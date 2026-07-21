@@ -24,6 +24,10 @@ const CAMPOS_JSON = new Set(['ancestrais', 'historico']);
 // ausência de valor vira `false`, não `null`.
 const CAMPOS_BOOL = new Set(['filhote', 'no_site']);
 
+// Colunas date: o formulário manda "" quando o campo fica vazio, e o
+// Postgres não aceita "" como data (só uma data real ou NULL).
+const CAMPOS_DATA = new Set(['data_nasc']);
+
 function normalizarValor(campo, valor) {
   if (CAMPOS_JSON.has(campo)) {
     // undefined/null -> respeita o default da coluna ('[]') em vez de gravar NULL
@@ -33,6 +37,10 @@ function normalizarValor(campo, valor) {
   if (CAMPOS_BOOL.has(campo)) {
     if (valor === undefined || valor === null) return false;
     return Boolean(valor);
+  }
+  if (CAMPOS_DATA.has(campo)) {
+    if (valor === undefined || valor === null || valor === '') return null;
+    return valor;
   }
   return valor ?? null;
 }
