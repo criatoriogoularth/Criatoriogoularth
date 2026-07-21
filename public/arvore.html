@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Árvore Genealógica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+.tree-container {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 30px 20px;
+  overflow: auto;
+  min-height: 600px;
+  width: 100%;
+  position: relative;
+}
+.genealogy-tree {
+  position: relative;
+  padding: 20px;
+  min-width: 100%;
+  min-height: 500px;
+}
+.tree-viewport {
+  position: relative;
+  min-height: 500px;
+}
+.tree-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+.tree-lines path {
+  stroke-width: 2px;
+  fill: none;
+}
+.tree-lines path.male { stroke: #3a6a9a; }
+.tree-lines path.female { stroke: #9a5a6a; }
+
+.tree-node {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 2px solid;
+  background: rgba(0,0,0,0.15);
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  min-width: 100px;
+  min-height: 50px;
+  transition: all 0.2s ease;
+}
+.tree-node.empty {
+  border: 2px solid var(--brass-dim);
+  background: rgba(0,0,0,0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  min-height: 50px;
+}
+.tree-node.empty:hover {
+  border-color: var(--brass);
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.1);
+}
+.tree-node.filled {
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+.tree-node.filled.female {
+  background: rgba(185,116,98,0.12);
+  border-color: var(--rose);
+}
+.tree-node.root {
+  border-color: var(--brass);
+  border-width: 3px;
+  background: var(--bg-elevated);
+  min-width: 140px;
+  min-height: 60px;
+}
+.tree-node .node-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree-node .node-band {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.tree-node .node-ref {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tree-node .node-plus {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+.gen-label {
+  position: absolute;
+  top: -18px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: .8;
+  letter-spacing: 0.05em;
+}
+.node-remove {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.tree-node.filled:not(.root):hover .node-remove {
+  opacity: 1;
+}
+.node-remove:hover { color: #e2988a; }
+
+.tree-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.tree-footer .btn { padding: 8px 20px; font-size: 12px; }
+.modal-item.male-item { border-left: 3px solid #3a6a9a; }
+.modal-item.female-item { border-left: 3px solid #9a5a6a; }
+
+.btn-config {
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  padding: 8px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-config:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+}
+
+.config-panel {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  display: none;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.config-panel.open {
+  display: block;
+}
+.config-panel .config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.config-panel .config-group {
+  background: rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+.config-panel .config-group label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.config-panel .config-group input[type="color"] {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.config-panel .config-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.config-panel .config-group input[type="number"],
+.config-panel .config-group input[type="text"],
+.config-panel .config-group select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  outline: none;
+}
+.config-panel .config-group input[type="number"]:focus,
+.config-panel .config-group input[type="text"]:focus,
+.config-panel .config-group select:focus {
+  border-color: var(--brass);
+}
+.config-panel .config-group .range-value {
+  font-size: 11px;
+  color: var(--brass-soft);
+  font-weight: 700;
+  text-align: right;
+}
+.config-panel .config-group .radio-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+.config-panel .config-group .radio-group label {
+  font-size: 11px;
+  color: var(--text);
+  text-transform: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.config-panel .config-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  justify-content: flex-end;
+}
+.config-panel .file-upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.config-panel .file-upload-area:hover {
+  border-color: var(--brass);
+}
+.config-panel .file-upload-area .icon {
+  font-size: 20px;
+}
+.config-panel .file-upload-area p {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 2px 0;
+}
+.config-panel .file-upload-area .aviso {
+  font-size: 9px;
+  color: var(--danger);
+  opacity: 0.7;
+}
+
+.cert-wrap {
+  background: var(--parchment);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 297mm;
+  aspect-ratio: 297 / 210;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-family: 'Manrope', sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.cert-bg-color {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.cert-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+.cert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 8px 20px;
+  border-bottom: 2px solid var(--brass);
+  background: rgba(199,151,63,0.08);
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.cert-header-left {
+  display: flex;
+  flex-direction: column;
+}
+.cert-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.cert-criador {
+  font-weight: 700;
+  font-size: 13px;
+  margin-top: 1px;
+}
+.cert-responsavel {
+  font-size: 10px;
+  margin-top: 1px;
+}
+.cert-registros {
+  font-size: 9px;
+  margin-top: 1px;
+}
+.cert-contato {
+  font-size: 9px;
+  margin-top: 1px;
+}
+.cert-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+}
+.cert-subject-panel {
+  flex: 0 0 86px;
+  height: 180px;
+  min-height: 180px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(199,151,63,0.06);
+  border: 2px solid var(--brass);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 0.15s ease;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+}
+.cert-columns {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+  position: relative;
+  z-index: 1;
+}
+.cert-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+.cert-col:not(:last-child) {
+  border-right: 1px dashed rgba(199,151,63,0.3);
+  padding-right: 6px;
+}
+.cert-pill {
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid rgba(58,106,154,0.25);
+  border-left: 3px solid #3a6a9a;
+  background: #1a2e28;
+  color: #ece6d6;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 0 4px;
+  width: 100%;
+  min-height: 12px;
+  transition: all 0.15s ease;
+}
+.cert-pill.wrap {
+  white-space: normal;
+  word-break: break-word;
+  text-overflow: clip;
+  line-height: 1.1;
+  padding: 0 4px;
+}
+.cert-pill.female {
+  background: #2e1a1a;
+  border-color: rgba(185,116,98,0.25);
+  border-left-color: #9a5a6a;
+  color: #ece6d6;
+}
+.cert-pill.indefinido {
+  color: #9aa89e;
+  font-style: italic;
+  background: #0d1a16;
+  border-color: rgba(0,0,0,0.08);
+  border-left-color: rgba(0,0,0,0.15);
+  font-weight: 400;
+}
+.cert-pill-anilha {
+  font-family: 'JetBrains Mono', monospace;
+  color: #e4c583 !important;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+.subject-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.subject-name {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+.subject-line {
+  font-size: 10.5px;
+  text-align: left;
+  margin-bottom: 1px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+.subject-line b {
+  font-weight: 600;
+  color: inherit;
+}
+.subject-line .mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+}
+.cert-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 20px;
+  border-top: 2px solid var(--brass);
+  font-size: 10px;
+  background: rgba(199,151,63,0.06);
+  position: relative;
+  z-index: 1;
+}
+.cert-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.cert-col[data-depth="1"] .cert-pill-anilha { font-size: 9px; opacity: 0.85; }
+.cert-col[data-depth="2"] .cert-pill-anilha { font-size: 8px; opacity: 0.8; }
+.cert-col[data-depth="3"] .cert-pill-anilha { font-size: 7px; opacity: 0.75; }
+.cert-col[data-depth="4"] .cert-pill-anilha { font-size: 6.5px; opacity: 0.7; }
+.cert-col[data-depth="5"] .cert-pill-anilha { font-size: 6px; opacity: 0.65; }
+
+@media print {
+  .cert-actions, .topbar .btn, .burger, .sidebar, .tree-footer,
+  .config-panel, .btn-config {
+    display: none !important;
+  }
+  .cert-wrap {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+  }
+  .shell {
+    display: block !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+}
+@media (max-width: 768px) {
+  .cert-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+  .tree-container { padding: 15px 10px; min-height: 400px; }
+  .tree-node { min-width: 70px; min-height: 40px; padding: 4px 8px; }
+  .tree-node .node-name { font-size: 10px; }
+  .config-panel .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-arvore">
+
+      <div class="topbar">
+        <div>
+          <h1>Árvore Genealógica</h1>
+          <div class="lede" id="arvore-lede">Escolha a ave para montar a genealogia.</div>
+        </div>
+        <button class="btn-config" onclick="toggleConfig()">⚙️ Configurar</button>
+      </div>
+
+      <div class="config-panel" id="config-panel">
+        <div class="config-grid">
+          <div class="config-group">
+            <label>🎨 Fundo</label>
+            <div class="file-upload-area" onclick="document.getElementById('bg-image-input').click()">
+              <div class="icon">🖼️</div>
+              <p><strong>Clique para imagem</strong></p>
+              <p class="aviso">⚠️ Tamanho ideal: 297mm x 210mm</p>
+            </div>
+            <input type="file" id="bg-image-input" accept="image/*" style="display:none;" onchange="carregarImagemFundo(event)">
+            <div style="display:flex;gap:6px;margin-top:4px;align-items:center;">
+              <input type="color" id="bg-color" value="#f3ecda" onchange="aplicarConfiguracoes()">
+              <span style="font-size:10px;color:var(--text-muted);">Cor (sem imagem)</span>
+              <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;" onclick="removerImagemFundo()">🗑️</button>
+            </div>
+            <div style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px;">
+              <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px;">🖼️ Opacidade da Imagem</label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="range" id="bg-opacidade" min="10" max="100" value="100" oninput="aplicarConfiguracoes()" style="flex:1;">
+                <span class="range-value" id="valor-opacidade" style="font-size:11px;color:var(--brass-soft);min-width:40px;">100%</span>
+              </div>
+              <label style="font-size:10px;color:var(--text-muted);display:block;margin-top:6px;margin-bottom:4px;">☀️ Brilho da Imagem</label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="range" id="bg-brilho" min="30" max="200" value="100" oninput="aplicarConfiguracoes()" style="flex:1;">
+                <span class="range-value" id="valor-brilho" style="font-size:11px;color:var(--brass-soft);min-width:40px;">100%</span>
+              </div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">💡 100% = normal | Menos = mais claro | Mais = mais escuro</div>
+            </div>
+          </div>
+          <div class="config-group">
+            <label>📋 Cabeçalho</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Título</span><input type="color" id="cor-titulo" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Criador</span><input type="color" id="cor-criador" value="#23291f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Responsável</span><input type="color" id="cor-responsavel" value="#4a5347" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Registros</span><input type="color" id="cor-registros" value="#4a5347" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Contato</span><input type="color" id="cor-contato" value="#4a5347" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Linha divisória</span><input type="color" id="cor-linha-header" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+            </div>
+          </div>
+          <div class="config-group">
+            <label>🎨 Cores dos Nós</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Macho Fundo</span><input type="color" id="cor-macho-fundo" value="#1a2e28" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Macho Texto</span><input type="color" id="cor-macho-texto" value="#ece6d6" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Fêmea Fundo</span><input type="color" id="cor-femea-fundo" value="#2e1a1a" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Fêmea Texto</span><input type="color" id="cor-femea-texto" value="#ece6d6" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Raiz Fundo</span><input type="color" id="cor-raiz-fundo" value="#132621" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="margin:2px 0 4px 55px;"><label style="font-size:9px;color:var(--text-muted);display:block;margin-bottom:2px;">Transparência do Fundo Raiz</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="raiz-opacidade" min="0" max="100" value="100" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-raiz-opacidade" style="font-size:11px;color:var(--brass-soft);min-width:34px;">100%</span></div></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Raiz Texto</span><input type="color" id="cor-raiz-texto" value="#e4c583" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:55px;">Borda Nós</span><input type="color" id="cor-borda-nos" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">⚠️ Cores do fundo e texto dos nós (sólidas)</div>
+          </div>
+          <div class="config-group">
+            <label>👤 Ave Raiz</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Fundo</span><input type="color" id="cor-avatar-fundo" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Texto</span><input type="color" id="cor-avatar-texto" value="#20170a" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Borda Raiz</span><input type="color" id="cor-borda-raiz" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+            </div>
+          </div>
+          <div class="config-group">
+            <label>📄 Rodapé</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Texto Rodapé</span><input type="color" id="cor-rodape-texto" value="#4a5347" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Linha Rodapé</span><input type="color" id="cor-rodape-linha" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Fundo Rodapé</span><input type="color" id="cor-rodape-fundo" value="rgba(199,151,63,0.06)" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+            </div>
+          </div>
+          <div class="config-group">
+            <label>📏 Tamanho Raiz</label>
+            <div><label style="font-size:9px;color:var(--text-muted);">Largura</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="tam-largura" min="60" max="200" value="86" step="2" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-largura">86px</span></div></div>
+            <div><label style="font-size:9px;color:var(--text-muted);">Altura</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="tam-altura" min="80" max="280" value="180" step="2" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-altura">180px</span></div></div>
+          </div>
+          <div class="config-group">
+            <label>🔤 Fonte Raiz</label>
+            <div><label style="font-size:9px;color:var(--text-muted);">Tamanho Nome</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="tam-nome" min="8" max="28" value="15" step="1" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-nome">15px</span></div></div>
+            <div><label style="font-size:9px;color:var(--text-muted);">Tamanho Info</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="tam-info" min="6" max="16" value="10.5" step="0.5" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-info">10.5px</span></div></div>
+            <div><label style="font-size:9px;color:var(--text-muted);">Tamanho Avatar</label><div style="display:flex;align-items:center;gap:8px;"><input type="range" id="tam-avatar" min="20" max="70" value="46" step="2" oninput="aplicarConfiguracoes()" style="flex:1;"><span class="range-value" id="valor-avatar">46px</span></div></div>
+            <div><label style="font-size:9px;color:var(--text-muted);">Negrito</label><div class="radio-group"><label><input type="radio" name="negrito-nome" value="bold" checked onchange="aplicarConfiguracoes()"> Sim</label><label><input type="radio" name="negrito-nome" value="normal" onchange="aplicarConfiguracoes()"> Não</label></div></div>
+          </div>
+          <div class="config-group">
+            <label>🔤 Fonte Geral</label>
+            <select id="fonte-certificado" onchange="aplicarConfiguracoes()">
+              <option value="'Manrope', sans-serif">Manrope</option>
+              <option value="'Fraunces', serif">Fraunces</option>
+              <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="Georgia, serif">Georgia</option>
+            </select>
+          </div>
+        </div>
+        <div class="config-actions">
+          <button class="btn btn-ghost" onclick="toggleConfig()">← Voltar</button>
+          <button class="btn btn-primary" onclick="salvarConfiguracoes()">💾 Salvar</button>
+        </div>
+      </div>
+
+      <div id="view-lista">
+        <div class="tabstrip" style="margin-bottom:18px;">
+          <button class="active" onclick="setListaFiltro('plantel', this)">Plantel</button>
+          <button onclick="setListaFiltro('todos', this)">Todos</button>
+        </div>
+        <div class="field" style="max-width:340px;margin-bottom:16px;">
+          <input type="text" id="busca-ave-lista" placeholder="Pesquisar ave..." oninput="renderListaAves()">
+        </div>
+        <div id="lista-aves"></div>
+      </div>
+
+      <div id="view-form" style="display:none;">
+        <button class="btn btn-ghost" style="margin-bottom:18px;" onclick="voltarLista()">← Voltar para a lista</button>
+        <div class="tree-container" id="tree-container">
+          <div class="genealogy-tree" id="genealogy-tree">
+            <div class="tree-viewport" id="tree-viewport"></div>
+          </div>
+        </div>
+        <div class="tree-footer">
+          <button class="btn btn-ghost" onclick="voltarLista()">Voltar</button>
+          <button class="btn btn-primary" onclick="salvarArvore()">💾 Salvar Árvore</button>
+          <button class="btn btn-danger" onclick="excluirArvore()">🗑 Excluir Árvore</button>
+          <button class="btn btn-primary" onclick="verCertificado()">📄 Gerar Certificado</button>
+        </div>
+      </div>
+
+      <div id="view-certificado" style="display:none;">
+        <button class="btn btn-ghost" style="margin-bottom:18px;" onclick="voltarForm()">← Voltar para a árvore</button>
+        <div class="cert-wrap" id="cert-wrap">
+          <div class="cert-bg-color" id="cert-bg-color" style="background:#f3ecda;"></div>
+          <img class="cert-bg-image" id="cert-bg-image" style="display:none;" alt="Fundo">
+          <div class="cert-header" id="cert-header">
+            <div class="cert-header-left">
+              <div class="cert-title" id="cert-title">CERTIFICADO</div>
+              <div class="cert-criador" id="cert-criador">Criatório Goularth</div>
+              <div class="cert-responsavel" id="cert-responsavel">Responsável: Fabio Alves Goulart</div>
+              <div class="cert-registros" id="cert-registros">CTF 3348370 / FOB II.889</div>
+              <div class="cert-contato" id="cert-contato">criatorio.goularth@gmail.com · (11) 9 4149-3657</div>
+            </div>
+          </div>
+          <div class="cert-body">
+            <div class="cert-subject-panel" id="cert-subject-panel"></div>
+            <div class="cert-columns" id="cert-columns"></div>
+          </div>
+          <div class="cert-footer" id="cert-footer">
+            <span id="cert-footer-text">Gestão de Criatório Goularth</span>
+          </div>
+        </div>
+        <div class="cert-actions">
+          <button class="btn btn-ghost" onclick="voltarForm()">← Voltar</button>
+          <button class="btn btn-primary" onclick="gerarPDF()">🖨️ Gerar PDF</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) fecharModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div><span id="modal-title">Selecione uma Ave</span></div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <input type="text" class="modal-search" id="modal-search" placeholder="Pesquisar..." oninput="renderModalLista()">
+    <div class="modal-list" id="modal-list"></div>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+
+<script>
+// ============================================================
+// ===== CONFIGURAÇÕES DO CERTIFICADO =====
+// ============================================================
+
+const CERT_CONFIG = {
+  1: { minPill: 18, maxPill: 32, minFont: 8, maxFont: 14, colWidth: 1.8 },
+  2: { minPill: 16, maxPill: 28, minFont: 7, maxFont: 12, colWidth: 1.5 },
+  3: { minPill: 14, maxPill: 24, minFont: 6, maxFont: 10, colWidth: 1.3 },
+  4: { minPill: 12, maxPill: 20, minFont: 5, maxFont: 8.5, colWidth: 1.1 },
+  5: { minPill: 10, maxPill: 17, minFont: 4.5, maxFont: 7.5, colWidth: 0.95 }
+};
+
+const CERT_MAX_GEN = 5;
+
+let CONFIG = {
+  bgColor: '#f3ecda', bgImage: null, bgOpacidade: 100, bgBrilho: 100,
+  corTitulo: '#c7973f', corCriador: '#23291f', corResponsavel: '#4a5347',
+  corRegistros: '#4a5347', corContato: '#4a5347', corLinhaHeader: '#c7973f',
+  corMachoFundo: '#1a2e28', corMachoTexto: '#ece6d6',
+  corFemeaFundo: '#2e1a1a', corFemeaTexto: '#ece6d6',
+  corRaizFundo: '#132621', corRaizOpacidade: 100, corRaizTexto: '#e4c583',
+  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: '#20170a',
+  corBordaRaiz: '#c7973f', corRodapeTexto: '#4a5347', corRodapeLinha: '#c7973f',
+  corRodapeFundo: 'rgba(199,151,63,0.06)', larguraRaiz: 86, alturaRaiz: 180,
+  tamNome: 15, tamInfo: 10.5, tamAvatar: 46, negritoNome: 'bold',
+  fonteCertificado: "'Manrope', sans-serif"
+};
+
+function toggleConfig() {
+  const panel = document.getElementById('config-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) carregarConfiguracoesNoPainel();
+}
+
+function carregarConfiguracoesNoPainel() {
+  document.getElementById('bg-color').value = CONFIG.bgColor;
+  document.getElementById('bg-opacidade').value = CONFIG.bgOpacidade || 100;
+  document.getElementById('bg-brilho').value = CONFIG.bgBrilho || 100;
+  document.getElementById('valor-opacidade').textContent = (CONFIG.bgOpacidade || 100) + '%';
+  document.getElementById('valor-brilho').textContent = (CONFIG.bgBrilho || 100) + '%';
+  document.getElementById('cor-titulo').value = CONFIG.corTitulo || '#c7973f';
+  document.getElementById('cor-criador').value = CONFIG.corCriador || '#23291f';
+  document.getElementById('cor-responsavel').value = CONFIG.corResponsavel || '#4a5347';
+  document.getElementById('cor-registros').value = CONFIG.corRegistros || '#4a5347';
+  document.getElementById('cor-contato').value = CONFIG.corContato || '#4a5347';
+  document.getElementById('cor-linha-header').value = CONFIG.corLinhaHeader || '#c7973f';
+  document.getElementById('cor-macho-fundo').value = CONFIG.corMachoFundo || '#1a2e28';
+  document.getElementById('cor-macho-texto').value = CONFIG.corMachoTexto || '#ece6d6';
+  document.getElementById('cor-femea-fundo').value = CONFIG.corFemeaFundo || '#2e1a1a';
+  document.getElementById('cor-femea-texto').value = CONFIG.corFemeaTexto || '#ece6d6';
+  document.getElementById('cor-raiz-fundo').value = CONFIG.corRaizFundo || '#132621';
+  document.getElementById('raiz-opacidade').value = CONFIG.corRaizOpacidade ?? 100;
+  document.getElementById('cor-raiz-texto').value = CONFIG.corRaizTexto || '#e4c583';
+  document.getElementById('cor-borda-nos').value = CONFIG.corBordaNos || '#c7973f';
+  document.getElementById('cor-avatar-fundo').value = CONFIG.corAvatarFundo || '#c7973f';
+  document.getElementById('cor-avatar-texto').value = CONFIG.corAvatarTexto || '#20170a';
+  document.getElementById('cor-borda-raiz').value = CONFIG.corBordaRaiz || '#c7973f';
+  document.getElementById('cor-rodape-texto').value = CONFIG.corRodapeTexto || '#4a5347';
+  document.getElementById('cor-rodape-linha').value = CONFIG.corRodapeLinha || '#c7973f';
+  document.getElementById('cor-rodape-fundo').value = CONFIG.corRodapeFundo || 'rgba(199,151,63,0.06)';
+  document.getElementById('tam-largura').value = CONFIG.larguraRaiz;
+  document.getElementById('tam-altura').value = CONFIG.alturaRaiz;
+  document.getElementById('tam-nome').value = CONFIG.tamNome;
+  document.getElementById('tam-info').value = CONFIG.tamInfo;
+  document.getElementById('tam-avatar').value = CONFIG.tamAvatar;
+  document.querySelector(`input[name="negrito-nome"][value="${CONFIG.negritoNome}"]`).checked = true;
+  document.getElementById('fonte-certificado').value = CONFIG.fonteCertificado;
+  atualizarValoresExibidos();
+}
+
+function atualizarValoresExibidos() {
+  document.getElementById('valor-largura').textContent = document.getElementById('tam-largura').value + 'px';
+  document.getElementById('valor-altura').textContent = document.getElementById('tam-altura').value + 'px';
+  document.getElementById('valor-nome').textContent = document.getElementById('tam-nome').value + 'px';
+  document.getElementById('valor-info').textContent = document.getElementById('tam-info').value + 'px';
+  document.getElementById('valor-avatar').textContent = document.getElementById('tam-avatar').value + 'px';
+  document.getElementById('valor-opacidade').textContent = document.getElementById('bg-opacidade').value + '%';
+  document.getElementById('valor-brilho').textContent = document.getElementById('bg-brilho').value + '%';
+  document.getElementById('valor-raiz-opacidade').textContent = document.getElementById('raiz-opacidade').value + '%';
+}
+
+function carregarImagemFundo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    CONFIG.bgImage = e.target.result;
+    CONFIG.bgOpacidade = 100;
+    CONFIG.bgBrilho = 100;
+    document.getElementById('bg-opacidade').value = 100;
+    document.getElementById('bg-brilho').value = 100;
+    document.getElementById('valor-opacidade').textContent = '100%';
+    document.getElementById('valor-brilho').textContent = '100%';
+    aplicarConfiguracoes();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removerImagemFundo() {
+  CONFIG.bgImage = null;
+  CONFIG.bgOpacidade = 100;
+  CONFIG.bgBrilho = 100;
+  document.getElementById('bg-opacidade').value = 100;
+  document.getElementById('bg-brilho').value = 100;
+  document.getElementById('valor-opacidade').textContent = '100%';
+  document.getElementById('valor-brilho').textContent = '100%';
+  aplicarConfiguracoes();
+}
+
+function aplicarConfiguracoes() {
+  CONFIG.bgColor = document.getElementById('bg-color').value;
+  CONFIG.bgOpacidade = parseInt(document.getElementById('bg-opacidade').value) || 100;
+  CONFIG.bgBrilho = parseInt(document.getElementById('bg-brilho').value) || 100;
+  CONFIG.corTitulo = document.getElementById('cor-titulo').value;
+  CONFIG.corCriador = document.getElementById('cor-criador').value;
+  CONFIG.corResponsavel = document.getElementById('cor-responsavel').value;
+  CONFIG.corRegistros = document.getElementById('cor-registros').value;
+  CONFIG.corContato = document.getElementById('cor-contato').value;
+  CONFIG.corLinhaHeader = document.getElementById('cor-linha-header').value;
+  CONFIG.corMachoFundo = document.getElementById('cor-macho-fundo').value;
+  CONFIG.corMachoTexto = document.getElementById('cor-macho-texto').value;
+  CONFIG.corFemeaFundo = document.getElementById('cor-femea-fundo').value;
+  CONFIG.corFemeaTexto = document.getElementById('cor-femea-texto').value;
+  CONFIG.corRaizFundo = document.getElementById('cor-raiz-fundo').value;
+  CONFIG.corRaizOpacidade = parseInt(document.getElementById('raiz-opacidade').value) || 100;
+  CONFIG.corRaizTexto = document.getElementById('cor-raiz-texto').value;
+  CONFIG.corBordaNos = document.getElementById('cor-borda-nos').value;
+  CONFIG.corAvatarFundo = document.getElementById('cor-avatar-fundo').value;
+  CONFIG.corAvatarTexto = document.getElementById('cor-avatar-texto').value;
+  CONFIG.corBordaRaiz = document.getElementById('cor-borda-raiz').value;
+  CONFIG.corRodapeTexto = document.getElementById('cor-rodape-texto').value;
+  CONFIG.corRodapeLinha = document.getElementById('cor-rodape-linha').value;
+  CONFIG.corRodapeFundo = document.getElementById('cor-rodape-fundo').value;
+  CONFIG.larguraRaiz = parseInt(document.getElementById('tam-largura').value) || 86;
+  CONFIG.alturaRaiz = parseInt(document.getElementById('tam-altura').value) || 180;
+  CONFIG.tamNome = parseInt(document.getElementById('tam-nome').value) || 15;
+  CONFIG.tamInfo = parseFloat(document.getElementById('tam-info').value) || 10.5;
+  CONFIG.tamAvatar = parseInt(document.getElementById('tam-avatar').value) || 46;
+  CONFIG.negritoNome = document.querySelector('input[name="negrito-nome"]:checked').value;
+  CONFIG.fonteCertificado = document.getElementById('fonte-certificado').value;
+  atualizarValoresExibidos();
+  aplicarAoCertificado();
+}
+
+function hexAlpha(pct) {
+  const v = Math.round((Math.max(0, Math.min(100, pct)) / 100) * 255);
+  return v.toString(16).padStart(2, '0');
+}
+
+function aplicarAoCertificado() {
+  const certWrap = document.getElementById('cert-wrap');
+  if (!certWrap) return;
+  const bgColor = document.getElementById('cert-bg-color');
+  const bgImage = document.getElementById('cert-bg-image');
+  if (CONFIG.bgImage) {
+    bgColor.style.background = 'transparent';
+    bgImage.src = CONFIG.bgImage;
+    bgImage.style.display = 'block';
+    bgImage.style.opacity = (CONFIG.bgOpacidade || 100) / 100;
+    bgImage.style.filter = `brightness(${(CONFIG.bgBrilho || 100) / 100})`;
+  } else {
+    bgColor.style.background = CONFIG.bgColor;
+    bgImage.style.display = 'none';
+    bgImage.style.opacity = 1;
+    bgImage.style.filter = 'none';
+  }
+  certWrap.style.fontFamily = CONFIG.fonteCertificado;
+  const header = document.getElementById('cert-header');
+  if (header) {
+    header.style.borderBottomColor = CONFIG.corLinhaHeader;
+    header.style.background = CONFIG.corLinhaHeader + '11';
+  }
+  document.getElementById('cert-title').style.color = CONFIG.corTitulo;
+  document.getElementById('cert-criador').style.color = CONFIG.corCriador;
+  document.getElementById('cert-responsavel').style.color = CONFIG.corResponsavel;
+  document.getElementById('cert-registros').style.color = CONFIG.corRegistros;
+  document.getElementById('cert-contato').style.color = CONFIG.corContato;
+  const footer = document.getElementById('cert-footer');
+  if (footer) {
+    footer.style.borderTopColor = CONFIG.corRodapeLinha;
+    footer.style.background = CONFIG.corRodapeFundo;
+  }
+  document.getElementById('cert-footer-text').style.color = CONFIG.corRodapeTexto;
+  const painel = document.querySelector('.cert-subject-panel');
+  if (painel) {
+    painel.style.flex = `0 0 ${CONFIG.larguraRaiz}px`;
+    painel.style.height = `${CONFIG.alturaRaiz}px`;
+    painel.style.minHeight = `${CONFIG.alturaRaiz}px`;
+    painel.style.borderColor = CONFIG.corBordaRaiz;
+    painel.style.background = CONFIG.corRaizFundo + hexAlpha(CONFIG.corRaizOpacidade ?? 100);
+    painel.style.color = CONFIG.corRaizTexto;
+  }
+  const avatar = document.querySelector('.subject-avatar');
+  if (avatar) {
+    avatar.style.width = CONFIG.tamAvatar + 'px';
+    avatar.style.height = CONFIG.tamAvatar + 'px';
+    avatar.style.fontSize = Math.round(CONFIG.tamAvatar * 0.4) + 'px';
+    avatar.style.color = CONFIG.corAvatarTexto;
+  }
+  const nome = document.querySelector('.subject-name');
+  if (nome) {
+    nome.style.fontSize = CONFIG.tamNome + 'px';
+    nome.style.fontWeight = CONFIG.negritoNome;
+    nome.style.color = CONFIG.corRaizTexto;
+  }
+  const linhas = document.querySelectorAll('.subject-line');
+  linhas.forEach(line => {
+    line.style.fontSize = CONFIG.tamInfo + 'px';
+    line.style.color = CONFIG.corRaizTexto;
+  });
+  document.querySelectorAll('.cert-pill:not(.indefinido)').forEach(pilula => {
+    const isFemale = pilula.classList.contains('female');
+    if (isFemale) {
+      pilula.style.background = CONFIG.corFemeaFundo;
+      pilula.style.color = CONFIG.corFemeaTexto;
+      pilula.style.borderColor = CONFIG.corFemeaFundo + '66';
+      pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+    } else {
+      pilula.style.background = CONFIG.corMachoFundo;
+      pilula.style.color = CONFIG.corMachoTexto;
+      pilula.style.borderColor = CONFIG.corMachoFundo + '66';
+      pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+    }
+    pilula.style.border = `1px solid ${CONFIG.corBordaNos}66`;
+    if (isFemale) {
+      pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+    } else {
+      pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+    }
+  });
+  document.querySelectorAll('.cert-pill-anilha').forEach(el => {
+    el.style.color = CONFIG.corRaizTexto + ' !important';
+  });
+  ajustarPilulasCertificado();
+}
+
+async function salvarConfiguracoes() {
+  aplicarConfiguracoes();
+  try {
+    await DB.setConfig('cert_config', CONFIG);
+    alert('✅ Configurações salvas!');
+  } catch(e) {
+    alert('⚠️ Configurações aplicadas nesta página, mas houve erro ao salvar: ' + e.message);
+  }
+}
+
+async function carregarConfiguracoesSalvas() {
+  try {
+    const salvo = await DB.getConfig('cert_config');
+    if (salvo) {
+      CONFIG = { ...CONFIG, ...salvo };
+    }
+  } catch(e) {}
+}
+
+function geracaoPaths(depth) {
+  let paths = [''];
+  for (let i = 0; i < depth; i++) {
+    const next = [];
+    paths.forEach(p => {
+      next.push(p ? p + '.pai' : 'pai');
+      next.push(p ? p + '.mae' : 'mae');
+    });
+    paths = next;
+  }
+  return paths;
+}
+
+function ajustarPilulasCertificado() {
+  const cols = document.querySelectorAll('#cert-columns .cert-col');
+  const container = document.getElementById('cert-columns');
+  if (!container || cols.length === 0) return;
+  const alturaDisponivel = container.clientHeight || 400;
+  cols.forEach(col => {
+    const depth = parseInt(col.dataset.depth, 10);
+    const count = parseInt(col.dataset.count, 10);
+    const config = CERT_CONFIG[depth] || CERT_CONFIG[5];
+    if (!count) return;
+    const espacamento = 2;
+    const alturaPilula = Math.max(config.minPill, Math.min(config.maxPill, (alturaDisponivel / count) - espacamento));
+    const proporcao = (alturaPilula - config.minPill) / (config.maxPill - config.minPill);
+    const tamanhoFonte = Math.max(config.minFont, Math.min(config.maxFont, config.minFont + (config.maxFont - config.minFont) * proporcao));
+    col.querySelectorAll('.cert-pill').forEach(pilula => {
+      pilula.style.height = alturaPilula + 'px';
+      pilula.style.fontSize = tamanhoFonte + 'px';
+      pilula.style.lineHeight = alturaPilula + 'px';
+      pilula.style.padding = '0 6px';
+      const isFemale = pilula.classList.contains('female');
+      const isIndefinido = pilula.classList.contains('indefinido');
+      if (!isIndefinido) {
+        if (isFemale) {
+          pilula.style.background = CONFIG.corFemeaFundo;
+          pilula.style.color = CONFIG.corFemeaTexto;
+          pilula.style.borderColor = CONFIG.corFemeaFundo + '66';
+          pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+        } else {
+          pilula.style.background = CONFIG.corMachoFundo;
+          pilula.style.color = CONFIG.corMachoTexto;
+          pilula.style.borderColor = CONFIG.corMachoFundo + '66';
+          pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+        }
+        pilula.style.border = `1px solid ${CONFIG.corBordaNos}66`;
+        if (isFemale) {
+          pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+        } else {
+          pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+        }
+      }
+      if (depth <= 2) {
+        pilula.style.whiteSpace = 'normal';
+        pilula.style.wordBreak = 'break-word';
+        pilula.style.lineHeight = '1.2';
+      } else {
+        pilula.style.whiteSpace = 'nowrap';
+      }
+    });
+  });
+}
+
+function renderizarCertificado() {
+  const ave = aveSelecionada;
+  if (!ave) return;
+  function obterAncestral(caminho) {
+    const encontrado = tree[caminho];
+    return (encontrado && encontrado.nome) ? encontrado.nome : null;
+  }
+  function obterAnilha(caminho) {
+    const encontrado = tree[caminho];
+    return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
+  }
+  const classeAvatar = ave.sexo === 'M' ? '' : ' female';
+  const avatarBg = ave.sexo === 'M' 
+    ? `radial-gradient(circle at 35% 30%, ${CONFIG.corAvatarFundo}dd, ${CONFIG.corAvatarFundo} 60%, ${CONFIG.corAvatarFundo}aa)`
+    : `radial-gradient(circle at 35% 30%, ${CONFIG.corFemeaFundo}dd, ${CONFIG.corFemeaFundo} 60%, ${CONFIG.corFemeaFundo}aa)`;
+  let linhasHtml = `
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
+    <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${ave.especie}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${ave.dataNasc || 'Indefinido'}</div>
+  `;
+  if (ave.raca && ave.raca.trim() !== '') {
+    linhasHtml += `<div class="subject-line" style="color:${CONFIG.corRaizTexto};">${ave.raca}</div>`;
+  }
+  document.getElementById('cert-subject-panel').innerHTML = `
+    <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${CONFIG.corAvatarTexto};">${ave.sexo === 'M' ? '♂' : '♀'}</div>
+    <div class="subject-name" style="color:${CONFIG.corRaizTexto};">${ave.nome}</div>
+    ${linhasHtml}
+  `;
+  let htmlColunas = '';
+  for (let profundidade = 1; profundidade <= CERT_MAX_GEN; profundidade++) {
+    const caminhos = geracaoPaths(profundidade);
+    const config = CERT_CONFIG[profundidade] || CERT_CONFIG[5];
+    const largura = config.colWidth || 1;
+    htmlColunas += `
+      <div class="cert-col" data-depth="${profundidade}" data-count="${caminhos.length}" style="flex: ${largura} 1 0; min-width: 60px;">
+    `;
+    caminhos.forEach(caminho => {
+      const nome = obterAncestral(caminho);
+      const anilha = obterAnilha(caminho);
+      const isIndefinido = !nome;
+      const sexo = caminho.endsWith('pai') ? 'M' : 'F';
+      const classeWrap = profundidade <= 2 ? ' wrap' : '';
+      const classePilula = 'cert-pill' + classeWrap + (sexo === 'F' ? ' female' : '') + (isIndefinido ? ' indefinido' : '');
+      if (isIndefinido) {
+        htmlColunas += `<div class="${classePilula}" title="Indefinido">Indefinido</div>`;
+      } else {
+        htmlColunas += `
+          <div class="cert-pill-wrapper">
+            <div class="${classePilula}" title="${nome}" style="width:100%;">${nome}</div>
+            ${anilha ? `<div class="cert-pill-anilha" style="color:${CONFIG.corRaizTexto} !important;">${anilha}</div>` : ''}
+          </div>
+        `;
+      }
+    });
+    htmlColunas += `</div>`;
+  }
+  document.getElementById('cert-columns').innerHTML = htmlColunas;
+  requestAnimationFrame(() => {
+    aplicarAoCertificado();
+    ajustarPilulasCertificado();
+  });
+}
+
+// ============================================================
+// ===== VARIÁVEIS E FUNÇÕES GLOBAIS =====
+// ============================================================
+
+let AVES = [];
+let listaFiltro = 'plantel';
+let aveSelecionada = null;
+let modalPath = null;
+let modalSexo = null;
+let tree = {};
+let treeModificada = false;
+let timeoutRedimensionamento;
+
+async function carregarAvesDoBanco() {
+  try {
+    const avesDB = await DB.getAll(DB.TABLES.AVES);
+    AVES = avesDB.map(a => {
+      let ancestrais = [];
+      if (a.ancestrais) {
+        if (typeof a.ancestrais === 'string') {
+          try { ancestrais = JSON.parse(a.ancestrais); } catch(e) { ancestrais = []; }
+        } else if (Array.isArray(a.ancestrais)) {
+          ancestrais = a.ancestrais;
+        }
+      }
+      return {
+        id: a.id,
+        nome: a.nome || '',
+        anilha: a.anilha || '-',
+        sexo: a.sexo || 'Indefinido',
+        especie: a.especie || 'Não identificada',
+        raca: a.raca || '',
+        dataNasc: a.dataNasc || '',
+        situacao: a.situacao || 'Plantel',
+        pai: a.pai || '',
+        mae: a.mae || '',
+        anilhaPai: a.anilhaPai || '',
+        anilhaMae: a.anilhaMae || '',
+        avoPaterno: a.avoPaterno || '',
+        avoPaterna: a.avoPaterna || '',
+        avoMaterno: a.avoMaterno || '',
+        avoMaterna: a.avoMaterna || '',
+        ancestrais: ancestrais
+      };
+    });
+  } catch (e) {
+    console.error('Erro ao carregar aves:', e);
+    AVES = [];
+  }
+}
+
+function setListaFiltro(f, btn) {
+  listaFiltro = f;
+  document.querySelectorAll('#view-lista .tabstrip button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderListaAves();
+}
+
+async function renderListaAves() {
+  const busca = document.getElementById('busca-ave-lista').value.toLowerCase();
+  await carregarAvesDoBanco();
+  let lista = AVES.filter(a => listaFiltro === 'todos' ? true : a.situacao === 'Plantel');
+  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  if (lista.length === 0) {
+    document.getElementById('lista-aves').innerHTML = '<div class="empty-note">Nenhuma ave encontrada.</div>';
+    return;
+  }
+  document.getElementById('lista-aves').innerHTML = lista.map(a => `
+    <div class="bird-card${a.sexo === 'F' ? ' female' : ''}">
+      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : '♂'}</div>
+      <div class="bird-info">
+        <div class="name">${a.nome} <span class="band-tag">${a.anilha}</span></div>
+        <div class="meta">${a.especie || 'Não identificada'} · ${a.situacao}</div>
+      </div>
+      <button class="btn btn-primary" onclick="abrirGenealogia(${a.id})">🌳 Ver Árvore</button>
+    </div>`).join('');
+}
+
+function voltarLista() {
+  document.getElementById('view-lista').style.display = 'block';
+  document.getElementById('view-form').style.display = 'none';
+  document.getElementById('view-certificado').style.display = 'none';
+  document.getElementById('arvore-lede').textContent = 'Escolha a ave para montar a genealogia.';
+  treeModificada = false;
+  const url = new URL(window.location);
+  url.searchParams.delete('id');
+  window.history.replaceState({}, '', url);
+}
+
+function voltarForm() {
+  document.getElementById('view-form').style.display = 'block';
+  document.getElementById('view-certificado').style.display = 'none';
+}
+
+// ============================================================
+// ===== FUNÇÃO PRINCIPAL - ABRIR GENEALOGIA =====
+// ============================================================
+
+async function abrirGenealogia(id) {
+  try {
+    await carregarAvesDoBanco();
+    const ave = AVES.find(a => a.id === id);
+    if (!ave) { 
+      alert('Ave não encontrada!'); 
+      return; 
+    }
+    
+    // ===== CORREÇÃO: NÃO REDIRECIONA PARA CADASTRO =====
+    if (!ave.especie || ave.especie === '' || ave.especie === 'undefined' || ave.especie === null) {
+      await DB.update(DB.TABLES.AVES, ave.id, { especie: 'Não identificada' });
+      ave.especie = 'Não identificada';
+    }
+    if (!ave.sexo || ave.sexo === '' || ave.sexo === null) {
+      await DB.update(DB.TABLES.AVES, ave.id, { sexo: 'Indefinido' });
+      ave.sexo = 'Indefinido';
+    }
+    if (!ave.anilha || ave.anilha === '' || ave.anilha === null) {
+      await DB.update(DB.TABLES.AVES, ave.id, { anilha: '-' });
+      ave.anilha = '-';
+    }
+    if (!ave.situacao || ave.situacao === '' || ave.situacao === null) {
+      await DB.update(DB.TABLES.AVES, ave.id, { situacao: 'Plantel' });
+      ave.situacao = 'Plantel';
+    }
+    
+    // ===== ABRE A ÁRVORE DIRETAMENTE =====
+    aveSelecionada = ave;
+    tree = {};
+    treeModificada = false;
+    tree[''] = { nome: ave.nome, anilha: ave.anilha };
+    
+    // CARREGAR CAMPOS LEGADOS (PAI, MÃE, AVÓS)
+    if (ave.pai) {
+      tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
+    }
+    if (ave.mae) {
+      tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
+    }
+    if (ave.avoPaterno) {
+      tree['pai.pai'] = { nome: ave.avoPaterno, anilha: '' };
+    }
+    if (ave.avoPaterna) {
+      tree['pai.mae'] = { nome: ave.avoPaterna, anilha: '' };
+    }
+    if (ave.avoMaterno) {
+      tree['mae.pai'] = { nome: ave.avoMaterno, anilha: '' };
+    }
+    if (ave.avoMaterna) {
+      tree['mae.mae'] = { nome: ave.avoMaterna, anilha: '' };
+    }
+    
+    // CARREGAR ANCESTRAIS ADICIONAIS
+    const ancestrais = ave.ancestrais || [];
+    if (Array.isArray(ancestrais) && ancestrais.length > 0) {
+      ancestrais.forEach(a => {
+        if (a.caminho && a.nome) {
+          if (!tree[a.caminho]) {
+            tree[a.caminho] = { 
+              nome: a.nome, 
+              anilha: a.anilha || '',
+              sexo: a.sexo || 'M'
+            };
+          }
+        }
+      });
+    }
+    
+    document.getElementById('view-lista').style.display = 'none';
+    document.getElementById('view-form').style.display = 'block';
+    document.getElementById('view-certificado').style.display = 'none';
+    document.getElementById('arvore-lede').textContent = '🌳 Árvore de ' + ave.nome;
+    renderTree();
+    
+  } catch (e) {
+    console.error('Erro:', e);
+    alert('Erro ao carregar árvore: ' + e.message);
+  }
+}
+
+function carregarAvePorId() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  if (id) {
+    setTimeout(async function() {
+      await carregarAvesDoBanco();
+      const ave = AVES.find(a => a.id === parseInt(id));
+      if (ave) {
+        abrirGenealogia(parseInt(id));
+      } else {
+        alert('Ave não encontrada! ID: ' + id);
+        voltarLista();
+      }
+    }, 300);
+  }
+}
+
+const NODE_SIZES = {
+  0: { w: 180, h: 72 }, 1: { w: 148, h: 62 }, 2: { w: 126, h: 54 },
+  3: { w: 108, h: 47 }, 4: { w: 96, h: 42 }, 5: { w: 84, h: 38 }
+};
+const GEN_LABELS = { 0: 'Ave', 1: 'Pais', 2: 'Avós', 3: 'Bisavós', 4: 'Trisavós', 5: 'Tetravós' };
+const GAP_ROOT = 8, COL_GAP = 26, LEAF_GAP = 8, TOP_PAD = 30, SIDE_PAD = 20;
+const MAX_GENERATIONS = 5;
+
+function getLabel(path) {
+  const labels = {
+    '': 'Ave', 'pai': 'Pai', 'mae': 'Mãe',
+    'pai.pai': 'Avô Paterno', 'pai.mae': 'Avó Paterna',
+    'mae.pai': 'Avô Materno', 'mae.mae': 'Avó Materna'
+  };
+  return labels[path] || path;
+}
+
+function getSexo(path) {
+  if (!path) return aveSelecionada ? aveSelecionada.sexo : 'M';
+  if (tree[path] && tree[path].sexo) return tree[path].sexo;
+  return path.endsWith('pai') ? 'M' : 'F';
+}
+
+function getChildren(path) {
+  const base = path ? path + '.' : '';
+  return [{path: base + 'pai', sexo: 'M'}, {path: base + 'mae', sexo: 'F'}];
+}
+
+function removerAncestral(path, event) {
+  if (event) event.stopPropagation();
+  if (!confirm('Remover este ancestral da árvore?')) return;
+  Object.keys(tree).forEach(p => {
+    if (p === path || p.startsWith(path + '.')) delete tree[p];
+  });
+  treeModificada = true;
+  renderTree();
+}
+
+function renderTree() {
+  const container = document.getElementById('tree-viewport');
+  if (!container) return;
+  if (aveSelecionada) {
+    tree[''] = { nome: aveSelecionada.nome, anilha: aveSelecionada.anilha };
+  }
+  const positions = {};
+  const edges = [];
+  let cursorY = TOP_PAD;
+  function layout(path, depth) {
+    const isFilled = tree[path] !== undefined;
+    const canExpand = isFilled && depth < MAX_GENERATIONS;
+    const size = NODE_SIZES[depth] || NODE_SIZES[5];
+    if (!canExpand) {
+      const y = cursorY + size.h / 2;
+      cursorY += size.h + LEAF_GAP;
+      positions[path] = { depth, y };
+      return y;
+    }
+    const children = getChildren(path);
+    const yPai = layout(children[0].path, depth + 1);
+    const yMae = layout(children[1].path, depth + 1);
+    const y = (yPai + yMae) / 2;
+    positions[path] = { depth, y };
+    edges.push({ from: path, to: children[0].path });
+    edges.push({ from: path, to: children[1].path });
+    return y;
+  }
+  layout('', 0);
+  let maxDepth = 0;
+  Object.values(positions).forEach(p => { if (p.depth > maxDepth) maxDepth = p.depth; });
+  const colX = [0];
+  for (let d = 1; d <= maxDepth; d++) {
+    const prevW = (NODE_SIZES[d - 1] || NODE_SIZES[5]).w;
+    colX[d] = colX[d - 1] + prevW + (d === 1 ? GAP_ROOT : COL_GAP);
+  }
+  const totalWidth = colX[maxDepth] + (NODE_SIZES[maxDepth] || NODE_SIZES[5]).w + SIDE_PAD * 2;
+  const totalHeight = Math.max(cursorY - LEAF_GAP + SIDE_PAD, 200);
+  let labelsHtml = '';
+  for (let d = 0; d <= maxDepth; d++) {
+    const w = (NODE_SIZES[d] || NODE_SIZES[5]).w;
+    labelsHtml += `<div class="gen-label" style="left:${colX[d] + (w/2)}px; transform:translateX(-50%); width:${w}px;">${GEN_LABELS[d] || ''}</div>`;
+  }
+  let nodesHtml = '';
+  Object.keys(positions).forEach(path => {
+    const { depth, y: yCenter } = positions[path];
+    const isRoot = depth === 0;
+    const sexo = getSexo(path);
+    const filled = tree[path];
+    const isFilled = filled !== undefined;
+    const size = NODE_SIZES[depth] || NODE_SIZES[5];
+    const w = size.w, h = size.h;
+    const x = colX[depth], y = yCenter - h / 2;
+    let cls = 'tree-node';
+    if (isRoot) cls += ' root';
+    if (isFilled) cls += ' filled'; else cls += ' empty';
+    cls += ' ' + (sexo === 'M' ? 'male' : 'female');
+    let content = '';
+    let removeBtn = '';
+    if (isFilled) {
+      content = `<div class="node-name">${filled.nome}</div><div class="node-band">${filled.anilha}</div>`;
+      if (!isRoot) removeBtn = `<button class="node-remove" onclick="removerAncestral('${path}', event)">✕</button>`;
+    } else {
+      content = `<div class="node-ref">${getLabel(path)}</div><div class="node-plus">+</div>`;
+    }
+    const click = isRoot ? '' : `onclick="abrirModal('${path}','${sexo}')"`;
+    nodesHtml += `<div class="${cls}" style="left:${x}px; top:${y}px; width:${w}px; height:${h}px;" ${click}>${content}${removeBtn}</div>`;
+  });
+  let linesSvg = '';
+  edges.forEach(edge => {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to) return;
+    const fromW = (NODE_SIZES[from.depth] || NODE_SIZES[5]).w;
+    const x1 = colX[from.depth] + fromW, y1 = from.y;
+    const x2 = colX[to.depth], y2 = to.y;
+    const mx = x1 + (x2 - x1) * 0.15;
+    const cls = getSexo(edge.to) === 'M' ? 'male' : 'female';
+    linesSvg += `<path d="M ${x1} ${y1} L ${mx} ${y1} L ${mx} ${y2} L ${x2} ${y2}" class="${cls}"/>`;
+  });
+  container.innerHTML = `
+    <div style="position:relative; width:${totalWidth}px; height:${totalHeight}px;">
+      ${labelsHtml}
+      <svg class="tree-lines" style="width:${totalWidth}px; height:${totalHeight}px;">${linesSvg}</svg>
+      ${nodesHtml}
+    </div>
+  `;
+}
+
+// ============================================================
+// ===== FUNÇÕES DO MODAL =====
+// ============================================================
+
+function abrirModal(path, sexo) {
+  modalPath = path;
+  modalSexo = sexo;
+  document.getElementById('modal-title').textContent = 'Selecionar ' + (sexo === 'M' ? 'Macho' : 'Fêmea');
+  document.getElementById('modal-search').value = '';
+  renderModalLista();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function renderModalLista() {
+  const busca = document.getElementById('modal-search').value.toLowerCase();
+  let lista = AVES.filter(a => a.sexo === modalSexo);
+  if (aveSelecionada && aveSelecionada.especie) {
+    lista = lista.filter(a => a.especie === aveSelecionada.especie);
+  }
+  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  document.getElementById('modal-list').innerHTML = lista.length === 0 ? 
+    '<div class="empty-note">Nenhuma ave encontrada com a mesma espécie.</div>' :
+    lista.map(a => `
+      <div class="modal-item ${modalSexo === 'M' ? 'male-item' : 'female-item'}">
+        <div><div class="mi-name">${a.nome}</div><div class="mi-band mono">${a.anilha}</div></div>
+        <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick='selecionarAncestral(${JSON.stringify(a)})'>Selecionar</button>
+      </div>
+    `).join('');
+}
+
+function selecionarAncestral(ave) {
+  tree[modalPath] = { nome: ave.nome, anilha: ave.anilha, id: ave.id };
+  treeModificada = true;
+  fecharModal();
+  renderTree();
+}
+
+// ============================================================
+// ===== FUNÇÕES DE SALVAR/EXCLUIR =====
+// ============================================================
+
+async function salvarArvore() {
+  if (!aveSelecionada) { alert('Nenhuma ave selecionada.'); return; }
+  if (!treeModificada) { alert('A árvore não foi modificada.'); return; }
+  
+  const ancestrais = [];
+  const caminhosExistentes = Object.keys(tree).filter(p => p !== '');
+  const camposPrincipais = ['pai', 'mae', 'pai.pai', 'pai.mae', 'mae.pai', 'mae.mae'];
+  
+  caminhosExistentes.forEach(caminho => {
+    if (!camposPrincipais.includes(caminho)) {
+      const partes = caminho.split('.');
+      const nivel = partes.length;
+      const sexo = partes[partes.length - 1] === 'pai' ? 'M' : 'F';
+      const nomeGeracao = nivel === 1 ? 'Pais' : nivel === 2 ? 'Avós' : nivel === 3 ? 'Bisavós' : nivel === 4 ? 'Trisavós' : 'Tataravós';
+      
+      ancestrais.push({
+        geracao: nivel,
+        nomeGeracao: nomeGeracao,
+        caminho: caminho,
+        sexo: sexo,
+        nome: tree[caminho].nome || '',
+        anilha: tree[caminho].anilha || '',
+        nota: ''
+      });
+    }
+  });
+  
+  const pai = tree['pai'] || null;
+  const mae = tree['mae'] || null;
+  const avoPaterno = tree['pai.pai'] || null;
+  const avoPaterna = tree['pai.mae'] || null;
+  const avoMaterno = tree['mae.pai'] || null;
+  const avoMaterna = tree['mae.mae'] || null;
+  
+  const dadosAtualizados = {
+    pai: pai ? pai.nome : '',
+    anilhaPai: pai ? pai.anilha : '',
+    mae: mae ? mae.nome : '',
+    anilhaMae: mae ? mae.anilha : '',
+    avoPaterno: avoPaterno ? avoPaterno.nome : '',
+    avoPaterna: avoPaterna ? avoPaterna.nome : '',
+    avoMaterno: avoMaterno ? avoMaterno.nome : '',
+    avoMaterna: avoMaterna ? avoMaterna.nome : '',
+    ancestrais: ancestrais
+  };
+  
+  await DB.update(DB.TABLES.AVES, aveSelecionada.id, dadosAtualizados);
+  treeModificada = false;
+  alert('✅ Árvore salva com sucesso! ' + ancestrais.length + ' ancestrais adicionais registrados.');
+  
+  const aveAtualizada = await DB.getById(DB.TABLES.AVES, aveSelecionada.id);
+  if (aveAtualizada) aveSelecionada = { ...aveSelecionada, ...aveAtualizada };
+}
+
+async function excluirArvore() {
+  if (!aveSelecionada) { alert('Nenhuma ave selecionada.'); return; }
+  if (!confirm(`Tem certeza que deseja excluir toda a árvore genealógica de "${aveSelecionada.nome}"?`)) return;
+  if (!confirm('⚠️ Isso removerá todos os vínculos familiares. Confirmar?')) return;
+  const dadosAtualizados = { 
+    pai: '', anilhaPai: '', mae: '', anilhaMae: '', 
+    avoPaterno: '', avoPaterna: '', avoMaterno: '', avoMaterna: '',
+    ancestrais: []
+  };
+  await DB.update(DB.TABLES.AVES, aveSelecionada.id, dadosAtualizados);
+  tree = {};
+  treeModificada = false;
+  alert('✅ Árvore excluída com sucesso!');
+  const aveAtualizada2 = await DB.getById(DB.TABLES.AVES, aveSelecionada.id);
+  if (aveAtualizada2) aveSelecionada = { ...aveSelecionada, ...aveAtualizada2 };
+  renderTree();
+}
+
+function verCertificado() {
+  document.getElementById('view-form').style.display = 'none';
+  document.getElementById('view-certificado').style.display = 'block';
+  document.getElementById('cert-wrap').style.fontFamily = CONFIG.fonteCertificado;
+  renderizarCertificado();
+}
+
+function gerarPDF() {
+  const certificado = document.getElementById('cert-wrap');
+  const btn = document.querySelector('.cert-actions .btn-primary');
+  const textoOriginal = btn.textContent;
+  btn.textContent = '⏳ Gerando PDF...';
+  btn.disabled = true;
+  aplicarAoCertificado();
+  setTimeout(() => {
+    const largura = certificado.scrollWidth;
+    const altura = certificado.scrollHeight;
+    html2canvas(certificado, {
+      scale: 3, useCORS: true, allowTaint: true,
+      backgroundColor: '#ffffff', logging: false,
+      width: largura, height: altura,
+      windowWidth: largura, windowHeight: altura,
+      onclone: function(doc, element) {
+        const el = element;
+        if (el) {
+          el.style.width = largura + 'px';
+          el.style.height = altura + 'px';
+          el.style.overflow = 'visible';
+          el.style.position = 'relative';
+        }
+        const clonePainel = el.querySelector('.cert-subject-panel');
+        if (clonePainel) {
+          clonePainel.style.background = CONFIG.corRaizFundo + hexAlpha(CONFIG.corRaizOpacidade ?? 100);
+          clonePainel.style.borderColor = CONFIG.corBordaRaiz;
+          clonePainel.style.color = CONFIG.corRaizTexto;
+        }
+        const clonePils = el.querySelectorAll('.cert-pill:not(.indefinido)');
+        clonePils.forEach(pilula => {
+          const isFemale = pilula.classList.contains('female');
+          if (isFemale) {
+            pilula.style.background = CONFIG.corFemeaFundo;
+            pilula.style.color = CONFIG.corFemeaTexto;
+          } else {
+            pilula.style.background = CONFIG.corMachoFundo;
+            pilula.style.color = CONFIG.corMachoTexto;
+          }
+        });
+        const cloneAnilhas = el.querySelectorAll('.cert-pill-anilha');
+        cloneAnilhas.forEach(elAnilha => {
+          elAnilha.style.color = CONFIG.corRaizTexto + ' !important';
+        });
+        const cloneTitulo = el.querySelector('.cert-title');
+        if (cloneTitulo) cloneTitulo.style.color = CONFIG.corTitulo;
+        const cloneCriador = el.querySelector('.cert-criador');
+        if (cloneCriador) cloneCriador.style.color = CONFIG.corCriador;
+      }
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const finalWidth = imgWidth * ratio;
+      const finalHeight = imgHeight * ratio;
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = (pdfHeight - finalHeight) / 2;
+      pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
+      const nomeAve = aveSelecionada ? aveSelecionada.nome : 'certificado';
+      pdf.save(`certificado_${nomeAve.replace(/\s/g, '_')}.pdf`);
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }).catch(error => {
+      console.error('Erro ao gerar PDF:', error);
+      alert('❌ Erro ao gerar PDF. Tente novamente.');
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    });
+  }, 300);
+}
+
+function ajustarComDebounce() {
+  clearTimeout(timeoutRedimensionamento);
+  timeoutRedimensionamento = setTimeout(() => {
+    ajustarPilulasCertificado();
+  }, 150);
+}
+
+window.addEventListener('resize', ajustarComDebounce);
+window.addEventListener('beforeprint', () => { ajustarPilulasCertificado(); });
+window.addEventListener('afterprint', () => { setTimeout(ajustarPilulasCertificado, 200); });
+
+carregarConfiguracoesSalvas();
+renderListaAves();
+carregarAvePorId();
+renderSidebar('arvore');
+</script>
+</body>
+</html>

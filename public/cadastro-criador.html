@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Dados do Criatório</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.radio-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.radio-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.owner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.16);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.owner-row .who {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.owner-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brass-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brass-soft);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.check-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.check-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* ===== SEÇÃO TROCAR SENHA ===== */
+.trocar-senha-section {
+  margin-top: 30px;
+  border: 1px solid var(--brass-dim);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  background: rgba(199,151,63,0.04);
+}
+
+.trocar-senha-section legend {
+  color: var(--brass-soft);
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.trocar-senha-section .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.trocar-senha-section .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.trocar-senha-section .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trocar-senha-section .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.trocar-senha-section .field label .req {
+  color: var(--rose);
+}
+
+.trocar-senha-section .field input {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  padding: 9px 11px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13.5px !important;
+  outline: none !important;
+  transition: .15s !important;
+}
+
+.trocar-senha-section .field input:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+}
+
+.trocar-senha-section .btn-alterar-senha {
+  padding: 10px 28px;
+  background: linear-gradient(135deg, var(--brass-soft), var(--brass));
+  color: #20170a;
+  border: none;
+  border-radius: 9px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trocar-senha-section .btn-alterar-senha:hover {
+  filter: brightness(1.08);
+  transform: scale(1.02);
+}
+
+.trocar-senha-section .btn-alterar-senha:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.trocar-senha-section .senha-status {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  display: none;
+}
+
+.trocar-senha-section .senha-status.success {
+  display: block;
+  background: rgba(92,154,124,0.15);
+  border: 1px solid rgba(92,154,124,0.3);
+  color: var(--sage-soft);
+}
+
+.trocar-senha-section .senha-status.error {
+  display: block;
+  background: rgba(192,89,74,0.15);
+  border: 1px solid rgba(192,89,74,0.3);
+  color: #e2988a;
+}
+
+.trocar-senha-section .senha-status.info {
+  display: block;
+  background: rgba(199,151,63,0.15);
+  border: 1px solid rgba(199,151,63,0.3);
+  color: var(--brass-soft);
+}
+
+/* ===== ESPÉCIES ===== */
+.especies-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.especies-toolbar .btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.especies-toolbar input,
+.especies-toolbar select {
+  background: rgba(0,0,0,0.35) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  outline: none;
+  flex: 1;
+  min-width: 140px;
+}
+
+.especies-toolbar input::placeholder {
+  color: var(--text-muted);
+}
+
+.especies-toolbar input:focus,
+.especies-toolbar select:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.especies-toolbar select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.especies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.especie-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+
+.especie-row .info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.especie-row .info .popular {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.especie-row .info .cientifico {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.especie-row .info .usada {
+  font-size: 9px;
+  color: var(--sage-soft);
+  background: rgba(92,154,124,0.15);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.especie-row .actions {
+  display: flex;
+  gap: 6px;
+}
+
+.especie-row .actions .btn {
+  padding: 2px 10px;
+  font-size: 10px;
+}
+
+.especie-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.especie-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* ===== MODAL DE ESPÉCIE ===== */
+.modal-box.especie-modal {
+  max-width: 440px;
+}
+
+.modal-box .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-box .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.modal-box .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-box .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.modal-box .field label .req {
+  color: var(--rose);
+}
+
+.modal-box .field input {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: .15s !important;
+}
+
+.modal-box .field input:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* ===== ESPÉCIES MAIS USADAS ===== */
+.especies-rapidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.especies-rapidas .chip {
+  background: rgba(199,151,63,0.1);
+  border: 1px solid var(--brass-dim);
+  border-radius: 16px;
+  padding: 4px 14px;
+  font-size: 11px;
+  color: var(--brass-soft);
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.especies-rapidas .chip:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.especies-rapidas .chip .cientifico-chip {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+/* ===== CORREÇÃO PARA SELECTS DO CRIADOR ===== */
+#f-categoria,
+#f-uf {
+  background: rgba(0,0,0,0.35) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  padding: 9px 11px !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13.5px !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c7973f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+}
+
+#f-categoria option,
+#f-uf option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+#f-categoria:focus,
+#f-uf:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+}
+
+@media (max-width: 768px) {
+  .trocar-senha-section .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-cadastro-criador">
+
+      <div class="topbar">
+        <div>
+          <h1>Dados do Criatório</h1>
+          <div class="lede">Informações que aparecem no certificado de árvore genealógica e nas etiquetas do seu criatório.</div>
+        </div>
+      </div>
+
+      <!-- ===== DADOS DO CRIATÓRIO ===== -->
+      <fieldset>
+        <legend>Identificação</legend>
+        <div class="field-grid">
+          <div class="field"><label>CNPJ/CPF <span class="req">*</span></label><input type="text" value="226.978.758-75" id="f-cpf"></div>
+          <div class="field"><label>Nome do Criatório <span class="req">*</span></label><input type="text" value="Criatório Goularth" id="f-nome-criatorio"></div>
+          <div class="field"><label>Registro</label><input type="text" value="3348370 / FOB II.889" id="f-registro"></div>
+          <div class="field"><label>Data Licença</label><input type="date" value="2001-02-19" id="f-data-licenca"></div>
+          <div class="field"><label>Categoria <span class="req">*</span></label>
+            <select id="f-categoria">
+              <option selected>Amador</option>
+              <option>Profissional</option>
+            </select>
+          </div>
+          <div class="field field-full"><label>Tipo Espécie <span class="req">*</span></label>
+            <div class="radio-row">
+              <label><input type="radio" name="tipoesp" checked> Ambos</label>
+              <label><input type="radio" name="tipoesp"> SISPASS</label>
+              <label><input type="radio" name="tipoesp"> FOB</label>
+            </div>
+          </div>
+          <div class="field"><label>Site</label><input type="text" placeholder="www.seusite.com.br" id="f-site"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Redes sociais</legend>
+        <div class="field-grid">
+          <div class="field"><label>WhatsApp</label><input type="text" value="(11) 9 4149-3657" id="f-whatsapp"></div>
+          <div class="field"><label>Facebook</label><input type="text" placeholder="/seuperfil" id="f-facebook"></div>
+          <div class="field"><label>Twitter</label><input type="text" placeholder="@seuperfil" id="f-twitter"></div>
+          <div class="field"><label>Instagram</label><input type="text" placeholder="@seuperfil" id="f-instagram"></div>
+          <div class="field"><label>YouTube</label><input type="text" placeholder="/canal" id="f-youtube"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contato</legend>
+        <div class="field-grid">
+          <div class="field"><label>Fone</label><input type="text" placeholder="(11)" id="f-fone"></div>
+          <div class="field"><label>Celular</label><input type="text" value="(11) 9 4149-3657" id="f-celular"></div>
+          <div class="field"><label>E-mail</label><input type="email" value="criatorio.goularth@gmail.com" id="f-email"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Endereço</legend>
+        <div class="field-grid">
+          <div class="field"><label>CEP</label><input type="text" value="09760-371" id="f-cep"></div>
+          <div class="field field-full"><label>Endereço <span class="req">*</span></label><input type="text" value="Rua Giacinto Tognato" id="f-endereco"></div>
+          <div class="field"><label>Número <span class="req">*</span></label><input type="text" value="889" id="f-numero"></div>
+          <div class="field"><label>Bairro <span class="req">*</span></label><input type="text" value="Baeta Neves" id="f-bairro"></div>
+          <div class="field"><label>UF <span class="req">*</span></label>
+            <select id="f-uf">
+              <option selected>SP</option>
+              <option>RJ</option>
+              <option>MG</option>
+              <option>ES</option>
+              <option>PR</option>
+              <option>SC</option>
+              <option>RS</option>
+              <option>BA</option>
+              <option>PE</option>
+              <option>CE</option>
+              <option>DF</option>
+              <option>GO</option>
+              <option>MT</option>
+              <option>MS</option>
+              <option>PA</option>
+              <option>AM</option>
+              <option>RO</option>
+              <option>AC</option>
+              <option>RR</option>
+              <option>AP</option>
+              <option>TO</option>
+              <option>MA</option>
+              <option>PI</option>
+              <option>RN</option>
+              <option>PB</option>
+              <option>AL</option>
+              <option>SE</option>
+            </select>
+          </div>
+          <div class="field"><label>Cidade <span class="req">*</span></label><input type="text" value="São Bernardo do Campo" id="f-cidade"></div>
+          <div class="field field-full"><label>Complemento</label><input type="text" placeholder="Opcional" id="f-complemento"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Proprietários</legend>
+        <div class="owner-row">
+          <div class="who">
+            <div class="owner-avatar">FG</div>
+            <div>
+              <div style="font-weight:700;font-size:13.5px;">Fabio Alves Goulart</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">CPF 226.978.758-75 · São Bernardo do Campo - SP</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;"><button class="btn btn-ghost" style="padding:6px 12px;">Editar</button></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-ghost">+ Adicionar Proprietário</button></div>
+      </fieldset>
+
+      <!-- ============================================================ -->
+      <!-- CADASTRO DE ESPÉCIES DE AVES                                    -->
+      <!-- ============================================================ -->
+      <fieldset>
+        <legend>🐦 Espécies de Aves</legend>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+          Cadastre as espécies que serão usadas no cadastro de aves. 
+          <span style="display:block;font-size:11px;color:var(--text-muted);margin-top:2px;">
+            💡 Clique nas espécies da lista rápida abaixo para adicioná-las automaticamente.
+          </span>
+        </p>
+
+        <!-- ESPÉCIES MAIS USADAS (RÁPIDAS) -->
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--text-muted);">➕ Adicionar rapidamente:</label>
+          <div class="especies-rapidas" id="especies-rapidas">
+            <!-- Preenchido pelo JavaScript -->
+          </div>
+        </div>
+
+        <div class="especies-toolbar">
+          <input type="text" id="f-especie-popular" placeholder="Nome popular">
+          <input type="text" id="f-especie-cientifico" placeholder="Nome científico (opcional)">
+          <button class="btn btn-primary" onclick="salvarEspecie()" style="padding:6px 18px;font-size:12px;">+ Adicionar</button>
+        </div>
+
+        <div class="especies-toolbar">
+          <input type="text" class="busca-especie" id="busca-especie" placeholder="🔍 Buscar espécie..." oninput="renderizarEspecies()">
+          <button class="btn btn-ghost" onclick="renderizarEspecies()" style="padding:6px 14px;font-size:12px;">⟳ Atualizar</button>
+        </div>
+
+        <div class="especie-count" id="especie-count">0 espécies cadastradas</div>
+
+        <div class="especies-list" id="especies-list">
+          <!-- Preenchido pelo JavaScript -->
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="cancelarEdicao()">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarDadosCriatorio()">Salvar Dados do Criatório</button>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- SEÇÃO TROCAR SENHA                                             -->
+      <!-- ============================================================ -->
+      <fieldset class="trocar-senha-section">
+        <legend>🔐 Trocar Senha</legend>
+        
+        <div class="field-grid">
+          <div class="field field-full">
+            <label>Senha Atual <span class="req">*</span></label>
+            <input type="password" id="senha-atual" placeholder="Digite sua senha atual">
+          </div>
+          <div class="field">
+            <label>Nova Senha <span class="req">*</span></label>
+            <input type="password" id="nova-senha" placeholder="Digite a nova senha">
+            <div style="font-size:10px;color:var(--text-muted);">Mínimo 6 caracteres</div>
+          </div>
+          <div class="field">
+            <label>Confirmar Nova Senha <span class="req">*</span></label>
+            <input type="password" id="confirmar-senha" placeholder="Confirme a nova senha">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn-alterar-senha" onclick="trocarSenha()">🔑 Alterar Senha</button>
+        </div>
+
+        <div class="senha-status" id="senha-status"></div>
+      </fieldset>
+
+    </section>
+  </main>
+</div>
+
+<!-- ===== MODAL DE EDIÇÃO DE ESPÉCIE ===== -->
+<div class="modal-overlay" id="modal-especie" onclick="if(event.target===this) fecharModalEspecie()">
+  <div class="modal-box especie-modal">
+    <div class="modal-head">
+      <div><span id="modal-especie-title">Editar Espécie</span></div>
+      <button class="modal-close" onclick="fecharModalEspecie()">✕</button>
+    </div>
+    <div class="field-grid">
+      <input type="hidden" id="edit-especie-id">
+      <div class="field field-full">
+        <label>Nome Popular <span class="req">*</span></label>
+        <input type="text" id="edit-especie-popular" placeholder="Ex: Canário-da-terra">
+      </div>
+      <div class="field field-full">
+        <label>Nome Científico</label>
+        <input type="text" id="edit-especie-cientifico" placeholder="Ex: Sicalis flaveola brasiliensis">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModalEspecie()">Cancelar</button>
+      <button class="btn btn-primary" onclick="atualizarEspecie()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('cadastro-criador');</script>
+<script>
+/* ============================================================
+   ESPÉCIES - DADOS INICIAIS
+   ============================================================ */
+
+const ESPECIES_INICIAIS = [
+  { popular: 'Agapornis', cientifico: 'Agapornis spp.' },
+  { popular: 'Azulão', cientifico: 'Cyanoloxia brissonii' },
+  { popular: 'Bicudo', cientifico: 'Sporophila maximiliani' },
+  { popular: 'Bigodinho', cientifico: 'Sporophila lineola' },
+  { popular: 'Caboclinho', cientifico: 'Sporophila bouvreuil' },
+  { popular: 'Caboclinho-de-barriga-vermelha', cientifico: 'Sporophila hypoxantha' },
+  { popular: 'Calopsita', cientifico: 'Nymphicus hollandicus' },
+  { popular: 'Canário-belga', cientifico: 'Serinus canaria domestica' },
+  { popular: 'Canário-da-terra', cientifico: 'Sicalis flaveola' },
+  { popular: 'Cardeal-amarelo', cientifico: 'Gubernatrix cristata' },
+  { popular: 'Cardeal-do-sul', cientifico: 'Paroaria coronata' },
+  { popular: 'Chorão', cientifico: 'Sporophila leucoptera' },
+  { popular: 'Coleiro (Papa-capim)', cientifico: 'Sporophila caerulescens' },
+  { popular: 'Coleiro Baiano', cientifico: 'Sporophila nigricollis' },
+  { popular: 'Corrupião', cientifico: 'Icterus jamacaii' },
+  { popular: 'Curió', cientifico: 'Sporophila angolensis' },
+  { popular: 'Diamante-de-Gould', cientifico: 'Chloebia gouldiae' },
+  { popular: 'Diamante-mandarim', cientifico: 'Taeniopygia guttata' },
+  { popular: 'Galo-de-campina', cientifico: 'Paroaria dominicana' },
+  { popular: 'Manon (Bengalim-do-Japão)', cientifico: 'Lonchura striata domestica' },
+  { popular: 'Periquito-australiano', cientifico: 'Melopsittacus undulatus' },
+  { popular: 'Pintassilgo', cientifico: 'Spinus magellanicus' },
+  { popular: 'Ring Neck (Periquito-de-colar)', cientifico: 'Psittacula krameri' },
+  { popular: 'Tiziu', cientifico: 'Volatinia jacarina' },
+  { popular: 'Trinca-ferro', cientifico: 'Saltator similis' }
+];
+
+ESPECIES_INICIAIS.sort((a, b) => a.popular.localeCompare(b.popular));
+
+/* ============================================================
+   ESPÉCIES - CRUD via API (site_config)
+   ============================================================ */
+
+const ESPECIES_KEY = 'especies_aves';
+
+async function getEspecies() {
+  const especies = await DB.getConfig(ESPECIES_KEY);
+  if (Array.isArray(especies) && especies.length > 0) return especies;
+
+  const iniciais = ESPECIES_INICIAIS.map((e, index) => ({
+    id: index + 1,
+    popular: e.popular,
+    cientifico: e.cientifico
+  }));
+  await saveEspecies(iniciais);
+  return iniciais;
+}
+
+async function saveEspecies(especies) {
+  await DB.setConfig(ESPECIES_KEY, especies);
+}
+
+async function getNextEspecieId() {
+  const especies = await getEspecies();
+  let maxId = 0;
+  especies.forEach(e => { if (e.id > maxId) maxId = e.id; });
+  return maxId + 1;
+}
+
+async function salvarEspecie() {
+  const popular = document.getElementById('f-especie-popular').value.trim();
+  const cientifico = document.getElementById('f-especie-cientifico').value.trim();
+
+  if (!popular) {
+    alert('Digite o nome popular da espécie.');
+    document.getElementById('f-especie-popular').focus();
+    return;
+  }
+
+  const especies = await getEspecies();
+  
+  if (especies.some(e => e.popular.toLowerCase() === popular.toLowerCase())) {
+    alert('Esta espécie já está cadastrada!');
+    return;
+  }
+
+  especies.push({
+    id: await getNextEspecieId(),
+    popular: popular,
+    cientifico: cientifico
+  });
+
+  await saveEspecies(especies);
+  
+  document.getElementById('f-especie-popular').value = '';
+  document.getElementById('f-especie-cientifico').value = '';
+  
+  renderizarEspecies();
+  renderizarEspeciesRapidas();
+}
+
+async function renderizarEspecies() {
+  const container = document.getElementById('especies-list');
+  const countEl = document.getElementById('especie-count');
+  const busca = document.getElementById('busca-especie').value.toLowerCase();
+  
+  let especies = await getEspecies();
+  
+  if (busca) {
+    especies = especies.filter(e => 
+      e.popular.toLowerCase().includes(busca) || 
+      (e.cientifico && e.cientifico.toLowerCase().includes(busca))
+    );
+  }
+
+  countEl.textContent = especies.length + ' espécies cadastradas';
+
+  if (especies.length === 0) {
+    container.innerHTML = `<div class="especie-empty">Nenhuma espécie encontrada.</div>`;
+    return;
+  }
+
+  container.innerHTML = especies.map(e => `
+    <div class="especie-row">
+      <div class="info">
+        <span class="popular">${e.popular}</span>
+        ${e.cientifico ? `<span class="cientifico">${e.cientifico}</span>` : ''}
+        <span class="usada">✓ disponível</span>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" style="padding:2px 10px;font-size:10px;" onclick="editarEspecie(${e.id})">✎</button>
+        <button class="btn btn-danger" style="padding:2px 10px;font-size:10px;" onclick="excluirEspecie(${e.id})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function renderizarEspeciesRapidas() {
+  const container = document.getElementById('especies-rapidas');
+  const especies = await getEspecies();
+  
+  const rapidas = especies.slice(0, 12);
+  
+  container.innerHTML = rapidas.map(e => `
+    <span class="chip" onclick="adicionarEspecieRapida('${e.popular}', '${e.cientifico || ''}')">
+      ${e.popular}
+      ${e.cientifico ? `<span class="cientifico-chip">${e.cientifico}</span>` : ''}
+    </span>
+  `).join('');
+}
+
+async function adicionarEspecieRapida(popular, cientifico) {
+  const especies = await getEspecies();
+  if (especies.some(e => e.popular === popular)) {
+    alert(`"${popular}" já está cadastrada!`);
+    return;
+  }
+  
+  especies.push({
+    id: await getNextEspecieId(),
+    popular: popular,
+    cientifico: cientifico
+  });
+  
+  await saveEspecies(especies);
+  renderizarEspecies();
+  renderizarEspeciesRapidas();
+}
+
+async function editarEspecie(id) {
+  const especies = await getEspecies();
+  const especie = especies.find(e => e.id === id);
+  if (!especie) return;
+
+  document.getElementById('edit-especie-id').value = id;
+  document.getElementById('edit-especie-popular').value = especie.popular;
+  document.getElementById('edit-especie-cientifico').value = especie.cientifico || '';
+  document.getElementById('modal-especie-title').textContent = 'Editar Espécie';
+  document.getElementById('modal-especie').classList.add('open');
+}
+
+function fecharModalEspecie() {
+  document.getElementById('modal-especie').classList.remove('open');
+}
+
+async function atualizarEspecie() {
+  const id = parseInt(document.getElementById('edit-especie-id').value);
+  const popular = document.getElementById('edit-especie-popular').value.trim();
+  const cientifico = document.getElementById('edit-especie-cientifico').value.trim();
+
+  if (!popular) {
+    alert('Digite o nome popular da espécie.');
+    return;
+  }
+
+  let especies = await getEspecies();
+  const index = especies.findIndex(e => e.id === id);
+  if (index === -1) return;
+
+  if (especies.some(e => e.popular.toLowerCase() === popular.toLowerCase() && e.id !== id)) {
+    alert('Já existe uma espécie com este nome!');
+    return;
+  }
+
+  especies[index] = { ...especies[index], popular, cientifico };
+  await saveEspecies(especies);
+  
+  fecharModalEspecie();
+  renderizarEspecies();
+  renderizarEspeciesRapidas();
+}
+
+async function excluirEspecie(id) {
+  const especies = await getEspecies();
+  const especie = especies.find(e => e.id === id);
+  if (!especie) return;
+  
+  if (!confirm(`Tem certeza que deseja excluir a espécie "${especie.popular}"?`)) return;
+  
+  const novas = especies.filter(e => e.id !== id);
+  await saveEspecies(novas);
+  renderizarEspecies();
+  renderizarEspeciesRapidas();
+}
+
+/* ============================================================
+   FUNÇÃO PARA POPULAR SELECT DE ESPÉCIES
+   ============================================================ */
+
+window.getEspeciesSelectOptions = async function() {
+  const especies = await getEspecies();
+  if (especies.length === 0) {
+    return `<option value="">Nenhuma espécie cadastrada. Cadastre em Dados do Criatório.</option>`;
+  }
+  return especies.map(e => 
+    `<option value="${e.popular}">${e.popular}${e.cientifico ? ' (' + e.cientifico + ')' : ''}</option>`
+  ).join('');
+};
+
+window.popularSelectEspecie = async function() {
+  const select = document.getElementById('f-especie');
+  if (!select) return;
+  
+  const especies = await getEspecies();
+  const valorAtual = select.value;
+  
+  if (especies.length === 0) {
+    select.innerHTML = `<option value="">Nenhuma espécie cadastrada. Cadastre em Dados do Criatório.</option>`;
+    return;
+  }
+  
+  let html = `<option value="">Selecione uma espécie...</option>`;
+  especies.forEach(e => {
+    const label = e.cientifico ? `${e.popular} (${e.cientifico})` : e.popular;
+    html += `<option value="${e.popular}">${label}</option>`;
+  });
+  select.innerHTML = html;
+  if (valorAtual) select.value = valorAtual;
+};
+
+/* ============================================================
+   DADOS DO CRIATÓRIO - SALVAR
+   ============================================================ */
+
+async function salvarDadosCriatorio() {
+  const dados = {
+    cpf: document.getElementById('f-cpf').value.trim(),
+    nomeCriatorio: document.getElementById('f-nome-criatorio').value.trim(),
+    registro: document.getElementById('f-registro').value.trim(),
+    dataLicenca: document.getElementById('f-data-licenca').value,
+    categoria: document.getElementById('f-categoria').value,
+    site: document.getElementById('f-site').value.trim(),
+    whatsapp: document.getElementById('f-whatsapp').value.trim(),
+    facebook: document.getElementById('f-facebook').value.trim(),
+    twitter: document.getElementById('f-twitter').value.trim(),
+    instagram: document.getElementById('f-instagram').value.trim(),
+    youtube: document.getElementById('f-youtube').value.trim(),
+    fone: document.getElementById('f-fone').value.trim(),
+    celular: document.getElementById('f-celular').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    cep: document.getElementById('f-cep').value.trim(),
+    endereco: document.getElementById('f-endereco').value.trim(),
+    numero: document.getElementById('f-numero').value.trim(),
+    bairro: document.getElementById('f-bairro').value.trim(),
+    uf: document.getElementById('f-uf').value,
+    cidade: document.getElementById('f-cidade').value.trim(),
+    complemento: document.getElementById('f-complemento').value.trim()
+  };
+
+  if (!dados.nomeCriatorio) {
+    alert('O campo "Nome do Criatório" é obrigatório!');
+    document.getElementById('f-nome-criatorio').focus();
+    return;
+  }
+
+  if (!dados.endereco || !dados.numero || !dados.bairro || !dados.cidade) {
+    alert('Preencha todos os campos obrigatórios do endereço.');
+    return;
+  }
+
+  try {
+    await DB.setConfig('dados_criatorio', dados);
+    alert('✅ Dados do criatório salvos com sucesso!');
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
+}
+
+async function carregarDadosCriatorio() {
+  try {
+    const dados = await DB.getConfig('dados_criatorio');
+    if (!dados) return;
+    
+    document.getElementById('f-cpf').value = dados.cpf || '';
+    document.getElementById('f-nome-criatorio').value = dados.nomeCriatorio || '';
+    document.getElementById('f-registro').value = dados.registro || '';
+    document.getElementById('f-data-licenca').value = dados.dataLicenca || '';
+    document.getElementById('f-categoria').value = dados.categoria || 'Amador';
+    document.getElementById('f-site').value = dados.site || '';
+    document.getElementById('f-whatsapp').value = dados.whatsapp || '';
+    document.getElementById('f-facebook').value = dados.facebook || '';
+    document.getElementById('f-twitter').value = dados.twitter || '';
+    document.getElementById('f-instagram').value = dados.instagram || '';
+    document.getElementById('f-youtube').value = dados.youtube || '';
+    document.getElementById('f-fone').value = dados.fone || '';
+    document.getElementById('f-celular').value = dados.celular || '';
+    document.getElementById('f-email').value = dados.email || '';
+    document.getElementById('f-cep').value = dados.cep || '';
+    document.getElementById('f-endereco').value = dados.endereco || '';
+    document.getElementById('f-numero').value = dados.numero || '';
+    document.getElementById('f-bairro').value = dados.bairro || '';
+    document.getElementById('f-uf').value = dados.uf || 'SP';
+    document.getElementById('f-cidade').value = dados.cidade || '';
+    document.getElementById('f-complemento').value = dados.complemento || '';
+  } catch (e) {}
+}
+
+function cancelarEdicao() {
+  if (confirm('Deseja descartar as alterações?')) {
+    carregarDadosCriatorio();
+  }
+}
+
+/* ============================================================
+   TROCAR SENHA
+   ============================================================ */
+
+async function trocarSenha() {
+  const senhaAtual = document.getElementById('senha-atual').value.trim();
+  const novaSenha = document.getElementById('nova-senha').value.trim();
+  const confirmarSenha = document.getElementById('confirmar-senha').value.trim();
+  const statusEl = document.getElementById('senha-status');
+  const btn = document.querySelector('.btn-alterar-senha');
+
+  // Limpar status anterior
+  statusEl.className = 'senha-status';
+  statusEl.style.display = 'none';
+
+  // Validações
+  if (!senhaAtual || !novaSenha || !confirmarSenha) {
+    statusEl.textContent = '⚠️ Preencha todos os campos.';
+    statusEl.className = 'senha-status error';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  if (novaSenha.length < 8) {
+    statusEl.textContent = '⚠️ A nova senha deve ter pelo menos 8 caracteres.';
+    statusEl.className = 'senha-status error';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    statusEl.textContent = '⚠️ As senhas não coincidem.';
+    statusEl.className = 'senha-status error';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    // A senha atual agora é conferida de verdade no servidor (bcrypt),
+    // não mais comparada com uma string fixa no navegador.
+    await DB.trocarSenha(senhaAtual, novaSenha);
+
+    statusEl.textContent = '✅ Senha alterada com sucesso!';
+    statusEl.className = 'senha-status success';
+    statusEl.style.display = 'block';
+
+    document.getElementById('senha-atual').value = '';
+    document.getElementById('nova-senha').value = '';
+    document.getElementById('confirmar-senha').value = '';
+
+    btn.disabled = true;
+    btn.textContent = '✅ Alterada!';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '🔑 Alterar Senha';
+    }, 3000);
+
+  } catch (e) {
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.className = 'senha-status error';
+    statusEl.style.display = 'block';
+  }
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+
+carregarDadosCriatorio();
+renderizarEspecies();
+renderizarEspeciesRapidas();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') fecharModalEspecie();
+});
+
+// Enter para trocar senha
+document.getElementById('confirmar-senha').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    trocarSenha();
+  }
+});
+
+renderSidebar('cadastro-criador');
+</script>
+</body>
+</html>

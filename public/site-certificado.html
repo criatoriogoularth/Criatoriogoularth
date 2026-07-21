@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Certificado</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --parchment: #f3ecda;
+  --parchment-dim: #e7dec5;
+  --ink: #23291f;
+  --ink-soft: #4a5347;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+}
+
+.site-header .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-header .logo .mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-header .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-header .logo .name {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-header .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.site-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.site-nav a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.cert-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cert-wrap {
+  background: var(--parchment);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 297mm;
+  aspect-ratio: 297 / 210;
+  margin: 0 auto;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  font-family: 'Manrope', sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cert-bg-color {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: #f3ecda;
+}
+
+.cert-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  display: none;
+}
+
+.cert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 8px 20px;
+  border-bottom: 2px solid var(--brass);
+  background: rgba(199,151,63,0.08);
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.cert-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--brass);
+}
+
+.cert-criador {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  margin-top: 1px;
+}
+
+.cert-responsavel {
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+.cert-registros {
+  font-size: 9px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+.cert-contato {
+  font-size: 9px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+.cert-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+}
+
+.cert-subject-panel {
+  flex: 0 0 86px;
+  height: 180px;
+  min-height: 180px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(199,151,63,0.06);
+  border: 2px solid var(--brass);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 0.15s ease;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+}
+
+.cert-columns {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.cert-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
+.cert-col:not(:last-child) {
+  border-right: 1px dashed rgba(199,151,63,0.3);
+  padding-right: 6px;
+}
+
+.cert-pill {
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid rgba(58,106,154,0.25);
+  border-left: 3px solid #3a6a9a;
+  background: rgba(58,106,154,0.08);
+  color: var(--ink);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 0 4px;
+  width: 100%;
+  min-height: 12px;
+  transition: all 0.15s ease;
+}
+
+.cert-pill.wrap {
+  white-space: normal;
+  word-break: break-word;
+  text-overflow: clip;
+  line-height: 1.1;
+  padding: 0 4px;
+}
+
+.cert-pill.female {
+  background: rgba(185,116,98,0.08);
+  border-color: rgba(185,116,98,0.25);
+  border-left-color: #9a5a6a;
+}
+
+.cert-pill.indefinido {
+  color: var(--ink-soft);
+  font-style: italic;
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.08);
+  border-left-color: rgba(0,0,0,0.15);
+  font-weight: 400;
+}
+
+.subject-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: #20170a;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.subject-name {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+
+.subject-line {
+  font-size: 10.5px;
+  color: var(--ink);
+  text-align: left;
+  margin-bottom: 1px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+
+.subject-line b {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.subject-line .mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+}
+
+.cert-pill-anilha {
+  font-family: 'JetBrains Mono', monospace;
+  color: #1a1a1a !important;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+
+.cert-col[data-depth="1"] .cert-pill-anilha { font-size: 9px; opacity: 0.85; }
+.cert-col[data-depth="2"] .cert-pill-anilha { font-size: 8px; opacity: 0.8; }
+.cert-col[data-depth="3"] .cert-pill-anilha { font-size: 7px; opacity: 0.75; }
+.cert-col[data-depth="4"] .cert-pill-anilha { font-size: 6.5px; opacity: 0.7; }
+.cert-col[data-depth="5"] .cert-pill-anilha { font-size: 6px; opacity: 0.65; }
+
+.cert-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 20px;
+  border-top: 2px solid var(--brass);
+  font-size: 10px;
+  color: var(--ink-soft);
+  background: rgba(199,151,63,0.06);
+  position: relative;
+  z-index: 1;
+}
+
+.btn-voltar {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  transition: .15s ease;
+}
+
+.btn-voltar:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+@media (max-width: 768px) {
+  .cert-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+  .cert-body {
+    flex-direction: column;
+  }
+  .cert-subject-panel {
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 120px;
+  }
+  .site-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 12px;
+  }
+  .site-header .logo {
+    justify-content: center;
+  }
+  .site-nav {
+    justify-content: center;
+  }
+}
+
+@media print {
+  .site-header, .btn-voltar {
+    display: none !important;
+  }
+  .cert-wrap {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+  }
+  body {
+    background: white !important;
+    padding: 0 !important;
+  }
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo" id="logo-section">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+    <nav class="site-nav">
+      <a href="site-home.html">← Voltar ao Site</a>
+    </nav>
+  </header>
+
+  <div class="cert-container">
+    <div class="cert-wrap" id="cert-wrap">
+      <div class="cert-bg-color" id="cert-bg-color" style="background:#f3ecda;"></div>
+      <img class="cert-bg-image" id="cert-bg-image" style="display:none;" alt="Fundo">
+      
+      <div class="cert-header" id="cert-header">
+        <div class="cert-header-left">
+          <div class="cert-title" id="cert-title">CERTIFICADO</div>
+          <div class="cert-criador" id="cert-criador">Criatório Goularth</div>
+          <div class="cert-responsavel" id="cert-responsavel">Responsável: Fabio Alves Goulart</div>
+          <div class="cert-registros" id="cert-registros">CTF 3348370 / FOB II.889</div>
+          <div class="cert-contato" id="cert-contato">criatorio.goularth@gmail.com · (11) 9 4149-3657</div>
+        </div>
+      </div>
+      
+      <div class="cert-body">
+        <div class="cert-subject-panel" id="cert-subject-panel"></div>
+        <div class="cert-columns" id="cert-columns"></div>
+      </div>
+      
+      <div class="cert-footer" id="cert-footer">
+        <span id="cert-footer-text">Gestão de Criatório Goularth</span>
+      </div>
+    </div>
+    
+    <div style="text-align:center;">
+      <a href="site-plantel.html" class="btn-voltar">← Voltar</a>
+    </div>
+  </div>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 38;
+      const nomeTamanho = personalizacao.nomeTamanho || 18;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub" style="font-size:10px;">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function getCertConfig() {
+      try {
+        const config = await DB.getConfig('cert_config');
+        if (config) {
+          return {
+            bgColor: config.bgColor || '#f3ecda',
+            bgImage: config.bgImage || null,
+            bgOpacidade: config.bgOpacidade || 100,
+            bgBrilho: config.bgBrilho || 100,
+            corTitulo: config.corTitulo || '#c7973f',
+            corCriador: config.corCriador || '#23291f',
+            corResponsavel: config.corResponsavel || '#4a5347',
+            corRegistros: config.corRegistros || '#4a5347',
+            corContato: config.corContato || '#4a5347',
+            corLinhaHeader: config.corLinhaHeader || '#c7973f',
+            corMachoFundo: config.corMachoFundo || '#1a2e28',
+            corMachoTexto: config.corMachoTexto || '#ece6d6',
+            corFemeaFundo: config.corFemeaFundo || '#2e1a1a',
+            corFemeaTexto: config.corFemeaTexto || '#ece6d6',
+            corRaizFundo: config.corRaizFundo || '#132621',
+            corRaizOpacidade: config.corRaizOpacidade || 100,
+            corRaizTexto: config.corRaizTexto || '#e4c583',
+            corBordaNos: config.corBordaNos || '#c7973f',
+            corAvatarFundo: config.corAvatarFundo || '#c7973f',
+            corAvatarTexto: config.corAvatarTexto || '#20170a',
+            corBordaRaiz: config.corBordaRaiz || '#c7973f',
+            corSexo: config.corSexo || '#4a5347',
+            corAnilhaLabel: config.corAnilhaLabel || '#4a5347',
+            corEspecie: config.corEspecie || '#4a5347',
+            corNasc: config.corNasc || '#4a5347',
+            corRaca: config.corRaca || '#4a5347',
+            corAnilha: config.corAnilha || '#e4c583',
+            corRodapeTexto: config.corRodapeTexto || '#4a5347',
+            corRodapeLinha: config.corRodapeLinha || '#c7973f',
+            corRodapeFundo: config.corRodapeFundo || 'rgba(199,151,63,0.06)',
+            larguraRaiz: config.larguraRaiz || 86,
+            alturaRaiz: config.alturaRaiz || 180,
+            tamNome: config.tamNome || 15,
+            tamInfo: config.tamInfo || 10.5,
+            tamAvatar: config.tamAvatar || 46,
+            negritoNome: config.negritoNome || 'bold',
+            fonteCertificado: config.fonteCertificado || "'Manrope', sans-serif"
+          };
+        }
+      } catch (e) {}
+      return getConfigPadrao();
+    }
+
+    function getConfigPadrao() {
+      return {
+        bgColor: '#f3ecda',
+        bgImage: null,
+        bgOpacidade: 100,
+        bgBrilho: 100,
+        corTitulo: '#c7973f',
+        corCriador: '#23291f',
+        corResponsavel: '#4a5347',
+        corRegistros: '#4a5347',
+        corContato: '#4a5347',
+        corLinhaHeader: '#c7973f',
+        corMachoFundo: '#1a2e28',
+        corMachoTexto: '#ece6d6',
+        corFemeaFundo: '#2e1a1a',
+        corFemeaTexto: '#ece6d6',
+        corRaizFundo: '#132621',
+        corRaizOpacidade: 100,
+        corRaizTexto: '#e4c583',
+        corBordaNos: '#c7973f',
+        corAvatarFundo: '#c7973f',
+        corAvatarTexto: '#20170a',
+        corBordaRaiz: '#c7973f',
+        corSexo: '#4a5347',
+        corAnilhaLabel: '#4a5347',
+        corEspecie: '#4a5347',
+        corNasc: '#4a5347',
+        corRaca: '#4a5347',
+        corAnilha: '#e4c583',
+        corRodapeTexto: '#4a5347',
+        corRodapeLinha: '#c7973f',
+        corRodapeFundo: 'rgba(199,151,63,0.06)',
+        larguraRaiz: 86,
+        alturaRaiz: 180,
+        tamNome: 15,
+        tamInfo: 10.5,
+        tamAvatar: 46,
+        negritoNome: 'bold',
+        fonteCertificado: "'Manrope', sans-serif"
+      };
+    }
+
+    async function getAveCompleta(id) {
+      return DB.getCertificadoPublico(id);
+    }
+
+    function formatarData(data) {
+      if (!data) return '-';
+      const partes = data.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return data;
+    }
+
+    function getSexoLabel(sexo) {
+      if (sexo === 'M') return 'Macho';
+      if (sexo === 'F') return 'Fêmea';
+      return 'Indefinido';
+    }
+
+    const CERT_MAX_GEN = 5;
+
+    function geracaoPaths(depth) {
+      let paths = [''];
+      for (let i = 0; i < depth; i++) {
+        const next = [];
+        paths.forEach(p => {
+          next.push(p ? p + '.pai' : 'pai');
+          next.push(p ? p + '.mae' : 'mae');
+        });
+        paths = next;
+      }
+      return paths;
+    }
+
+    function hexAlpha(pct) {
+      const v = Math.round((Math.max(0, Math.min(100, pct)) / 100) * 255);
+      return v.toString(16).padStart(2, '0');
+    }
+
+    async function carregarCertificado() {
+      const params = new URLSearchParams(window.location.search);
+      const id = parseInt(params.get('id'));
+      
+      if (!id) {
+        document.getElementById('cert-subject-panel').innerHTML = '<div class="subject-name">Ave não encontrada</div>';
+        return;
+      }
+      
+      const ave = await getAveCompleta(id);
+      
+      if (!ave) {
+        document.getElementById('cert-subject-panel').innerHTML = '<div class="subject-name">Ave não encontrada</div>';
+        return;
+      }
+
+      const config = await getCertConfig();
+
+      // O servidor já resolveu pai/mãe (nome/anilha) e tentou achar os avós
+      // olhando o registro do pai/mãe, se existirem no plantel — não
+      // precisamos mais buscar na tabela inteira de aves no navegador.
+      const paiEncontrado = ave.paiEncontrado;
+      const maeEncontrada = ave.maeEncontrada;
+
+      const tree = {};
+      tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
+      
+      if (ave.pai && ave.pai !== ave.nome) {
+        if (paiEncontrado) {
+          tree['pai'] = { nome: paiEncontrado.nome, anilha: paiEncontrado.anilha || '' };
+          if (paiEncontrado.pai && paiEncontrado.pai !== paiEncontrado.nome) {
+            tree['pai.pai'] = { nome: paiEncontrado.pai, anilha: paiEncontrado.anilhaPai || '' };
+          }
+          if (paiEncontrado.mae && paiEncontrado.mae !== paiEncontrado.nome) {
+            tree['pai.mae'] = { nome: paiEncontrado.mae, anilha: paiEncontrado.anilhaMae || '' };
+          }
+        } else {
+          tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
+        }
+      }
+      
+      if (ave.mae && ave.mae !== ave.nome) {
+        if (maeEncontrada) {
+          tree['mae'] = { nome: maeEncontrada.nome, anilha: maeEncontrada.anilha || '' };
+          if (maeEncontrada.pai && maeEncontrada.pai !== maeEncontrada.nome) {
+            tree['mae.pai'] = { nome: maeEncontrada.pai, anilha: maeEncontrada.anilhaPai || '' };
+          }
+          if (maeEncontrada.mae && maeEncontrada.mae !== maeEncontrada.nome) {
+            tree['mae.mae'] = { nome: maeEncontrada.mae, anilha: maeEncontrada.anilhaMae || '' };
+          }
+        } else {
+          tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
+        }
+      }
+      
+      if (ave.avoPaterno && !tree['pai.pai']) {
+        tree['pai.pai'] = { nome: ave.avoPaterno, anilha: ave.anilhaAvoPaterno || '' };
+      }
+      if (ave.avoPaterna && !tree['pai.mae']) {
+        tree['pai.mae'] = { nome: ave.avoPaterna, anilha: ave.anilhaAvoPaterna || '' };
+      }
+      if (ave.avoMaterno && !tree['mae.pai']) {
+        tree['mae.pai'] = { nome: ave.avoMaterno, anilha: ave.anilhaAvoMaterno || '' };
+      }
+      if (ave.avoMaterna && !tree['mae.mae']) {
+        tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
+      }
+
+      function obterAncestral(caminho) {
+        const encontrado = tree[caminho];
+        return (encontrado && encontrado.nome) ? encontrado.nome : null;
+      }
+
+      function obterAnilha(caminho) {
+        const encontrado = tree[caminho];
+        return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
+      }
+
+      const bgColor = document.getElementById('cert-bg-color');
+      const bgImage = document.getElementById('cert-bg-image');
+      
+      if (config.bgImage) {
+        bgColor.style.background = 'transparent';
+        bgImage.src = config.bgImage;
+        bgImage.style.display = 'block';
+        bgImage.style.opacity = (config.bgOpacidade || 100) / 100;
+        bgImage.style.filter = `brightness(${(config.bgBrilho || 100) / 100})`;
+      } else {
+        bgColor.style.background = config.bgColor || '#f3ecda';
+        bgImage.style.display = 'none';
+        bgImage.style.opacity = 1;
+        bgImage.style.filter = 'none';
+      }
+
+      const certWrap = document.getElementById('cert-wrap');
+      if (certWrap) {
+        certWrap.style.fontFamily = config.fonteCertificado || "'Manrope', sans-serif";
+      }
+
+      const header = document.getElementById('cert-header');
+      if (header) {
+        header.style.borderBottomColor = config.corLinhaHeader || '#c7973f';
+        header.style.background = (config.corLinhaHeader || '#c7973f') + '11';
+      }
+      
+      document.getElementById('cert-title').style.color = config.corTitulo || '#c7973f';
+      document.getElementById('cert-criador').style.color = config.corCriador || '#23291f';
+      document.getElementById('cert-responsavel').style.color = config.corResponsavel || '#4a5347';
+      document.getElementById('cert-registros').style.color = config.corRegistros || '#4a5347';
+      document.getElementById('cert-contato').style.color = config.corContato || '#4a5347';
+
+      const footer = document.getElementById('cert-footer');
+      if (footer) {
+        footer.style.borderTopColor = config.corRodapeLinha || '#c7973f';
+        footer.style.background = config.corRodapeFundo || 'rgba(199,151,63,0.06)';
+      }
+      document.getElementById('cert-footer-text').style.color = config.corRodapeTexto || '#4a5347';
+
+      const classeAvatar = ave.sexo === 'M' ? '' : ' female';
+      const avatarBg = ave.sexo === 'M' 
+        ? `radial-gradient(circle at 35% 30%, ${config.corAvatarFundo || '#c7973f'}dd, ${config.corAvatarFundo || '#c7973f'} 60%, ${config.corAvatarFundo || '#c7973f'}aa)`
+        : `radial-gradient(circle at 35% 30%, ${config.corFemeaFundo || '#2e1a1a'}dd, ${config.corFemeaFundo || '#2e1a1a'} 60%, ${config.corFemeaFundo || '#2e1a1a'}aa)`;
+      
+      let linhasHtml = `
+        <div class="subject-line" style="color:${config.corSexo || '#4a5347'};"><b style="color:${config.corSexo || '#4a5347'};">Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
+        <div class="subject-line mono" style="color:${config.corAnilhaLabel || '#4a5347'};"><b style="color:${config.corAnilhaLabel || '#4a5347'};">Anilha:</b> ${ave.anilha}</div>
+        <div class="subject-line" style="color:${config.corEspecie || '#4a5347'};"><b style="color:${config.corEspecie || '#4a5347'};">Espécie:</b> ${ave.especie}</div>
+        <div class="subject-line" style="color:${config.corNasc || '#4a5347'};"><b style="color:${config.corNasc || '#4a5347'};">Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
+      `;
+      
+      if (ave.raca && ave.raca.trim() !== '') {
+        linhasHtml += `<div class="subject-line" style="color:${config.corRaca || '#4a5347'};">${ave.raca}</div>`;
+      }
+      
+      const painel = document.getElementById('cert-subject-panel');
+      painel.innerHTML = `
+        <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : '♀'}</div>
+        <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
+        ${linhasHtml}
+      `;
+
+      painel.style.background = (config.corRaizFundo || '#132621') + hexAlpha(config.corRaizOpacidade || 100);
+      painel.style.borderColor = config.corBordaRaiz || '#c7973f';
+      painel.style.color = config.corRaizTexto || '#e4c583';
+      painel.style.flex = `0 0 ${config.larguraRaiz || 86}px`;
+      painel.style.height = `${config.alturaRaiz || 180}px`;
+      painel.style.minHeight = `${config.alturaRaiz || 180}px`;
+
+      document.querySelectorAll('.cert-pill-anilha').forEach(el => {
+        el.style.color = (config.corAnilha || '#e4c583') + ' !important';
+      });
+
+      let htmlColunas = '';
+      for (let profundidade = 1; profundidade <= CERT_MAX_GEN; profundidade++) {
+        const caminhos = geracaoPaths(profundidade);
+        const configPill = { minPill: 10, maxPill: 32, minFont: 6, maxFont: 14, colWidth: 1 };
+        
+        htmlColunas += `
+          <div class="cert-col" 
+               data-depth="${profundidade}" 
+               data-count="${caminhos.length}" 
+               style="flex: ${configPill.colWidth} 1 0; min-width: 50px;">
+        `;
+        
+        caminhos.forEach(caminho => {
+          const nome = obterAncestral(caminho);
+          const anilha = obterAnilha(caminho);
+          const isIndefinido = !nome || nome === 'Indefinido';
+          const sexo = caminho.endsWith('pai') ? 'M' : 'F';
+          const classeWrap = profundidade <= 2 ? ' wrap' : '';
+          const classePilula = 'cert-pill' + classeWrap + (sexo === 'F' ? ' female' : '') + (isIndefinido ? ' indefinido' : '');
+          
+          if (isIndefinido) {
+            htmlColunas += `<div class="${classePilula}" title="Indefinido">Indefinido</div>`;
+          } else {
+            htmlColunas += `
+              <div class="cert-pill-wrapper">
+                <div class="${classePilula}" title="${nome}" style="width:100%;">${nome}</div>
+                ${anilha ? `<div class="cert-pill-anilha">${anilha}</div>` : ''}
+              </div>
+            `;
+          }
+        });
+        
+        htmlColunas += `</div>`;
+      }
+
+      document.getElementById('cert-columns').innerHTML = htmlColunas;
+
+      document.querySelectorAll('.cert-pill:not(.indefinido)').forEach(pilula => {
+        const isFemale = pilula.classList.contains('female');
+        if (isFemale) {
+          pilula.style.background = config.corFemeaFundo || '#2e1a1a';
+          pilula.style.color = config.corFemeaTexto || '#ece6d6';
+          pilula.style.borderColor = (config.corFemeaFundo || '#2e1a1a') + '66';
+          pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
+        } else {
+          pilula.style.background = config.corMachoFundo || '#1a2e28';
+          pilula.style.color = config.corMachoTexto || '#ece6d6';
+          pilula.style.borderColor = (config.corMachoFundo || '#1a2e28') + '66';
+          pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
+        }
+        pilula.style.border = `1px solid ${(config.corBordaNos || '#c7973f')}66`;
+        if (isFemale) {
+          pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
+        } else {
+          pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
+        }
+      });
+
+      setTimeout(() => ajustarPilulas(), 100);
+    }
+
+    function ajustarPilulas() {
+      const cols = document.querySelectorAll('#cert-columns .cert-col');
+      const container = document.getElementById('cert-columns');
+      if (!container || cols.length === 0) return;
+
+      const alturaDisponivel = container.clientHeight || 400;
+      
+      cols.forEach(col => {
+        const depth = parseInt(col.dataset.depth, 10);
+        const count = parseInt(col.dataset.count, 10);
+        if (!count) return;
+
+        const configs = {
+          1: { minPill: 18, maxPill: 32, minFont: 8, maxFont: 14 },
+          2: { minPill: 16, maxPill: 28, minFont: 7, maxFont: 12 },
+          3: { minPill: 14, maxPill: 24, minFont: 6, maxFont: 10 },
+          4: { minPill: 12, maxPill: 20, minFont: 5, maxFont: 8.5 },
+          5: { minPill: 10, maxPill: 17, minFont: 4.5, maxFont: 7.5 }
+        };
+        const config = configs[depth] || configs[5];
+
+        const espacamento = 2;
+        const alturaPilula = Math.max(
+          config.minPill,
+          Math.min(config.maxPill, (alturaDisponivel / count) - espacamento)
+        );
+
+        const proporcao = (alturaPilula - config.minPill) / (config.maxPill - config.minPill);
+        const tamanhoFonte = Math.max(
+          config.minFont,
+          Math.min(config.maxFont, config.minFont + (config.maxFont - config.minFont) * proporcao)
+        );
+
+        col.querySelectorAll('.cert-pill').forEach(pilula => {
+          pilula.style.height = alturaPilula + 'px';
+          pilula.style.fontSize = tamanhoFonte + 'px';
+          pilula.style.lineHeight = alturaPilula + 'px';
+          pilula.style.padding = '0 6px';
+        });
+      });
+    }
+
+    carregarLogo();
+    carregarCertificado();
+
+    let timeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(timeout);
+      timeout = setTimeout(ajustarPilulas, 200);
+    });
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

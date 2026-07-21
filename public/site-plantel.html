@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Plantel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+  --sage-soft: #8fc3a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav .logo .mark {
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-nav .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-nav .logo .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-nav .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.plantel-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  align-items: flex-end;
+}
+
+.plantel-filters .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+}
+
+.plantel-filters .filter-group label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+
+.plantel-filters .filter-group select {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239aa89e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  padding-right: 30px !important;
+  cursor: pointer !important;
+}
+
+.plantel-filters .filter-group select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.plantel-filters .btn-limpar {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+.plantel-filters .btn-limpar:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+
+.aves-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ave-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: .15s ease;
+}
+
+.ave-card:hover {
+  border-color: var(--brass-dim);
+}
+
+.ave-card .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.ave-card .header .nome {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.ave-card .header .sexo {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.sexo-macho {
+  background: rgba(70, 130, 200, 0.15);
+  color: #5a8ab0;
+}
+
+.sexo-femea {
+  background: rgba(200, 100, 130, 0.15);
+  color: #e2a898;
+}
+
+.sexo-indefinido {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+
+.ave-card .detalhes {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.ave-card .detalhes strong {
+  color: var(--text);
+}
+
+.ave-card .detalhes .anilha {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brass-soft);
+  font-size: 11px;
+}
+
+.ave-card .footer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ave-card .footer .btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+  text-decoration: none;
+}
+
+.ave-card .footer .btn:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+
+.ave-card .footer .btn-primary {
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass-dim);
+  color: var(--brass-soft);
+}
+
+.ave-card .footer .btn-primary:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.empty-plantel {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.empty-plantel .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .aves-grid {
+    grid-template-columns: 1fr;
+  }
+  .plantel-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .plantel-filters .filter-group {
+    min-width: unset;
+  }
+  .plantel-filters .btn-limpar {
+    margin-left: 0;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <a href="site-plantel.html" class="active">Plantel</a>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="plantel-filters">
+      <div class="filter-group">
+        <label>Espécie</label>
+        <select id="filtro-especie" onchange="aplicarFiltros()">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Sexo</label>
+        <select id="filtro-sexo" onchange="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="M">Machos</option>
+          <option value="F">Fêmeas</option>
+          <option value="Indefinido">Indefinidos</option>
+        </select>
+      </div>
+      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+    </div>
+
+    <div id="total-aves" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">0 aves</div>
+
+    <div class="aves-grid" id="aves-grid">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function getSiteAves() {
+      return DB.getAvesPublicas();
+    }
+
+    async function carregarFiltros() {
+      const avesSite = await getSiteAves();
+      const especies = [...new Set(avesSite.map(a => a.especie).filter(Boolean))];
+      
+      const selectEspecie = document.getElementById('filtro-especie');
+      selectEspecie.innerHTML = '<option value="">Todas</option>';
+      especies.sort().forEach(esp => {
+        selectEspecie.innerHTML += `<option value="${esp}">${esp}</option>`;
+      });
+      
+      const params = new URLSearchParams(window.location.search);
+      const especieParam = params.get('especie');
+      if (especieParam) {
+        selectEspecie.value = especieParam;
+      }
+    }
+
+    async function aplicarFiltros() {
+      const especie = document.getElementById('filtro-especie').value;
+      const sexo = document.getElementById('filtro-sexo').value;
+
+      let aves = await getSiteAves();
+      
+      if (especie) {
+        aves = aves.filter(a => a.especie === especie);
+      }
+      if (sexo) {
+        aves = aves.filter(a => a.sexo === sexo);
+      }
+      
+      aves.sort((a, b) => a.nome.localeCompare(b.nome));
+      
+      document.getElementById('total-aves').textContent = aves.length + ' aves';
+      
+      const grid = document.getElementById('aves-grid');
+      
+      if (aves.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-plantel">
+            <div class="icon">🐦</div>
+            <p>Nenhuma ave encontrada com os filtros selecionados.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      grid.innerHTML = aves.map(a => {
+        const sexoClass = a.sexo === 'M' ? 'sexo-macho' : a.sexo === 'F' ? 'sexo-femea' : 'sexo-indefinido';
+        const sexoLabel = a.sexo === 'M' ? '♂ Macho' : a.sexo === 'F' ? '♀ Fêmea' : '⚪ Indefinido';
+        
+        return `
+        <div class="ave-card">
+          <div class="header">
+            <span class="nome">${a.nome}</span>
+            <span class="sexo ${sexoClass}">${sexoLabel}</span>
+          </div>
+          <div class="detalhes">
+            <div><strong>Anilha:</strong> <span class="anilha">${a.anilha || '-'}</span></div>
+            <div><strong>Espécie:</strong> ${a.especie || '-'}</div>
+            ${a.raca ? `<div><strong>Raça:</strong> ${a.raca}</div>` : ''}
+            ${a.dataNasc ? `<div><strong>Nascimento:</strong> ${formatarData(a.dataNasc)}</div>` : ''}
+            ${a.pai ? `<div><strong>Pai:</strong> ${a.pai}</div>` : ''}
+            ${a.mae ? `<div><strong>Mãe:</strong> ${a.mae}</div>` : ''}
+            ${a.status ? `<div><strong>Status:</strong> ${a.status}</div>` : ''}
+          </div>
+          <div class="footer">
+            <a href="site-certificado.html?id=${a.id}" target="_blank" class="btn btn-primary">📄 Ver Certificado</a>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    function formatarData(data) {
+      if (!data) return '-';
+      const partes = data.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return data;
+    }
+
+    function limparFiltros() {
+      document.getElementById('filtro-especie').value = '';
+      document.getElementById('filtro-sexo').value = '';
+      aplicarFiltros();
+    }
+
+    carregarLogo();
+    carregarFiltros();
+    aplicarFiltros();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

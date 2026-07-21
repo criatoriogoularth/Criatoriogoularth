@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Reprodução</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.repro-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.repro-toolbar .filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.repro-toolbar .filters input,
+.repro-toolbar .filters select {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 12.5px !important;
+  outline: none !important;
+  min-width: 130px !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.repro-toolbar .filters select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c7973f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+}
+
+.repro-toolbar .filters select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.repro-toolbar .filters input:focus,
+.repro-toolbar .filters select:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.repro-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.repro-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: .15s ease;
+}
+
+.repro-card:hover {
+  border-color: var(--brass-dim);
+}
+
+.repro-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.repro-card .card-header .nome-femea {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.repro-card .card-header .status-badge {
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.ativo {
+  background: rgba(92, 154, 124, 0.2);
+  color: var(--sage-soft);
+}
+
+.status-badge.finalizado {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+
+.repro-card .card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  font-size: 12.5px;
+}
+
+.repro-card .card-body .label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.repro-card .card-body .value {
+  color: var(--text);
+}
+
+.repro-card .card-filhotes {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.repro-card .card-filhotes .titulo {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.repro-card .card-filhotes .filhote-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.repro-card .card-filhotes .filhote-item:last-child {
+  border-bottom: none;
+}
+
+.repro-card .card-filhotes .filhote-item .info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.repro-card .card-filhotes .filhote-item .anilha-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--brass-soft);
+  background: rgba(0,0,0,0.15);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.repro-card .card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.repro-card .card-actions .btn {
+  padding: 4px 14px;
+  font-size: 11px;
+}
+
+.modal-box.form-modal {
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-box .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-box .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.modal-box .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-box .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.modal-box .field label .req {
+  color: var(--rose);
+}
+
+.modal-box .field input,
+.modal-box .field select,
+.modal-box .field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: .15s !important;
+}
+
+.modal-box .field input:focus,
+.modal-box .field select:focus,
+.modal-box .field textarea:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.modal-box .field select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.modal-box .field textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+
+.modal-box .field .radio-group {
+  display: flex;
+  gap: 18px;
+  padding-top: 4px;
+}
+
+.modal-box .field .radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.modal-box .field .radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brass);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.ave-selector {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(0,0,0,0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+.ave-selector .ave-info {
+  flex: 1;
+}
+
+.ave-selector .ave-info .nome {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ave-selector .ave-info .anilha {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ave-selector .btn {
+  padding: 4px 12px;
+  font-size: 11px;
+}
+
+.campo-destaque {
+  border-left: 3px solid var(--brass) !important;
+  padding-left: 12px !important;
+  background: rgba(199,151,63,0.04) !important;
+}
+
+.previsao-nascimento {
+  background: rgba(92,154,124,0.08) !important;
+  border-left: 3px solid var(--sage-soft) !important;
+}
+
+/* ===== FILHOTES NA REPRODUÇÃO ===== */
+.filhotes-container {
+  background: rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.filhote-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.filhote-row:last-child {
+  margin-bottom: 0;
+}
+
+.filhote-row .campo-nome {
+  flex: 1;
+  min-width: 100px;
+}
+
+.filhote-row .campo-sexo {
+  min-width: 80px;
+}
+
+.filhote-row .campo-anilha {
+  flex: 1;
+  min-width: 120px;
+}
+
+.filhote-row .btn-remover-filhote {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+}
+
+.filhote-row .btn-remover-filhote:hover {
+  color: #e2988a;
+}
+
+.filhote-row select,
+.filhote-row input {
+  background: rgba(0,0,0,0.25) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 12px !important;
+  outline: none !important;
+  width: 100%;
+}
+
+.filhote-row select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.btn-add-filhote {
+  padding: 6px 16px;
+  font-size: 12px;
+  background: rgba(92, 154, 124, 0.15);
+  border: 1px solid rgba(92, 154, 124, 0.3);
+  color: var(--sage-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+}
+
+.btn-add-filhote:hover {
+  background: rgba(92, 154, 124, 0.25);
+}
+
+.filhotes-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* ===== PERÍODO DE INCUBAÇÃO ===== */
+.incubacao-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.incubacao-container select {
+  flex: 2;
+  min-width: 160px;
+}
+
+.incubacao-container input {
+  flex: 1;
+  min-width: 60px;
+  max-width: 80px;
+  text-align: center;
+}
+
+.incubacao-container .dias-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.incubacao-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.incubacao-info .info-item {
+  background: rgba(199,151,63,0.08);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .modal-box .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .repro-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .repro-toolbar .filters {
+    flex-direction: column;
+  }
+  .repro-toolbar .filters input,
+  .repro-toolbar .filters select {
+    width: 100%;
+    min-width: unset;
+  }
+  .repro-cards {
+    grid-template-columns: 1fr;
+  }
+  .repro-card .card-body {
+    grid-template-columns: 1fr;
+  }
+  .incubacao-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .incubacao-container input {
+    max-width: 100%;
+  }
+  .filhote-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filhote-row .btn-remover-filhote {
+    align-self: flex-end;
+  }
+  .modal-box.form-modal {
+    max-width: 95%;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.empty-state .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.empty-state p {
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-reproducao">
+
+      <div class="topbar">
+        <div>
+          <h1>Reprodução</h1>
+          <div class="lede">Gerencie os cruzamentos e reproduções do seu criatório.</div>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModalCadastro()">+ Nova Reprodução</button>
+      </div>
+
+      <div class="repro-toolbar">
+        <div class="filters">
+          <input type="text" id="busca-repro" placeholder="Pesquisar..." oninput="renderizarCards()">
+          <select id="filtro-status" onchange="renderizarCards()">
+            <option value="">Todos os status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Finalizado">Finalizado</option>
+          </select>
+        </div>
+        <span style="font-size:12px;color:var(--text-muted);" id="total-repro">0 registros</span>
+      </div>
+
+      <div class="repro-cards" id="repro-cards">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- ===== MODAL DE CADASTRO/EDIÇÃO ===== -->
+<div class="modal-overlay" id="modal-repro" onclick="if(event.target===this) fecharModalRepro()">
+  <div class="modal-box form-modal">
+    <div class="modal-head">
+      <div><span id="modal-title-repro">Nova Reprodução</span></div>
+      <button class="modal-close" onclick="fecharModalRepro()">✕</button>
+    </div>
+
+    <form id="form-repro" onsubmit="salvarReproducao(event)">
+      <input type="hidden" id="edit-id-repro" value="">
+
+      <div class="field-grid">
+        <div class="field">
+          <label>Status <span class="req">*</span></label>
+          <select id="f-status-repro" required>
+            <option value="">Selecione...</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Finalizado">Finalizado</option>
+          </select>
+        </div>
+
+        <div class="field field-full">
+          <label>Ave Fêmea <span class="req">*</span></label>
+          <div class="ave-selector" id="femea-selector">
+            <div class="ave-info">
+              <div class="nome" id="femea-nome">Nenhuma selecionada</div>
+              <div class="anilha" id="femea-anilha">-</div>
+            </div>
+            <button type="button" class="btn btn-ghost" onclick="selecionarAve('femea')">Selecionar</button>
+          </div>
+          <input type="hidden" id="f-femea-id" value="">
+        </div>
+
+        <div class="field field-full">
+          <label>Ave Macho</label>
+          <div class="ave-selector" id="macho-selector">
+            <div class="ave-info">
+              <div class="nome" id="macho-nome">Nenhuma selecionada</div>
+              <div class="anilha" id="macho-anilha">-</div>
+            </div>
+            <button type="button" class="btn btn-ghost" onclick="selecionarAve('macho')">Selecionar</button>
+          </div>
+          <input type="hidden" id="f-macho-id" value="">
+        </div>
+
+        <!-- CRUZAS -->
+        <div class="field campo-destaque">
+          <label>1ª Dia da Cruza <span class="req">*</span></label>
+          <input type="date" id="f-cruza1" required>
+        </div>
+
+        <div class="field">
+          <label>2ª Dia da Cruza</label>
+          <input type="date" id="f-cruza2">
+        </div>
+
+        <div class="field">
+          <label>3ª Dia da Cruza</label>
+          <input type="date" id="f-cruza3">
+        </div>
+
+        <div class="field">
+          <label>4ª Dia da Cruza</label>
+          <input type="date" id="f-cruza4">
+        </div>
+
+        <div class="field">
+          <label>5ª Dia da Cruza</label>
+          <input type="date" id="f-cruza5">
+        </div>
+
+        <!-- CHOCO E PREVISÃO -->
+        <div class="field campo-destaque">
+          <label>Início do Choco <span class="req">*</span></label>
+          <input type="date" id="f-inicio-choco" required>
+        </div>
+
+        <div class="field previsao-nascimento">
+          <label>Previsão de Nascimento</label>
+          
+          <div class="incubacao-container">
+            <select id="f-periodo-incubacao" onchange="atualizarPrevisaoNascimento()">
+              <option value="14">🐦 Canário: 14 dias</option>
+              <option value="17">🕊️ Pombo: 17 dias</option>
+              <option value="18">🦜 Calopsita: 18 dias</option>
+              <option value="19">🕊️ Pombo: 19 dias</option>
+              <option value="21">🐔 Galinha: 21 dias</option>
+              <option value="28">🦆 Pato: 28 dias</option>
+              <option value="28">🦃 Peru: 28 dias</option>
+              <option value="0">✏️ Personalizado</option>
+            </select>
+            <input type="number" id="f-dias-incubacao" min="1" max="120" value="14" onchange="atualizarPrevisaoNascimento()" oninput="atualizarPrevisaoNascimento()">
+            <span class="dias-label">dias</span>
+          </div>
+          
+          <div class="incubacao-info" id="incubacao-info">
+            <span class="info-item">🐦 Canário: 14 dias</span>
+            <span class="info-item">🕊️ Pombo: 17-19 dias</span>
+            <span class="info-item">🦜 Calopsita: 18-21 dias</span>
+            <span class="info-item">🐔 Galinha: 21 dias</span>
+            <span class="info-item">🦆 Pato: 28 dias</span>
+            <span class="info-item">🦃 Peru: 28 dias</span>
+          </div>
+          
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">
+            📅 Data calculada: <span id="data-previsao-display">-</span>
+          </div>
+          
+          <input type="date" id="f-previsao-nascimento" readonly style="background:rgba(92,154,124,0.15) !important;cursor:default;margin-top:4px;">
+        </div>
+
+        <!-- OVOS -->
+        <div class="field">
+          <label>Ovos Férteis</label>
+          <input type="number" id="f-ovos-ferteis" value="0" min="0">
+        </div>
+
+        <div class="field">
+          <label>Ovos Indefinidos</label>
+          <input type="number" id="f-ovos-indefinidos" value="0" min="0">
+        </div>
+
+        <div class="field">
+          <label>Ovos Inférteis</label>
+          <input type="number" id="f-ovos-inferteis" value="0" min="0">
+        </div>
+
+        <div class="field">
+          <label>Total de Ovos</label>
+          <input type="number" id="f-total-ovos" value="0" min="0" readonly style="font-weight:700;color:var(--brass-soft) !important;">
+        </div>
+
+        <!-- ===== FILHOTES ===== -->
+        <div class="field field-full">
+          <label>🐣 Filhotes</label>
+          <div class="filhotes-container" id="filhotes-container">
+            <div class="filhotes-empty" id="filhotes-empty">Nenhum filhote adicionado</div>
+            <div id="filhotes-list"></div>
+          </div>
+          <div style="margin-top:8px;">
+            <button type="button" class="btn-add-filhote" onclick="adicionarLinhaFilhote()">+ Adicionar Filhote</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Finalizada</label>
+          <div class="radio-group">
+            <label><input type="radio" name="finalizada" value="Sim"> Sim</label>
+            <label><input type="radio" name="finalizada" value="Não" checked> Não</label>
+          </div>
+        </div>
+
+        <div class="field field-full">
+          <label>Observação</label>
+          <textarea id="f-observacao-repro" placeholder="Observações sobre a reprodução..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="fecharModalRepro()">Voltar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL DE SELEÇÃO DE AVE ===== -->
+<div class="modal-overlay" id="modal-select-ave" onclick="if(event.target===this) fecharModalSelectAve()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-head">
+      <div><span id="modal-select-title">Selecione uma Ave</span></div>
+      <button class="modal-close" onclick="fecharModalSelectAve()">✕</button>
+    </div>
+    <input type="text" class="modal-search" id="modal-select-search" placeholder="Pesquisar por nome ou anilha..." oninput="renderModalSelectAve()">
+    <div class="modal-list" id="modal-select-list"></div>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('reproducao');</script>
+<script>
+/* ============================================================
+   DADOS - REPRODUÇÕES
+   ============================================================ */
+
+let reproducoes = [];
+let modoEdicaoRepro = false;
+let selectAveTarget = null;
+
+// ============================================================
+// FUNÇÕES DE RENDERIZAÇÃO
+// ============================================================
+
+async function renderizarCards() {
+  const busca = document.getElementById('busca-repro').value.toLowerCase();
+  const filtroStatus = document.getElementById('filtro-status').value;
+
+  reproducoes = await DB.getAll(DB.TABLES.REPRODUCOES);
+
+  let lista = reproducoes.filter(item => {
+    const matchBusca = item.femeaNome.toLowerCase().includes(busca) || 
+                       item.femeaAnilha.toLowerCase().includes(busca) ||
+                       (item.machoNome && item.machoNome.toLowerCase().includes(busca));
+    const matchStatus = filtroStatus ? item.status === filtroStatus : true;
+    return matchBusca && matchStatus;
+  });
+
+  document.getElementById('total-repro').textContent = lista.length + ' registros';
+
+  const container = document.getElementById('repro-cards');
+  if (lista.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🥚</div>
+        <h3>Nenhuma reprodução cadastrada</h3>
+        <p>Clique em "+ Nova Reprodução" para adicionar um cruzamento.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = lista.map(item => {
+    let filhotesHtml = '';
+    if (item.filhotes && item.filhotes.length > 0) {
+      filhotesHtml = item.filhotes.map(f => `
+        <div class="filhote-item">
+          <div class="info">
+            <span>${f.nome || 'Sem nome'}</span>
+            <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? '#5a8ab0' : '#e2a898'};">
+              ${f.sexo === 'M' ? '♂' : '♀'}
+            </span>
+          </div>
+          <span class="anilha-tag">${f.anilha || 'Sem anilha'}</span>
+        </div>
+      `).join('');
+    } else {
+      filhotesHtml = '<div style="font-size:11px;color:var(--text-muted);font-style:italic;">Nenhum filhote registrado</div>';
+    }
+
+    return `
+    <div class="repro-card">
+      <div class="card-header">
+        <div>
+          <div class="nome-femea">${item.femeaNome}</div>
+          <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">${item.femeaAnilha}</div>
+        </div>
+        <span class="status-badge ${item.status === 'Ativo' ? 'ativo' : 'finalizado'}">${item.status}</span>
+      </div>
+      <div class="card-body">
+        ${item.machoNome ? `<span class="label">Macho:</span><span class="value">${item.machoNome}</span>` : ''}
+        <span class="label">Início Choco:</span>
+        <span class="value">${formatarData(item.inicioChoco)}</span>
+        <span class="label">Previsão Nasc.:</span>
+        <span class="value">${formatarData(item.previsaoNascimento) || '-'}</span>
+        <span class="label">Total Ovos:</span>
+        <span class="value"><strong>${item.totalOvos}</strong> (${item.ovosFerteis || 0} férteis)</span>
+        <span class="label">Finalizada:</span>
+        <span class="value">${item.finalizada === 'Sim' ? '✅ Sim' : '⏳ Não'}</span>
+      </div>
+      <div class="card-filhotes">
+        <div class="titulo">🐣 Filhotes (${item.filhotes ? item.filhotes.length : 0})</div>
+        ${filhotesHtml}
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-ghost" onclick="editarReproducao(${item.id})">✎ Editar</button>
+        <button class="btn btn-danger" onclick="excluirReproducao(${item.id})">✕ Excluir</button>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = data.split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
+// ============================================================
+// PREVISÃO DE NASCIMENTO
+// ============================================================
+
+function atualizarPrevisaoNascimento() {
+  const inicioChoco = document.getElementById('f-inicio-choco').value;
+  const selectPeriodo = document.getElementById('f-periodo-incubacao');
+  const inputDias = document.getElementById('f-dias-incubacao');
+  const previsaoInput = document.getElementById('f-previsao-nascimento');
+  const displayData = document.getElementById('data-previsao-display');
+  
+  let dias = 0;
+  
+  if (selectPeriodo.value === '0') {
+    dias = parseInt(inputDias.value) || 0;
+    inputDias.disabled = false;
+    inputDias.style.opacity = '1';
+  } else {
+    dias = parseInt(selectPeriodo.value) || 14;
+    inputDias.value = dias;
+    inputDias.disabled = true;
+    inputDias.style.opacity = '0.6';
+  }
+  
+  if (inicioChoco && dias > 0) {
+    const data = new Date(inicioChoco);
+    data.setDate(data.getDate() + dias);
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    const dataFormatada = `${ano}-${mes}-${dia}`;
+    previsaoInput.value = dataFormatada;
+    const diaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][data.getDay()];
+    displayData.textContent = `${diaSemana}, ${dia}/${mes}/${ano}`;
+  } else {
+    previsaoInput.value = '';
+    displayData.textContent = '-';
+  }
+}
+
+function configurarPeriodoIncubacao() {
+  const select = document.getElementById('f-periodo-incubacao');
+  const inputDias = document.getElementById('f-dias-incubacao');
+  
+  if (select.value === '0') {
+    inputDias.disabled = false;
+    inputDias.style.opacity = '1';
+  } else {
+    inputDias.value = select.value;
+    inputDias.disabled = true;
+    inputDias.style.opacity = '0.6';
+  }
+  atualizarPrevisaoNascimento();
+}
+
+// ============================================================
+// MODAL DE REPRODUÇÃO
+// ============================================================
+
+async function abrirModalCadastro() {
+  modoEdicaoRepro = false;
+  document.getElementById('modal-title-repro').textContent = 'Nova Reprodução';
+  document.getElementById('edit-id-repro').value = '';
+  document.getElementById('f-status-repro').value = 'Ativo';
+  document.getElementById('f-femea-id').value = '';
+  document.getElementById('femea-nome').textContent = 'Nenhuma selecionada';
+  document.getElementById('femea-anilha').textContent = '-';
+  document.getElementById('f-macho-id').value = '';
+  document.getElementById('macho-nome').textContent = 'Nenhuma selecionada';
+  document.getElementById('macho-anilha').textContent = '-';
+  document.getElementById('f-cruza1').value = '';
+  document.getElementById('f-cruza2').value = '';
+  document.getElementById('f-cruza3').value = '';
+  document.getElementById('f-cruza4').value = '';
+  document.getElementById('f-cruza5').value = '';
+  document.getElementById('f-inicio-choco').value = '';
+  document.getElementById('f-previsao-nascimento').value = '';
+  document.getElementById('data-previsao-display').textContent = '-';
+  document.getElementById('f-periodo-incubacao').value = '14';
+  document.getElementById('f-dias-incubacao').value = '14';
+  document.getElementById('f-dias-incubacao').disabled = true;
+  document.getElementById('f-dias-incubacao').style.opacity = '0.6';
+  document.getElementById('f-ovos-ferteis').value = 0;
+  document.getElementById('f-ovos-indefinidos').value = 0;
+  document.getElementById('f-ovos-inferteis').value = 0;
+  document.getElementById('f-total-ovos').value = 0;
+  document.querySelector('input[name="finalizada"][value="Não"]').checked = true;
+  document.getElementById('f-observacao-repro').value = '';
+  
+  document.getElementById('filhotes-list').innerHTML = '';
+  document.getElementById('filhotes-empty').style.display = 'block';
+  document.getElementById('filhotes-empty').textContent = 'Nenhum filhote adicionado';
+  
+  adicionarLinhaFilhote();
+  
+  document.getElementById('modal-repro').classList.add('open');
+}
+
+async function editarReproducao(id) {
+  modoEdicaoRepro = true;
+  const item = await DB.getById(DB.TABLES.REPRODUCOES, id);
+  if (!item) return;
+
+  document.getElementById('modal-title-repro').textContent = 'Editar Reprodução';
+  document.getElementById('edit-id-repro').value = id;
+  document.getElementById('f-status-repro').value = item.status;
+  
+  document.getElementById('f-femea-id').value = item.femeaId;
+  document.getElementById('femea-nome').textContent = item.femeaNome;
+  document.getElementById('femea-anilha').textContent = item.femeaAnilha;
+  
+  if (item.machoId) {
+    document.getElementById('f-macho-id').value = item.machoId;
+    document.getElementById('macho-nome').textContent = item.machoNome || '';
+    document.getElementById('macho-anilha').textContent = item.machoAnilha || '';
+  }
+  
+  document.getElementById('f-cruza1').value = item.cruza1 || '';
+  document.getElementById('f-cruza2').value = item.cruza2 || '';
+  document.getElementById('f-cruza3').value = item.cruza3 || '';
+  document.getElementById('f-cruza4').value = item.cruza4 || '';
+  document.getElementById('f-cruza5').value = item.cruza5 || '';
+  document.getElementById('f-inicio-choco').value = item.inicioChoco || '';
+  document.getElementById('f-previsao-nascimento').value = item.previsaoNascimento || '';
+  
+  const dias = item.diasIncubacao || 14;
+  document.getElementById('f-dias-incubacao').value = dias;
+  const select = document.getElementById('f-periodo-incubacao');
+  let encontrou = false;
+  for (let i = 0; i < select.options.length; i++) {
+    if (parseInt(select.options[i].value) === dias) {
+      select.value = dias;
+      encontrou = true;
+      break;
+    }
+  }
+  if (!encontrou) {
+    select.value = '0';
+    document.getElementById('f-dias-incubacao').disabled = false;
+    document.getElementById('f-dias-incubacao').style.opacity = '1';
+  } else {
+    document.getElementById('f-dias-incubacao').disabled = true;
+    document.getElementById('f-dias-incubacao').style.opacity = '0.6';
+  }
+  
+  document.getElementById('f-ovos-ferteis').value = item.ovosFerteis || 0;
+  document.getElementById('f-ovos-indefinidos').value = item.ovosIndefinidos || 0;
+  document.getElementById('f-ovos-inferteis').value = item.ovosInferteis || 0;
+  document.getElementById('f-total-ovos').value = item.totalOvos || 0;
+  document.querySelector(`input[name="finalizada"][value="${item.finalizada}"]`).checked = true;
+  document.getElementById('f-observacao-repro').value = item.observacao || '';
+  
+  document.getElementById('filhotes-list').innerHTML = '';
+  if (item.filhotes && item.filhotes.length > 0) {
+    document.getElementById('filhotes-empty').style.display = 'none';
+    for (let index = 0; index < item.filhotes.length; index++) {
+      await adicionarLinhaFilhote(item.filhotes[index], index);
+    }
+  } else {
+    document.getElementById('filhotes-empty').style.display = 'block';
+    document.getElementById('filhotes-empty').textContent = 'Nenhum filhote adicionado';
+    await adicionarLinhaFilhote();
+  }
+  
+  document.getElementById('modal-repro').classList.add('open');
+  
+  if (item.inicioChoco) {
+    atualizarPrevisaoNascimento();
+  }
+}
+
+function fecharModalRepro() {
+  document.getElementById('modal-repro').classList.remove('open');
+}
+
+// ============================================================
+// FILHOTES
+// ============================================================
+
+let filhoteCounter = 0;
+
+async function obterAnilhasDisponiveis() {
+  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const anilhasUsadas = new Set(aves.map(a => a.anilha));
+  
+  return anilhas.filter(a => 
+    a.disponivel === 'Sim' && 
+    a.ativo === 'Sim' && 
+    !anilhasUsadas.has(a.numero)
+  );
+}
+
+async function adicionarLinhaFilhote(dados, index) {
+  const container = document.getElementById('filhotes-list');
+  const empty = document.getElementById('filhotes-empty');
+  
+  if (empty) empty.style.display = 'none';
+  
+  const isNovo = !dados;
+  const rowIndex = isNovo ? filhoteCounter++ : index;
+  
+  const anilhasDisponiveis = await obterAnilhasDisponiveis();
+  
+  let anilhasOptions = '<option value="">Selecionar anilha...</option>';
+  anilhasDisponiveis.forEach(a => {
+    const selected = dados && dados.anilha === a.numero ? 'selected' : '';
+    anilhasOptions += `<option value="${a.numero}" ${selected}>${a.numero} (${a.cor})</option>`;
+  });
+  
+  const nome = dados ? dados.nome || '' : '';
+  const sexo = dados ? dados.sexo || 'Indefinido' : 'Indefinido';
+  const anilha = dados ? dados.anilha || '' : '';
+  
+  const row = document.createElement('div');
+  row.className = 'filhote-row';
+  row.dataset.index = rowIndex;
+  row.innerHTML = `
+    <div class="campo-nome">
+      <input type="text" class="filhote-nome" placeholder="Nome do filhote" value="${nome}">
+    </div>
+    <div class="campo-sexo">
+      <select class="filhote-sexo">
+        <option value="Indefinido" ${sexo === 'Indefinido' ? 'selected' : ''}>Indefinido</option>
+        <option value="M" ${sexo === 'M' ? 'selected' : ''}>♂ Macho</option>
+        <option value="F" ${sexo === 'F' ? 'selected' : ''}>♀ Fêmea</option>
+      </select>
+    </div>
+    <div class="campo-anilha">
+      <select class="filhote-anilha">
+        ${anilhasOptions}
+      </select>
+    </div>
+    <button type="button" class="btn-remover-filhote" onclick="removerLinhaFilhote(this)" title="Remover filhote">✕</button>
+  `;
+  
+  container.appendChild(row);
+}
+
+function removerLinhaFilhote(btn) {
+  const row = btn.closest('.filhote-row');
+  if (row) {
+    row.remove();
+    const container = document.getElementById('filhotes-list');
+    const empty = document.getElementById('filhotes-empty');
+    if (container.children.length === 0) {
+      empty.style.display = 'block';
+      empty.textContent = 'Nenhum filhote adicionado';
+    }
+  }
+}
+
+function coletarFilhotes() {
+  const rows = document.querySelectorAll('#filhotes-list .filhote-row');
+  const filhotes = [];
+  
+  rows.forEach(row => {
+    const nome = row.querySelector('.filhote-nome').value.trim();
+    const sexo = row.querySelector('.filhote-sexo').value;
+    const anilha = row.querySelector('.filhote-anilha').value;
+    
+    if (nome || anilha) {
+      filhotes.push({
+        nome: nome || 'Filhote',
+        sexo: sexo,
+        anilha: anilha
+      });
+    }
+  });
+  
+  return filhotes;
+}
+
+// ============================================================
+// SELEÇÃO DE AVE
+// ============================================================
+
+function selecionarAve(target) {
+  selectAveTarget = target;
+  const sexo = target === 'femea' ? 'F' : 'M';
+  document.getElementById('modal-select-title').textContent = `Selecionar ${target === 'femea' ? 'Fêmea' : 'Macho'}`;
+  document.getElementById('modal-select-search').value = '';
+  document.getElementById('modal-select-ave').classList.add('open');
+  renderModalSelectAve(sexo);
+}
+
+function fecharModalSelectAve() {
+  document.getElementById('modal-select-ave').classList.remove('open');
+}
+
+async function renderModalSelectAve(sexoFiltro) {
+  const busca = document.getElementById('modal-select-search').value.toLowerCase();
+  const sexo = sexoFiltro || (selectAveTarget === 'femea' ? 'F' : 'M');
+  
+  const avesDB = await DB.getAll(DB.TABLES.AVES);
+  let lista = avesDB.filter(a => a.sexo === sexo);
+  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  
+  const container = document.getElementById('modal-select-list');
+  if (lista.length === 0) {
+    container.innerHTML = '<div class="empty-note">Nenhuma ave encontrada.</div>';
+    return;
+  }
+  
+  container.innerHTML = lista.map(a => `
+    <div class="modal-item">
+      <div>
+        <div class="mi-name">${a.nome} ${a.sexo === 'F' ? '♀' : '♂'}</div>
+        <div class="mi-band mono">${a.anilha} · ${a.especie}</div>
+      </div>
+      <button class="btn btn-primary" style="padding:6px 14px;" onclick="selecionarAveConfirm(${a.id}, '${a.nome}', '${a.anilha}')">Selecionar</button>
+    </div>
+  `).join('');
+}
+
+function selecionarAveConfirm(id, nome, anilha) {
+  if (selectAveTarget === 'femea') {
+    document.getElementById('f-femea-id').value = id;
+    document.getElementById('femea-nome').textContent = nome;
+    document.getElementById('femea-anilha').textContent = anilha;
+  } else {
+    document.getElementById('f-macho-id').value = id;
+    document.getElementById('macho-nome').textContent = nome;
+    document.getElementById('macho-anilha').textContent = anilha;
+  }
+  fecharModalSelectAve();
+}
+
+// ============================================================
+// FUNÇÃO PARA HERDAR ANCESTRAIS
+// ============================================================
+
+async function herdarAncestrais(aveId) {
+  const ave = await DB.getById(DB.TABLES.AVES, aveId);
+  if (!ave) return {};
+  
+  // Buscar todos os ancestrais possíveis
+  const ancestrais = {
+    pai: ave.pai || '',
+    anilhaPai: ave.anilhaPai || '',
+    mae: ave.mae || '',
+    anilhaMae: ave.anilhaMae || '',
+    avoPaterno: ave.avoPaterno || '',
+    avoPaterna: ave.avoPaterna || '',
+    avoMaterno: ave.avoMaterno || '',
+    avoMaterna: ave.avoMaterna || ''
+  };
+  
+  // Tentar buscar avós completos se o pai existir
+  if (ave.pai) {
+    const paiCompleto = await DB.getAvePorNome(ave.pai);
+    if (paiCompleto) {
+      if (paiCompleto.pai && paiCompleto.pai !== paiCompleto.nome) {
+        ancestrais.avoPaterno = paiCompleto.pai;
+        ancestrais.anilhaAvoPaterno = paiCompleto.anilhaPai || '';
+      }
+      if (paiCompleto.mae && paiCompleto.mae !== paiCompleto.nome) {
+        ancestrais.avoPaterna = paiCompleto.mae;
+        ancestrais.anilhaAvoPaterna = paiCompleto.anilhaMae || '';
+      }
+    }
+  }
+  
+  // Tentar buscar avós completos se a mãe existir
+  if (ave.mae) {
+    const maeCompleta = await DB.getAvePorNome(ave.mae);
+    if (maeCompleta) {
+      if (maeCompleta.pai && maeCompleta.pai !== maeCompleta.nome) {
+        ancestrais.avoMaterno = maeCompleta.pai;
+        ancestrais.anilhaAvoMaterno = maeCompleta.anilhaPai || '';
+      }
+      if (maeCompleta.mae && maeCompleta.mae !== maeCompleta.nome) {
+        ancestrais.avoMaterna = maeCompleta.mae;
+        ancestrais.anilhaAvoMaterna = maeCompleta.anilhaMae || '';
+      }
+    }
+  }
+  
+  return ancestrais;
+}
+
+// ============================================================
+// CRUD - SALVAR REPRODUÇÃO
+// ============================================================
+
+async function salvarReproducao(event) {
+  event.preventDefault();
+
+  const filhotes = coletarFilhotes();
+  const finalizada = document.querySelector('input[name="finalizada"]:checked').value;
+  const status = document.getElementById('f-status-repro').value;
+
+  const dados = {
+    status: status,
+    femeaId: parseInt(document.getElementById('f-femea-id').value),
+    femeaNome: document.getElementById('femea-nome').textContent,
+    femeaAnilha: document.getElementById('femea-anilha').textContent,
+    machoId: document.getElementById('f-macho-id').value ? parseInt(document.getElementById('f-macho-id').value) : null,
+    machoNome: document.getElementById('macho-nome').textContent !== 'Nenhuma selecionada' ? document.getElementById('macho-nome').textContent : '',
+    machoAnilha: document.getElementById('macho-anilha').textContent !== '-' ? document.getElementById('macho-anilha').textContent : '',
+    cruza1: document.getElementById('f-cruza1').value,
+    cruza2: document.getElementById('f-cruza2').value,
+    cruza3: document.getElementById('f-cruza3').value,
+    cruza4: document.getElementById('f-cruza4').value,
+    cruza5: document.getElementById('f-cruza5').value,
+    inicioChoco: document.getElementById('f-inicio-choco').value,
+    previsaoNascimento: document.getElementById('f-previsao-nascimento').value,
+    diasIncubacao: parseInt(document.getElementById('f-dias-incubacao').value) || 14,
+    ovosFerteis: parseInt(document.getElementById('f-ovos-ferteis').value) || 0,
+    ovosIndefinidos: parseInt(document.getElementById('f-ovos-indefinidos').value) || 0,
+    ovosInferteis: parseInt(document.getElementById('f-ovos-inferteis').value) || 0,
+    totalOvos: parseInt(document.getElementById('f-total-ovos').value) || 0,
+    finalizada: finalizada,
+    observacao: document.getElementById('f-observacao-repro').value.trim(),
+    filhotes: filhotes
+  };
+
+  if (!dados.status || !dados.femeaId || !dados.cruza1 || !dados.inicioChoco) {
+    alert('Preencha os campos obrigatórios: Status, Fêmea, 1ª Dia da Cruza e Início do Choco.');
+    return;
+  }
+
+  const editId = document.getElementById('edit-id-repro').value;
+
+  // Se finalizada, cria os filhotes
+  if (finalizada === 'Sim' && filhotes.length > 0) {
+    if (!confirm(`🐣 ${filhotes.length} filhote(s) serão criados no plantel com status "Filhote". Continuar?`)) {
+      return;
+    }
+    
+    const avesExistentes = await DB.getAll(DB.TABLES.AVES);
+    const anilhasExistentes = new Set(avesExistentes.map(a => a.anilha));
+    const anilhasDuplicadas = filhotes.filter(f => f.anilha && anilhasExistentes.has(f.anilha));
+    
+    if (anilhasDuplicadas.length > 0) {
+      const msg = anilhasDuplicadas.map(f => `• ${f.nome}: ${f.anilha}`).join('\n');
+      if (!confirm(`⚠️ As seguintes anilhas já estão em uso:\n${msg}\n\nDeseja continuar mesmo assim?`)) {
+        return;
+      }
+    }
+  }
+
+  // Salvar reprodução
+  let reproSalva;
+  if (editId) {
+    await DB.update(DB.TABLES.REPRODUCOES, parseInt(editId), dados);
+    reproSalva = await DB.getById(DB.TABLES.REPRODUCOES, parseInt(editId));
+  } else {
+    reproSalva = await DB.add(DB.TABLES.REPRODUCOES, dados);
+  }
+
+  // Se finalizada, criar os filhotes com HERANÇA COMPLETA
+  if (finalizada === 'Sim' && filhotes.length > 0) {
+    const especieFemea = await obterEspecieAve(dados.femeaId);
+    const filhotesCriados = [];
+    
+    // Buscar ancestrais completos do pai e da mãe
+    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId) : {};
+    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId) : {};
+    
+    for (const f of filhotes) {
+      if (f.anilha) {
+        const anilhaObj = await DB.getAnilhaPorNumero(f.anilha);
+        if (anilhaObj) {
+          await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
+        }
+      }
+      
+      // Montar árvore genealógica COMPLETA
+      const novaAve = {
+        nome: f.nome || 'Filhote',
+        anilha: f.anilha || '',
+        sexo: f.sexo || 'Indefinido',
+        especie: especieFemea || 'Não identificada',
+        dataNasc: dados.previsaoNascimento || dados.inicioChoco,
+        situacao: 'Filhote',
+        filhote: true,
+        // Pai e Mãe (diretos)
+        pai: dados.machoNome || '',
+        anilhaPai: dados.machoAnilha || '',
+        mae: dados.femeaNome || '',
+        anilhaMae: dados.femeaAnilha || '',
+        // Avós paternos (herdados do pai)
+        avoPaterno: ancestraisPai.pai || '',
+        anilhaAvoPaterno: ancestraisPai.anilhaPai || '',
+        avoPaterna: ancestraisPai.mae || '',
+        anilhaAvoPaterna: ancestraisPai.anilhaMae || '',
+        // Avós maternos (herdados da mãe)
+        avoMaterno: ancestraisMae.pai || '',
+        anilhaAvoMaterno: ancestraisMae.anilhaPai || '',
+        avoMaterna: ancestraisMae.mae || '',
+        anilhaAvoMaterna: ancestraisMae.anilhaMae || '',
+        // Bisavós - tentar buscar mais profundamente
+        bisavoPaterno: ancestraisPai.avoPaterno || '',
+        bisavoPaterna: ancestraisPai.avoPaterna || '',
+        bisavoMaterno: ancestraisMae.avoMaterno || '',
+        bisavoMaterna: ancestraisMae.avoMaterna || '',
+        // Outros campos
+        manejo: 'Mantenedor',
+        historico: [{
+          motivo: 'Nascimento',
+          descricao: `Filhote nascido da reprodução de ${dados.femeaNome}${dados.machoNome ? ' com ' + dados.machoNome : ''}`,
+          data: dados.previsaoNascimento || dados.inicioChoco,
+          detalhes: `Reprodução ID: ${reproSalva.id}`
+        }]
+      };
+      
+      const aveCriada = await DB.add(DB.TABLES.AVES, novaAve);
+      filhotesCriados.push(aveCriada);
+    }
+    
+    if (filhotesCriados.length > 0) {
+      const reproAtualizada = await DB.getById(DB.TABLES.REPRODUCOES, reproSalva.id);
+      if (reproAtualizada) {
+        const filhotesComIds = filhotesCriados.map((ave, index) => ({
+          ...filhotes[index],
+          id: ave.id
+        }));
+        await DB.update(DB.TABLES.REPRODUCOES, reproSalva.id, { filhotesCriados: filhotesComIds });
+      }
+    }
+    
+    alert(`✅ ${filhotesCriados.length} filhote(s) criados com sucesso!\n\n🌳 Árvore genealógica herdada dos pais.`);
+  }
+
+  fecharModalRepro();
+  renderizarCards();
+}
+
+async function obterEspecieAve(id) {
+  const ave = await DB.getById(DB.TABLES.AVES, id);
+  return ave ? ave.especie : 'Não identificada';
+}
+
+async function excluirReproducao(id) {
+  if (!confirm('Tem certeza que deseja excluir esta reprodução?')) return;
+  await DB.delete(DB.TABLES.REPRODUCOES, id);
+  renderizarCards();
+}
+
+// ============================================================
+// ATUALIZAR TOTAL DE OVOS
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  const camposOvos = ['f-ovos-ferteis', 'f-ovos-indefinidos', 'f-ovos-inferteis'];
+  camposOvos.forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+      const fert = parseInt(document.getElementById('f-ovos-ferteis').value) || 0;
+      const indef = parseInt(document.getElementById('f-ovos-indefinidos').value) || 0;
+      const infer = parseInt(document.getElementById('f-ovos-inferteis').value) || 0;
+      document.getElementById('f-total-ovos').value = fert + indef + infer;
+    });
+  });
+
+  document.getElementById('f-inicio-choco').addEventListener('change', function() {
+    atualizarPrevisaoNascimento();
+  });
+  
+  document.getElementById('f-periodo-incubacao').addEventListener('change', function() {
+    configurarPeriodoIncubacao();
+  });
+  
+  document.getElementById('f-dias-incubacao').addEventListener('change', function() {
+    if (document.getElementById('f-periodo-incubacao').value === '0') {
+      atualizarPrevisaoNascimento();
+    }
+  });
+  
+  document.getElementById('f-dias-incubacao').addEventListener('input', function() {
+    if (document.getElementById('f-periodo-incubacao').value === '0') {
+      atualizarPrevisaoNascimento();
+    }
+  });
+});
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+renderizarCards();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    fecharModalRepro();
+    fecharModalSelectAve();
+  }
+});
+</script>
+</body>
+</html>

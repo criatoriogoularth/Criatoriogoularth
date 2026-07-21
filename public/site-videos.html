@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Vídeos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav .logo .mark {
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-nav .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-nav .logo .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-nav .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 20px;
+  padding-bottom: 0;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: .15s ease;
+  margin-bottom: -2px;
+}
+
+.tabs button:hover {
+  color: var(--text);
+}
+
+.tabs button.active {
+  color: var(--brass-soft);
+  border-bottom-color: var(--brass);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.video-item {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: .15s ease;
+}
+
+.video-item:hover {
+  border-color: var(--brass-dim);
+  transform: translateY(-3px);
+}
+
+.video-item .video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+
+.video-item .video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.video-item .info {
+  padding: 10px 14px;
+}
+
+.video-item .info .titulo {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.video-item .info .descricao {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.video-item .info .categoria {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(199,151,63,0.12);
+  color: var(--brass-soft);
+  margin-top: 4px;
+}
+
+.empty-videos {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.empty-videos .icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .videos-grid {
+    grid-template-columns: 1fr;
+  }
+  .tabs button {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <a href="site-plantel.html">Plantel</a>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html" class="active">Vídeos</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="subtitle">Vídeos do criatório no YouTube</div>
+
+    <div class="tabs" id="videos-tabs">
+      <button class="active" data-tab="videos-criacao" onclick="switchTab('videos-criacao', this)">🎬 Criação</button>
+      <button data-tab="videos-torneios" onclick="switchTab('videos-torneios', this)">🏆 Torneios</button>
+    </div>
+
+    <div class="tab-content active" id="videos-criacao">
+      <div id="videos-criacao-grid" class="videos-grid"></div>
+    </div>
+
+    <div class="tab-content" id="videos-torneios">
+      <div id="videos-torneios-grid" class="videos-grid"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      return match ? match[1] : null;
+    }
+
+    async function getVideos() {
+      const videos = await DB.getConfig('site_videos');
+      if (videos && videos.length > 0) return videos;
+
+      const conteudo = await DB.getConfig('site_conteudo');
+      if (conteudo && conteudo.videos && conteudo.videos.length > 0) return conteudo.videos;
+
+      return [];
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('#videos-tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    async function renderizarVideos() {
+      const videos = await getVideos();
+
+      const criacao = videos.filter(v => v.categoria === 'Criação' || !v.categoria);
+      const torneios = videos.filter(v => v.categoria === 'Torneios');
+      
+      renderizarGrid('videos-criacao-grid', criacao);
+      renderizarGrid('videos-torneios-grid', torneios);
+    }
+
+    function renderizarGrid(gridId, videos) {
+      const grid = document.getElementById(gridId);
+      
+      if (videos.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-videos">
+            <div class="icon">🎬</div>
+            <p>Nenhum vídeo nesta categoria.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      grid.innerHTML = videos.map(video => {
+        const videoId = extractYouTubeId(video.url);
+        const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+        
+        return `
+          <div class="video-item">
+            <div class="video-wrapper">
+              ${embedUrl ? `<iframe src="${embedUrl}" allowfullscreen loading="lazy"></iframe>` : 
+                `<div style="display:flex;align-items:center;justify-content:center;height:200px;background:var(--bg);color:var(--text-muted);">URL inválida</div>`}
+            </div>
+            <div class="info">
+              <div class="titulo">${video.titulo || 'Sem título'}</div>
+              ${video.descricao ? `<div class="descricao">${video.descricao}</div>` : ''}
+              <span class="categoria">${video.categoria || 'Criação'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    carregarLogo();
+    renderizarVideos();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

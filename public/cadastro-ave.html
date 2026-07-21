@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Cadastro de Ave</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.field-grid .field-full { grid-column: 1 / -1; }
+
+.tabstrip {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+  padding-bottom: 0;
+}
+.tabstrip button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tabstrip button.active {
+  color: var(--brass-soft);
+  border-bottom-color: var(--brass);
+}
+.subpage { display: none; }
+.subpage.active { display: block; }
+.empty-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 26px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.anilhas-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.anilhas-list .anilha-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: .15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.anilhas-list .anilha-item:hover {
+  border-color: var(--brass);
+}
+.anilhas-list .anilha-item .cor-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+.anilhas-list .anilha-item .numero {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.anilhas-list .anilha-item .tipo {
+  font-size: 9px;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.15);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.nova-anilha-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.nova-anilha-row select,
+.nova-anilha-row input {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 12px !important;
+  outline: none !important;
+}
+.nova-anilha-row select:focus,
+.nova-anilha-row input:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+.nova-anilha-row .btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.ancestral-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ancestral-row input {
+  flex: 1;
+}
+.ancestral-row .btn-buscar {
+  padding: 4px 12px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.modal-box.ave-select-modal {
+  max-width: 480px;
+}
+.modal-list .modal-item .mi-especie {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.btn-atualizar-especies {
+  padding: 4px 12px;
+  font-size: 11px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+}
+.btn-atualizar-especies:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.historico-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.historico-item {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.historico-item .info {
+  flex: 1;
+}
+
+.historico-item .info .motivo {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--brass-soft);
+}
+
+.historico-item .info .descricao {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.historico-item .info .detalhes {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.historico-item .info .data {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.historico-item .actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.historico-item .actions .btn {
+  padding: 2px 10px;
+  font-size: 10px;
+}
+
+.historico-empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.historico-empty .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.4;
+}
+
+.modal-box.historico-modal {
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.modal-box .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-box .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.modal-box .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-box .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.modal-box .field label .req {
+  color: var(--rose);
+}
+
+.modal-box .field input,
+.modal-box .field select,
+.modal-box .field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: .15s !important;
+}
+
+.modal-box .field input:focus,
+.modal-box .field select:focus,
+.modal-box .field textarea:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.modal-box .field select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.modal-box .field textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-aviso {
+  background: rgba(192, 89, 74, 0.1);
+  border: 1px solid rgba(192, 89, 74, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  color: #e2988a;
+  font-size: 13px;
+}
+
+.modal-aviso strong {
+  color: var(--danger);
+}
+
+.campo-destacar {
+  border-left: 3px solid var(--brass) !important;
+  padding-left: 14px !important;
+}
+
+.situacao-com-historico {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.situacao-com-historico select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.situacao-com-historico .btn-historico {
+  padding: 6px 14px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.heranca-aviso {
+  background: rgba(92, 154, 124, 0.08);
+  border: 1px solid rgba(92, 154, 124, 0.25);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--sage-soft);
+  display: none;
+}
+.heranca-aviso.visible {
+  display: block;
+}
+.heranca-aviso .icon {
+  margin-right: 6px;
+}
+
+/* ===== ÁRVORE COMPLETA ===== */
+.arvore-completa-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.arvore-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.arvore-coluna .col-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 3px;
+}
+.arvore-no {
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.08);
+  min-height: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+  line-height: 1.1;
+}
+.arvore-no.filled { background: rgba(199,151,63,0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
+.arvore-no.filled.female { background: rgba(185,116,98,0.06); border-color: rgba(185,116,98,0.3); color: #e2a898; }
+.arvore-no.empty { color: var(--text-muted); opacity: 0.4; font-style: italic; font-size: 8px; }
+.arvore-no .anilha-tag {
+  font-size: 6px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .modal-box .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .historico-item {
+    flex-direction: column;
+  }
+  .historico-item .actions {
+    align-self: flex-end;
+  }
+  .situacao-com-historico {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .arvore-completa-container {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-cadastro-ave">
+
+      <div class="topbar">
+        <div>
+          <h1 id="page-title">Cadastro de Ave</h1>
+          <div class="lede" id="page-lede">Ficha completa do pássaro — dados, histórico, comportamento e documentos.</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="voltarLista()">← Voltar</button>
+          <button class="btn btn-primary" onclick="salvarAve()">💾 Salvar Ave</button>
+        </div>
+      </div>
+
+      <input type="hidden" id="edit-id" value="">
+
+      <div class="tabstrip" id="ave-tabs">
+        <button class="active" data-sub="ave-dados" onclick="goSubtab('ave-dados', this)">Ave</button>
+        <button data-sub="ave-historico" onclick="goSubtab('ave-historico', this)">📜 Histórico</button>
+        <button data-sub="ave-comp" onclick="goSubtab('ave-comp', this)">Comportamento</button>
+        <button data-sub="ave-entrada" onclick="goSubtab('ave-entrada', this)">Registro Entrada</button>
+        <button data-sub="ave-saida" onclick="goSubtab('ave-saida', this)">Registro Saída</button>
+        <button data-sub="ave-prop" onclick="goSubtab('ave-prop', this)">Proprietário</button>
+      </div>
+
+      <!-- ABA AVE -->
+      <div class="subpage active" id="ave-dados">
+        <fieldset>
+          <legend>Identificação</legend>
+          <div class="field-grid">
+            <div class="field field-full"><label>Nome <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Ex: AGATHA CAN"></div>
+            <div class="field"><label>Data de Nascimento</label><input type="date" id="f-data-nasc"></div>
+            <div class="field"><label>Sexo <span class="req">*</span></label>
+              <select id="f-sexo">
+                <option value="Indefinido">Indefinido</option>
+                <option value="M">Macho</option>
+                <option value="F">Fêmea</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Classificação zootécnica</legend>
+          <div class="field-grid">
+            <div class="field">
+              <label>Situação <span class="req">*</span></label>
+              <div class="situacao-com-historico">
+                <select id="f-situacao">
+                  <option value="Disponível">Disponível</option>
+                  <option value="Filhote">Filhote</option>
+                  <option value="Pareamento">Pareamento</option>
+                  <option value="Quarentena">Quarentena</option>
+                  <option value="Fuga">Fuga</option>
+                  <option value="Óbito">Óbito</option>
+                  <option value="Saída do plantel">Saída do plantel</option>
+                  <option value="Plantel" selected>Plantel</option>
+                </select>
+                <button type="button" class="btn btn-primary btn-historico" onclick="abrirModalHistorico()">+ Histórico</button>
+              </div>
+            </div>
+            <div class="field"><label>Tipo <span class="req">*</span></label>
+              <select id="f-tipo-ave">
+                <option value="Canto">Canto</option>
+                <option value="Cor">Cor</option>
+                <option value="Postura">Postura</option>
+              </select>
+            </div>
+            <div class="field field-full">
+              <label>Espécie</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select id="f-especie" style="flex:1;">
+                  <option value="">Selecione uma espécie...</option>
+                </select>
+                <button type="button" class="btn-atualizar-especies" onclick="popularSelectEspecie()" title="Atualizar lista de espécies">⟳</button>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">
+                Gerencie as espécies em <a href="cadastro-criador.html" style="color:var(--brass-soft);">Dados do Criatório</a>
+              </div>
+            </div>
+            <div class="field"><label>Raça</label><input type="text" id="f-raca" placeholder="Ex: Timbrado Espanhol Original"></div>
+            <div class="field"><label>Manejo <span class="req">*</span></label>
+              <select id="f-manejo">
+                <option value="Mantenedor">Mantenedor</option>
+                <option value="Reprodução">Reprodução</option>
+                <option value="Exposição">Exposição</option>
+              </select>
+            </div>
+            <div class="field"><label>Gaiola</label><input type="text" id="f-gaiola" placeholder="-"></div>
+            <div class="field"><label>Mutação</label><input type="text" id="f-mutacao" placeholder="Não"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Genealogia</legend>
+          <div class="field-grid">
+            <div class="field"><label>Pai</label>
+              <div class="ancestral-row">
+                <input type="text" id="f-pai" placeholder="Nome do pai">
+                <button type="button" class="btn btn-ghost btn-buscar" onclick="abrirModalSelecionarAve('pai')">🔍 Buscar</button>
+              </div>
+              <div id="aviso-heranca-pai" class="heranca-aviso">
+                <span class="icon">🌳</span> Ancestrais do pai serão herdados automaticamente
+              </div>
+            </div>
+            <div class="field"><label>Anilha do Pai</label><input type="text" id="f-anilha-pai" placeholder="Anilha do pai" readonly></div>
+            <div class="field"><label>Mãe</label>
+              <div class="ancestral-row">
+                <input type="text" id="f-mae" placeholder="Nome da mãe">
+                <button type="button" class="btn btn-ghost btn-buscar" onclick="abrirModalSelecionarAve('mae')">🔍 Buscar</button>
+              </div>
+              <div id="aviso-heranca-mae" class="heranca-aviso">
+                <span class="icon">🌳</span> Ancestrais da mãe serão herdados automaticamente
+              </div>
+            </div>
+            <div class="field"><label>Anilha da Mãe</label><input type="text" id="f-anilha-mae" placeholder="Anilha da mãe" readonly></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">
+            💡 Ao selecionar pai e mãe, os avós serão preenchidos automaticamente com os dados do sistema.
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Anilha</legend>
+          <div class="field">
+            <label>Anilha <span class="req">*</span></label>
+            <input type="text" id="f-anilha" placeholder="Ex: FOB/CA.065/025/2022">
+          </div>
+
+          <div style="margin-top:10px;">
+            <label style="font-size:11.5px;color:var(--text-muted);">Anilhas disponíveis no sistema:</label>
+            <div class="anilhas-list" id="anilhas-disponiveis"></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label style="font-size:11.5px;color:var(--text-muted);">Cadastrar nova anilha:</label>
+            <div class="nova-anilha-row">
+              <select id="nova-cor" style="min-width:100px;">
+                <option value="">Cor</option>
+                <option value="Prata">Prata</option>
+                <option value="Prata - Sispass">Prata - Sispass</option>
+                <option value="Amarelo">Amarelo</option>
+                <option value="Azul">Azul</option>
+                <option value="Castanho">Castanho</option>
+                <option value="Cinza">Cinza</option>
+                <option value="Laranja">Laranja</option>
+                <option value="Marrom">Marrom</option>
+                <option value="Rosa">Rosa</option>
+                <option value="Verde">Verde</option>
+                <option value="Bege">Bege</option>
+                <option value="Branco">Branco</option>
+                <option value="Caramelo">Caramelo</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Cobre">Cobre</option>
+                <option value="Dourado">Dourado</option>
+                <option value="Ferrugem">Ferrugem</option>
+                <option value="Marfim">Marfim</option>
+                <option value="Ouro">Ouro</option>
+                <option value="Preto">Preto</option>
+                <option value="Roxo">Roxo</option>
+                <option value="Vermelho">Vermelho</option>
+              </select>
+              <select id="nova-tipo" style="min-width:100px;">
+                <option value="">Tipo</option>
+                <option value="Aberta">Aberta</option>
+                <option value="Comercial">Comercial</option>
+                <option value="FOB">FOB</option>
+                <option value="IBAMA">IBAMA</option>
+                <option value="Marcação">Marcação</option>
+                <option value="Sispass">Sispass</option>
+              </select>
+              <input type="text" id="nova-numero" placeholder="Número da anilha" style="flex:1;min-width:120px;">
+              <button type="button" class="btn btn-primary" onclick="cadastrarAnilhaRapido()">+ Adicionar</button>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ===== ÁRVORE COMPLETA ===== -->
+        <fieldset>
+          <legend>🌳 Árvore Genealógica Completa</legend>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+            Ancestrais importados do PDF (até 5 gerações)
+          </div>
+          <div id="arvore-completa-container" class="arvore-completa-container">
+            <div style="text-align:center;padding:20px;color:var(--text-muted);grid-column:1/-1;">
+              Nenhum ancestral adicional cadastrado.
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="voltarLista()">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarAve()">Salvar Ave</button>
+        </div>
+      </div>
+
+      <!-- ABA HISTÓRICO -->
+      <div class="subpage" id="ave-historico">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:0;">Histórico da Ave</h3>
+          <button class="btn btn-primary" onclick="abrirModalHistorico()">+ Adicionar Histórico</button>
+        </div>
+        <div id="historico-lista" class="historico-container">
+          <!-- Preenchido pelo JavaScript -->
+        </div>
+      </div>
+
+      <!-- OUTRAS ABAS -->
+      <div class="subpage" id="ave-comp"><div class="empty-note">Registros de comportamento e temperamento observados.</div></div>
+      <div class="subpage" id="ave-entrada"><div class="empty-note">Data, origem e forma de entrada da ave no plantel.</div></div>
+      <div class="subpage" id="ave-saida"><div class="empty-note">Data, destino e motivo de saída.</div></div>
+      <div class="subpage" id="ave-prop"><div class="empty-note">Proprietário atual e histórico de transferências.</div></div>
+
+    </section>
+  </main>
+</div>
+
+<!-- MODAL DE SELEÇÃO DE AVE -->
+<div class="modal-overlay" id="modal-select-ave" onclick="if(event.target===this) fecharModalSelectAve()">
+  <div class="modal-box ave-select-modal">
+    <div class="modal-head">
+      <div><span id="modal-select-title">Selecionar Ave</span></div>
+      <button class="modal-close" onclick="fecharModalSelectAve()">✕</button>
+    </div>
+    <input type="text" class="modal-search" id="modal-select-search" placeholder="Pesquisar por nome ou anilha..." oninput="renderModalSelectAve()">
+    <div class="modal-list" id="modal-select-list"></div>
+  </div>
+</div>
+
+<!-- MODAL DE HISTÓRICO -->
+<div class="modal-overlay" id="modal-historico" onclick="if(event.target===this) fecharModalHistorico()">
+  <div class="modal-box historico-modal">
+    <div class="modal-head">
+      <div><span id="modal-historico-title">Adicionar Histórico</span></div>
+      <button class="modal-close" onclick="fecharModalHistorico()">✕</button>
+    </div>
+
+    <form id="form-historico" onsubmit="salvarHistorico(event)">
+      <input type="hidden" id="edit-historico-id" value="">
+
+      <div class="field-grid">
+        <div class="field field-full">
+          <label>Motivo <span class="req">*</span></label>
+          <select id="f-historico-motivo" required onchange="atualizarCamposHistorico()">
+            <option value="">Selecione...</option>
+            <option value="Pareamento">Pareamento</option>
+            <option value="Fuga">Fuga</option>
+            <option value="Óbito">Óbito</option>
+            <option value="Quarentena">Quarentena</option>
+            <option value="Saída do plantel">Saída do plantel</option>
+            <option value="Entrada no plantel">Entrada no plantel</option>
+            <option value="Observação">Observação</option>
+          </select>
+        </div>
+
+        <div id="campos-dinamicos">
+          <!-- Preenchido pelo JavaScript -->
+        </div>
+
+        <div class="field field-full">
+          <label>Data do histórico <span class="req">*</span></label>
+          <input type="date" id="f-historico-data" required>
+        </div>
+
+        <div id="aviso-quarentena" class="modal-aviso" style="display:none;">
+          <strong>⚠️ AVISO</strong><br>
+          A quarentena em aves é um procedimento essencial para evitar a entrada e a disseminação de doenças no seu plantel.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="fecharModalHistorico()">Fechar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('cadastro-ave');</script>
+<script>
+/* ============================================================
+   VARIÁVEIS GLOBAIS
+   ============================================================ */
+
+let selectAveTarget = null;
+let historicoAtual = [];
+
+/* ============================================================
+   FUNÇÃO PARA POPULAR SELECT DE ESPÉCIES
+   ============================================================ */
+
+async function getEspecies() {
+  return (await DB.getConfig('especies_aves')) || [];
+}
+
+async function popularSelectEspecie() {
+  const select = document.getElementById('f-especie');
+  if (!select) return;
+
+  const especies = await getEspecies();
+  const valorAtual = select.value;
+  
+  if (especies.length === 0) {
+    select.innerHTML = `<option value="">Nenhuma espécie cadastrada. Cadastre em Dados do Criatório.</option>`;
+    return;
+  }
+  
+  let html = `<option value="">Selecione uma espécie...</option>`;
+  especies.forEach(e => {
+    const label = e.cientifico ? `${e.popular} (${e.cientifico})` : e.popular;
+    html += `<option value="${e.popular}">${label}</option>`;
+  });
+  select.innerHTML = html;
+  if (valorAtual) select.value = valorAtual;
+}
+
+/* ============================================================
+   FUNÇÃO PARA HERDAR ANCESTRAIS
+   ============================================================ */
+
+async function herdarAncestrais(paiNome, maeNome) {
+  const ancestrais = {
+    pai: paiNome || '',
+    anilhaPai: '',
+    mae: maeNome || '',
+    anilhaMae: '',
+    avoPaterno: '',
+    avoPaterna: '',
+    avoMaterno: '',
+    avoMaterna: '',
+    bisavoPaterno: '',
+    bisavoPaterna: '',
+    bisavoMaterno: '',
+    bisavoMaterna: ''
+  };
+  
+  if (paiNome) {
+    const paiCompleto = await DB.getAvePorNome(paiNome);
+    if (paiCompleto) {
+      ancestrais.anilhaPai = paiCompleto.anilha || '';
+      ancestrais.avoPaterno = paiCompleto.pai || '';
+      ancestrais.avoPaterna = paiCompleto.mae || '';
+      if (paiCompleto.avoPaterno) ancestrais.bisavoPaterno = paiCompleto.avoPaterno;
+      if (paiCompleto.avoPaterna) ancestrais.bisavoPaterna = paiCompleto.avoPaterna;
+      if (paiCompleto.avoMaterno) ancestrais.bisavoMaterno = paiCompleto.avoMaterno;
+      if (paiCompleto.avoMaterna) ancestrais.bisavoMaterna = paiCompleto.avoMaterna;
+    }
+  }
+  
+  if (maeNome) {
+    const maeCompleta = await DB.getAvePorNome(maeNome);
+    if (maeCompleta) {
+      ancestrais.anilhaMae = maeCompleta.anilha || '';
+      ancestrais.avoMaterno = maeCompleta.pai || '';
+      ancestrais.avoMaterna = maeCompleta.mae || '';
+      if (maeCompleta.avoPaterno) ancestrais.bisavoPaterno = maeCompleta.avoPaterno;
+      if (maeCompleta.avoPaterna) ancestrais.bisavoPaterna = maeCompleta.avoPaterna;
+      if (maeCompleta.avoMaterno) ancestrais.bisavoMaterno = maeCompleta.avoMaterno;
+      if (maeCompleta.avoMaterna) ancestrais.bisavoMaterna = maeCompleta.avoMaterna;
+    }
+  }
+  
+  return ancestrais;
+}
+
+/* ============================================================
+   FUNÇÕES DE NAVEGAÇÃO
+   ============================================================ */
+
+function goSubtab(id, btn) {
+  document.querySelectorAll('#ave-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.subpage').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function voltarLista() {
+  location.href = 'passaros.html';
+}
+
+/* ============================================================
+   RENDERIZAR ÁRVORE COMPLETA
+   ============================================================ */
+
+function renderizarArvoreCompleta(ave) {
+  const container = document.getElementById('arvore-completa-container');
+  if (!container) return;
+  
+  const ancestrais = ave.ancestrais || [];
+  
+  if (!ancestrais || ancestrais.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--text-muted);grid-column:1/-1;">
+        Nenhum ancestral adicional cadastrado.
+      </div>
+    `;
+    return;
+  }
+  
+  // Agrupar por geração
+  const porGeracao = {};
+  ancestrais.forEach(n => {
+    if (!porGeracao[n.geracao]) porGeracao[n.geracao] = [];
+    porGeracao[n.geracao].push(n);
+  });
+  
+  const geracoesOrdenadas = Object.keys(porGeracao).map(Number).sort((a, b) => a - b);
+  
+  // Ordenar cada geração pelo caminho
+  geracoesOrdenadas.forEach(g => {
+    porGeracao[g].sort((a, b) => {
+      const ia = parseInt(a.caminho.replace(/P/g, '0').replace(/M/g, '1'), 2);
+      const ib = parseInt(b.caminho.replace(/P/g, '0').replace(/M/g, '1'), 2);
+      return ia - ib;
+    });
+  });
+  
+  let html = '';
+  
+  // Coluna da raiz
+  html += `
+    <div class="arvore-coluna">
+      <div class="col-label">Ave</div>
+      <div class="arvore-no filled">
+        ${ave.nome || '-'}
+        <span class="anilha-tag">${ave.anilha || ''}</span>
+      </div>
+    </div>
+  `;
+  
+  // Colunas de cada geração
+  geracoesOrdenadas.forEach(g => {
+    const nos = porGeracao[g];
+    const label = nos[0]?.nomeGeracao || `G${g}`;
+    html += `
+      <div class="arvore-coluna">
+        <div class="col-label">${label}</div>
+        ${nos.map(n => `
+          <div class="arvore-no ${n.nome ? (n.sexo === 'F' ? 'filled female' : 'filled') : 'empty'}">
+            ${n.nome || '—'}
+            ${n.anilha ? `<span class="anilha-tag">${n.anilha}</span>` : ''}
+            ${n.nota ? `<span style="font-size:6px;color:var(--text-muted);opacity:0.5;">${n.nota}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+/* ============================================================
+   CARREGAR DADOS DE EDIÇÃO
+   ============================================================ */
+
+async function carregarDadosEdicao() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  if (id) {
+    const ave = await DB.getById(DB.TABLES.AVES, parseInt(id));
+    if (ave) {
+      document.getElementById('page-title').textContent = 'Editar Ave: ' + ave.nome;
+      document.getElementById('page-lede').textContent = 'Editando os dados de ' + ave.nome;
+      document.getElementById('edit-id').value = ave.id;
+      document.getElementById('f-nome').value = ave.nome || '';
+      document.getElementById('f-data-nasc').value = ave.dataNasc || '';
+      document.getElementById('f-sexo').value = ave.sexo || 'Indefinido';
+      document.getElementById('f-situacao').value = ave.situacao || 'Plantel';
+      document.getElementById('f-tipo-ave').value = ave.tipo || 'Canto';
+      
+      await popularSelectEspecie();
+      if (ave.especie) document.getElementById('f-especie').value = ave.especie;
+      
+      document.getElementById('f-raca').value = ave.raca || '';
+      document.getElementById('f-manejo').value = ave.manejo || 'Mantenedor';
+      document.getElementById('f-gaiola').value = ave.gaiola || '';
+      document.getElementById('f-mutacao').value = ave.mutacao || '';
+      document.getElementById('f-anilha').value = ave.anilha || '';
+      document.getElementById('f-pai').value = ave.pai || '';
+      document.getElementById('f-anilha-pai').value = ave.anilhaPai || '';
+      document.getElementById('f-mae').value = ave.mae || '';
+      document.getElementById('f-anilha-mae').value = ave.anilhaMae || '';
+      
+      // Carregar histórico
+      historicoAtual = ave.historico || [];
+      renderizarHistorico();
+      
+      // CARREGAR ÁRVORE COMPLETA
+      renderizarArvoreCompleta(ave);
+    } else {
+      alert('Ave não encontrada!');
+      voltarLista();
+    }
+  } else {
+    await popularSelectEspecie();
+    historicoAtual = [];
+    renderizarHistorico();
+    document.getElementById('arvore-completa-container').innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--text-muted);grid-column:1/-1;">
+        Nenhum ancestral adicional cadastrado.
+      </div>
+    `;
+  }
+  await carregarAnilhasDisponiveis();
+  
+  document.getElementById('f-pai').addEventListener('input', function() {
+    const aviso = document.getElementById('aviso-heranca-pai');
+    if (this.value.trim()) {
+      aviso.classList.add('visible');
+    } else {
+      aviso.classList.remove('visible');
+    }
+  });
+  
+  document.getElementById('f-mae').addEventListener('input', function() {
+    const aviso = document.getElementById('aviso-heranca-mae');
+    if (this.value.trim()) {
+      aviso.classList.add('visible');
+    } else {
+      aviso.classList.remove('visible');
+    }
+  });
+}
+
+/* ============================================================
+   ANILHAS
+   ============================================================ */
+
+async function carregarAnilhasDisponiveis() {
+  const container = document.getElementById('anilhas-disponiveis');
+  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  
+  if (anilhas.length === 0) {
+    container.innerHTML = '<div class="empty-note" style="padding:12px;font-size:12px;">Nenhuma anilha cadastrada. Cadastre uma acima.</div>';
+    return;
+  }
+  
+  const cores = {
+    'Prata': '#C0C0C0', 'Prata - Sispass': '#A8A8A8', 'Amarelo': '#FFD700',
+    'Azul': '#4169E1', 'Castanho': '#8B4513', 'Cinza': '#808080',
+    'Laranja': '#FF8C00', 'Marrom': '#A52A2A', 'Rosa': '#FF69B4',
+    'Verde': '#32CD32', 'Bege': '#F5F5DC', 'Branco': '#FFFFFF',
+    'Caramelo': '#D2691E', 'Bronze': '#CD7F32', 'Cobre': '#B87333',
+    'Dourado': '#FFD700', 'Ferrugem': '#B7410E', 'Marfim': '#FFFFF0',
+    'Ouro': '#FFD700', 'Preto': '#1A1A1A', 'Roxo': '#8B008B',
+    'Vermelho': '#DC143C'
+  };
+  
+  container.innerHTML = anilhas.map(a => `
+    <div class="anilha-item" onclick="selecionarAnilha('${a.numero}')">
+      <span class="cor-dot" style="background:${cores[a.cor] || '#808080'};"></span>
+      <span class="numero">${a.numero}</span>
+      <span class="tipo">${a.tipo}</span>
+      <span style="font-size:9px;color:var(--text-muted);">${a.disponivel === 'Sim' ? '✅' : '❌'}</span>
+    </div>
+  `).join('');
+}
+
+function selecionarAnilha(numero) {
+  document.getElementById('f-anilha').value = numero;
+}
+
+async function cadastrarAnilhaRapido() {
+  const cor = document.getElementById('nova-cor').value;
+  const tipo = document.getElementById('nova-tipo').value;
+  const numero = document.getElementById('nova-numero').value.trim();
+  
+  if (!cor) { alert('Selecione a cor da anilha.'); return; }
+  if (!tipo) { alert('Selecione o tipo da anilha.'); return; }
+  if (!numero) { alert('Digite o número da anilha.'); return; }
+  
+  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  if (anilhas.some(a => a.numero === numero)) {
+    alert('Esta anilha já está cadastrada!');
+    return;
+  }
+  
+  const novaAnilha = {
+    cor: cor,
+    tipo: tipo,
+    numero: numero,
+    dimensao: '',
+    observacao: 'Cadastrada via cadastro de ave',
+    ativo: 'Sim',
+    disponivel: 'Sim',
+    dataCadastro: new Date().toISOString().split('T')[0]
+  };
+  
+  await DB.add(DB.TABLES.ANILHAS, novaAnilha);
+  
+  document.getElementById('nova-cor').value = '';
+  document.getElementById('nova-tipo').value = '';
+  document.getElementById('nova-numero').value = '';
+  
+  document.getElementById('f-anilha').value = numero;
+  
+  await carregarAnilhasDisponiveis();
+  
+  alert('✅ Anilha cadastrada com sucesso!');
+}
+
+/* ============================================================
+   MODAL DE SELEÇÃO DE AVE
+   ============================================================ */
+
+function abrirModalSelecionarAve(target) {
+  selectAveTarget = target;
+  const titulo = target === 'pai' ? 'Selecionar Pai' : 'Selecionar Mãe';
+  document.getElementById('modal-select-title').textContent = titulo;
+  document.getElementById('modal-select-search').value = '';
+  document.getElementById('modal-select-ave').classList.add('open');
+  renderModalSelectAve();
+}
+
+function fecharModalSelectAve() {
+  document.getElementById('modal-select-ave').classList.remove('open');
+}
+
+async function renderModalSelectAve() {
+  const busca = document.getElementById('modal-select-search').value.toLowerCase();
+  const especieAtual = document.getElementById('f-especie').value.trim();
+  
+  let aves = await DB.getAll(DB.TABLES.AVES);
+  
+  if (especieAtual) {
+    aves = aves.filter(a => a.especie === especieAtual);
+  }
+  
+  if (selectAveTarget === 'pai') {
+    aves = aves.filter(a => a.sexo === 'M');
+  } else if (selectAveTarget === 'mae') {
+    aves = aves.filter(a => a.sexo === 'F');
+  }
+  
+  if (busca) {
+    aves = aves.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  }
+  
+  const container = document.getElementById('modal-select-list');
+  if (aves.length === 0) {
+    container.innerHTML = '<div class="empty-note">Nenhuma ave encontrada com a mesma espécie e sexo.</div>';
+    return;
+  }
+  
+  container.innerHTML = aves.map(a => `
+    <div class="modal-item ${a.sexo === 'M' ? 'male-item' : 'female-item'}">
+      <div>
+        <div class="mi-name">${a.nome} ${a.sexo === 'M' ? '♂' : '♀'}</div>
+        <div class="mi-band mono">${a.anilha}</div>
+        <div class="mi-especie">${a.especie}</div>
+      </div>
+      <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick="selecionarAveModal(${a.id}, '${a.nome}', '${a.anilha}')">Selecionar</button>
+    </div>
+  `).join('');
+}
+
+function selecionarAveModal(id, nome, anilha) {
+  if (selectAveTarget === 'pai') {
+    document.getElementById('f-pai').value = nome;
+    document.getElementById('f-anilha-pai').value = anilha;
+    document.getElementById('aviso-heranca-pai').classList.add('visible');
+  } else if (selectAveTarget === 'mae') {
+    document.getElementById('f-mae').value = nome;
+    document.getElementById('f-anilha-mae').value = anilha;
+    document.getElementById('aviso-heranca-mae').classList.add('visible');
+  }
+  fecharModalSelectAve();
+}
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+
+function renderizarHistorico() {
+  const container = document.getElementById('historico-lista');
+  
+  if (!historicoAtual || historicoAtual.length === 0) {
+    container.innerHTML = `
+      <div class="historico-empty">
+        <div class="icon">📜</div>
+        <p>Nenhum histórico registrado para esta ave.</p>
+        <p style="font-size:12px;">Clique em "+ Adicionar Histórico" para registrar um evento.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const historicoOrdenado = [...historicoAtual].sort((a, b) => {
+    if (a.data && b.data) return b.data.localeCompare(a.data);
+    return 0;
+  });
+
+  container.innerHTML = historicoOrdenado.map((item, index) => `
+    <div class="historico-item">
+      <div class="info">
+        <div class="motivo">${item.motivo}</div>
+        ${item.descricao ? `<div class="descricao">${item.descricao}</div>` : ''}
+        ${item.detalhes ? `<div class="detalhes">${item.detalhes}</div>` : ''}
+        <div class="data">📅 ${formatarData(item.data)}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" style="padding:2px 10px;font-size:10px;" onclick="editarHistorico(${index})">✎</button>
+        <button class="btn btn-danger" style="padding:2px 10px;font-size:10px;" onclick="excluirHistorico(${index})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = data.split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
+function abrirModalHistorico() {
+  document.getElementById('modal-historico-title').textContent = 'Adicionar Histórico';
+  document.getElementById('edit-historico-id').value = '';
+  document.getElementById('f-historico-motivo').value = '';
+  document.getElementById('f-historico-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('aviso-quarentena').style.display = 'none';
+  atualizarCamposHistorico();
+  document.getElementById('modal-historico').classList.add('open');
+}
+
+function fecharModalHistorico() {
+  document.getElementById('modal-historico').classList.remove('open');
+}
+
+function atualizarCamposHistorico() {
+  const motivo = document.getElementById('f-historico-motivo').value;
+  const container = document.getElementById('campos-dinamicos');
+  const aviso = document.getElementById('aviso-quarentena');
+  
+  container.innerHTML = '';
+  aviso.style.display = 'none';
+
+  let html = `
+    <div class="field field-full">
+      <label>Descrição <span class="req">*</span></label>
+      <textarea id="f-historico-descricao" placeholder="Descreva o evento..." required>${motivo}</textarea>
+    </div>
+    <div class="field field-full">
+      <label>Observação</label>
+      <textarea id="f-historico-observacao" placeholder="Observações adicionais..."></textarea>
+    </div>
+  `;
+
+  if (motivo === 'Saída do plantel') {
+    html += `
+      <div class="field">
+        <label>CNPJ/CPF</label>
+        <input type="text" id="f-historico-cnpj" placeholder="CNPJ/CPF do destinatário">
+      </div>
+      <div class="field">
+        <label>Data Saída</label>
+        <input type="date" id="f-historico-data-saida" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Nome <span class="req">*</span></label>
+        <input type="text" id="f-historico-nome-destino" placeholder="Nome do destinatário" required>
+      </div>
+      <div class="field">
+        <label>Valor</label>
+        <input type="text" id="f-historico-valor" placeholder="R$ 0,00" value="R$ 0,00">
+      </div>
+      <div class="field">
+        <label>Registro <span class="req">*</span></label>
+        <input type="text" id="f-historico-registro" placeholder="Número do registro" required>
+      </div>
+    `;
+  } else if (motivo === 'Quarentena') {
+    aviso.style.display = 'block';
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data Início Quarentena</label>
+        <input type="date" id="f-historico-data-inicio" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Data Fim Quarentena</label>
+        <input type="date" id="f-historico-data-fim">
+      </div>
+      <div class="field field-full">
+        <label>Local da Quarentena</label>
+        <input type="text" id="f-historico-local" placeholder="Local onde a ave está em quarentena">
+      </div>
+    `;
+  } else if (motivo === 'Pareamento') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Nome do Parceiro <span class="req">*</span></label>
+        <input type="text" id="f-historico-parceiro" placeholder="Nome da ave parceira" required>
+      </div>
+      <div class="field">
+        <label>Anilha do Parceiro</label>
+        <input type="text" id="f-historico-anilha-parceiro" placeholder="Anilha do parceiro">
+      </div>
+      <div class="field">
+        <label>Data Início</label>
+        <input type="date" id="f-historico-data-inicio-pareamento" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+    `;
+  } else if (motivo === 'Fuga') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data da Fuga</label>
+        <input type="date" id="f-historico-data-fuga" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Local da Fuga</label>
+        <input type="text" id="f-historico-local-fuga" placeholder="Local onde ocorreu a fuga">
+      </div>
+      <div class="field field-full">
+        <label>Circunstâncias</label>
+        <textarea id="f-historico-circunstancia" placeholder="Descreva as circunstâncias da fuga..."></textarea>
+      </div>
+    `;
+  } else if (motivo === 'Óbito') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data do Óbito</label>
+        <input type="date" id="f-historico-data-obito" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Causa da Morte</label>
+        <input type="text" id="f-historico-causa" placeholder="Causa do óbito">
+      </div>
+      <div class="field field-full">
+        <label>Necropsia</label>
+        <select id="f-historico-necropsia">
+          <option value="">Selecione...</option>
+          <option value="Não realizada">Não realizada</option>
+          <option value="Realizada">Realizada</option>
+          <option value="Em andamento">Em andamento</option>
+        </select>
+      </div>
+      <div class="field field-full">
+        <label>Laudo</label>
+        <input type="text" id="f-historico-laudo" placeholder="Número do laudo ou resultado">
+      </div>
+    `;
+  } else if (motivo === 'Entrada no plantel') {
+    html += `
+      <div class="field field-full">
+        <label>Origem <span class="req">*</span></label>
+        <input type="text" id="f-historico-origem" placeholder="De onde veio a ave" required>
+      </div>
+      <div class="field">
+        <label>Data de Compra</label>
+        <input type="date" id="f-historico-data-compra" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field">
+        <label>Valor Pago</label>
+        <input type="text" id="f-historico-valor-compra" placeholder="R$ 0,00" value="R$ 0,00">
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  if (motivo === 'Saída do plantel') {
+    const desc = document.getElementById('f-historico-descricao');
+    if (desc) desc.value = 'Saída do plantel';
+  }
+}
+
+function salvarHistorico(event) {
+  event.preventDefault();
+
+  const motivo = document.getElementById('f-historico-motivo').value;
+  const descricao = document.getElementById('f-historico-descricao').value.trim();
+  const observacao = document.getElementById('f-historico-observacao').value.trim();
+  const data = document.getElementById('f-historico-data').value;
+
+  if (!motivo || !descricao || !data) {
+    alert('Preencha todos os campos obrigatórios.');
+    return;
+  }
+
+  const editIndex = document.getElementById('edit-historico-id').value;
+
+  const historicoItem = {
+    motivo: motivo,
+    descricao: descricao,
+    observacao: observacao,
+    data: data,
+    detalhes: ''
+  };
+
+  if (motivo === 'Saída do plantel') {
+    const cnpj = document.getElementById('f-historico-cnpj')?.value || '';
+    const dataSaida = document.getElementById('f-historico-data-saida')?.value || '';
+    const nomeDestino = document.getElementById('f-historico-nome-destino')?.value || '';
+    const valor = document.getElementById('f-historico-valor')?.value || 'R$ 0,00';
+    const registro = document.getElementById('f-historico-registro')?.value || '';
+    
+    historicoItem.detalhes = `Destino: ${nomeDestino} | Registro: ${registro} | Valor: ${valor}`;
+    if (cnpj) historicoItem.detalhes += ` | CNPJ/CPF: ${cnpj}`;
+    if (dataSaida) historicoItem.detalhes += ` | Data Saída: ${formatarData(dataSaida)}`;
+  } else if (motivo === 'Quarentena') {
+    const dataInicio = document.getElementById('f-historico-data-inicio')?.value || '';
+    const dataFim = document.getElementById('f-historico-data-fim')?.value || '';
+    const local = document.getElementById('f-historico-local')?.value || '';
+    
+    historicoItem.detalhes = `Início: ${formatarData(dataInicio)}`;
+    if (dataFim) historicoItem.detalhes += ` | Fim: ${formatarData(dataFim)}`;
+    if (local) historicoItem.detalhes += ` | Local: ${local}`;
+  } else if (motivo === 'Pareamento') {
+    const parceiro = document.getElementById('f-historico-parceiro')?.value || '';
+    const anilhaParceiro = document.getElementById('f-historico-anilha-parceiro')?.value || '';
+    const dataInicio = document.getElementById('f-historico-data-inicio-pareamento')?.value || '';
+    
+    historicoItem.detalhes = `Parceiro: ${parceiro}`;
+    if (anilhaParceiro) historicoItem.detalhes += ` | Anilha: ${anilhaParceiro}`;
+    if (dataInicio) historicoItem.detalhes += ` | Início: ${formatarData(dataInicio)}`;
+  } else if (motivo === 'Fuga') {
+    const dataFuga = document.getElementById('f-historico-data-fuga')?.value || '';
+    const localFuga = document.getElementById('f-historico-local-fuga')?.value || '';
+    
+    historicoItem.detalhes = `Data: ${formatarData(dataFuga)}`;
+    if (localFuga) historicoItem.detalhes += ` | Local: ${localFuga}`;
+  } else if (motivo === 'Óbito') {
+    const dataObito = document.getElementById('f-historico-data-obito')?.value || '';
+    const causa = document.getElementById('f-historico-causa')?.value || '';
+    const necropsia = document.getElementById('f-historico-necropsia')?.value || '';
+    const laudo = document.getElementById('f-historico-laudo')?.value || '';
+    
+    historicoItem.detalhes = `Data: ${formatarData(dataObito)}`;
+    if (causa) historicoItem.detalhes += ` | Causa: ${causa}`;
+    if (necropsia) historicoItem.detalhes += ` | Necropsia: ${necropsia}`;
+    if (laudo) historicoItem.detalhes += ` | Laudo: ${laudo}`;
+  } else if (motivo === 'Entrada no plantel') {
+    const origem = document.getElementById('f-historico-origem')?.value || '';
+    const dataCompra = document.getElementById('f-historico-data-compra')?.value || '';
+    const valorCompra = document.getElementById('f-historico-valor-compra')?.value || 'R$ 0,00';
+    
+    historicoItem.detalhes = `Origem: ${origem}`;
+    if (dataCompra) historicoItem.detalhes += ` | Data: ${formatarData(dataCompra)}`;
+    if (valorCompra) historicoItem.detalhes += ` | Valor: ${valorCompra}`;
+  }
+
+  if (editIndex !== '') {
+    historicoAtual[parseInt(editIndex)] = historicoItem;
+  } else {
+    historicoAtual.push(historicoItem);
+  }
+
+  fecharModalHistorico();
+  renderizarHistorico();
+  
+  const situacaoSelect = document.getElementById('f-situacao');
+  if (motivo && situacaoSelect) {
+    const situacoesValidas = ['Pareamento', 'Fuga', 'Óbito', 'Quarentena', 'Saída do plantel'];
+    if (situacoesValidas.includes(motivo)) {
+      situacaoSelect.value = motivo;
+    }
+  }
+  
+  alert('✅ Histórico salvo com sucesso!');
+}
+
+function editarHistorico(index) {
+  const item = historicoAtual[index];
+  if (!item) return;
+
+  document.getElementById('modal-historico-title').textContent = 'Editar Histórico';
+  document.getElementById('edit-historico-id').value = index;
+  document.getElementById('f-historico-motivo').value = item.motivo;
+  document.getElementById('f-historico-data').value = item.data || new Date().toISOString().split('T')[0];
+  
+  atualizarCamposHistorico();
+  
+  document.getElementById('f-historico-descricao').value = item.descricao || '';
+  document.getElementById('f-historico-observacao').value = item.observacao || '';
+  
+  document.getElementById('modal-historico').classList.add('open');
+}
+
+function excluirHistorico(index) {
+  if (!confirm('Tem certeza que deseja excluir este registro do histórico?')) return;
+  historicoAtual.splice(index, 1);
+  renderizarHistorico();
+}
+
+/* ============================================================
+   SALVAR AVE - COM HERANÇA COMPLETA
+   ============================================================ */
+
+async function salvarAve() {
+  const id = document.getElementById('edit-id').value;
+  const nome = document.getElementById('f-nome').value.trim();
+  if (!nome) { alert('O campo Nome é obrigatório!'); document.getElementById('f-nome').focus(); return; }
+  const anilha = document.getElementById('f-anilha').value.trim();
+  if (!anilha) { alert('O campo Anilha é obrigatório!'); document.getElementById('f-anilha').focus(); return; }
+  
+  const paiNome = document.getElementById('f-pai').value.trim();
+  const maeNome = document.getElementById('f-mae').value.trim();
+  
+  const ancestrais = await herdarAncestrais(paiNome, maeNome);
+  
+  // Buscar ave existente para preservar ancestrais
+  let aveExistente = null;
+  if (id) {
+    aveExistente = await DB.getById(DB.TABLES.AVES, parseInt(id));
+  }
+  
+  // Preservar ancestrais existentes se houver
+  let ancestraisExistentes = [];
+  if (aveExistente && aveExistente.ancestrais) {
+    if (typeof aveExistente.ancestrais === 'string') {
+      try { ancestraisExistentes = JSON.parse(aveExistente.ancestrais); } catch(e) {}
+    } else if (Array.isArray(aveExistente.ancestrais)) {
+      ancestraisExistentes = aveExistente.ancestrais;
+    }
+  }
+  
+  // Os avós legados só são recalculados quando dá pra herdar de uma ave-pai/ave-mãe
+  // cadastrada no sistema. Se não der (ex: ave importada de certificado, sem os pais
+  // cadastrados como registros próprios), mantém o que a ave já tinha — senão os avós
+  // importados do PDF seriam apagados toda vez que o cadastro fosse apenas reaberto e salvo.
+  const avoPaterno = ancestrais.avoPaterno || (aveExistente ? aveExistente.avoPaterno : '') || '';
+  const avoPaterna = ancestrais.avoPaterna || (aveExistente ? aveExistente.avoPaterna : '') || '';
+  const avoMaterno = ancestrais.avoMaterno || (aveExistente ? aveExistente.avoMaterno : '') || '';
+  const avoMaterna = ancestrais.avoMaterna || (aveExistente ? aveExistente.avoMaterna : '') || '';
+  
+  const dados = {
+    nome: nome,
+    dataNasc: document.getElementById('f-data-nasc').value,
+    sexo: document.getElementById('f-sexo').value,
+    situacao: document.getElementById('f-situacao').value,
+    tipo: document.getElementById('f-tipo-ave').value,
+    especie: document.getElementById('f-especie').value || '',
+    raca: document.getElementById('f-raca').value.trim(),
+    manejo: document.getElementById('f-manejo').value,
+    gaiola: document.getElementById('f-gaiola').value.trim(),
+    mutacao: document.getElementById('f-mutacao').value.trim(),
+    anilha: anilha,
+    pai: paiNome,
+    anilhaPai: document.getElementById('f-anilha-pai').value.trim() || ancestrais.anilhaPai,
+    mae: maeNome,
+    anilhaMae: document.getElementById('f-anilha-mae').value.trim() || ancestrais.anilhaMae,
+    avoPaterno: avoPaterno,
+    avoPaterna: avoPaterna,
+    avoMaterno: avoMaterno,
+    avoMaterna: avoMaterna,
+    filhote: document.getElementById('f-situacao').value === 'Filhote',
+    historico: historicoAtual,
+    // PRESERVAR ANCESTRAIS EXISTENTES (árvore completa importada do certificado)
+    ancestrais: ancestraisExistentes
+  };
+  
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const anilhaEmUso = aves.some(a => a.anilha === anilha && a.id !== parseInt(id));
+  if (anilhaEmUso) { alert('Esta anilha já está sendo usada por outra ave!'); return; }
+  
+  try {
+    if (id) {
+      await DB.update(DB.TABLES.AVES, parseInt(id), dados);
+      alert('✅ Ave atualizada com sucesso!');
+    } else {
+      await DB.add(DB.TABLES.AVES, dados);
+      alert('✅ Ave cadastrada com sucesso!');
+    }
+    voltarLista();
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+
+carregarDadosEdicao();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    fecharModalSelectAve();
+    fecharModalHistorico();
+  }
+});
+</script>
+</body>
+</html>

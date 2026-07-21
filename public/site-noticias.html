@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Notícias</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav .logo .mark {
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-nav .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-nav .logo .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-nav .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+.site-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  color: var(--brass-soft);
+  margin-bottom: 4px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.noticias-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.noticia-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: .15s ease;
+}
+
+.noticia-card:hover {
+  border-color: var(--brass-dim);
+}
+
+.noticia-card .banner {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+}
+
+.noticia-card .content {
+  padding: 20px 24px;
+}
+
+.noticia-card .content .titulo {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  color: var(--brass-soft);
+  margin-bottom: 6px;
+}
+
+.noticia-card .content .data {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.noticia-card .content .texto {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.noticia-card .content .videos {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.noticia-card .content .videos .video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.noticia-card .content .videos .video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.noticia-card .content .fotos {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.noticia-card .content .fotos img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.noticia-card .content .fotos img:hover {
+  transform: scale(1.02);
+  border-color: var(--brass-dim);
+}
+
+.empty-noticias {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-noticias .icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.foto-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.foto-modal.open {
+  display: flex;
+}
+
+.foto-modal img {
+  max-width: 90%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.foto-modal .fechar {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 40px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.foto-modal .fechar:hover {
+  color: var(--text);
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .noticia-card .content {
+    padding: 14px 16px;
+  }
+  .noticia-card .content .titulo {
+    font-size: 20px;
+  }
+  .noticia-card .content .videos {
+    grid-template-columns: 1fr;
+  }
+  .noticia-card .content .fotos {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html" class="active">Notícias</a>
+        <a href="site-plantel.html">Plantel</a>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <h1>📰 Notícias</h1>
+    <div class="subtitle">Últimas novidades e atualizações do criatório</div>
+
+    <div class="noticias-grid" id="noticias-grid">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+  </main>
+
+  <div class="foto-modal" id="foto-modal" onclick="fecharModal()">
+    <span class="fechar" onclick="fecharModal()">✕</span>
+    <img id="modal-img" src="" alt="">
+  </div>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function getNoticias() {
+      const noticias = await DB.getConfig('site_noticias');
+      if (noticias && noticias.length > 0) return noticias;
+
+      const conteudo = await DB.getConfig('site_conteudo');
+      if (conteudo && conteudo.noticias && conteudo.noticias.length > 0) return conteudo.noticias;
+
+      return [];
+    }
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      return match ? match[1] : null;
+    }
+
+    function abrirModal(url) {
+      document.getElementById('modal-img').src = url;
+      document.getElementById('foto-modal').classList.add('open');
+    }
+
+    function fecharModal() {
+      document.getElementById('foto-modal').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') fecharModal();
+    });
+
+    async function renderizarNoticias() {
+      const noticias = await getNoticias();
+
+      const grid = document.getElementById('noticias-grid');
+      
+      if (noticias.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-noticias">
+            <div class="icon">📰</div>
+            <p>Nenhuma notícia cadastrada.</p>
+            <p style="font-size:12px;">Acompanhe em breve as novidades do criatório.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      noticias.sort((a, b) => {
+        if (!a.data) return 1;
+        if (!b.data) return -1;
+        return b.data.localeCompare(a.data);
+      });
+      
+      grid.innerHTML = noticias.map(noticia => `
+        <div class="noticia-card">
+          ${noticia.banner ? `<img src="${noticia.banner}" class="banner" onerror="this.style.display='none'">` : ''}
+          <div class="content">
+            <div class="titulo">${noticia.titulo || 'Sem título'}</div>
+            <div class="data">📅 ${formatarData(noticia.data)}</div>
+            <div class="texto">${noticia.texto || ''}</div>
+            
+            ${noticia.videos && noticia.videos.length > 0 ? `
+              <div class="videos">
+                ${noticia.videos.map(v => {
+                  const videoId = extractYouTubeId(v);
+                  return videoId ? `
+                    <div class="video-wrapper">
+                      <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                  ` : '';
+                }).filter(Boolean).join('')}
+              </div>
+            ` : ''}
+            
+            ${noticia.fotos && noticia.fotos.length > 0 ? `
+              <div class="fotos">
+                ${noticia.fotos.map(f => `
+                  <img src="${f}" onclick="abrirModal('${f}')" onerror="this.style.display='none'">
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatarData(data) {
+      if (!data) return 'Data não informada';
+      const partes = data.split('-');
+      if (partes.length === 3) {
+        const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        return `${parseInt(partes[2])} de ${meses[parseInt(partes[1])-1]} de ${partes[0]}`;
+      }
+      return data;
+    }
+
+    carregarLogo();
+    renderizarNoticias();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

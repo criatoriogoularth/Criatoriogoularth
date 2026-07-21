@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Editar Site</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.editor-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--brass-soft);
+  margin-bottom: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.field input,
+.field select,
+.field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  outline: none !important;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--brass) !important;
+}
+.upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(0,0,0,0.1);
+}
+.upload-area:hover {
+  border-color: var(--brass-dim);
+}
+.upload-area .icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+.upload-area p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.upload-area .format {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.upload-area input[type="file"] {
+  display: none;
+}
+.upload-area .btn-upload {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 24px;
+  border-radius: 6px;
+  background: rgba(199,151,63,0.15);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+}
+.upload-area .btn-upload:hover {
+  background: rgba(199,151,63,0.25);
+}
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.item-row .info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+}
+.item-row .info .preview {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.item-row .info .titulo {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+}
+.item-row .info .descricao {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.item-row .info .categoria-tag {
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(199,151,63,0.12);
+  color: var(--brass-soft);
+}
+.item-row .actions {
+  display: flex;
+  gap: 6px;
+}
+.item-row .actions .btn {
+  padding: 2px 10px;
+  font-size: 10px;
+}
+.empty-list {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.tabs button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tabs button.active {
+  color: var(--brass-soft);
+  border-bottom-color: var(--brass);
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+.banner-upload-area {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
+}
+.banner-upload-area input[type="file"] {
+  display: none;
+}
+.banner-upload-area .btn-upload {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--brass-dim);
+  background: rgba(199,151,63,0.08);
+  color: var(--brass-soft);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+}
+.banner-upload-area .btn-upload:hover {
+  background: rgba(199,151,63,0.18);
+}
+.banner-preview-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  margin-top: 8px;
+}
+.banner-preview-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 250px;
+  object-fit: cover;
+}
+.banner-preview-container .placeholder {
+  width: 100%;
+  height: 120px;
+  background: rgba(0,0,0,0.2);
+  border: 2px dashed var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  flex-direction: column;
+  gap: 8px;
+}
+.ave-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  border: 1px solid var(--line);
+}
+.ave-selector-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.ave-selector-item label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+}
+.especie-titulo {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--brass-soft);
+  font-size: 14px;
+}
+.status-select {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: 'Manrope', sans-serif;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1 id="page-title">✎ Editar Página</h1>
+          <div class="lede" id="page-lede">Edite o conteúdo da página do site</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-primary" onclick="salvarConteudo()">💾 Salvar</button>
+        </div>
+      </div>
+
+      <div id="editor-container">
+        <!-- Conteúdo renderizado pelo JavaScript -->
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+// ============================================================
+// SIDEBAR
+// ============================================================
+renderSidebar('admin-site');
+
+// ============================================================
+// FUNÇÕES DE BANCO (via API)
+// ============================================================
+
+async function getSiteConteudo() {
+  return (await DB.getConfig('site_conteudo')) || {};
+}
+
+async function saveSiteConteudo(data) {
+  await DB.setConfig('site_conteudo', data);
+}
+
+async function getAvesPlantel() {
+  return DB.getAll(DB.TABLES.AVES);
+}
+
+async function getFotos() {
+  return (await DB.getConfig('site_fotos')) || [];
+}
+
+async function saveFotos(fotosArr) {
+  await DB.setConfig('site_fotos', fotosArr);
+}
+
+async function getVideos() {
+  return (await DB.getConfig('site_videos')) || [];
+}
+
+async function saveVideos(videosArr) {
+  await DB.setConfig('site_videos', videosArr);
+}
+
+async function getNoticias() {
+  return (await DB.getConfig('site_noticias')) || [];
+}
+
+async function saveNoticias(noticiasArr) {
+  await DB.setConfig('site_noticias', noticiasArr);
+}
+
+async function getEspeciesDisponiveis() {
+  return (await DB.getConfig('site_especies')) || {};
+}
+
+// ============================================================
+// VARIÁVEIS GLOBAIS
+// ============================================================
+
+let paginaAtual = '';
+let conteudo = {};
+let todasAves = [];
+let fotos = [];
+let videos = [];
+let noticias = [];
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+
+async function initEditor() {
+  const params = new URLSearchParams(window.location.search);
+  paginaAtual = params.get('pagina') || 'home';
+  
+  conteudo = await getSiteConteudo();
+  todasAves = await getAvesPlantel();
+  fotos = await getFotos();
+  videos = await getVideos();
+  noticias = await getNoticias();
+  
+  const titulos = {
+    'home': 'Home',
+    'criatorio': 'O Criatório',
+    'noticias': 'Notícias',
+    'plantel': 'Plantel',
+    'adultos': 'Adultos Disponíveis',
+    'filhotes': 'Filhotes',
+    'fotos': 'Fotos',
+    'videos': 'Vídeos',
+    'contato': 'Contato'
+  };
+  
+  document.getElementById('page-title').textContent = `✎ Editar: ${titulos[paginaAtual] || paginaAtual}`;
+  document.getElementById('page-lede').textContent = `Editando o conteúdo da página "${titulos[paginaAtual] || paginaAtual}"`;
+  
+  await renderizarEditor();
+}
+
+// ============================================================
+// RENDERIZAR EDITOR
+// ============================================================
+
+async function renderizarEditor() {
+  const container = document.getElementById('editor-container');
+  
+  if (paginaAtual === 'home') {
+    container.innerHTML = await renderHome();
+  } else if (paginaAtual === 'criatorio') {
+    container.innerHTML = renderCriatorio();
+  } else if (paginaAtual === 'noticias') {
+    container.innerHTML = renderNoticias();
+  } else if (paginaAtual === 'plantel') {
+    container.innerHTML = renderPlantel();
+  } else if (paginaAtual === 'adultos') {
+    container.innerHTML = renderAdultos();
+  } else if (paginaAtual === 'filhotes') {
+    container.innerHTML = renderFilhotes();
+  } else if (paginaAtual === 'fotos') {
+    container.innerHTML = renderFotos();
+  } else if (paginaAtual === 'videos') {
+    container.innerHTML = renderVideos();
+  } else if (paginaAtual === 'contato') {
+    container.innerHTML = renderContato();
+  } else {
+    container.innerHTML = '<div class="editor-card"><p>Página não encontrada.</p></div>';
+  }
+  
+  await carregarDadosSalvos();
+}
+
+// ============================================================
+// RENDER HOME - CORRIGIDO
+// ============================================================
+
+async function renderHome() {
+  // Buscar espécies disponíveis
+  const especiesDisponiveis = await getEspeciesDisponiveis();
+  
+  let especiesHtml = '';
+  const nomes = Object.keys(especiesDisponiveis);
+  if (nomes.length === 0) {
+    especiesHtml = '<div class="empty-list">Nenhuma espécie cadastrada. Vá em "Espécies da Home" para cadastrar.</div>';
+  } else {
+    const especiesSelecionadas = conteudo.home && conteudo.home.especies ? conteudo.home.especies : [];
+    nomes.forEach(esp => {
+      const selecionado = especiesSelecionadas.includes(esp);
+      especiesHtml += `
+        <div class="ave-selector-item" style="border:1px solid ${selecionado ? 'var(--brass)' : 'var(--line)'};">
+          <input type="checkbox" id="especie-${esp}" ${selecionado ? 'checked' : ''} onchange="atualizarEspecies('${esp}')" style="width:18px;height:18px;accent-color:var(--brass);cursor:pointer;">
+          <label for="especie-${esp}" style="cursor:pointer;flex:1;font-size:13px;color:${selecionado ? 'var(--brass-soft)' : 'var(--text)'};">
+            ${especiesDisponiveis[esp].titulo || esp}
+            ${especiesDisponiveis[esp].imagem ? ' 🖼️' : ''}
+            ${selecionado ? ' ✅' : ''}
+          </label>
+        </div>
+      `;
+    });
+  }
+  
+  return `
+    <div class="editor-card">
+      <h3>🖼️ Banner Principal</h3>
+      <div class="field">
+        <label>Imagem do Banner</label>
+        <div class="banner-upload-area">
+          <input type="file" id="banner-file-input" accept="image/*" onchange="uploadBanner(event)">
+          <button class="btn-upload" onclick="document.getElementById('banner-file-input').click()">📤 Escolher Imagem</button>
+          <span style="font-size:12px;color:var(--text-muted);">ou</span>
+          <input type="text" id="banner-url" placeholder="https://exemplo.com/banner.jpg" style="flex:1;min-width:200px;">
+          <button class="btn btn-ghost" onclick="carregarBannerUrl()" style="padding:6px 14px;font-size:12px;">Carregar</button>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">📐 Tamanho recomendado: <strong>1920 × 800 px</strong></div>
+      </div>
+      <div class="banner-preview-container" id="banner-preview-container">
+        <div class="placeholder">
+          <span style="font-size:32px;opacity:0.4;">🖼️</span>
+          <span>Nenhum banner configurado</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-danger" onclick="excluirBanner()">🗑️ Excluir Banner</button>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Título do Banner</label>
+        <input type="text" id="banner-titulo" placeholder="Bem-vindo ao Criatório Goularth">
+        <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
+      </div>
+      <div class="field">
+        <label>Subtítulo do Banner</label>
+        <input type="text" id="banner-subtitulo" placeholder="Excelência na criação de aves">
+        <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
+      </div>
+    </div>
+    <div class="editor-card">
+      <h3>📝 Texto da Home</h3>
+      <div class="field">
+        <label>Texto Principal</label>
+        <textarea id="home-texto" rows="6" placeholder="Digite o texto principal da home..."></textarea>
+      </div>
+    </div>
+    <div class="editor-card">
+      <h3>🐦 Espécies em Destaque</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Marque as espécies que aparecerão na home. <a href="site-editor-especies.html" style="color:var(--brass-soft);">Gerenciar espécies →</a></p>
+      <div id="especies-destaque-list">
+        ${especiesHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// FUNÇÃO PARA ATUALIZAR ESPÉCIE - CORRIGIDA
+// ============================================================
+
+function atualizarEspecies(esp) {
+  // Pegar o checkbox
+  const checkbox = document.getElementById(`especie-${esp}`);
+  if (!checkbox) return;
+  
+  // Pegar o container pai
+  const container = checkbox.closest('.ave-selector-item');
+  const label = container.querySelector('label');
+  
+  // Atualizar visual
+  if (checkbox.checked) {
+    container.style.border = '1px solid var(--brass)';
+    label.style.color = 'var(--brass-soft)';
+    // Adicionar ✅ se não tiver
+    if (!label.textContent.includes('✅')) {
+      label.textContent += ' ✅';
+    }
+  } else {
+    container.style.border = '1px solid var(--line)';
+    label.style.color = 'var(--text)';
+    // Remover ✅
+    label.textContent = label.textContent.replace(' ✅', '');
+  }
+}
+
+// ============================================================
+// FUNÇÃO PARA EXCLUIR BANNER
+// ============================================================
+
+async function excluirBanner() {
+  if (!confirm('Tem certeza que deseja excluir o banner?')) return;
+  
+  document.getElementById('banner-url').value = '';
+  document.getElementById('banner-preview-container').innerHTML = `
+    <div class="placeholder">
+      <span style="font-size:32px;opacity:0.4;">🖼️</span>
+      <span>Nenhum banner configurado</span>
+    </div>
+  `;
+  
+  // Salvar automaticamente
+  await salvarConteudo();
+}
+
+// ============================================================
+// RENDER PLANTEL - SEPARADO POR ESPÉCIE
+// ============================================================
+
+function renderPlantel() {
+  return `
+    <div class="editor-card">
+      <h3>🐦 Selecionar Aves do Plantel</h3>
+      <p style="color:var(--text-muted);margin-bottom:12px;">Marque as aves que aparecerão no plantel do site.</p>
+      <div id="plantel-aves-list"></div>
+    </div>
+    <div class="editor-card">
+      <h3>📋 Aves Selecionadas</h3>
+      <div id="plantel-selecionadas"></div>
+    </div>
+  `;
+}
+
+async function carregarAvesPlantel() {
+  const aves = todasAves;
+  const container = document.getElementById('plantel-aves-list');
+  const selecionadas = document.getElementById('plantel-selecionadas');
+  if (!container) return;
+  
+  // Agrupar aves por espécie
+  const especies = {};
+  aves.forEach(ave => {
+    const esp = ave.especie || 'Sem espécie';
+    if (!especies[esp]) especies[esp] = [];
+    especies[esp].push(ave);
+  });
+  
+  // Ordenar espécies alfabeticamente
+  const especiesOrdenadas = Object.keys(especies).sort();
+  
+  // Lista de aves para selecionar - separada por espécie
+  let html = '';
+  especiesOrdenadas.forEach(esp => {
+    html += `<div class="especie-titulo">🐦 ${esp}</div>`;
+    
+    especies[esp].forEach(ave => {
+      const selecionado = !!ave.noSite;
+      html += `
+        <div class="ave-selector-item">
+          <input type="checkbox" id="plantel-ave-${ave.id}" ${selecionado ? 'checked' : ''} onchange="toggleAveSite(${ave.id})">
+          <label for="plantel-ave-${ave.id}">
+            ${ave.nome} 
+            <span style="color:var(--text-muted);font-size:12px;">(${ave.anilha || '-'})</span>
+            <span style="color:var(--text-muted);font-size:11px;margin-left:8px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</span>
+          </label>
+        </div>
+      `;
+    });
+  });
+  container.innerHTML = html || '<div class="empty-list">Nenhuma ave cadastrada.</div>';
+  
+  // Lista de aves selecionadas
+  const avesSelecionadas = aves.filter(a => a.noSite);
+  if (avesSelecionadas.length === 0) {
+    selecionadas.innerHTML = '<div class="empty-list">Nenhuma ave selecionada para o site.</div>';
+  } else {
+    let htmlSel = '';
+    avesSelecionadas.forEach(ave => {
+      htmlSel += `
+        <div class="item-row">
+          <div class="info">
+            <span class="titulo">${ave.nome}</span>
+            <span class="descricao">${ave.anilha || '-'} · ${ave.especie || '-'}</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-danger" onclick="removerAveSite(${ave.id})">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    selecionadas.innerHTML = htmlSel;
+  }
+}
+
+async function toggleAveSite(id) {
+  const ave = todasAves.find(a => a.id === id);
+  if (!ave) return;
+  
+  if (!ave.noSite) {
+    await DB.update(DB.TABLES.AVES, id, { noSite: true, categoriaSite: 'plantel', statusSite: 'Disponível' });
+  } else {
+    await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  }
+  todasAves = await getAvesPlantel();
+  carregarAvesPlantel();
+}
+
+async function removerAveSite(id) {
+  await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  todasAves = await getAvesPlantel();
+  carregarAvesPlantel();
+}
+
+// ============================================================
+// RENDER ADULTOS - SEPARADO POR ESPÉCIE COM STATUS
+// ============================================================
+
+function renderAdultos() {
+  return `
+    <div class="editor-card">
+      <h3>🐤 Selecionar Adultos Disponíveis</h3>
+      <p style="color:var(--text-muted);margin-bottom:12px;">Marque as aves adultas que aparecerão na página de adultos disponíveis.</p>
+      <div id="adultos-aves-list"></div>
+    </div>
+    <div class="editor-card">
+      <h3>📋 Adultos Selecionados</h3>
+      <div id="adultos-selecionadas"></div>
+    </div>
+  `;
+}
+
+async function carregarAdultos() {
+  const aves = todasAves;
+  const container = document.getElementById('adultos-aves-list');
+  const selecionadas = document.getElementById('adultos-selecionadas');
+  if (!container) return;
+  
+  // Agrupar aves por espécie
+  const especies = {};
+  aves.forEach(ave => {
+    const esp = ave.especie || 'Sem espécie';
+    if (!especies[esp]) especies[esp] = [];
+    especies[esp].push(ave);
+  });
+  
+  const especiesOrdenadas = Object.keys(especies).sort();
+  
+  let html = '';
+  especiesOrdenadas.forEach(esp => {
+    html += `<div class="especie-titulo">🐦 ${esp}</div>`;
+    
+    especies[esp].forEach(ave => {
+      const selecionado = ave.noSite && ave.categoriaSite === 'adulto';
+      html += `
+        <div class="ave-selector-item">
+          <input type="checkbox" id="adulto-ave-${ave.id}" ${selecionado ? 'checked' : ''} onchange="toggleAdulto(${ave.id})">
+          <label for="adulto-ave-${ave.id}">
+            ${ave.nome} 
+            <span style="color:var(--text-muted);font-size:12px;">(${ave.anilha || '-'})</span>
+            <span style="color:var(--text-muted);font-size:11px;margin-left:8px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</span>
+          </label>
+        </div>
+      `;
+    });
+  });
+  container.innerHTML = html || '<div class="empty-list">Nenhuma ave cadastrada.</div>';
+  
+  // Lista de adultos selecionados
+  const adultosSite = aves.filter(a => a.noSite && a.categoriaSite === 'adulto');
+  if (adultosSite.length === 0) {
+    selecionadas.innerHTML = '<div class="empty-list">Nenhum adulto selecionado.</div>';
+  } else {
+    let htmlSel = '';
+    adultosSite.forEach(ave => {
+      htmlSel += `
+        <div class="item-row">
+          <div class="info">
+            <span class="titulo">${ave.nome}</span>
+            <span class="descricao">${ave.anilha || '-'} · ${ave.especie || '-'}</span>
+            <span style="font-size:11px;color:var(--text-muted);">
+              Status: 
+              <select class="status-select" onchange="editarStatusAdulto(${ave.id}, this.value)">
+                <option value="Disponível" ${ave.statusSite === 'Disponível' ? 'selected' : ''}>Disponível</option>
+                <option value="Reservado" ${ave.statusSite === 'Reservado' ? 'selected' : ''}>Reservado</option>
+                <option value="Vendido" ${ave.statusSite === 'Vendido' ? 'selected' : ''}>Vendido</option>
+              </select>
+            </span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-danger" onclick="removerAdulto(${ave.id})">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    selecionadas.innerHTML = htmlSel;
+  }
+}
+
+async function toggleAdulto(id) {
+  const ave = todasAves.find(a => a.id === id);
+  if (!ave) return;
+  
+  if (!ave.noSite) {
+    await DB.update(DB.TABLES.AVES, id, { noSite: true, categoriaSite: 'adulto', statusSite: 'Disponível' });
+  } else if (ave.categoriaSite === 'adulto') {
+    await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  } else {
+    await DB.update(DB.TABLES.AVES, id, { categoriaSite: 'adulto', statusSite: 'Disponível' });
+  }
+  todasAves = await getAvesPlantel();
+  carregarAdultos();
+}
+
+async function removerAdulto(id) {
+  await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  todasAves = await getAvesPlantel();
+  carregarAdultos();
+}
+
+async function editarStatusAdulto(id, novoStatus) {
+  await DB.update(DB.TABLES.AVES, id, { statusSite: novoStatus });
+  todasAves = await getAvesPlantel();
+}
+
+// ============================================================
+// RENDER FILHOTES - SEPARADO POR ESPÉCIE COM STATUS
+// ============================================================
+
+function renderFilhotes() {
+  return `
+    <div class="editor-card">
+      <h3>🐣 Selecionar Filhotes</h3>
+      <p style="color:var(--text-muted);margin-bottom:12px;">Marque os filhotes que aparecerão na página de filhotes disponíveis.</p>
+      <div id="filhotes-aves-list"></div>
+    </div>
+    <div class="editor-card">
+      <h3>📋 Filhotes Selecionados</h3>
+      <div id="filhotes-selecionadas"></div>
+    </div>
+  `;
+}
+
+async function carregarFilhotes() {
+  const aves = todasAves;
+  const container = document.getElementById('filhotes-aves-list');
+  const selecionadas = document.getElementById('filhotes-selecionadas');
+  if (!container) return;
+  
+  // Agrupar aves por espécie
+  const especies = {};
+  aves.forEach(ave => {
+    const esp = ave.especie || 'Sem espécie';
+    if (!especies[esp]) especies[esp] = [];
+    especies[esp].push(ave);
+  });
+  
+  const especiesOrdenadas = Object.keys(especies).sort();
+  
+  let html = '';
+  especiesOrdenadas.forEach(esp => {
+    html += `<div class="especie-titulo">🐦 ${esp}</div>`;
+    
+    especies[esp].forEach(ave => {
+      const selecionado = ave.noSite && ave.categoriaSite === 'filhote';
+      html += `
+        <div class="ave-selector-item">
+          <input type="checkbox" id="filhote-ave-${ave.id}" ${selecionado ? 'checked' : ''} onchange="toggleFilhote(${ave.id})">
+          <label for="filhote-ave-${ave.id}">
+            ${ave.nome} 
+            <span style="color:var(--text-muted);font-size:12px;">(${ave.anilha || '-'})</span>
+            <span style="color:var(--text-muted);font-size:11px;margin-left:8px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</span>
+            ${ave.dataNasc ? `<span style="color:var(--text-muted);font-size:10px;margin-left:8px;">📅 ${formatarData(ave.dataNasc)}</span>` : ''}
+          </label>
+        </div>
+      `;
+    });
+  });
+  container.innerHTML = html || '<div class="empty-list">Nenhuma ave cadastrada.</div>';
+  
+  // Lista de filhotes selecionados
+  const filhotesSite = aves.filter(a => a.noSite && a.categoriaSite === 'filhote');
+  if (filhotesSite.length === 0) {
+    selecionadas.innerHTML = '<div class="empty-list">Nenhum filhote selecionado.</div>';
+  } else {
+    let htmlSel = '';
+    filhotesSite.forEach(ave => {
+      htmlSel += `
+        <div class="item-row">
+          <div class="info">
+            <span class="titulo">${ave.nome}</span>
+            <span class="descricao">${ave.anilha || '-'} · ${ave.especie || '-'}</span>
+            <span style="font-size:11px;color:var(--text-muted);">
+              Status: 
+              <select class="status-select" onchange="editarStatusFilhote(${ave.id}, this.value)">
+                <option value="Disponível" ${ave.statusSite === 'Disponível' ? 'selected' : ''}>Disponível</option>
+                <option value="Reservado" ${ave.statusSite === 'Reservado' ? 'selected' : ''}>Reservado</option>
+                <option value="Vendido" ${ave.statusSite === 'Vendido' ? 'selected' : ''}>Vendido</option>
+              </select>
+            </span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-danger" onclick="removerFilhote(${ave.id})">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    selecionadas.innerHTML = htmlSel;
+  }
+}
+
+async function toggleFilhote(id) {
+  const ave = todasAves.find(a => a.id === id);
+  if (!ave) return;
+  
+  if (!ave.noSite) {
+    await DB.update(DB.TABLES.AVES, id, { noSite: true, categoriaSite: 'filhote', statusSite: 'Disponível' });
+  } else if (ave.categoriaSite === 'filhote') {
+    await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  } else {
+    await DB.update(DB.TABLES.AVES, id, { categoriaSite: 'filhote', statusSite: 'Disponível' });
+  }
+  todasAves = await getAvesPlantel();
+  carregarFilhotes();
+}
+
+async function removerFilhote(id) {
+  await DB.update(DB.TABLES.AVES, id, { noSite: false, categoriaSite: null, statusSite: null });
+  todasAves = await getAvesPlantel();
+  carregarFilhotes();
+}
+
+async function editarStatusFilhote(id, novoStatus) {
+  await DB.update(DB.TABLES.AVES, id, { statusSite: novoStatus });
+  todasAves = await getAvesPlantel();
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = data.split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
+// ============================================================
+// RENDER FOTOS
+// ============================================================
+
+function renderFotos() {
+  const fotosCriacao = fotos.filter(f => f.categoria === 'Criação' || !f.categoria);
+  const fotosTorneios = fotos.filter(f => f.categoria === 'Torneios');
+  
+  return `
+    <div class="editor-card">
+      <h3>📸 Adicionar Foto</h3>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="nova-foto-titulo" placeholder="Ex: Filhotes Canário-da-terra">
+      </div>
+      <div class="field">
+        <label>Categoria</label>
+        <select id="nova-foto-categoria">
+          <option value="Criação">📸 Criação</option>
+          <option value="Torneios">🏆 Torneios</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input type="text" id="nova-foto-descricao" placeholder="Breve descrição">
+      </div>
+      <div class="field">
+        <div class="upload-area" onclick="document.getElementById('fotos-file-input').click()">
+          <div class="icon">🖼️</div>
+          <p><strong>Clique para selecionar imagens</strong></p>
+          <p class="format">JPG, PNG, GIF, WEBP · Máx: 10MB</p>
+          <input type="file" id="fotos-file-input" accept="image/*" multiple onchange="uploadFotos(event)">
+          <div class="btn-upload">📤 Escolher Imagens</div>
+        </div>
+      </div>
+    </div>
+    <div class="editor-card">
+      <h3>🖼️ Fotos Cadastradas (${fotos.length})</h3>
+      <div class="tabs">
+        <button class="active" onclick="switchTabFotos('lista-criacao', this)">📸 Criação (${fotosCriacao.length})</button>
+        <button onclick="switchTabFotos('lista-torneios', this)">🏆 Torneios (${fotosTorneios.length})</button>
+      </div>
+      <div class="tab-content active" id="lista-criacao">
+        <div id="fotos-criacao" class="items-list">${renderListaFotos(fotosCriacao)}</div>
+      </div>
+      <div class="tab-content" id="lista-torneios">
+        <div id="fotos-torneios" class="items-list">${renderListaFotos(fotosTorneios)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderListaFotos(lista) {
+  if (lista.length === 0) return '<div class="empty-list">Nenhuma foto nesta categoria.</div>';
+  
+  return lista.map((foto, index) => {
+    const realIndex = fotos.indexOf(foto);
+    return `
+      <div class="item-row">
+        <div class="info">
+          <img src="${foto.url}" class="preview" onerror="this.style.display='none'">
+          <div>
+            <div class="titulo">${foto.titulo || 'Sem título'}</div>
+            ${foto.descricao ? `<div class="descricao">${foto.descricao}</div>` : ''}
+            <span class="categoria-tag">${foto.categoria || 'Criação'}</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="editarFoto(${realIndex})">✎</button>
+          <button class="btn btn-danger" onclick="removerFoto(${realIndex})">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function switchTabFotos(tabId, btn) {
+  const container = btn.closest('.editor-card');
+  container.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ============================================================
+// RENDER VÍDEOS
+// ============================================================
+
+function renderVideos() {
+  const videosCriacao = videos.filter(v => v.categoria === 'Criação' || !v.categoria);
+  const videosTorneios = videos.filter(v => v.categoria === 'Torneios');
+  
+  return `
+    <div class="editor-card">
+      <h3>🎬 Adicionar Vídeo (YouTube)</h3>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="novo-video-titulo" placeholder="Ex: Apresentação do CT Caribe">
+      </div>
+      <div class="field">
+        <label>Categoria</label>
+        <select id="novo-video-categoria">
+          <option value="Criação">🎬 Criação</option>
+          <option value="Torneios">🏆 Torneios</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input type="text" id="novo-video-descricao" placeholder="Breve descrição">
+      </div>
+      <div class="field">
+        <label>URL do YouTube</label>
+        <input type="text" id="novo-video-url" placeholder="https://youtu.be/...">
+      </div>
+      <button class="btn btn-primary" onclick="adicionarVideo()" style="width:100%;justify-content:center;">+ Adicionar Vídeo</button>
+    </div>
+    <div class="editor-card">
+      <h3>🎥 Vídeos Cadastrados (${videos.length})</h3>
+      <div class="tabs">
+        <button class="active" onclick="switchTabVideos('lista-videos-criacao', this)">🎬 Criação (${videosCriacao.length})</button>
+        <button onclick="switchTabVideos('lista-videos-torneios', this)">🏆 Torneios (${videosTorneios.length})</button>
+      </div>
+      <div class="tab-content active" id="lista-videos-criacao">
+        <div id="videos-criacao" class="items-list">${renderListaVideos(videosCriacao)}</div>
+      </div>
+      <div class="tab-content" id="lista-videos-torneios">
+        <div id="videos-torneios" class="items-list">${renderListaVideos(videosTorneios)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderListaVideos(lista) {
+  if (lista.length === 0) return '<div class="empty-list">Nenhum vídeo nesta categoria.</div>';
+  
+  return lista.map((video, index) => {
+    const realIndex = videos.indexOf(video);
+    const videoId = extractYouTubeId(video.url);
+    return `
+      <div class="item-row">
+        <div class="info">
+          ${videoId ? `<img src="https://img.youtube.com/vi/${videoId}/default.jpg" class="preview" onerror="this.style.display='none'">` : '<div style="width:60px;height:45px;background:var(--bg);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--line);">🎬</div>'}
+          <div>
+            <div class="titulo">${video.titulo || 'Sem título'}</div>
+            ${video.descricao ? `<div class="descricao">${video.descricao}</div>` : ''}
+            <span class="categoria-tag">${video.categoria || 'Criação'}</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="editarVideo(${realIndex})">✎</button>
+          <button class="btn btn-danger" onclick="removerVideo(${realIndex})">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function switchTabVideos(tabId, btn) {
+  const container = btn.closest('.editor-card');
+  container.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ============================================================
+// RENDER NOTÍCIAS
+// ============================================================
+
+function renderNoticias() {
+  return `
+    <div class="editor-card">
+      <h3>📰 Adicionar Notícia</h3>
+      <div class="field">
+        <label>Título *</label>
+        <input type="text" id="noticia-titulo" placeholder="Título da notícia">
+      </div>
+      <div class="field">
+        <label>Texto *</label>
+        <textarea id="noticia-texto" rows="6" placeholder="Conteúdo da notícia..."></textarea>
+      </div>
+      <div class="field">
+        <label>Banner/Imagem</label>
+        <div class="upload-area" onclick="document.getElementById('noticia-banner-input').click()" style="padding:15px;">
+          <div class="icon" style="font-size:24px;">🖼️</div>
+          <p style="font-size:13px;">Clique para selecionar imagem de destaque</p>
+          <input type="file" id="noticia-banner-input" accept="image/*" onchange="uploadBannerNoticia(event)">
+          <div class="btn-upload" style="padding:4px 16px;font-size:11px;">📤 Escolher</div>
+        </div>
+        <div id="noticia-banner-preview" style="margin-top:6px;display:none;">
+          <img id="noticia-banner-img" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid var(--line);">
+        </div>
+        <input type="hidden" id="noticia-banner-url" value="">
+      </div>
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="noticia-data">
+      </div>
+      <button class="btn btn-primary" onclick="salvarNoticiaAtual()" style="width:100%;justify-content:center;">💾 Salvar Notícia</button>
+      <input type="hidden" id="edit-noticia-index" value="">
+    </div>
+    <div class="editor-card">
+      <h3>📋 Notícias Publicadas (${noticias.length})</h3>
+      <div id="noticias-lista" class="items-list">
+        ${renderListaNoticias()}
+      </div>
+    </div>
+  `;
+}
+
+function renderListaNoticias() {
+  if (noticias.length === 0) return '<div class="empty-list">Nenhuma notícia cadastrada.</div>';
+  
+  return noticias.map((n, index) => `
+    <div class="item-row">
+      <div class="info">
+        <div>
+          <div class="titulo">${n.titulo || 'Sem título'}</div>
+          <div class="descricao">${n.texto ? n.texto.substring(0, 80) + '...' : ''}</div>
+          <span style="font-size:10px;color:var(--text-muted);">📅 ${n.data || 'Sem data'}</span>
+          ${n.banner ? ' 🖼️' : ''}
+          ${n.videos && n.videos.length > 0 ? ` 🎬${n.videos.length}` : ''}
+          ${n.fotos && n.fotos.length > 0 ? ` 📸${n.fotos.length}` : ''}
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="editarNoticia(${index})">✎</button>
+        <button class="btn btn-danger" onclick="excluirNoticia(${index})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// RENDER CRIATÓRIO
+// ============================================================
+
+function renderCriatorio() {
+  return `
+    <div class="editor-card">
+      <h3>📖 Sobre o Criatório</h3>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="criatorio-titulo" placeholder="O Criatório">
+      </div>
+      <div class="field">
+        <label>História</label>
+        <textarea id="criatorio-historia" rows="10" placeholder="História do criatório..."></textarea>
+      </div>
+      <div class="field">
+        <label>Genética e Parceiros</label>
+        <textarea id="criatorio-genetica" rows="6" placeholder="Lista de criadores parceiros..."></textarea>
+      </div>
+      <div class="field">
+        <label>Imagem (URL)</label>
+        <input type="text" id="criatorio-imagem" placeholder="https://exemplo.com/criatorio.jpg">
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// RENDER CONTATO
+// ============================================================
+
+function renderContato() {
+  return `
+    <div class="editor-card">
+      <h3>📧 Informações de Contato</h3>
+      <div class="field">
+        <label>WhatsApp</label>
+        <input type="text" id="contato-whatsapp" placeholder="(11) 9 0000-0000">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="text" id="contato-email" placeholder="contato@criatorio.com">
+      </div>
+      <div class="field">
+        <label>Endereço</label>
+        <input type="text" id="contato-endereco" placeholder="Cidade - Estado">
+      </div>
+      <div class="field">
+        <label>Instagram</label>
+        <input type="text" id="contato-instagram" placeholder="@instagram">
+      </div>
+      <div class="field">
+        <label>Facebook</label>
+        <input type="text" id="contato-facebook" placeholder="/facebook">
+      </div>
+      <div class="field">
+        <label>YouTube</label>
+        <input type="text" id="contato-youtube" placeholder="/youtube">
+      </div>
+      <div class="field">
+        <label>Registros</label>
+        <input type="text" id="contato-registros" placeholder="CTF 000000 / FOB 000">
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// FUNÇÕES DE BANNER
+// ============================================================
+
+function uploadBanner(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const url = e.target.result;
+    document.getElementById('banner-url').value = url;
+    document.getElementById('banner-preview-container').innerHTML = `<img src="${url}" alt="Banner">`;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function carregarBannerUrl() {
+  const url = document.getElementById('banner-url').value.trim();
+  if (!url) return;
+  document.getElementById('banner-preview-container').innerHTML = `<img src="${url}" alt="Banner" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><span style=\\'font-size:32px;opacity:0.4;\\'>❌</span><span>Erro ao carregar</span></div>'">`;
+}
+
+function uploadBannerNoticia(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const url = e.target.result;
+    document.getElementById('noticia-banner-url').value = url;
+    document.getElementById('noticia-banner-preview').style.display = 'block';
+    document.getElementById('noticia-banner-img').src = url;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// FUNÇÕES DE FOTOS
+// ============================================================
+
+function uploadFotos(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) {
+    alert('Nenhum arquivo selecionado.');
+    return;
+  }
+
+  const titulo = document.getElementById('nova-foto-titulo').value.trim() || 'Sem título';
+  const categoria = document.getElementById('nova-foto-categoria').value || 'Criação';
+  const descricao = document.getElementById('nova-foto-descricao').value.trim() || '';
+
+  let carregadas = 0;
+  const total = files.length;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) {
+      alert(`O arquivo "${file.name}" não é uma imagem.`);
+      continue;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert(`A imagem "${file.name}" excede 10MB.`);
+      continue;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      fotos.push({
+        url: e.target.result,
+        titulo: titulo + (total > 1 ? ` ${carregadas + 1}` : ''),
+        categoria: categoria,
+        descricao: descricao
+      });
+      carregadas++;
+      if (carregadas === total) {
+        await saveFotos(fotos);
+        await renderizarEditor();
+        alert(`✅ ${carregadas} foto(s) enviada(s)!`);
+        document.getElementById('nova-foto-titulo').value = '';
+        document.getElementById('nova-foto-descricao').value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  event.target.value = '';
+}
+
+async function editarFoto(index) {
+  const foto = fotos[index];
+  if (!foto) return;
+  const novoTitulo = prompt('Novo título:', foto.titulo || '');
+  if (novoTitulo === null) return;
+  const novaCategoria = prompt('Nova categoria (Criação ou Torneios):', foto.categoria || 'Criação');
+  if (novaCategoria === null) return;
+  const novaDescricao = prompt('Nova descrição:', foto.descricao || '');
+  if (novaDescricao === null) return;
+  foto.titulo = novoTitulo.trim() || 'Sem título';
+  foto.categoria = novaCategoria.trim() || 'Criação';
+  foto.descricao = novaDescricao.trim() || '';
+  await saveFotos(fotos);
+  await renderizarEditor();
+}
+
+async function removerFoto(index) {
+  if (!confirm('Remover esta foto?')) return;
+  fotos.splice(index, 1);
+  await saveFotos(fotos);
+  await renderizarEditor();
+}
+
+// ============================================================
+// FUNÇÕES DE VÍDEOS
+// ============================================================
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return match ? match[1] : null;
+}
+
+async function adicionarVideo() {
+  const titulo = document.getElementById('novo-video-titulo').value.trim();
+  const url = document.getElementById('novo-video-url').value.trim();
+  const categoria = document.getElementById('novo-video-categoria').value || 'Criação';
+  const descricao = document.getElementById('novo-video-descricao').value.trim() || '';
+  
+  if (!titulo) { alert('Digite o título.'); return; }
+  if (!url) { alert('Digite a URL do YouTube.'); return; }
+  if (!extractYouTubeId(url)) { alert('URL do YouTube inválida.'); return; }
+  
+  videos.push({ titulo, url, categoria, descricao });
+  await saveVideos(videos);
+  await renderizarEditor();
+  document.getElementById('novo-video-titulo').value = '';
+  document.getElementById('novo-video-url').value = '';
+  document.getElementById('novo-video-descricao').value = '';
+  alert('✅ Vídeo adicionado!');
+}
+
+async function editarVideo(index) {
+  const video = videos[index];
+  if (!video) return;
+  const novoTitulo = prompt('Novo título:', video.titulo || '');
+  if (novoTitulo === null) return;
+  const novaCategoria = prompt('Nova categoria (Criação ou Torneios):', video.categoria || 'Criação');
+  if (novaCategoria === null) return;
+  const novaDescricao = prompt('Nova descrição:', video.descricao || '');
+  if (novaDescricao === null) return;
+  video.titulo = novoTitulo.trim() || 'Sem título';
+  video.categoria = novaCategoria.trim() || 'Criação';
+  video.descricao = novaDescricao.trim() || '';
+  await saveVideos(videos);
+  await renderizarEditor();
+}
+
+async function removerVideo(index) {
+  if (!confirm('Remover este vídeo?')) return;
+  videos.splice(index, 1);
+  await saveVideos(videos);
+  await renderizarEditor();
+}
+
+// ============================================================
+// FUNÇÕES DE NOTÍCIAS
+// ============================================================
+
+async function salvarNoticiaAtual() {
+  const titulo = document.getElementById('noticia-titulo').value.trim();
+  const texto = document.getElementById('noticia-texto').value.trim();
+  const data = document.getElementById('noticia-data').value;
+  const banner = document.getElementById('noticia-banner-url').value || '';
+  const editIndex = document.getElementById('edit-noticia-index').value;
+  
+  if (!titulo || !texto) {
+    alert('Preencha o título e o texto.');
+    return;
+  }
+  
+  const noticia = { titulo, texto, data: data || new Date().toISOString().split('T')[0], banner, videos: [], fotos: [] };
+  
+  if (editIndex !== '') {
+    noticias[parseInt(editIndex)] = noticia;
+  } else {
+    noticias.push(noticia);
+  }
+  
+  await saveNoticias(noticias);
+  document.getElementById('noticia-titulo').value = '';
+  document.getElementById('noticia-texto').value = '';
+  document.getElementById('noticia-banner-url').value = '';
+  document.getElementById('noticia-banner-preview').style.display = 'none';
+  document.getElementById('edit-noticia-index').value = '';
+  await renderizarEditor();
+  alert('✅ Notícia salva!');
+}
+
+function editarNoticia(index) {
+  const n = noticias[index];
+  if (!n) return;
+  document.getElementById('noticia-titulo').value = n.titulo || '';
+  document.getElementById('noticia-texto').value = n.texto || '';
+  document.getElementById('noticia-data').value = n.data || '';
+  document.getElementById('edit-noticia-index').value = index;
+  if (n.banner) {
+    document.getElementById('noticia-banner-url').value = n.banner;
+    document.getElementById('noticia-banner-preview').style.display = 'block';
+    document.getElementById('noticia-banner-img').src = n.banner;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function excluirNoticia(index) {
+  if (!confirm('Excluir esta notícia?')) return;
+  noticias.splice(index, 1);
+  await saveNoticias(noticias);
+  await renderizarEditor();
+}
+
+// ============================================================
+// CARREGAR DADOS SALVOS - CORRIGIDO
+// ============================================================
+
+async function carregarDadosSalvos() {
+  const data = conteudo[paginaAtual] || {};
+  
+  if (paginaAtual === 'home') {
+    // Banner
+    if (data.bannerUrl) {
+      document.getElementById('banner-url').value = data.bannerUrl;
+      document.getElementById('banner-preview-container').innerHTML = `<img src="${data.bannerUrl}" alt="Banner" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><span style=\\'font-size:32px;opacity:0.4;\\'>❌</span><span>Erro ao carregar</span></div>'">`;
+    }
+    document.getElementById('banner-titulo').value = data.bannerTitulo || '';
+    document.getElementById('banner-subtitulo').value = data.bannerSubtitulo || '';
+    document.getElementById('home-texto').value = data.texto || '';
+    
+    // Espécies em destaque - com checkbox e borda colorida
+    const especiesDestaque = data.especies || [];
+    const especiesDisponiveis = await getEspeciesDisponiveis();
+    const container = document.getElementById('especies-destaque-list');
+    
+    if (container) {
+      const nomes = Object.keys(especiesDisponiveis);
+      if (nomes.length === 0) {
+        container.innerHTML = '<div class="empty-list">Nenhuma espécie cadastrada. Vá em "Espécies da Home" para cadastrar.</div>';
+      } else {
+        let html = '';
+        nomes.forEach(esp => {
+          const selecionado = especiesDestaque.includes(esp);
+          html += `
+            <div class="ave-selector-item" style="border:1px solid ${selecionado ? 'var(--brass)' : 'var(--line)'};">
+              <input type="checkbox" id="especie-${esp}" ${selecionado ? 'checked' : ''} onchange="atualizarEspecies('${esp}')" style="width:18px;height:18px;accent-color:var(--brass);cursor:pointer;">
+              <label for="especie-${esp}" style="cursor:pointer;flex:1;font-size:13px;color:${selecionado ? 'var(--brass-soft)' : 'var(--text)'};">
+                ${especiesDisponiveis[esp].titulo || esp}
+                ${especiesDisponiveis[esp].imagem ? ' 🖼️' : ''}
+                ${selecionado ? ' ✅' : ''}
+              </label>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    }
+  }
+  
+  if (paginaAtual === 'criatorio') {
+    document.getElementById('criatorio-titulo').value = data.titulo || '';
+    document.getElementById('criatorio-historia').value = data.historia || '';
+    document.getElementById('criatorio-genetica').value = data.genetica || '';
+    document.getElementById('criatorio-imagem').value = data.imagem || '';
+  }
+  
+  if (paginaAtual === 'contato') {
+    document.getElementById('contato-whatsapp').value = data.whatsapp || '';
+    document.getElementById('contato-email').value = data.email || '';
+    document.getElementById('contato-endereco').value = data.endereco || '';
+    document.getElementById('contato-instagram').value = data.instagram || '';
+    document.getElementById('contato-facebook').value = data.facebook || '';
+    document.getElementById('contato-youtube').value = data.youtube || '';
+    document.getElementById('contato-registros').value = data.registros || '';
+  }
+  
+  if (paginaAtual === 'plantel') {
+    await carregarAvesPlantel();
+  }
+  
+  if (paginaAtual === 'adultos') {
+    await carregarAdultos();
+  }
+  
+  if (paginaAtual === 'filhotes') {
+    await carregarFilhotes();
+  }
+}
+
+// ============================================================
+// SALVAR CONTEÚDO - CORRIGIDO
+// ============================================================
+
+async function salvarConteudo() {
+  const data = {};
+  
+  if (paginaAtual === 'home') {
+    // PEGAR TODAS AS ESPÉCIES MARCADAS
+    const especiesSelecionadas = [];
+    document.querySelectorAll('#especies-destaque-list input[type="checkbox"]:checked').forEach(cb => {
+      const id = cb.id.replace('especie-', '');
+      if (id) especiesSelecionadas.push(id);
+    });
+    
+    data.bannerUrl = document.getElementById('banner-url').value.trim();
+    data.bannerTitulo = document.getElementById('banner-titulo').value.trim();
+    data.bannerSubtitulo = document.getElementById('banner-subtitulo').value.trim();
+    data.texto = document.getElementById('home-texto').value.trim();
+    data.especies = especiesSelecionadas;
+  }
+  
+  if (paginaAtual === 'criatorio') {
+    data.titulo = document.getElementById('criatorio-titulo').value.trim();
+    data.historia = document.getElementById('criatorio-historia').value.trim();
+    data.genetica = document.getElementById('criatorio-genetica').value.trim();
+    data.imagem = document.getElementById('criatorio-imagem').value.trim();
+  }
+  
+  if (paginaAtual === 'contato') {
+    data.whatsapp = document.getElementById('contato-whatsapp').value.trim();
+    data.email = document.getElementById('contato-email').value.trim();
+    data.endereco = document.getElementById('contato-endereco').value.trim();
+    data.instagram = document.getElementById('contato-instagram').value.trim();
+    data.facebook = document.getElementById('contato-facebook').value.trim();
+    data.youtube = document.getElementById('contato-youtube').value.trim();
+    data.registros = document.getElementById('contato-registros').value.trim();
+  }
+  
+  conteudo[paginaAtual] = { ...conteudo[paginaAtual], ...data };
+  await saveSiteConteudo(conteudo);
+  
+  // Salvar fotos, vídeos e notícias também
+  await saveFotos(fotos);
+  await saveVideos(videos);
+  await saveNoticias(noticias);
+  
+  alert('✅ Conteúdo salvo com sucesso!');
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+
+initEditor();
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Adultos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+  --sage-soft: #8fc3a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav .logo .mark {
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-nav .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-nav .logo .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-nav .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.especie-section {
+  margin-bottom: 30px;
+}
+
+.especie-section .especie-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  color: var(--brass-soft);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--brass-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.especie-section .especie-title .count {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-family: 'Manrope', sans-serif;
+}
+
+.table-wrapper {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-wrapper th {
+  background: rgba(0,0,0,0.25);
+  color: var(--brass-soft);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table-wrapper td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.table-wrapper tr:last-child td {
+  border-bottom: none;
+}
+
+.table-wrapper tr:hover td {
+  background: rgba(199,151,63,0.04);
+}
+
+.sexo-badge {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.sexo-macho {
+  background: rgba(70, 130, 200, 0.15);
+  color: #5a8ab0;
+}
+
+.sexo-femea {
+  background: rgba(200, 100, 130, 0.15);
+  color: #e2a898;
+}
+
+.sexo-indefinido {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+
+.status-badge {
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.status-disponivel {
+  background: rgba(92, 154, 124, 0.2);
+  color: var(--sage-soft);
+}
+
+.status-reservado {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+
+.status-vendido {
+  background: rgba(192, 89, 74, 0.2);
+  color: #e2988a;
+}
+
+.btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+
+.btn-primary {
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass-dim);
+  color: var(--brass-soft);
+}
+
+.btn-primary:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.btn-success {
+  background: rgba(92, 154, 124, 0.15);
+  border-color: rgba(92, 154, 124, 0.3);
+  color: var(--sage-soft);
+}
+
+.btn-success:hover {
+  background: rgba(92, 154, 124, 0.25);
+}
+
+.empty-adultos {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.empty-adultos .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .table-wrapper {
+    font-size: 12px;
+  }
+  .table-wrapper th,
+  .table-wrapper td {
+    padding: 6px 8px;
+  }
+  .especie-section .especie-title {
+    font-size: 18px;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <a href="site-plantel.html">Plantel</a>
+        <a href="site-adultos.html" class="active">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="subtitle">Adultos disponíveis para venda — todos com certificado de origem e anilha registrada</div>
+
+    <div id="adultos-container">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function getSiteAves() {
+      return DB.getAvesPublicas();
+    }
+
+    function formatarData(data) {
+      if (!data) return '-';
+      const partes = data.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return data;
+    }
+
+    function getSexoClass(sexo) {
+      if (sexo === 'M') return 'sexo-macho';
+      if (sexo === 'F') return 'sexo-femea';
+      return 'sexo-indefinido';
+    }
+
+    function getSexoLabel(sexo) {
+      if (sexo === 'M') return 'Macho';
+      if (sexo === 'F') return 'Fêmea';
+      return 'Indefinido';
+    }
+
+    function getStatusClass(status) {
+      const s = (status || 'Disponível').toLowerCase();
+      if (s.includes('reservado')) return 'status-reservado';
+      if (s.includes('vendido')) return 'status-vendido';
+      return 'status-disponivel';
+    }
+
+    async function renderizarAdultos() {
+      let aves = await getSiteAves();
+
+      aves = aves.filter(a => a.categoria === 'adulto');
+      
+      aves.sort((a, b) => {
+        const espA = a.especie || 'Sem espécie';
+        const espB = b.especie || 'Sem espécie';
+        if (espA !== espB) return espA.localeCompare(espB);
+        return a.nome.localeCompare(b.nome);
+      });
+      
+      const container = document.getElementById('adultos-container');
+      
+      if (aves.length === 0) {
+        container.innerHTML = `
+          <div class="empty-adultos">
+            <div class="icon">🐤</div>
+            <p>Nenhum adulto disponível no momento.</p>
+            <p style="font-size:12px;">Volte em breve para conferir novidades.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const grupos = {};
+      aves.forEach(ave => {
+        const especie = ave.especie || 'Sem espécie';
+        if (!grupos[especie]) grupos[especie] = [];
+        grupos[especie].push(ave);
+      });
+      
+      let html = '';
+      let total = 0;
+      
+      for (const [especie, lista] of Object.entries(grupos)) {
+        total += lista.length;
+        
+        html += `
+          <div class="especie-section">
+            <div class="especie-title">
+              🐦 ${especie}
+              <span class="count">${lista.length} adulto${lista.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sexo</th>
+                    <th>Nome</th>
+                    <th>Anilha</th>
+                    <th>Nascimento</th>
+                    <th>Pai</th>
+                    <th>Mãe</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        lista.forEach(a => {
+          html += `
+            <tr>
+              <td><span class="sexo-badge ${getSexoClass(a.sexo)}">${getSexoLabel(a.sexo)}</span></td>
+              <td><strong>${a.nome}</strong></td>
+              <td><span style="font-family:'JetBrains Mono',monospace;color:var(--brass-soft);font-size:12px;">${a.anilha || '-'}</span></td>
+              <td>${formatarData(a.dataNasc)}</td>
+              <td>${a.pai || '-'}</td>
+              <td>${a.mae || '-'}</td>
+              <td><span class="status-badge ${getStatusClass(a.status)}">${a.status || 'Disponível'}</span></td>
+              <td>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                  <a href="site-certificado.html?id=${a.id}" target="_blank" class="btn btn-primary">📄 Ver Árvore</a>
+                  ${(a.status || 'Disponível') === 'Disponível' ? `<button class="btn btn-success" onclick="reservarAdulto(${a.id})">📩 Reservar</button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+        
+        html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+      
+      const totalHtml = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">${total} adultos disponíveis</div>`;
+      container.innerHTML = totalHtml + html;
+    }
+
+    // Antes, qualquer visitante conseguia marcar a ave como "Reservado" direto
+    // pelo navegador — isso mudava um dado real do sistema sem nenhuma
+    // permissão. Agora o visitante só manda a mensagem pelo WhatsApp; quem
+    // marca como reservado de fato é o admin, no painel.
+    async function reservarAdulto(id) {
+      const avesSite = await getSiteAves();
+      const ave = avesSite.find(a => a.id === id);
+      if (!ave) return;
+
+      const nome = ave.nome;
+      const anilha = ave.anilha || 'sem anilha';
+
+      const mensagem = `Olá! Tenho interesse em reservar o adulto ${nome} (${anilha}). Poderia me passar mais informações?`;
+      const telefone = '5511941493657';
+      window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`, '_blank');
+    }
+
+    carregarLogo();
+    renderizarAdultos();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

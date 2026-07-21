@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Importar Árvore Genealógica</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .import-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--line);
+            border-radius: var(--radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: .15s ease;
+            background: var(--bg-elevated);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--brass);
+            background: var(--bg-elevated-2);
+        }
+
+        .upload-area .icon {
+            font-size: 48px;
+            opacity: 0.5;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .upload-area .format {
+            font-size: 12px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .btn-upload {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 30px;
+            border-radius: 8px;
+            background: rgba(199,151,63,0.15);
+            border: 1px solid var(--brass-dim);
+            color: var(--brass-soft);
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Manrope', sans-serif;
+            transition: .15s ease;
+        }
+
+        .btn-upload:hover {
+            background: rgba(199,151,63,0.25);
+        }
+
+        .preview-section {
+            background: var(--bg-elevated-2);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-section.open {
+            display: block;
+        }
+
+        .preview-section h3 {
+            font-family: 'Fraunces', serif;
+            color: var(--brass-soft);
+            margin-bottom: 14px;
+        }
+
+        .tree-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            min-width: 100%;
+        }
+
+        .tree-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 100px;
+        }
+
+        .tree-col .col-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 4px;
+        }
+
+        .tree-node-preview {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            border: 1px solid var(--line);
+            background: rgba(0,0,0,0.1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tree-node-preview.filled {
+            background: rgba(199,151,63,0.08);
+            border-color: var(--brass-dim);
+            color: var(--brass-soft);
+        }
+
+        .tree-node-preview.female {
+            background: rgba(185,116,98,0.08);
+            border-color: rgba(185,116,98,0.3);
+            color: #e2a898;
+        }
+
+        .tree-node-preview.empty {
+            color: var(--text-muted);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        .tree-node-preview .anilha-tag {
+            font-size: 8px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            display: block;
+        }
+
+        .import-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .import-summary .stat {
+            background: rgba(0,0,0,0.1);
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .import-summary .stat .number {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            color: var(--brass-soft);
+        }
+
+        .import-summary .stat .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .field-group {
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--brass-dim);
+        }
+
+        .field-group .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .field-group .row .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 70px;
+        }
+
+        .field-group .row .value {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .field-group .row .value .highlight {
+            color: var(--brass-soft);
+        }
+
+        .field-group .row .anilha-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--brass-soft);
+        }
+
+        .btn-import {
+            padding: 12px 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--brass-soft), var(--brass));
+            color: #20170a;
+            border: none;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: .15s ease;
+            width: 100%;
+        }
+
+        .btn-import:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn-import:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-msg {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(92, 154, 124, 0.15);
+            border: 1px solid rgba(92, 154, 124, 0.3);
+            color: var(--sage-soft);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(192, 89, 74, 0.15);
+            border: 1px solid rgba(192, 89, 74, 0.3);
+            color: #e2988a;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 12px 0;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brass), var(--brass-soft));
+            border-radius: 3px;
+            transition: width .3s ease;
+            width: 0%;
+        }
+
+        .instrucoes {
+            background: rgba(199,151,63,0.06);
+            border: 1px solid var(--brass-dim);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .instrucoes h4 {
+            color: var(--brass-soft);
+            margin-bottom: 8px;
+        }
+
+        .instrucoes ul {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .instrucoes ul li strong {
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .tree-preview {
+                grid-template-columns: repeat(3, 1fr);
+                font-size: 10px;
+            }
+            .field-group .row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .import-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main>
+        <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+        <section class="page active" id="page-importar-arvore">
+
+            <div class="topbar">
+                <div>
+                    <h1>📤 Importar Árvore Genealógica</h1>
+                    <div class="lede">Faça upload do PDF da árvore genealógica para preencher automaticamente os dados da ave</div>
+                </div>
+                <div>
+                    <button class="btn btn-ghost" onclick="location.href='passaros.html'">← Voltar</button>
+                </div>
+            </div>
+
+            <div class="import-container">
+
+                <div class="instrucoes">
+                    <h4>📋 Como funciona:</h4>
+                    <ul>
+                        <li><strong>1.</strong> Faça upload do PDF da árvore genealógica (gerado pelo sistema)</li>
+                        <li><strong>2.</strong> O sistema vai extrair os dados automaticamente</li>
+                        <li><strong>3.</strong> Você pode revisar os dados antes de importar</li>
+                        <li><strong>4.</strong> Os dados vão preencher a ave e toda sua árvore genealógica</li>
+                        <li><strong>5.</strong> Se a ave já existir, os dados faltantes serão completados</li>
+                    </ul>
+                </div>
+
+                <!-- ÁREA DE UPLOAD -->
+                <div class="upload-area" onclick="document.getElementById('pdf-input').click()">
+                    <div class="icon">📄</div>
+                    <p><strong>Clique para selecionar o PDF da árvore</strong></p>
+                    <p class="format">Apenas arquivos PDF gerados pelo sistema</p>
+                    <input type="file" id="pdf-input" accept=".pdf" onchange="processarPDF(event)">
+                    <div class="btn-upload">📤 Escolher PDF</div>
+                </div>
+
+                <!-- BARRA DE PROGRESSO -->
+                <div class="progress-bar" id="progress-bar">
+                    <div class="fill" id="progress-fill"></div>
+                </div>
+
+                <!-- STATUS -->
+                <div class="status-msg" id="status-msg"></div>
+
+                <!-- PRÉVIA DOS DADOS EXTRAÍDOS -->
+                <div class="preview-section" id="preview-section">
+                    <h3>🔍 Dados Extraídos</h3>
+
+                    <div id="preview-content">
+                        <!-- Preenchido pelo JavaScript -->
+                    </div>
+
+                    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-ghost" onclick="cancelarImportacao()">Cancelar</button>
+                        <button class="btn-import" id="btn-importar" onclick="confirmarImportacao()">
+                            📥 Importar para o Sistema
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+renderSidebar('passaros');
+
+// ============================================================
+// VARIÁVEIS
+// ============================================================
+
+let dadosExtraidos = null;
+let dadosProcessados = null;
+
+// ============================================================
+// FUNÇÃO PRINCIPAL - PROCESSAR PDF
+// ============================================================
+
+async function processarPDF(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Verificar se é PDF
+    if (file.type !== 'application/pdf') {
+        mostrarStatus('⚠️ Por favor, selecione um arquivo PDF válido.', 'error');
+        return;
+    }
+
+    // Mostrar progresso
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+    progressBar.classList.add('active');
+    progressFill.style.width = '10%';
+
+    try {
+        // Ler e extrair a árvore completa do PDF (posicional, fiel à grade do certificado)
+        progressFill.style.width = '30%';
+        const dados = await lerArvoreDoPDF(file);
+        progressFill.style.width = '80%';
+
+        dadosExtraidos = dados;
+        dadosProcessados = await processarDadosArvore(dados);
+
+        progressFill.style.width = '100%';
+
+        // Mostrar prévia
+        mostrarPrevia(dadosProcessados);
+
+        setTimeout(() => {
+            progressBar.classList.remove('active');
+            progressFill.style.width = '0%';
+        }, 500);
+
+        mostrarStatus('✅ Dados extraídos com sucesso! Revise e confirme a importação.', 'success');
+
+    } catch (error) {
+        console.error('Erro:', error);
+        progressBar.classList.remove('active');
+        progressFill.style.width = '0%';
+        mostrarStatus('❌ ' + error.message, 'error');
+    }
+}
+
+// ============================================================
+// LER E EXTRAIR A ÁRVORE DO PDF (posicional, via pdf.js)
+// ============================================================
+//
+// COMO FUNCIONA:
+// Cada certificado é gerado pelo sistema (FPDF), mas o layout NÃO é
+// fixo: quando um nome é mais longo, a caixa pode ficar mais larga,
+// o que desloca as colunas seguintes para a direita. Por isso NÃO
+// dá para usar coordenadas X fixas (a versão anterior fazia isso e
+// por isso funcionava só em alguns certificados).
+//
+// A posição que NÃO muda é o CENTRO de cada caixa (x + largura/2):
+// o texto é sempre centralizado dentro da caixa, então mesmo que
+// "PENÉLOPE (Canaril Alta Genética RJ)" e "Galoucura" tenham
+// tamanhos bem diferentes, o centro das duas caixas na mesma
+// geração é idêntico. Por isso a extração agrupa por centro, não
+// por posição absoluta.
+//
+// Passo a passo:
+// 1) Os campos do cabeçalho (Sexo/Nascimento/Anilha/Raça/Espécie/
+//    Criatório/Responsável/CTF) são identificados pelo próprio
+//    texto do rótulo (ex: "Sexo:"), então funcionam não importa
+//    onde estejam na página.
+// 2) O nome da própria ave fica sempre na mesma altura da página
+//    (y ~353), entre a linha "Anilha:" e a linha "Raça:" — isso é
+//    fixo porque esse bloco de informação tem posição absoluta.
+// 3) Tudo o que sobra (depois de remover cabeçalho/rodapé/nome) é
+//    a árvore. Agrupamos por centro-X (cada grupo = uma geração) e,
+//    dentro de cada geração, dividimos a altura em 2^geração fatias
+//    iguais (pai sempre em cima, mãe embaixo, recursivamente) —
+//    é assim que o certificado sempre desenha a árvore.
+
+const NOME_AVE_Y = 353.1;       // posição vertical fixa do nome da própria ave
+const NOME_AVE_TOL = 4;         // tolerância em pontos
+const HEADER_Y_MAX = 115;       // abaixo disso já é a árvore/corpo do certificado
+const TREE_Y_MAX = 585;         // acima disso é rodapé (site/QR)
+const MIN_CENTER_TREE = 150;    // caixas de metadados extras (coeficiente etc.) ficam à esquerda disso
+const COL_GAP = 30;             // gap mínimo de centro-X para considerar nova geração
+
+const LABEL_RE = /^(Sexo:|Nascimento:|Anilha:|Ra[çc]a:|Criatorio|Responsável:|CTF:?|CERTIFICADO|Coeficiente|Parentesco:|Consanguinidade:)/i;
+const SPECIES_RE = /^\([A-Za-zÀ-ÿ]+\s[a-zà-ÿ]+\)$/;
+const GEN_LABELS = { 1: 'Pais', 2: 'Avós', 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
+
+function nomeGeracao(g) {
+    return GEN_LABELS[g] || `Geração ${g}`;
+}
+
+async function lerArvoreDoPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const data = new Uint8Array(arrayBuffer);
+    const doc = await pdfjsLib.getDocument({ data }).promise;
+    const page = await doc.getPage(1);
+    const viewport = page.getViewport({ scale: 1 });
+    const pageHeight = viewport.height;
+    const content = await page.getTextContent();
+
+    const items = content.items
+        .map(it => ({ text: it.str, x: it.transform[4], yTop: pageHeight - it.transform[5], w: it.width }))
+        .filter(it => it.text.trim().length > 0);
+
+    if (items.length < 5) {
+        throw new Error('Não foi possível ler texto do PDF. Verifique se o arquivo foi gerado pelo sistema.');
+    }
+
+    // --- 1) Cabeçalho institucional e dados da própria ave: extraídos pelo
+    //     texto do rótulo, então funcionam em qualquer posição da página ---
+    const textoCompleto = items.map(it => it.text.trim());
+    const dados = { ...extrairCabecalhoTopo(textoCompleto), ...extrairDadosAve(textoCompleto) };
+    dados.especie = await mapearEspecieParaPopular(dados.especie || '');
+    dados.situacao = 'Plantel';
+
+    // --- 2) Nome da própria ave: sempre na mesma altura fixa (y ~353) ---
+    const nomeItens = items.filter(it => Math.abs(it.yTop - NOME_AVE_Y) < NOME_AVE_TOL && !LABEL_RE.test(it.text.trim()));
+    dados.nome = nomeItens.map(it => it.text.trim()).join(' ').replace(/[\/\-,]+$/, '').trim();
+
+    // Se não deu pra identificar o nome automaticamente, tenta achar a ave já
+    // cadastrada no sistema pela ANILHA (essa sim é extraída de forma bem
+    // confiável, porque busca literalmente o rótulo "Anilha:"). Se achar,
+    // usa o nome que já está cadastrado e segue o processo normalmente
+    // (só vai atualizar os outros dados da ave que já existe).
+    if (!dados.nome && dados.anilha) {
+        const aveExistentePorAnilha = typeof DB !== 'undefined' ? await DB.getAvePorAnilha(dados.anilha) : null;
+        if (aveExistentePorAnilha) {
+            dados.nome = aveExistentePorAnilha.nome;
+        }
+    }
+
+    if (!dados.nome) {
+        const msgAnilha = dados.anilha
+            ? `A anilha "${dados.anilha}" também não foi encontrada em nenhuma ave já cadastrada. `
+            : '';
+        throw new Error(
+            'Não foi possível identificar o nome da ave no PDF. ' + msgAnilha +
+            'Dica: cadastre a ave manualmente primeiro (em "Cadastro de Ave", preenchendo pelo menos Nome e Anilha) ' +
+            'e depois importe este PDF novamente — o sistema vai reconhecer a ave pela anilha e atualizar o restante dos dados automaticamente.'
+        );
+    }
+
+    // --- 3) Árvore: tudo que não é cabeçalho/rodapé/nome da própria ave ---
+    const candidatosArvore = items.filter(it => {
+        const t = it.text.trim();
+        if (it.yTop < HEADER_Y_MAX || it.yTop > TREE_Y_MAX) return false;
+        if (Math.abs(it.yTop - NOME_AVE_Y) < NOME_AVE_TOL) return false;
+        if (LABEL_RE.test(t) || SPECIES_RE.test(t)) return false;
+        if (/meuspassaros|^www\./i.test(t)) return false;
+        return true;
+    });
+    candidatosArvore.forEach(it => { it.center = it.x + it.w / 2; });
+
+    // Remove blocos extras que alguns certificados têm (ex: coeficiente de
+    // parentesco), que ficam sempre bem à esquerda das colunas de gerações
+    const itensArvore = candidatosArvore.filter(it => it.center >= MIN_CENTER_TREE);
+
+    // Agrupa por centro-X (cada grupo = uma geração da árvore)
+    const ordenadosPorCentro = [...itensArvore].sort((a, b) => a.center - b.center);
+    const colunas = [];
+    let atual = [];
+    ordenadosPorCentro.forEach(it => {
+        if (atual.length && it.center - atual[atual.length - 1].center > COL_GAP) {
+            colunas.push(atual);
+            atual = [];
+        }
+        atual.push(it);
+    });
+    if (atual.length) colunas.push(atual);
+
+    // --- 4) Para cada geração, divide a altura em 2^geração fatias iguais ---
+    const arvoreCompleta = [];
+    colunas.forEach((coluna, idx) => {
+        const g = idx + 1;
+        const nSlots = Math.pow(2, g);
+        const minY = Math.min(...coluna.map(i => i.yTop));
+        const maxY = Math.max(...coluna.map(i => i.yTop));
+        const slotH = nSlots > 1 ? (maxY - minY) / (nSlots - 1) : (maxY - minY);
+
+        const slots = Array.from({ length: nSlots }, () => []);
+        coluna.forEach(it => {
+            let slot = slotH > 0 ? Math.round((it.yTop - minY) / slotH) : 0;
+            slot = Math.max(0, Math.min(nSlots - 1, slot));
+            slots[slot].push(it);
+        });
+
+        slots.forEach((palavras, i) => {
+            palavras.sort((a, b) => a.yTop - b.yTop || a.x - b.x);
+            const caminho = i.toString(2).padStart(g, '0').split('').map(d => d === '0' ? 'pai' : 'mae').join('.');
+            const sexo = caminho.endsWith('pai') ? 'M' : 'F';
+            const { nome, anilha, nota } = separarLinhasDoNo(palavras);
+            arvoreCompleta.push({ geracao: g, nomeGeracao: nomeGeracao(g), caminho, sexo, nome, anilha, nota });
+        });
+    });
+
+    dados.arvoreCompleta = arvoreCompleta;
+
+    // Mapear as 2 primeiras gerações para os campos antigos (compatibilidade)
+    const porCaminho = {};
+    arvoreCompleta.forEach(n => { porCaminho[n.caminho] = n; });
+
+    dados.pai = porCaminho['pai']?.nome || '';
+    dados.anilhaPai = porCaminho['pai']?.anilha || '';
+    dados.mae = porCaminho['mae']?.nome || '';
+    dados.anilhaMae = porCaminho['mae']?.anilha || '';
+    dados.avoPaterno = porCaminho['pai.pai']?.nome || '';
+    dados.avoPaterna = porCaminho['pai.mae']?.nome || '';
+    dados.avoMaterno = porCaminho['mae.pai']?.nome || '';
+    dados.avoMaterna = porCaminho['mae.mae']?.nome || '';
+
+    return dados;
+}
+
+// Separa as linhas de uma caixa da árvore em nome / anilha (FOB) / nota de parentesco
+function separarLinhasDoNo(palavras) {
+    if (palavras.length === 0) return { nome: '', anilha: '', nota: '' };
+
+    const linhas = [];
+    let linhaAtual = [];
+    let ultimoY = null;
+    palavras.forEach(p => {
+        if (ultimoY !== null && Math.abs(p.yTop - ultimoY) > 4) {
+            linhas.push(linhaAtual);
+            linhaAtual = [];
+        }
+        linhaAtual.push(p);
+        ultimoY = p.yTop;
+    });
+    if (linhaAtual.length) linhas.push(linhaAtual);
+
+    const textoLinhas = linhas.map(l => l.map(w => w.text).join(' ').trim());
+
+    let anilha = '';
+    const nomeLinhas = [];
+    textoLinhas.forEach(l => {
+        // Códigos de anilha: "FOB/CA.065/004/2023", "FOB 284- OD008 - 2023", "AD.016/086/2018"...
+        if (/^FOB\b/i.test(l) || /^[A-Z]{1,3}[.\/]\d/.test(l)) {
+            anilha = anilha ? anilha + ' ' + l : l;
+        } else {
+            nomeLinhas.push(l);
+        }
+    });
+
+    const textoNome = nomeLinhas.join(' ').trim();
+    let nome = textoNome;
+    let nota = '';
+    const notaMatch = textoNome.match(/\b(pai do|m[aã]e do|pai d\b|m[aã]e d\b|tio d\b|irm[aã][o]?\/|av[óo] d\b|plantel|camp\b|vicecampe[aã]o).*/i);
+    if (notaMatch) {
+        nome = textoNome.slice(0, notaMatch.index).trim();
+        nota = textoNome.slice(notaMatch.index).trim();
+    }
+    nome = nome.replace(/[\/\-,]+$/, '').trim();
+    return { nome, anilha, nota };
+}
+
+// Extrai dados do cabeçalho institucional (Criatório/Responsável/CTF/Cidade),
+// procurando pelo texto de cada rótulo item a item — não depende de posição.
+function extrairCabecalhoTopo(linhas) {
+    const dados = {};
+    const texto = linhas.join(' ').replace(/\s+/g, ' ');
+
+    const criatorioMatch = texto.match(/Criatorio\s+([A-Za-zÀ-ÿ\s]+?)(?:\s+\d+\s*\/|\s+\(|\s+Responsável)/i);
+    if (criatorioMatch) dados.criatorio = criatorioMatch[1].trim();
+
+    const respMatch = texto.match(/Responsável:\s*([A-Za-zÀ-ÿ\s]+?)(?:\s+CTF|\s+\(|\s+\d|$)/i);
+    if (respMatch) dados.responsavel = respMatch[1].trim();
+
+    const telefoneMatch = texto.match(/\((\d{2})\)\s*(\d{4,5})-(\d{4})/);
+    if (telefoneMatch) dados.contato = `(${telefoneMatch[1]}) ${telefoneMatch[2]}-${telefoneMatch[3]}`;
+
+    const regMatch = texto.match(/CTF:?\s*(\d+)\s*\/?\s*(?:FOB:?\s*([A-Z0-9.]+))?/i);
+    if (regMatch) {
+        dados.registros = `CTF ${regMatch[1]}`;
+        if (regMatch[2]) dados.registros += ` / FOB ${regMatch[2]}`;
+    }
+
+    const cidadeMatch = texto.match(/\/\s*([A-Za-zÀ-ÿ\s]+?)\s*\/\s*([A-Z]{2})\b/);
+    if (cidadeMatch) {
+        dados.cidade = cidadeMatch[1].trim();
+        dados.estado = cidadeMatch[2].trim();
+    }
+    return dados;
+}
+
+// Traduz a espécie científica extraída do certificado (ex: "Serinus canaria") para o
+// nome popular cadastrado em Dados do Criatório (ex: "Canário-belga"), que é o valor
+// que o <select> de espécie do Cadastro de Ave realmente usa. Sem isso, o campo
+// fica em branco porque "Serinus canaria" não bate com nenhuma opção do select.
+async function mapearEspecieParaPopular(especieCientifica) {
+    if (!especieCientifica) return '';
+    try {
+        const especies = (await DB.getConfig('especies_aves')) || [];
+        const alvo = especieCientifica.toLowerCase().trim();
+        const encontrada = especies.find(e =>
+            e.cientifico && (
+                e.cientifico.toLowerCase().includes(alvo) ||
+                alvo.includes(e.cientifico.toLowerCase())
+            )
+        );
+        return encontrada ? encontrada.popular : especieCientifica;
+    } catch (e) {
+        return especieCientifica;
+    }
+}
+
+// Extrai Sexo/Nascimento/Anilha/Raça/Espécie da própria ave, procurando cada
+// rótulo item a item (não depende de coluna nem posição na página).
+function extrairDadosAve(linhas) {
+    const dados = {};
+
+    linhas.forEach(l => {
+        const sexoMatch = l.match(/^Sexo:\s*(Macho|Fêmea)/i);
+        if (sexoMatch) dados.sexo = /macho/i.test(sexoMatch[1]) ? 'M' : 'F';
+
+        const nascMatch = l.match(/^Nascimento:\s*(\d{2})\/(\d{2})\/(\d{4})/i);
+        if (nascMatch) dados.dataNasc = `${nascMatch[3]}-${nascMatch[2]}-${nascMatch[1]}`;
+
+        const anilhaMatch = l.match(/^Anilha:\s*(.+)/i);
+        if (anilhaMatch) dados.anilha = anilhaMatch[1].replace(/\s+/g, ' ').trim();
+
+        const racaMatch = l.match(/^Ra[çc]a:\s*(.+)/i);
+        if (racaMatch) dados.raca = racaMatch[1].trim();
+
+        const especieMatch = l.match(/^\(([A-Za-zÀ-ÿ]+\s[a-zà-ÿ]+)\)$/);
+        if (especieMatch) dados.especie = especieMatch[1].trim();
+    });
+
+    return dados;
+}
+
+// ============================================================
+// PROCESSAR DADOS DA ÁRVORE
+// ============================================================
+
+async function processarDadosArvore(dados) {
+    // Verificar se a ave já existe no sistema
+    let aveExistente = null;
+    
+    if (dados.anilha) {
+        aveExistente = await DB.getAvePorAnilha(dados.anilha);
+    }
+    
+    if (!aveExistente && dados.nome) {
+        aveExistente = await DB.getAvePorNome(dados.nome);
+    }
+    
+    const resultado = {
+        ave: {
+            id: aveExistente ? aveExistente.id : null,
+            existe: !!aveExistente,
+            dados: {
+                nome: dados.nome || '',
+                anilha: dados.anilha || '',
+                sexo: dados.sexo || 'Indefinido',
+                especie: dados.especie || '',
+                raca: dados.raca || '',
+                dataNasc: dados.dataNasc || '',
+                situacao: dados.situacao || 'Plantel',
+                pai: dados.pai || '',
+                anilhaPai: dados.anilhaPai || '',
+                mae: dados.mae || '',
+                anilhaMae: dados.anilhaMae || '',
+                avoPaterno: dados.avoPaterno || '',
+                avoPaterna: dados.avoPaterna || '',
+                avoMaterno: dados.avoMaterno || '',
+                avoMaterna: dados.avoMaterna || '',
+                // Árvore genealógica completa (todas as gerações que o PDF trouxer:
+                // pais, avós, bisavós, trisavós, tataravós...). Cada item tem
+                // {geracao, nomeGeracao, caminho, sexo, nome, anilha, nota}.
+                // "caminho" é uma string tipo "PMP" (pai da mãe do pai) que
+                // identifica a posição exata na árvore, então nada se perde
+                // mesmo em gerações com 8, 16 ou 32 indivíduos.
+                ancestrais: dados.arvoreCompleta || []
+            }
+        },
+        // Dados atuais da ave (se existir)
+        atuais: aveExistente || null,
+        // Campos que serão atualizados
+        atualizacoes: [],
+        // Dados do criatório
+        criatorio: {
+            nome: dados.criatorio || '',
+            responsavel: dados.responsavel || '',
+            contato: dados.contato || '',
+            registros: dados.registros || '',
+            cidade: dados.cidade || '',
+            estado: dados.estado || ''
+        }
+    };
+    
+    // Identificar quais campos serão atualizados
+    if (aveExistente) {
+        const campos = ['nome', 'anilha', 'sexo', 'especie', 'raca', 'dataNasc', 'situacao',
+                       'pai', 'anilhaPai', 'mae', 'anilhaMae', 
+                       'avoPaterno', 'avoPaterna', 'avoMaterno', 'avoMaterna'];
+        
+        campos.forEach(campo => {
+            const valorNovo = resultado.ave.dados[campo] || '';
+            const valorAntigo = aveExistente[campo] || '';
+            if (valorNovo && valorNovo !== valorAntigo) {
+                resultado.atualizacoes.push({
+                    campo: campo,
+                    de: valorAntigo || '(vazio)',
+                    para: valorNovo
+                });
+            }
+        });
+
+        // Ancestrais: compara o array inteiro (qualquer mudança de profundidade/dado conta)
+        const ancestraisAntigos = JSON.stringify(aveExistente.ancestrais || []);
+        const ancestraisNovos = JSON.stringify(resultado.ave.dados.ancestrais);
+        if (ancestraisNovos !== '[]' && ancestraisNovos !== ancestraisAntigos) {
+            resultado.atualizacoes.push({
+                campo: 'ancestrais',
+                de: `${(aveExistente.ancestrais || []).length} registros`,
+                para: `${resultado.ave.dados.ancestrais.length} registros`
+            });
+        }
+    }
+    
+    return resultado;
+}
+
+// ============================================================
+// MOSTAR PRÉVIA
+// ============================================================
+
+function mostrarPrevia(dados) {
+    const section = document.getElementById('preview-section');
+    const content = document.getElementById('preview-content');
+    
+    section.classList.add('open');
+    
+    const ave = dados.ave;
+    const existe = ave.existe;
+    const atualizacoes = dados.atualizacoes;
+    const ancestrais = ave.dados.ancestrais || [];
+
+    // Agrupar ancestrais por geração, ordenados na posição correta (topo=paterno, base=materno)
+    const porGeracao = {};
+    ancestrais.forEach(n => {
+        if (!porGeracao[n.geracao]) porGeracao[n.geracao] = [];
+        porGeracao[n.geracao].push(n);
+    });
+    const geracoesOrdenadas = Object.keys(porGeracao).map(Number).sort((a, b) => a - b);
+    geracoesOrdenadas.forEach(g => {
+        porGeracao[g].sort((a, b) => {
+            const toIdx = c => parseInt(c.caminho.split('.').map(p => p === 'pai' ? '0' : '1').join(''), 2);
+            return toIdx(a) - toIdx(b);
+        });
+    });
+    
+    let html = '';
+    
+    // === STATUS DA AVE ===
+    html += `
+        <div style="margin-bottom:16px;padding:12px 16px;border-radius:8px;background:${existe ? 'rgba(199,151,63,0.08)' : 'rgba(92,154,124,0.08)'};border:1px solid ${existe ? 'var(--brass-dim)' : 'rgba(92,154,124,0.3)'};">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div>
+                    <strong style="font-size:16px;color:${existe ? 'var(--brass-soft)' : 'var(--sage-soft)'};">${ave.dados.nome}</strong>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-left:8px;">${ave.dados.anilha}</span>
+                </div>
+                <span style="font-size:12px;padding:4px 14px;border-radius:12px;background:${existe ? 'rgba(199,151,63,0.15)' : 'rgba(92,154,124,0.15)'};color:${existe ? 'var(--brass-soft)' : 'var(--sage-soft)'};">
+                    ${existe ? '🔄 Ave existente (atualizar)' : '🆕 Nova ave'}
+                </span>
+            </div>
+            ${existe ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">ID: ${ave.id} · Situação atual: ${dados.atuais?.situacao || 'N/A'}</div>` : ''}
+        </div>
+    `;
+    
+    // === RESUMO ===
+    html += `
+        <div class="import-summary">
+            <div class="stat">
+                <div class="number">${dados.atualizacoes.length}</div>
+                <div class="label">Campos a atualizar</div>
+            </div>
+            <div class="stat">
+                <div class="number">${1 + ancestrais.length}</div>
+                <div class="label">Nós na árvore</div>
+            </div>
+            <div class="stat">
+                <div class="number">${existe ? '✅' : '➕'}</div>
+                <div class="label">${existe ? 'Atualização' : 'Novo cadastro'}</div>
+            </div>
+        </div>
+    `;
+    
+    // === ÁRVORE GENEALÓGICA (gerações dinâmicas: pais, avós, bisavós, trisavós, tataravós...) ===
+    html += `
+        <div style="margin:16px 0;">
+            <h4 style="color:var(--brass-soft);margin-bottom:8px;">🌳 Árvore Genealógica${ancestrais.length ? ` (${geracoesOrdenadas.length + 1} gerações, ${1 + ancestrais.length} indivíduos)` : ''}</h4>
+            <div class="tree-preview" style="grid-template-columns: repeat(${geracoesOrdenadas.length + 2}, 1fr);">
+                <div class="tree-col">
+                    <div class="col-label">Ave</div>
+                    <div class="tree-node-preview filled">
+                        ${ave.dados.nome || '-'}
+                        <span class="anilha-tag">${ave.dados.anilha || ''}</span>
+                    </div>
+                </div>
+                ${geracoesOrdenadas.map(g => {
+                    const nos = porGeracao[g];
+                    const label = nos[0]?.nomeGeracao || `Geração ${g}`;
+                    return `
+                    <div class="tree-col">
+                        <div class="col-label">${label}</div>
+                        ${nos.map(n => `
+                            <div class="tree-node-preview ${n.nome ? (n.sexo === 'M' ? 'filled' : 'filled female') : 'empty'}" title="${(n.nota || '').replace(/"/g, '&quot;')}">
+                                ${n.nome || '—'}
+                                ${n.anilha ? `<span class="anilha-tag">${n.anilha}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>`;
+                }).join('')}
+                <div class="tree-col">
+                    <div class="col-label">Dados</div>
+                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
+                        Sexo: ${ave.dados.sexo === 'M' ? '♂ Macho' : ave.dados.sexo === 'F' ? '♀ Fêmea' : '⚪ Indefinido'}
+                    </div>
+                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
+                        Espécie: ${ave.dados.especie || '-'}
+                    </div>
+                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
+                        Raça: ${ave.dados.raca || '-'}
+                    </div>
+                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
+                        Nasc: ${ave.dados.dataNasc || '-'}
+                    </div>
+                </div>
+            </div>
+            ${ancestrais.length ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Passe o mouse sobre uma caixa para ver anotações do certificado (ex: "Camp BR 19", "Plantel Bruno R. RJ").</div>` : ''}
+        </div>
+    `;
+    
+    // === ATUALIZAÇÕES ===
+    if (atualizacoes.length > 0) {
+        html += `
+            <div style="margin:16px 0;">
+                <h4 style="color:var(--brass-soft);margin-bottom:8px;">🔄 Campos a serem atualizados:</h4>
+                <div style="background:rgba(0,0,0,0.08);border-radius:8px;padding:10px;">
+                    ${atualizacoes.map(up => `
+                        <div style="display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid var(--line);">
+                            <span style="color:var(--text-muted);min-width:100px;">${up.campo}</span>
+                            <span style="color:#e2988a;">${up.de}</span>
+                            <span style="color:var(--text-muted);">→</span>
+                            <span style="color:var(--sage-soft);font-weight:600;">${up.para}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } else if (existe) {
+        html += `
+            <div style="padding:12px;background:rgba(92,154,124,0.08);border-radius:8px;border:1px solid rgba(92,154,124,0.2);color:var(--sage-soft);text-align:center;">
+                ✅ A ave já está completa! Nenhuma atualização necessária.
+            </div>
+        `;
+    }
+    
+    // === DADOS DO CRIATÓRIO ===
+    if (dados.criatorio.nome) {
+        html += `
+            <div style="margin-top:12px;padding:10px 14px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:11px;color:var(--text-muted);">
+                <strong>🏷️ Criatório:</strong> ${dados.criatorio.nome}
+                ${dados.criatorio.responsavel ? ` · Responsável: ${dados.criatorio.responsavel}` : ''}
+                ${dados.criatorio.registros ? ` · ${dados.criatorio.registros}` : ''}
+                ${dados.criatorio.cidade ? ` · ${dados.criatorio.cidade}/${dados.criatorio.estado || ''}` : ''}
+                ${dados.criatorio.contato ? ` · 📞 ${dados.criatorio.contato}` : ''}
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+    
+    // Habilitar botão de importação
+    document.getElementById('btn-importar').disabled = false;
+}
+
+// ============================================================
+// CONFIRMAR IMPORTAÇÃO
+// ============================================================
+
+async function confirmarImportacao() {
+    if (!dadosProcessados) {
+        alert('Nenhum dado para importar.');
+        return;
+    }
+    
+    const ave = dadosProcessados.ave;
+    const existe = ave.existe;
+    
+    let msg = '';
+    if (existe) {
+        msg = `🔄 A ave "${ave.dados.nome}" (${ave.dados.anilha}) já existe no sistema.\n\n`;
+        if (dadosProcessados.atualizacoes.length > 0) {
+            msg += `Serão atualizados ${dadosProcessados.atualizacoes.length} campos:\n`;
+            dadosProcessados.atualizacoes.forEach(up => {
+                msg += `  • ${up.campo}: ${up.de} → ${up.para}\n`;
+            });
+        } else {
+            msg += `Nenhuma atualização necessária. A ave já está completa.`;
+        }
+    } else {
+        msg = `➕ Nova ave "${ave.dados.nome}" (${ave.dados.anilha})\n\n`;
+        msg += `Serão cadastrados:\n`;
+        msg += `  • Sexo: ${ave.dados.sexo === 'M' ? 'Macho' : ave.dados.sexo === 'F' ? 'Fêmea' : 'Indefinido'}\n`;
+        msg += `  • Espécie: ${ave.dados.especie || '-'}\n`;
+        msg += `  • Raça: ${ave.dados.raca || '-'}\n`;
+        msg += `  • Nascimento: ${ave.dados.dataNasc || '-'}\n`;
+        msg += `  • Pai: ${ave.dados.pai || '-'}\n`;
+        msg += `  • Mãe: ${ave.dados.mae || '-'}\n`;
+        
+        const avos = [
+            ave.dados.avoPaterno, ave.dados.avoPaterna,
+            ave.dados.avoMaterno, ave.dados.avoMaterna
+        ].filter(Boolean);
+        if (avos.length > 0) {
+            msg += `  • Avós: ${avos.join(', ')}\n`;
+        }
+        const maisProfundos = (ave.dados.ancestrais || []).filter(n => n.geracao > 2 && n.nome).length;
+        if (maisProfundos > 0) {
+            msg += `  • + ${maisProfundos} ancestrais em gerações mais profundas (bisavós/trisavós/tataravós)\n`;
+        }
+    }
+    
+    if (!confirm(msg + '\n\nDeseja continuar?')) {
+        return;
+    }
+    
+    try {
+        // SALVAR NO BANCO
+        let resultado;
+        
+        if (existe) {
+            // Atualizar ave existente
+            const dadosAtualizados = {};
+            const campos = ['nome', 'anilha', 'sexo', 'especie', 'raca', 'dataNasc', 'situacao',
+                           'pai', 'anilhaPai', 'mae', 'anilhaMae',
+                           'avoPaterno', 'avoPaterna', 'avoMaterno', 'avoMaterna'];
+            
+            campos.forEach(campo => {
+                if (ave.dados[campo]) {
+                    dadosAtualizados[campo] = ave.dados[campo];
+                }
+            });
+            if (ave.dados.ancestrais && ave.dados.ancestrais.length > 0) {
+                dadosAtualizados.ancestrais = ave.dados.ancestrais;
+            }
+            
+            // Adicionar histórico da atualização
+            const historico = dadosProcessados.atuais?.historico || [];
+            historico.push({
+                motivo: 'Atualização',
+                descricao: `Atualização automática da árvore genealógica via importação de PDF`,
+                data: new Date().toISOString().split('T')[0],
+                detalhes: `Atualizados ${dadosProcessados.atualizacoes.length} campos`
+            });
+            dadosAtualizados.historico = historico;
+            
+            await DB.update(DB.TABLES.AVES, ave.id, dadosAtualizados);
+            resultado = await DB.getById(DB.TABLES.AVES, ave.id);
+            alert(`✅ Ave "${ave.dados.nome}" atualizada com sucesso!`);
+            
+        } else {
+            // Criar nova ave
+            const novaAve = {
+                nome: ave.dados.nome || 'Sem nome',
+                anilha: ave.dados.anilha || '',
+                sexo: ave.dados.sexo || 'Indefinido',
+                especie: ave.dados.especie || '',
+                raca: ave.dados.raca || '',
+                dataNasc: ave.dados.dataNasc || '',
+                situacao: 'Plantel',
+                filhote: false,
+                pai: ave.dados.pai || '',
+                anilhaPai: ave.dados.anilhaPai || '',
+                mae: ave.dados.mae || '',
+                anilhaMae: ave.dados.anilhaMae || '',
+                avoPaterno: ave.dados.avoPaterno || '',
+                avoPaterna: ave.dados.avoPaterna || '',
+                avoMaterno: ave.dados.avoMaterno || '',
+                avoMaterna: ave.dados.avoMaterna || '',
+                ancestrais: ave.dados.ancestrais || [],
+                historico: [{
+                    motivo: 'Importação',
+                    descricao: `Ave importada via PDF da árvore genealógica`,
+                    data: new Date().toISOString().split('T')[0],
+                    detalhes: `Importado do arquivo PDF`
+                }]
+            };
+            
+            resultado = await DB.add(DB.TABLES.AVES, novaAve);
+            alert(`✅ Ave "${novaAve.nome}" cadastrada com sucesso! ID: ${resultado.id}`);
+        }
+        
+        // Resetar
+        dadosExtraidos = null;
+        dadosProcessados = null;
+        document.getElementById('preview-section').classList.remove('open');
+        document.getElementById('pdf-input').value = '';
+        mostrarStatus('', '');
+        
+        // Perguntar se quer ver a ave
+        if (confirm('Deseja abrir a ficha da ave agora?')) {
+            window.location.href = `cadastro-ave.html?id=${resultado.id}`;
+        } else {
+            window.location.href = 'passaros.html';
+        }
+        
+    } catch (error) {
+        console.error('Erro ao importar:', error);
+        mostrarStatus('❌ Erro ao importar: ' + error.message, 'error');
+    }
+}
+
+// ============================================================
+// FUNÇÕES AUXILIARES
+// ============================================================
+
+function mostrarStatus(msg, tipo) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-msg';
+    if (tipo) {
+        el.classList.add(tipo);
+    }
+}
+
+function cancelarImportacao() {
+    if (!confirm('Cancelar a importação?')) return;
+    dadosExtraidos = null;
+    dadosProcessados = null;
+    document.getElementById('preview-section').classList.remove('open');
+    document.getElementById('pdf-input').value = '';
+    mostrarStatus('', '');
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderSidebar('passaros');
+});
+</script>
+</body>
+</html>

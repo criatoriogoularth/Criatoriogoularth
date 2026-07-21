@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Contato</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav .logo .mark {
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.site-nav .logo .mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.site-nav .logo .name {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+
+.site-nav .logo .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+.site-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.contact-info {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.contact-info h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  color: var(--brass-soft);
+  margin-bottom: 14px;
+}
+
+.contact-info .item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.contact-info .item .icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contact-info .item .label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.contact-info .item a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.contact-info .item a:hover {
+  color: var(--brass-soft);
+}
+
+.contact-form {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.contact-form h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  color: var(--brass-soft);
+  margin-bottom: 14px;
+}
+
+.contact-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.contact-form .field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.contact-form .field input,
+.contact-form .field textarea {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: .15s;
+}
+
+.contact-form .field input:focus,
+.contact-form .field textarea:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12);
+}
+
+.contact-form .field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-form .btn {
+  padding: 10px 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--brass-soft), var(--brass));
+  color: #20170a;
+  border: none;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.contact-form .btn:hover {
+  filter: brightness(1.08);
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.social-links a {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.social-links a:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <a href="site-plantel.html">Plantel</a>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-contato.html" class="active">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="subtitle">Entre em contato conosco para mais informações sobre as aves e o criatório</div>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>📋 Informações</h3>
+        <div id="contact-details">
+          <!-- Preenchido pelo JavaScript -->
+        </div>
+
+        <h3 style="margin-top:20px;">🌐 Redes Sociais</h3>
+        <div class="social-links" id="social-links">
+          <!-- Preenchido pelo JavaScript -->
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h3>✉️ Envie uma Mensagem</h3>
+        <form id="contact-form" onsubmit="enviarMensagem(event)">
+          <div class="field">
+            <label>Seu Nome *</label>
+            <input type="text" id="contato-nome" placeholder="Digite seu nome" required>
+          </div>
+          <div class="field">
+            <label>E-mail *</label>
+            <input type="email" id="contato-email" placeholder="seu@email.com" required>
+          </div>
+          <div class="field">
+            <label>Assunto</label>
+            <input type="text" id="contato-assunto" placeholder="Assunto da mensagem">
+          </div>
+          <div class="field">
+            <label>Mensagem *</label>
+            <textarea id="contato-mensagem" placeholder="Digite sua mensagem..." required></textarea>
+          </div>
+          <button type="submit" class="btn">📤 Enviar Mensagem</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function getSiteConteudo() {
+      return (await DB.getConfig('site_conteudo')) || {};
+    }
+
+    async function carregarContato() {
+      const conteudo = await getSiteConteudo();
+      const contato = conteudo.contato || {};
+
+      const details = document.getElementById('contact-details');
+      
+      let html = '';
+      
+      if (contato.endereco) {
+        html += `
+          <div class="item">
+            <span class="icon">📍</span>
+            <div>
+              <div class="label">Endereço</div>
+              ${contato.endereco}
+            </div>
+          </div>
+        `;
+      }
+      
+      if (contato.whatsapp) {
+        const numero = contato.whatsapp.replace(/\D/g, '');
+        html += `
+          <div class="item">
+            <span class="icon">📱</span>
+            <div>
+              <div class="label">WhatsApp</div>
+              <a href="https://wa.me/${numero}" target="_blank">${contato.whatsapp}</a>
+            </div>
+          </div>
+        `;
+      }
+      
+      if (contato.email) {
+        html += `
+          <div class="item">
+            <span class="icon">📧</span>
+            <div>
+              <div class="label">E-mail</div>
+              <a href="mailto:${contato.email}">${contato.email}</a>
+            </div>
+          </div>
+        `;
+      }
+      
+      if (contato.registros) {
+        html += `
+          <div class="item">
+            <span class="icon">🏷️</span>
+            <div>
+              <div class="label">Registros</div>
+              ${contato.registros}
+            </div>
+          </div>
+        `;
+      }
+      
+      details.innerHTML = html || `
+        <div class="item">
+          <span style="color:var(--text-muted);font-size:13px;">Configure as informações de contato na administração do site.</span>
+        </div>
+      `;
+
+      const social = document.getElementById('social-links');
+      let socialHtml = '';
+      
+      if (contato.instagram) {
+        const insta = contato.instagram.startsWith('@') ? contato.instagram : `@${contato.instagram}`;
+        socialHtml += `<a href="https://instagram.com/${contato.instagram.replace('@', '')}" target="_blank">📸 ${insta}</a>`;
+      }
+      
+      if (contato.facebook) {
+        const fb = contato.facebook.startsWith('/') ? contato.facebook : `/${contato.facebook}`;
+        socialHtml += `<a href="https://facebook.com${fb}" target="_blank">📘 ${fb}</a>`;
+      }
+      
+      if (contato.youtube) {
+        const yt = contato.youtube.startsWith('/') ? contato.youtube : `/${contato.youtube}`;
+        socialHtml += `<a href="https://youtube.com${yt}" target="_blank">▶️ ${yt}</a>`;
+      }
+      
+      if (contato.whatsapp) {
+        const numero = contato.whatsapp.replace(/\D/g, '');
+        socialHtml += `<a href="https://wa.me/${numero}" target="_blank">📱 WhatsApp</a>`;
+      }
+      
+      social.innerHTML = socialHtml || `
+        <a href="#" style="color:var(--text-muted);font-size:13px;">Configure as redes sociais na administração.</a>
+      `;
+    }
+
+    async function enviarMensagem(event) {
+      event.preventDefault();
+      
+      const nome = document.getElementById('contato-nome').value.trim();
+      const email = document.getElementById('contato-email').value.trim();
+      const assunto = document.getElementById('contato-assunto').value.trim();
+      const mensagem = document.getElementById('contato-mensagem').value.trim();
+      
+      if (!nome || !email || !mensagem) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+      }
+      
+      const conteudo = await getSiteConteudo();
+      const contato = conteudo.contato || {};
+      const emailDestino = contato.email || 'criatorio.goularth@gmail.com';
+      
+      const subject = encodeURIComponent(assunto || 'Contato pelo site');
+      const body = encodeURIComponent(`Nome: ${nome}\nE-mail: ${email}\n\n${mensagem}`);
+      window.location.href = `mailto:${emailDestino}?subject=${subject}&body=${body}`;
+      
+      alert(`✅ Mensagem enviada para ${emailDestino}!\n\nDe: ${nome}\nE-mail: ${email}\nAssunto: ${assunto || 'Sem assunto'}`);
+      
+      document.getElementById('contato-nome').value = '';
+      document.getElementById('contato-email').value = '';
+      document.getElementById('contato-assunto').value = '';
+      document.getElementById('contato-mensagem').value = '';
+    }
+
+    carregarLogo();
+    carregarContato();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

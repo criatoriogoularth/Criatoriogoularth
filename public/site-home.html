@@ -1,0 +1,760 @@
+<!-- site-home.html - COMPLETO COM BOTÃO DE LOGIN CORRETO -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1a16;
+  --bg-elevated: #132621;
+  --bg-elevated-2: #17302a;
+  --brass: #c7973f;
+  --brass-soft: #e4c583;
+  --brass-dim: rgba(199,151,63,0.28);
+  --text: #ece6d6;
+  --text-muted: #9aa89e;
+  --line: rgba(199,151,63,0.22);
+  --sage-soft: #8fc3a8;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  min-height: 100vh;
+}
+
+/* ===== HEADER COM BANNER ===== */
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.site-banner {
+  position: relative;
+  overflow: hidden;
+  max-height: 500px;
+  background: var(--bg-elevated-2);
+}
+
+.site-banner img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
+.site-banner .no-banner {
+  width: 100%;
+  height: 200px;
+  background: var(--bg-elevated-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.site-banner .no-banner .icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px 24px 20px;
+  background: linear-gradient(transparent, rgba(13,26,22,0.85));
+}
+
+.banner-overlay h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  color: var(--brass-soft);
+  margin-bottom: 4px;
+}
+
+.banner-overlay p {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+/* ===== NAVEGAÇÃO ABAIXO DO BANNER ===== */
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.nav-links > a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.nav-links > a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.nav-links > a.active {
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+
+/* ===== DROPDOWN EM CASCATA ===== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown > a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: .15s ease;
+  cursor: pointer;
+  display: inline-block;
+  border: 1px solid transparent;
+}
+
+.dropdown > a::after {
+  content: ' ▼';
+  font-size: 8px;
+}
+
+.dropdown > a:hover {
+  color: var(--text);
+  background: rgba(199,151,63,0.08);
+  border-color: var(--brass-dim);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 0;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content .sub-dropdown {
+  position: relative;
+}
+
+.dropdown-content .sub-dropdown > a {
+  display: block;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.dropdown-content .sub-dropdown > a:hover {
+  background: rgba(199,151,63,0.08);
+  color: var(--text);
+}
+
+.dropdown-content .sub-dropdown > a::after {
+  content: ' ►';
+  float: right;
+  font-size: 10px;
+}
+
+.sub-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  min-width: 160px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 0;
+  z-index: 101;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.sub-dropdown:hover .sub-dropdown-content {
+  display: block;
+}
+
+.sub-dropdown-content a {
+  display: block;
+  padding: 6px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12px;
+  transition: .15s ease;
+}
+
+.sub-dropdown-content a:hover {
+  background: rgba(199,151,63,0.08);
+  color: var(--text);
+}
+
+.sub-dropdown-content a .sexo-icon {
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+/* ===== BOTÃO DE LOGIN ===== */
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-login-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.btn-login-site:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+  transform: scale(1.02);
+}
+
+/* ===== MAIN ===== */
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main .intro-text {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 30px;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.species-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.species-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  text-align: center;
+  transition: .15s ease;
+  cursor: pointer;
+}
+
+.species-card:hover {
+  border-color: var(--brass-dim);
+  transform: translateY(-3px);
+}
+
+.species-card .especie-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 10px;
+  border: 2px solid var(--brass-dim);
+  background: var(--bg-elevated);
+}
+
+.species-card .icon {
+  font-size: 40px;
+  margin-bottom: 6px;
+}
+
+.species-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  color: var(--brass-soft);
+  margin-bottom: 2px;
+}
+
+.species-card .cientifico {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.species-card .desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.species-card .btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  transition: .15s ease;
+}
+
+.species-card .btn:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.species-card .ver-mais {
+  font-size: 10px;
+  color: var(--brass-soft);
+  margin-top: 4px;
+  opacity: 0.6;
+}
+
+.species-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.species-modal.open {
+  display: flex;
+}
+
+.species-modal .modal-content {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--brass-dim);
+  border-radius: var(--radius);
+  max-width: 500px;
+  width: 100%;
+  padding: 30px;
+  max-height: 90vh;
+  overflow-y: auto;
+  cursor: default;
+  position: relative;
+}
+
+.species-modal .modal-content .fechar {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 28px;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.species-modal .modal-content .fechar:hover {
+  color: var(--text);
+}
+
+.species-modal .modal-content .modal-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 12px;
+  display: block;
+  border: 3px solid var(--brass-dim);
+}
+
+.species-modal .modal-content .modal-icon {
+  font-size: 56px;
+  text-align: center;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.species-modal .modal-content h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  color: var(--brass-soft);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.species-modal .modal-content .modal-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.species-modal .modal-content .modal-btn {
+  display: inline-block;
+  margin: 16px auto 0;
+  padding: 8px 24px;
+  border-radius: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: .15s ease;
+  text-align: center;
+}
+
+.species-modal .modal-content .modal-btn:hover {
+  background: rgba(199,151,63,0.2);
+}
+
+.site-footer {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.site-footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.site-footer .links a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer .links a:hover {
+  color: var(--brass-soft);
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .nav-links {
+    justify-content: center;
+    gap: 4px;
+  }
+  .nav-links > a,
+  .dropdown > a {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .nav-buttons {
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .banner-overlay h1 {
+    font-size: 22px;
+  }
+  .banner-overlay p {
+    font-size: 14px;
+  }
+  .species-grid {
+    grid-template-columns: 1fr;
+  }
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0;
+  }
+  .sub-dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    border-radius: 0;
+    padding-left: 16px;
+  }
+  .dropdown:hover .dropdown-content {
+    display: none;
+  }
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
+  .species-modal .modal-content {
+    padding: 20px;
+  }
+  .btn-login-site {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+</style>
+</head>
+<body>
+  <!-- ===== HEADER COM BANNER ===== -->
+  <header class="site-header">
+    <div class="site-banner" id="banner-section">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+
+    <!-- ===== NAVEGAÇÃO ABAIXO DO BANNER ===== -->
+    <div class="site-nav">
+      <div class="nav-links">
+        <a href="site-home.html" class="active">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        
+        <!-- DROPDOWN PLANTEL -->
+        <div class="dropdown">
+          <a>Plantel</a>
+          <div class="dropdown-content" id="plantel-dropdown"></div>
+        </div>
+        
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      
+      <!-- ===== BOTÃO DE LOGIN ===== -->
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="intro-text" id="intro-text"></div>
+
+    <h2 style="font-family:'Fraunces',serif;font-size:24px;color:var(--brass-soft);text-align:center;margin-bottom:8px;">Nossas Espécies</h2>
+    <div class="species-grid" id="species-grid"></div>
+  </main>
+
+  <!-- ===== MODAL DA ESPÉCIE ===== -->
+  <div class="species-modal" id="species-modal" onclick="fecharModalEspecie()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="fechar" onclick="fecharModalEspecie()">✕</button>
+      <div id="modal-especie-content">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getSiteConteudo() {
+      return (await DB.getConfig('site_conteudo')) || {};
+    }
+
+    async function getSiteAves() {
+      return DB.getAvesPublicas();
+    }
+
+    async function getEspecies() {
+      return (await DB.getConfig('site_especies')) || {};
+    }
+
+    function abrirModalEspecie(nome, info) {
+      const modal = document.getElementById('species-modal');
+      const content = document.getElementById('modal-especie-content');
+      
+      const imgHtml = info.imagem ? `<img src="${info.imagem}" class="modal-img" alt="${nome}">` : `<span class="modal-icon">🐦</span>`;
+      
+      content.innerHTML = `
+        ${imgHtml}
+        <h2>${info.titulo || nome}</h2>
+        <div class="modal-desc">${info.desc || 'Sem descrição disponível.'}</div>
+        <a href="site-plantel.html?especie=${encodeURIComponent(nome)}" class="modal-btn">🐦 Ver Plantel →</a>
+      `;
+      
+      modal.classList.add('open');
+    }
+
+    function fecharModalEspecie() {
+      document.getElementById('species-modal').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') fecharModalEspecie();
+    });
+
+    async function carregarHome() {
+      const conteudo = await getSiteConteudo();
+      const home = conteudo.home || {};
+      const avesSite = await getSiteAves();
+      const especiesInfo = await getEspecies();
+
+      // ===== BANNER =====
+      const bannerSection = document.getElementById('banner-section');
+      if (home.bannerUrl) {
+        let bannerHtml = `<img src="${home.bannerUrl}" alt="Banner" onerror="this.style.display='none'">`;
+        
+        const temTitulo = home.bannerTitulo && home.bannerTitulo.trim() !== '';
+        const temSubtitulo = home.bannerSubtitulo && home.bannerSubtitulo.trim() !== '';
+        
+        if (temTitulo || temSubtitulo) {
+          bannerHtml += `<div class="banner-overlay">`;
+          if (temTitulo) bannerHtml += `<h1>${home.bannerTitulo}</h1>`;
+          if (temSubtitulo) bannerHtml += `<p>${home.bannerSubtitulo}</p>`;
+          bannerHtml += `</div>`;
+        }
+        
+        bannerSection.innerHTML = bannerHtml;
+      } else {
+        bannerSection.innerHTML = `
+          <div class="no-banner">
+            <div class="icon">🖼️</div>
+            <span>Configure um banner em administração</span>
+          </div>
+        `;
+      }
+
+      // ===== DROPDOWN PLANTEL =====
+      const dropdownPlantel = document.getElementById('plantel-dropdown');
+      const especiesPlantel = [...new Set(avesSite.map(a => a.especie).filter(Boolean))];
+      
+      let dropdownHtml = '';
+      especiesPlantel.sort().forEach(esp => {
+        const count = avesSite.filter(a => a.especie === esp).length;
+        if (count === 0) return;
+        
+        dropdownHtml += `
+          <div class="sub-dropdown">
+            <a href="site-plantel.html?especie=${encodeURIComponent(esp)}">${esp}</a>
+            <div class="sub-dropdown-content">
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=M">${esp} - <span class="sexo-icon">♂</span> Machos</a>
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=F">${esp} - <span class="sexo-icon">♀</span> Fêmeas</a>
+            </div>
+          </div>
+        `;
+      });
+      dropdownPlantel.innerHTML = dropdownHtml || `<a href="site-plantel.html" style="display:block;padding:8px 16px;color:var(--text-muted);text-decoration:none;">Ver Plantel</a>`;
+
+      // ===== TEXTO =====
+      document.getElementById('intro-text').textContent = home.texto || 'Bem-vindo ao Criatório Goularth, um espaço dedicado à criação de aves com excelência genética e qualidade. Conheça nossas espécies e apaixone-se pelo canto das nossas aves.';
+
+      // ===== ESPÉCIES =====
+      const especiesDestaque = home.especies || [];
+      const grid = document.getElementById('species-grid');
+      
+      const especiesSelecionadas = especiesDestaque.filter(esp => especiesInfo[esp]);
+      
+      if (especiesSelecionadas.length === 0) {
+        grid.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1;">
+            <div style="font-size:48px;margin-bottom:12px;opacity:0.4;">🐦</div>
+            <p>Nenhuma espécie selecionada para destaque.</p>
+            <p style="font-size:12px;">Selecione as espécies no editor da Home.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = especiesSelecionadas.map(esp => {
+        const info = especiesInfo[esp];
+        const count = avesSite.filter(a => a.especie === esp).length;
+        const imgHtml = info.imagem ? `<img src="${info.imagem}" class="especie-img" alt="${esp}" onerror="this.style.display='none'">` : `<div class="icon">🐦</div>`;
+        
+        return `
+          <div class="species-card" onclick="abrirModalEspecie('${esp}', ${JSON.stringify(info).replace(/"/g, '&quot;')})">
+            ${imgHtml}
+            <h3>${info.titulo || esp}</h3>
+            <div class="cientifico">${count} aves no plantel</div>
+            <div class="desc">${info.desc || ''}</div>
+            <span class="ver-mais">🔍 Clique para ver mais</span>
+            <a href="site-plantel.html?especie=${encodeURIComponent(esp)}" class="btn" onclick="event.stopPropagation();">Ver Plantel →</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    carregarHome();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>
