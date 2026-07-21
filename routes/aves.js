@@ -18,11 +18,21 @@ const CAMPOS = [
 // vez de JSON, e o Postgres rejeita com "invalid input syntax for type json".
 const CAMPOS_JSON = new Set(['ancestrais', 'historico']);
 
+// Colunas boolean NOT NULL DEFAULT false: se o campo não vier no body,
+// `?? null` mandava NULL explícito pro INSERT, o que sobrescreve o
+// DEFAULT da coluna e quebra a constraint NOT NULL. Aqui garantimos que
+// ausência de valor vira `false`, não `null`.
+const CAMPOS_BOOL = new Set(['filhote', 'no_site']);
+
 function normalizarValor(campo, valor) {
   if (CAMPOS_JSON.has(campo)) {
     // undefined/null -> respeita o default da coluna ('[]') em vez de gravar NULL
     if (valor === undefined || valor === null) return '[]';
     return JSON.stringify(valor);
+  }
+  if (CAMPOS_BOOL.has(campo)) {
+    if (valor === undefined || valor === null) return false;
+    return Boolean(valor);
   }
   return valor ?? null;
 }
