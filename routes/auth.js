@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ function limparFalhas(ip) {
   tentativas.delete(ip);
 }
 
-router.post('/login', async (req, res) => {
+router.post('/login', asyncHandler(async (req, res) => {
   const ip = req.ip;
   if (bloqueado(ip)) {
     return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' });
@@ -90,11 +91,11 @@ router.post('/login', async (req, res) => {
     console.error('Erro no login:', err);
     res.status(500).json({ error: 'Erro interno ao autenticar.' });
   }
-});
+}));
 
 // Confirma se o token ainda é válido e devolve os dados do usuário logado.
 // O front-end usa isso no lugar do antigo "auth-check.js".
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const { rows } = await pool.query(
       'SELECT id, nome, email, role, criatorio, status FROM usuarios WHERE id = $1',
@@ -106,12 +107,12 @@ router.get('/me', authMiddleware, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Erro interno.' });
   }
-});
+}));
 
 // Troca de senha de verdade: confere a senha atual com bcrypt antes de
 // gravar a nova (também com hash). Substitui o antigo "trocarSenha()" que
 // só comparava com a string fixa 'admin123' guardada no localStorage.
-router.put('/senha', authMiddleware, async (req, res) => {
+router.put('/senha', authMiddleware, asyncHandler(async (req, res) => {
   const { senhaAtual, novaSenha } = req.body || {};
 
   if (!senhaAtual || !novaSenha) {
@@ -137,6 +138,6 @@ router.put('/senha', authMiddleware, async (req, res) => {
     console.error('Erro ao trocar senha:', err);
     res.status(500).json({ error: 'Erro interno ao trocar senha.' });
   }
-});
+}));
 
 module.exports = router;

@@ -871,15 +871,18 @@ function mostrarPrevia(dados) {
     html += `
         <div style="margin-bottom:16px;padding:12px 16px;border-radius:8px;background:${existe ? 'rgba(199,151,63,0.08)' : 'rgba(92,154,124,0.08)'};border:1px solid ${existe ? 'var(--brass-dim)' : 'rgba(92,154,124,0.3)'};">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                <div>
-                    <strong style="font-size:16px;color:${existe ? 'var(--brass-soft)' : 'var(--sage-soft)'};">${ave.dados.nome}</strong>
-                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-left:8px;">${ave.dados.anilha}</span>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" id="edit-ave-nome" value="${(ave.dados.nome || '').replace(/"/g, '&quot;')}" placeholder="Nome"
+                        style="background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--brass-soft);font-weight:700;font-size:14px;min-width:140px;">
+                    <input type="text" id="edit-ave-anilha" value="${(ave.dados.anilha || '').replace(/"/g, '&quot;')}" placeholder="Anilha"
+                        style="background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;min-width:140px;">
                 </div>
                 <span style="font-size:12px;padding:4px 14px;border-radius:12px;background:${existe ? 'rgba(199,151,63,0.15)' : 'rgba(92,154,124,0.15)'};color:${existe ? 'var(--brass-soft)' : 'var(--sage-soft)'};">
                     ${existe ? '🔄 Ave existente (atualizar)' : '🆕 Nova ave'}
                 </span>
             </div>
             ${existe ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">ID: ${ave.id} · Situação atual: ${dados.atuais?.situacao || 'N/A'}</div>` : ''}
+            <div style="font-size:10px;color:var(--text-muted);margin-top:6px;">✏️ Os campos acima e os nós da árvore abaixo são editáveis — corrija antes de confirmar a importação.</div>
         </div>
     `;
     
@@ -920,30 +923,35 @@ function mostrarPrevia(dados) {
                     <div class="tree-col">
                         <div class="col-label">${label}</div>
                         ${nos.map(n => `
-                            <div class="tree-node-preview ${n.nome ? (n.sexo === 'M' ? 'filled' : 'filled female') : 'empty'}" title="${(n.nota || '').replace(/"/g, '&quot;')}">
-                                ${n.nome || '—'}
-                                ${n.anilha ? `<span class="anilha-tag">${n.anilha}</span>` : ''}
+                            <div class="tree-node-preview editable" style="padding:6px;display:flex;flex-direction:column;gap:3px;">
+                                <input type="text" id="edit-anc-nome-${n.caminho}" value="${(n.nome || '').replace(/"/g, '&quot;')}" placeholder="Nome (${n.sexo === 'M' ? '♂' : '♀'})"
+                                    style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text);font-size:10px;">
+                                <input type="text" id="edit-anc-anilha-${n.caminho}" value="${(n.anilha || '').replace(/"/g, '&quot;')}" placeholder="Anilha"
+                                    style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--brass-soft);font-family:'JetBrains Mono',monospace;font-size:9px;">
+                                <input type="text" id="edit-anc-nota-${n.caminho}" value="${(n.nota || '').replace(/"/g, '&quot;')}" placeholder="Nota/observação"
+                                    style="width:100%;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text-muted);font-size:9px;">
                             </div>
                         `).join('')}
                     </div>`;
                 }).join('')}
                 <div class="tree-col">
                     <div class="col-label">Dados</div>
-                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
-                        Sexo: ${ave.dados.sexo === 'M' ? '♂ Macho' : ave.dados.sexo === 'F' ? '♀ Fêmea' : '⚪ Indefinido'}
-                    </div>
-                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
-                        Espécie: ${ave.dados.especie || '-'}
-                    </div>
-                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
-                        Raça: ${ave.dados.raca || '-'}
-                    </div>
-                    <div class="tree-node-preview" style="font-size:9px;border-color:transparent;">
-                        Nasc: ${ave.dados.dataNasc || '-'}
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <select id="edit-ave-sexo" style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                            <option value="Indefinido" ${ave.dados.sexo === 'Indefinido' || !ave.dados.sexo ? 'selected' : ''}>⚪ Indefinido</option>
+                            <option value="M" ${ave.dados.sexo === 'M' ? 'selected' : ''}>♂ Macho</option>
+                            <option value="F" ${ave.dados.sexo === 'F' ? 'selected' : ''}>♀ Fêmea</option>
+                        </select>
+                        <input type="text" id="edit-ave-especie" value="${(ave.dados.especie || '').replace(/"/g, '&quot;')}" placeholder="Espécie"
+                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                        <input type="text" id="edit-ave-raca" value="${(ave.dados.raca || '').replace(/"/g, '&quot;')}" placeholder="Raça"
+                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                        <input type="date" id="edit-ave-datanasc" value="${ave.dados.dataNasc || ''}"
+                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
                     </div>
                 </div>
             </div>
-            ${ancestrais.length ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Passe o mouse sobre uma caixa para ver anotações do certificado (ex: "Camp BR 19", "Plantel Bruno R. RJ").</div>` : ''}
+            ${ancestrais.length ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">✏️ Edite nome, anilha ou nota de qualquer nó antes de confirmar. Campos em branco ficam vazios na árvore.</div>` : ''}
         </div>
     `;
     
@@ -995,11 +1003,68 @@ function mostrarPrevia(dados) {
 // CONFIRMAR IMPORTAÇÃO
 // ============================================================
 
+// ============================================================
+// SINCRONIZAR EDIÇÕES DA PRÉVIA
+// ============================================================
+// Lê os campos que a pessoa editou na prévia (nome/anilha/sexo/espécie/
+// raça/nascimento da ave, e nome/anilha/nota de cada nó da árvore) e
+// escreve de volta em dadosProcessados antes de salvar. Também espelha
+// os nós de "Pais" e "Avós" da árvore nos campos planos (pai, anilhaPai,
+// avoPaterno...) que o restante do formulário usa, pra não haver
+// divergência entre o que a pessoa editou na árvore e o que é salvo.
+function sincronizarEdicoesDaPrevia() {
+    if (!dadosProcessados) return;
+    const d = dadosProcessados.ave.dados;
+
+    const campoAve = (id, fallback) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : fallback;
+    };
+
+    d.nome = campoAve('edit-ave-nome', d.nome);
+    d.anilha = campoAve('edit-ave-anilha', d.anilha);
+    d.sexo = campoAve('edit-ave-sexo', d.sexo);
+    d.especie = campoAve('edit-ave-especie', d.especie);
+    d.raca = campoAve('edit-ave-raca', d.raca);
+    d.dataNasc = campoAve('edit-ave-datanasc', d.dataNasc);
+
+    const ancestrais = d.ancestrais || [];
+    const porCaminho = {};
+
+    ancestrais.forEach(n => {
+        const nomeEl = document.getElementById(`edit-anc-nome-${n.caminho}`);
+        const anilhaEl = document.getElementById(`edit-anc-anilha-${n.caminho}`);
+        const notaEl = document.getElementById(`edit-anc-nota-${n.caminho}`);
+        if (nomeEl) n.nome = nomeEl.value.trim();
+        if (anilhaEl) n.anilha = anilhaEl.value.trim();
+        if (notaEl) n.nota = notaEl.value.trim();
+        porCaminho[n.caminho] = n;
+    });
+
+    // Espelhar pais e avós editados nos campos planos usados ao salvar
+    const mapaCaminhos = {
+        'pai': ['pai', 'anilhaPai'],
+        'mae': ['mae', 'anilhaMae'],
+        'pai.pai': ['avoPaterno', null],
+        'pai.mae': ['avoPaterna', null],
+        'mae.pai': ['avoMaterno', null],
+        'mae.mae': ['avoMaterna', null]
+    };
+    Object.entries(mapaCaminhos).forEach(([caminho, [campoNome, campoAnilha]]) => {
+        const no = porCaminho[caminho];
+        if (!no) return;
+        d[campoNome] = no.nome || '';
+        if (campoAnilha) d[campoAnilha] = no.anilha || '';
+    });
+}
+
 async function confirmarImportacao() {
     if (!dadosProcessados) {
         alert('Nenhum dado para importar.');
         return;
     }
+
+    sincronizarEdicoesDaPrevia();
     
     const ave = dadosProcessados.ave;
     const existe = ave.existe;

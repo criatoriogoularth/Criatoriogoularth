@@ -1,12 +1,15 @@
 // middleware/asyncHandler.js
 //
-// Envolve uma rota async: se a Promise rejeitar (erro de query, etc.),
-// chama next(err) em vez de deixar a rejeição "escapar" sem tratamento.
-// Sem isso, um erro dentro de um handler `async (req, res) => {...}`
-// vira um unhandledRejection e derruba o processo Node inteiro —
-// foi o que aconteceu no crash de routes/aves.js.
-module.exports = function asyncHandler(fn) {
+// Express 4 não captura automaticamente uma Promise rejeitada dentro de
+// uma rota "async (req, res) => {...}". Sem isso, um erro de banco dentro
+// de qualquer rota vira um "unhandledRejection" e derruba o processo
+// inteiro do Node (foi o que aconteceu em produção). Este wrapper garante
+// que qualquer erro caia no middleware de erro do server.js, virando uma
+// resposta 500 normal em vez de tirar o site do ar.
+function asyncHandler(fn) {
   return function (req, res, next) {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
-};
+}
+
+module.exports = asyncHandler;

@@ -721,6 +721,18 @@ body {
         tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
       }
 
+      // Gerações mais profundas (bisavós, trisavós, tataravós) vêm do
+      // campo "ancestrais", preenchido pelo editor de Árvore Genealógica
+      // no painel — sem isso, o certificado público parava nos avós
+      // mesmo quando o gerenciador tinha gerações mais antigas cadastradas.
+      if (Array.isArray(ave.ancestrais)) {
+        ave.ancestrais.forEach(a => {
+          if (a && a.caminho && a.nome && !tree[a.caminho]) {
+            tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
+          }
+        });
+      }
+
       function obterAncestral(caminho) {
         const encontrado = tree[caminho];
         return (encontrado && encontrado.nome) ? encontrado.nome : null;

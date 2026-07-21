@@ -13,38 +13,6 @@ const CAMPOS = [
   'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico'
 ];
 
-// Colunas jsonb: precisam ir como STRING JSON pro pg, senão o driver trata
-// arrays/objetos JS como literal de array do Postgres (`{"..","..",}`) em
-// vez de JSON, e o Postgres rejeita com "invalid input syntax for type json".
-const CAMPOS_JSON = new Set(['ancestrais', 'historico']);
-
-// Colunas boolean NOT NULL DEFAULT false: se o campo não vier no body,
-// `?? null` mandava NULL explícito pro INSERT, o que sobrescreve o
-// DEFAULT da coluna e quebra a constraint NOT NULL. Aqui garantimos que
-// ausência de valor vira `false`, não `null`.
-const CAMPOS_BOOL = new Set(['filhote', 'no_site']);
-
-// Colunas date: o formulário manda "" quando o campo fica vazio, e o
-// Postgres não aceita "" como data (só uma data real ou NULL).
-const CAMPOS_DATA = new Set(['data_nasc']);
-
-function normalizarValor(campo, valor) {
-  if (CAMPOS_JSON.has(campo)) {
-    // undefined/null -> respeita o default da coluna ('[]') em vez de gravar NULL
-    if (valor === undefined || valor === null) return '[]';
-    return JSON.stringify(valor);
-  }
-  if (CAMPOS_BOOL.has(campo)) {
-    if (valor === undefined || valor === null) return false;
-    return Boolean(valor);
-  }
-  if (CAMPOS_DATA.has(campo)) {
-    if (valor === undefined || valor === null || valor === '') return null;
-    return valor;
-  }
-  return valor ?? null;
-}
-
 function linhaParaAve(row) {
   return row; // node-pg já entrega JSONB como objeto/array JS
 }
@@ -84,7 +52,7 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   }
 
   const cols = ['usuario_id', ...CAMPOS];
-  const valores = [req.user.id, ...CAMPOS.map(c => normalizarValor(c, body[c]))];
+  const valores = [req.user.id, ...CAMPOS.map(c => body[c] ?? null)];
   const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
 
   const { rows } = await pool.query(
@@ -113,7 +81,7 @@ router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
   }
 
   const sets = camposPresentes.map((c, i) => `${c} = $${i + 1}`).join(', ');
-  const valores = camposPresentes.map(c => normalizarValor(c, body[c]));
+  const valores = camposPresentes.map(c => body[c]);
   valores.push(req.params.id, req.user.id);
 
   const { rows } = await pool.query(
@@ -158,7 +126,8 @@ router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
             data_nasc AS "dataNasc", pai, anilha_pai AS "anilhaPai",
             mae, anilha_mae AS "anilhaMae",
             avo_paterno AS "avoPaterno", avo_paterna AS "avoPaterna",
-            avo_materno AS "avoMaterno", avo_materna AS "avoMaterna"
+            avo_materno AS "avoMaterno", avo_materna AS "avoMaterna",
+            ancestrais
      FROM aves WHERE id = $1 AND no_site = true`,
     [req.params.id]
   );

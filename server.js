@@ -41,16 +41,18 @@ app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Rota de API não encontrada.' });
 });
 
-// ===== HANDLER DE ERRO GLOBAL =====
-// Precisa ser o ÚLTIMO app.use e ter 4 argumentos (é assim que o Express
-// reconhece um error handler). Pega qualquer erro passado via next(err)
-// pelas rotas (agora todas envolvidas em asyncHandler) e responde com
-// JSON em vez de deixar a exceção subir e derrubar o processo inteiro,
-// como aconteceu no crash de "invalid input syntax for type json".
+// Handler de erro global: sem isso, um erro de banco em qualquer rota
+// (ex: coluna inexistente, JSON inválido) derrubava o processo do Node
+// inteiro e tirava o site do ar até o próximo deploy. Agora vira uma
+// resposta 500 normal e o servidor continua no ar.
 app.use((err, req, res, next) => {
   console.error('Erro não tratado:', err);
   if (res.headersSent) return next(err);
   res.status(500).json({ error: 'Erro interno do servidor.' });
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
 });
 
 app.listen(PORT, () => {
