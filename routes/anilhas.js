@@ -2,19 +2,20 @@
 const express = require('express');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 router.use(authMiddleware); // todas as rotas de anilhas exigem login
 
-router.get('/', async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM anilhas WHERE usuario_id = $1 ORDER BY id',
     [req.user.id]
   );
   res.json(rows);
-});
+}));
 
-router.post('/', async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
   const { cor, tipo, numero, dimensao, observacao, data_cadastro, disponivel, ativo } = req.body || {};
   if (!numero) return res.status(400).json({ error: 'Número da anilha é obrigatório.' });
 
@@ -32,9 +33,9 @@ router.post('/', async (req, res) => {
     [req.user.id, cor, tipo, numero, dimensao, observacao, data_cadastro || null, disponivel || 'Sim', ativo || 'Sim']
   );
   res.status(201).json(rows[0]);
-});
+}));
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', asyncHandler(async (req, res) => {
   const { cor, tipo, numero, dimensao, observacao, data_cadastro, disponivel, ativo } = req.body || {};
 
   if (numero) {
@@ -62,15 +63,15 @@ router.put('/:id', async (req, res) => {
   );
   if (!rows[0]) return res.status(404).json({ error: 'Anilha não encontrada.' });
   res.json(rows[0]);
-});
+}));
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'DELETE FROM anilhas WHERE id=$1 AND usuario_id=$2 RETURNING id',
     [req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Anilha não encontrada.' });
   res.json({ ok: true });
-});
+}));
 
 module.exports = router;

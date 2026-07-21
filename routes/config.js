@@ -12,6 +12,7 @@
 const express = require('express');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -30,17 +31,17 @@ function validarChave(req, res, next) {
 }
 
 // ---------- LEITURA PÚBLICA (o site do criatório precisa ler sem login) ----------
-router.get('/publico/:chave', validarChave, async (req, res) => {
+router.get('/publico/:chave', validarChave, asyncHandler(async (req, res) => {
   // Sistema é single-user: sempre lê do usuário id=1 (o admin/dono do criatório)
   const { rows } = await pool.query(
     'SELECT valor FROM site_config WHERE usuario_id = $1 AND chave = $2',
     [1, req.params.chave]
   );
   res.json(rows[0] ? rows[0].valor : null);
-});
+}));
 
 // ---------- ESCRITA (só o admin logado) ----------
-router.put('/:chave', authMiddleware, validarChave, async (req, res) => {
+router.put('/:chave', authMiddleware, validarChave, asyncHandler(async (req, res) => {
   const { valor } = req.body || {};
   if (valor === undefined) return res.status(400).json({ error: 'Campo "valor" é obrigatório.' });
 
@@ -53,6 +54,6 @@ router.put('/:chave', authMiddleware, validarChave, async (req, res) => {
     [req.user.id, req.params.chave, JSON.stringify(valor)]
   );
   res.json(rows[0].valor);
-});
+}));
 
 module.exports = router;

@@ -8,6 +8,7 @@
 const express = require('express');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -16,33 +17,33 @@ function achatar(row) {
   return { id: row.id, status: row.status, criadoEm: row.criado_em, ...row.dados };
 }
 
-router.get('/', async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM reproducoes WHERE usuario_id = $1 ORDER BY id DESC',
     [req.user.id]
   );
   res.json(rows.map(achatar));
-});
+}));
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM reproducoes WHERE id = $1 AND usuario_id = $2',
     [req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Registro não encontrado.' });
   res.json(achatar(rows[0]));
-});
+}));
 
-router.post('/', async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
   const { status, ...dados } = req.body || {};
   const { rows } = await pool.query(
     'INSERT INTO reproducoes (usuario_id, dados, status) VALUES ($1,$2,$3) RETURNING *',
     [req.user.id, JSON.stringify(dados), status || 'Ativo']
   );
   res.status(201).json(achatar(rows[0]));
-});
+}));
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', asyncHandler(async (req, res) => {
   const { status, ...dadosNovos } = req.body || {};
 
   const atual = await pool.query(
@@ -58,15 +59,15 @@ router.put('/:id', async (req, res) => {
     [JSON.stringify(dadosMesclados), status, req.params.id, req.user.id]
   );
   res.json(achatar(rows[0]));
-});
+}));
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'DELETE FROM reproducoes WHERE id=$1 AND usuario_id=$2 RETURNING id',
     [req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Registro não encontrado.' });
   res.json({ ok: true });
-});
+}));
 
 module.exports = router;

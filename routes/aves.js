@@ -2,6 +2,7 @@
 const express = require('express');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -12,30 +13,44 @@ const CAMPOS = [
   'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico'
 ];
 
+// Colunas jsonb: precisam ir como STRING JSON pro pg, senão o driver trata
+// arrays/objetos JS como literal de array do Postgres (`{"..","..",}`) em
+// vez de JSON, e o Postgres rejeita com "invalid input syntax for type json".
+const CAMPOS_JSON = new Set(['ancestrais', 'historico']);
+
+function normalizarValor(campo, valor) {
+  if (CAMPOS_JSON.has(campo)) {
+    // undefined/null -> respeita o default da coluna ('[]') em vez de gravar NULL
+    if (valor === undefined || valor === null) return '[]';
+    return JSON.stringify(valor);
+  }
+  return valor ?? null;
+}
+
 function linhaParaAve(row) {
   return row; // node-pg já entrega JSONB como objeto/array JS
 }
 
 // ---------- ROTAS PRIVADAS (exigem login) ----------
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM aves WHERE usuario_id = $1 ORDER BY id',
     [req.user.id]
   );
   res.json(rows.map(linhaParaAve));
-});
+}));
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM aves WHERE id = $1 AND usuario_id = $2',
     [req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ave não encontrada.' });
   res.json(linhaParaAve(rows[0]));
-});
+}));
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
   if (!body.nome || !body.anilha) {
     return res.status(400).json({ error: 'Nome e anilha são obrigatórios.' });
@@ -51,7 +66,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 
   const cols = ['usuario_id', ...CAMPOS];
-  const valores = [req.user.id, ...CAMPOS.map(c => body[c] ?? null)];
+  const valores = [req.user.id, ...CAMPOS.map(c => normalizarValor(c, body[c]))];
   const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
 
   const { rows } = await pool.query(
@@ -59,9 +74,9 @@ router.post('/', authMiddleware, async (req, res) => {
     valores
   );
   res.status(201).json(linhaParaAve(rows[0]));
-});
+}));
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
 
   if (body.anilha) {
@@ -80,7 +95,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 
   const sets = camposPresentes.map((c, i) => `${c} = $${i + 1}`).join(', ');
-  const valores = camposPresentes.map(c => body[c]);
+  const valores = camposPresentes.map(c => normalizarValor(c, body[c]));
   valores.push(req.params.id, req.user.id);
 
   const { rows } = await pool.query(
@@ -91,20 +106,20 @@ router.put('/:id', authMiddleware, async (req, res) => {
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ave não encontrada.' });
   res.json(linhaParaAve(rows[0]));
-});
+}));
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'DELETE FROM aves WHERE id = $1 AND usuario_id = $2 RETURNING id',
     [req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ave não encontrada.' });
   res.json({ ok: true });
-});
+}));
 
 // ---------- ROTA PÚBLICA (site do criatório, sem login) ----------
 // Só devolve o que foi marcado explicitamente para aparecer no site.
-router.get('/publico/site', async (req, res) => {
+router.get('/publico/site', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, mae,
@@ -112,14 +127,14 @@ router.get('/publico/site', async (req, res) => {
      FROM aves WHERE no_site = true ORDER BY especie, nome`
   );
   res.json(rows);
-});
+}));
 
 // Certificado público de uma ave específica. Só funciona se a ave estiver
 // marcada para aparecer no site (no_site = true) — assim não expõe o
 // plantel privado inteiro, só resolve os avós dessa ave em particular
 // (a versão antiga mandava a tabela "aves" completa pro navegador do
 // visitante fazer essa busca, o que vazava todo o plantel privado).
-router.get('/publico/certificado/:id', async (req, res) => {
+router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
   const aveRes = await pool.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, anilha_pai AS "anilhaPai",
@@ -146,6 +161,6 @@ router.get('/publico/certificado/:id', async (req, res) => {
   const maeEncontrada = await buscarPorNome(ave.mae);
 
   res.json({ ...ave, paiEncontrado, maeEncontrada });
-});
+}));
 
 module.exports = router;
