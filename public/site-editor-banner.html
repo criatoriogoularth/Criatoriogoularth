@@ -196,12 +196,23 @@ renderSidebar('admin-site');
 
 async function getBanner() {
   try {
-    return (await DB.getConfig('site_banner')) || {};
+    const conteudo = (await DB.getConfig('site_conteudo')) || {};
+    const home = conteudo.home || {};
+    return {
+      url: home.bannerUrl || '',
+      titulo: home.bannerTitulo || '',
+      subtitulo: home.bannerSubtitulo || ''
+    };
   } catch (e) { return {}; }
 }
 
 async function saveBanner(banner) {
-  return DB.setConfig('site_banner', banner);
+  const conteudo = (await DB.getConfig('site_conteudo')) || {};
+  conteudo.home = conteudo.home || {};
+  conteudo.home.bannerUrl = banner.url || '';
+  conteudo.home.bannerTitulo = banner.titulo || '';
+  conteudo.home.bannerSubtitulo = banner.subtitulo || '';
+  return DB.setConfig('site_conteudo', conteudo);
 }
 
 // ============================================================
