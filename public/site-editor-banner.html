@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Editar Banner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.editor-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--brass-soft);
+  margin-bottom: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.field input,
+.field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  outline: none !important;
+}
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--brass) !important;
+}
+.banner-preview-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  margin-top: 8px;
+  position: relative;
+}
+.banner-preview-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 300px;
+  object-fit: cover;
+}
+.banner-preview-container .placeholder {
+  width: 100%;
+  height: 150px;
+  background: rgba(0,0,0,0.2);
+  border: 2px dashed var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  flex-direction: column;
+  gap: 8px;
+}
+.banner-preview-container .placeholder .icon {
+  font-size: 32px;
+  opacity: 0.4;
+}
+.banner-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.banner-actions .btn {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+.banner-upload-area {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
+}
+.banner-upload-area input[type="file"] {
+  display: none;
+}
+.banner-upload-area .btn-upload {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--brass-dim);
+  background: rgba(199,151,63,0.08);
+  color: var(--brass-soft);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  transition: .15s ease;
+}
+.banner-upload-area .btn-upload:hover {
+  background: rgba(199,151,63,0.18);
+}
+.banner-size-info {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1>✎ Editar Banner do Site</h1>
+          <div class="lede">Configure o banner que aparecerá em todas as páginas do site</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-primary" onclick="salvarBanner()">💾 Salvar</button>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <h3>🖼️ Banner do Site</h3>
+        
+        <div class="field">
+          <label>Imagem do Banner</label>
+          <div class="banner-upload-area">
+            <input type="file" id="banner-file-input" accept="image/*" onchange="uploadBanner(event)">
+            <button class="btn-upload" onclick="document.getElementById('banner-file-input').click()">📤 Escolher Imagem</button>
+            <span style="font-size:12px;color:var(--text-muted);">ou</span>
+            <input type="text" id="banner-url" placeholder="https://exemplo.com/banner.jpg" style="flex:1;min-width:200px;">
+            <button class="btn btn-ghost" onclick="carregarBannerUrl()" style="padding:6px 14px;font-size:12px;">Carregar</button>
+          </div>
+          <div class="banner-size-info">📐 Tamanho recomendado: <strong>1920 × 500 px</strong> (cabeçalho)</div>
+        </div>
+
+        <div id="banner-preview-container">
+          <div class="banner-preview-container">
+            <div class="placeholder">
+              <span style="font-size:32px;opacity:0.4;">🖼️</span>
+              <span>Nenhum banner configurado</span>
+              <span style="font-size:11px;">Faça upload ou cole a URL da imagem</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="banner-actions">
+          <button class="btn btn-danger" onclick="excluirBanner()">🗑️ Excluir Banner</button>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label>Título do Banner</label>
+          <input type="text" id="banner-titulo" placeholder="Bem-vindo ao Criatório Goularth">
+          <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
+        </div>
+        <div class="field">
+          <label>Subtítulo do Banner</label>
+          <input type="text" id="banner-subtitulo" placeholder="Excelência na criação de aves">
+          <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+renderSidebar('admin-site');
+
+// ============================================================
+// FUNÇÕES DE BANCO
+// ============================================================
+
+function getBanner() {
+  try {
+    const data = localStorage.getItem('site_banner');
+    return data ? JSON.parse(data) : {};
+  } catch (e) { return {}; }
+}
+
+function saveBanner(banner) {
+  localStorage.setItem('site_banner', JSON.stringify(banner));
+}
+
+// ============================================================
+// VARIÁVEIS
+// ============================================================
+
+let banner = {};
+
+// ============================================================
+// CARREGAR
+// ============================================================
+
+function carregarBanner() {
+  banner = getBanner();
+  renderizarBanner();
+}
+
+// ============================================================
+// RENDERIZAR
+// ============================================================
+
+function renderizarBanner() {
+  // Preview da imagem
+  const container = document.getElementById('banner-preview-container');
+  if (banner.url) {
+    container.innerHTML = `<div class="banner-preview-container"><img src="${banner.url}" alt="Banner" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><span style=\\'font-size:32px;opacity:0.4;\\'>❌</span><span>Erro ao carregar imagem</span></div>'"></div>`;
+  } else {
+    container.innerHTML = `<div class="banner-preview-container"><div class="placeholder"><span style="font-size:32px;opacity:0.4;">🖼️</span><span>Nenhum banner configurado</span></div></div>`;
+  }
+  
+  // Campos de texto
+  document.getElementById('banner-url').value = banner.url || '';
+  document.getElementById('banner-titulo').value = banner.titulo || '';
+  document.getElementById('banner-subtitulo').value = banner.subtitulo || '';
+}
+
+// ============================================================
+// FUNÇÕES DO BANNER
+// ============================================================
+
+function uploadBanner(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (!file.type.startsWith('image/')) {
+    alert('Selecione uma imagem válida.');
+    return;
+  }
+  
+  if (file.size > 10 * 1024 * 1024) {
+    alert('A imagem excede 10MB.');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const url = e.target.result;
+    document.getElementById('banner-url').value = url;
+    document.getElementById('banner-preview-container').innerHTML = `<div class="banner-preview-container"><img src="${url}" alt="Banner"></div>`;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function carregarBannerUrl() {
+  const url = document.getElementById('banner-url').value.trim();
+  if (!url) return;
+  document.getElementById('banner-preview-container').innerHTML = `<div class="banner-preview-container"><img src="${url}" alt="Banner" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><span style=\\'font-size:32px;opacity:0.4;\\'>❌</span><span>Erro ao carregar imagem</span></div>'"></div>`;
+}
+
+function excluirBanner() {
+  if (!confirm('Tem certeza que deseja excluir o banner?')) return;
+  
+  banner.url = '';
+  banner.titulo = '';
+  banner.subtitulo = '';
+  
+  saveBanner(banner);
+  renderizarBanner();
+  alert('✅ Banner excluído com sucesso!');
+}
+
+function salvarBanner() {
+  banner.url = document.getElementById('banner-url').value.trim();
+  banner.titulo = document.getElementById('banner-titulo').value.trim();
+  banner.subtitulo = document.getElementById('banner-subtitulo').value.trim();
+  
+  saveBanner(banner);
+  alert('✅ Banner salvo com sucesso!');
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+
+carregarBanner();
+</script>
+</body>
+</html>
