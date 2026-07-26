@@ -20,8 +20,18 @@ const CAMPOS = [
 // com JSON.stringify antes de entrar na query.
 const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico']);
 
+// Colunas que o banco exige (NOT NULL) mas que os formulários antigos
+// às vezes não mandam (ex: importação de árvore genealógica). Sem esse
+// valor padrão, a inserção falhava com "null value ... violates not-null
+// constraint" e a ave nem sequer era salva.
+const VALORES_PADRAO = {
+  no_site: false
+};
+
 function prepararValor(campo, valor) {
-  if (valor === undefined) return null;
+  if (valor === undefined || valor === null) {
+    valor = VALORES_PADRAO.hasOwnProperty(campo) ? VALORES_PADRAO[campo] : null;
+  }
   if (CAMPOS_JSON_ARRAY.has(campo) && valor !== null) {
     return JSON.stringify(valor);
   }
