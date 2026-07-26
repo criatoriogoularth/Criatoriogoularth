@@ -183,23 +183,25 @@
   </main>
 </div>
 
+<script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
+<script src="db-api.js"></script>
 <script>
 renderSidebar('admin-site');
 
 // ============================================================
-// FUNÇÕES DE BANCO
+// FUNÇÕES DE BANCO (API — antes era localStorage, por isso o
+// banner não aparecia pra ninguém além de quem salvou no navegador)
 // ============================================================
 
-function getBanner() {
+async function getBanner() {
   try {
-    const data = localStorage.getItem('site_banner');
-    return data ? JSON.parse(data) : {};
+    return (await DB.getConfig('site_banner')) || {};
   } catch (e) { return {}; }
 }
 
-function saveBanner(banner) {
-  localStorage.setItem('site_banner', JSON.stringify(banner));
+async function saveBanner(banner) {
+  return DB.setConfig('site_banner', banner);
 }
 
 // ============================================================
@@ -212,8 +214,8 @@ let banner = {};
 // CARREGAR
 // ============================================================
 
-function carregarBanner() {
-  banner = getBanner();
+async function carregarBanner() {
+  banner = await getBanner();
   renderizarBanner();
 }
 
@@ -270,25 +272,33 @@ function carregarBannerUrl() {
   document.getElementById('banner-preview-container').innerHTML = `<div class="banner-preview-container"><img src="${url}" alt="Banner" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><span style=\\'font-size:32px;opacity:0.4;\\'>❌</span><span>Erro ao carregar imagem</span></div>'"></div>`;
 }
 
-function excluirBanner() {
+async function excluirBanner() {
   if (!confirm('Tem certeza que deseja excluir o banner?')) return;
   
   banner.url = '';
   banner.titulo = '';
   banner.subtitulo = '';
   
-  saveBanner(banner);
-  renderizarBanner();
-  alert('✅ Banner excluído com sucesso!');
+  try {
+    await saveBanner(banner);
+    renderizarBanner();
+    alert('✅ Banner excluído com sucesso!');
+  } catch (e) {
+    alert('❌ Erro ao excluir: ' + e.message);
+  }
 }
 
-function salvarBanner() {
+async function salvarBanner() {
   banner.url = document.getElementById('banner-url').value.trim();
   banner.titulo = document.getElementById('banner-titulo').value.trim();
   banner.subtitulo = document.getElementById('banner-subtitulo').value.trim();
   
-  saveBanner(banner);
-  alert('✅ Banner salvo com sucesso!');
+  try {
+    await saveBanner(banner);
+    alert('✅ Banner salvo com sucesso!');
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
 }
 
 // ============================================================

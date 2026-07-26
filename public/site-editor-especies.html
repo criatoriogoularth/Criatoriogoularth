@@ -167,22 +167,22 @@
   </main>
 </div>
 
+<script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
+<script src="db-api.js"></script>
 <script>
 renderSidebar('admin-site');
 
 // ============================================================
-// FUNÇÕES DE BANCO
+// FUNÇÕES DE BANCO (API — antes era localStorage, por isso as
+// espécies editadas aqui não apareciam no site pra outras pessoas)
 // ============================================================
 
-function getEspecies() {
+async function getEspecies() {
   try {
-    const data = localStorage.getItem('site_especies');
-    if (data) {
-      const especies = JSON.parse(data);
-      if (especies && Object.keys(especies).length > 0) {
-        return especies;
-      }
+    const especies = await DB.getConfig('site_especies');
+    if (especies && Object.keys(especies).length > 0) {
+      return especies;
     }
   } catch (e) {}
   
@@ -206,13 +206,8 @@ function getEspecies() {
   };
 }
 
-function saveEspecies(especies) {
-  localStorage.setItem('site_especies', JSON.stringify(especies));
-  // Forçar atualização da home
-  try {
-    const event = new Event('storage');
-    window.dispatchEvent(event);
-  } catch(e) {}
+async function saveEspecies(especies) {
+  return DB.setConfig('site_especies', especies);
 }
 
 // ============================================================
@@ -225,8 +220,8 @@ let especies = {};
 // CARREGAR
 // ============================================================
 
-function carregarEspecies() {
-  especies = getEspecies();
+async function carregarEspecies() {
+  especies = await getEspecies();
   renderizarEspecies();
 }
 
@@ -354,7 +349,7 @@ function uploadImagemEspecie(event) {
   event.target.value = '';
 }
 
-function salvarEdicaoEspecie(key) {
+async function salvarEdicaoEspecie(key) {
   const titulo = document.getElementById('edit-titulo').value.trim();
   const desc = document.getElementById('edit-desc').value.trim();
   const imagem = document.getElementById('edit-imagem').value.trim();
@@ -371,23 +366,31 @@ function salvarEdicaoEspecie(key) {
     imagem: imagem
   };
   
-  saveEspecies(especies);
-  renderizarEspecies();
-  
-  // Fechar modal
-  const modal = document.querySelector('div[style*="position: fixed"]');
-  if (modal) modal.remove();
-  
-  alert('✅ Espécie atualizada com sucesso!');
+  try {
+    await saveEspecies(especies);
+    renderizarEspecies();
+    
+    // Fechar modal
+    const modal = document.querySelector('div[style*="position: fixed"]');
+    if (modal) modal.remove();
+    
+    alert('✅ Espécie atualizada com sucesso!');
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
 }
 
 // ============================================================
 // SALVAR
 // ============================================================
 
-function salvarEspecies() {
-  saveEspecies(especies);
-  alert('✅ Espécies salvas com sucesso!');
+async function salvarEspecies() {
+  try {
+    await saveEspecies(especies);
+    alert('✅ Espécies salvas com sucesso!');
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
 }
 
 // ============================================================
