@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Anilhas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.anilhas-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.anilhas-toolbar .filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.anilhas-toolbar .filters input,
+.anilhas-toolbar .filters select {
+  background: rgba(0,0,0,0.18);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+  min-width: 140px;
+}
+
+.anilhas-toolbar .filters input:focus,
+.anilhas-toolbar .filters select:focus {
+  border-color: var(--brass);
+}
+
+.table-wrap {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-wrap th {
+  background: rgba(0,0,0,0.25);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table-wrap td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+.table-wrap tr:hover td {
+  background: rgba(199,151,63,0.04);
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-ativo { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
+.badge-inativo { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
+.badge-disponivel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
+.badge-indisponivel { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
+.badge-aberta { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
+.badge-comercial { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+.badge-fob { background: rgba(199, 151, 63, 0.20); color: var(--brass-soft); }
+.badge-ibama { background: rgba(92, 154, 124, 0.20); color: var(--sage-soft); }
+.badge-marcacao { background: rgba(200, 100, 130, 0.20); color: #e2a898; }
+.badge-sispass { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+
+.color-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.modal-box.form-modal {
+  max-width: 520px;
+}
+
+.modal-box .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-box .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.modal-box .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-box .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.modal-box .field label .req {
+  color: var(--rose);
+}
+
+.modal-box .field input,
+.modal-box .field select,
+.modal-box .field textarea {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: .15s;
+}
+
+.modal-box .field input:focus,
+.modal-box .field select:focus,
+.modal-box .field textarea:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12);
+}
+
+.modal-box .field textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.modal-box .field .radio-group {
+  display: flex;
+  gap: 18px;
+  padding-top: 4px;
+}
+
+.modal-box .field .radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.modal-box .field .radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brass);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.empty-state-table {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-table .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-state-table h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+/* ===== BOTÃO LOTES ===== */
+.btn-lote {
+  background: rgba(70, 130, 200, 0.15);
+  border: 1px solid rgba(70, 130, 200, 0.3);
+  color: #5a8ab0;
+  padding: 10px 20px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  transition: .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-lote:hover {
+  background: rgba(70, 130, 200, 0.25);
+  border-color: rgba(70, 130, 200, 0.5);
+}
+
+/* ===== MODAL DE LOTE - CORRIGIDO ===== */
+.modal-box.lote-modal {
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.modal-box.lote-modal .modal-head {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.modal-box.lote-modal form {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  min-height: 0;
+}
+
+.modal-box.lote-modal .modal-actions {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 18px;
+  background: var(--bg-elevated-2);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding-bottom: 4px;
+}
+
+.modal-box .lote-preview {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.modal-box .lote-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.modal-box .lote-info strong {
+  color: var(--brass-soft);
+}
+
+/* Scrollbar customizada para o modal de lote */
+.modal-box.lote-modal form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-box.lote-modal form::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+.modal-box.lote-modal form::-webkit-scrollbar-thumb {
+  background: var(--brass-dim);
+  border-radius: 4px;
+}
+
+.modal-box.lote-modal form::-webkit-scrollbar-thumb:hover {
+  background: var(--brass);
+}
+
+@media (max-width: 768px) {
+  .modal-box .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .anilhas-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .anilhas-toolbar .filters {
+    flex-direction: column;
+  }
+  .anilhas-toolbar .filters input,
+  .anilhas-toolbar .filters select {
+    width: 100%;
+    min-width: unset;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .modal-box.lote-modal {
+    max-width: 95%;
+    max-height: 95vh;
+    padding: 14px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-anilhas">
+
+      <div class="topbar">
+        <div>
+          <h1>Anilhas</h1>
+          <div class="lede">Gerencie as anilhas do seu criatório — cadastro, estoque e disponibilidade.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-lote" onclick="abrirModalLote()">📦 Anilhas em Lote</button>
+          <button class="btn btn-primary" onclick="abrirModalCadastro()">+ Nova Anilha</button>
+        </div>
+      </div>
+
+      <div class="anilhas-toolbar">
+        <div class="filters">
+          <input type="text" id="busca-anilha" placeholder="Pesquisar por número..." oninput="renderizarTabela()">
+          <select id="filtro-cor" onchange="renderizarTabela()">
+            <option value="">Todas as cores</option>
+            <option value="Prata">Prata</option>
+            <option value="Prata - Sispass">Prata - Sispass</option>
+            <option value="Amarelo">Amarelo</option>
+            <option value="Azul">Azul</option>
+            <option value="Castanho">Castanho</option>
+            <option value="Cinza">Cinza</option>
+            <option value="Laranja">Laranja</option>
+            <option value="Marrom">Marrom</option>
+            <option value="Rosa">Rosa</option>
+            <option value="Verde">Verde</option>
+            <option value="Bege">Bege</option>
+            <option value="Branco">Branco</option>
+            <option value="Caramelo">Caramelo</option>
+            <option value="Bronze">Bronze</option>
+            <option value="Cobre">Cobre</option>
+            <option value="Dourado">Dourado</option>
+            <option value="Ferrugem">Ferrugem</option>
+            <option value="Marfim">Marfim</option>
+            <option value="Ouro">Ouro</option>
+            <option value="Preto">Preto</option>
+            <option value="Roxo">Roxo</option>
+            <option value="Vermelho">Vermelho</option>
+          </select>
+          <select id="filtro-status" onchange="renderizarTabela()">
+            <option value="">Todos os status</option>
+            <option value="Sim">Ativo</option>
+            <option value="Não">Inativo</option>
+          </select>
+          <select id="filtro-disponivel" onchange="renderizarTabela()">
+            <option value="">Disponibilidade</option>
+            <option value="Sim">Disponível</option>
+            <option value="Não">Indisponível</option>
+          </select>
+        </div>
+        <span style="font-size:12px;color:var(--text-muted);" id="total-anilhas">0 anilhas</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cor</th>
+              <th>Número</th>
+              <th>Tipo</th>
+              <th>Dimensão</th>
+              <th>Status</th>
+              <th>Disponível</th>
+              <th>Data Cadastro</th>
+              <th style="text-align:center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="anilhas-table">
+            <!-- Preenchido pelo JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- ===== MODAL DE CADASTRO INDIVIDUAL ===== -->
+<div class="modal-overlay" id="modal-anilha" onclick="if(event.target===this) fecharModalAnilha()">
+  <div class="modal-box form-modal">
+    <div class="modal-head">
+      <div><span id="modal-title-anilha">Nova Anilha</span></div>
+      <button class="modal-close" onclick="fecharModalAnilha()">✕</button>
+    </div>
+
+    <form id="form-anilha" onsubmit="salvarAnilha(event)">
+      <input type="hidden" id="edit-id" value="">
+
+      <div class="field-grid">
+        <div class="field">
+          <label>Cor <span class="req">*</span></label>
+          <select id="f-cor" required>
+            <option value="">Selecione...</option>
+            <option value="Prata">Prata</option>
+            <option value="Prata - Sispass">Prata - Sispass</option>
+            <option value="Amarelo">Amarelo</option>
+            <option value="Azul">Azul</option>
+            <option value="Castanho">Castanho</option>
+            <option value="Cinza">Cinza</option>
+            <option value="Laranja">Laranja</option>
+            <option value="Marrom">Marrom</option>
+            <option value="Rosa">Rosa</option>
+            <option value="Verde">Verde</option>
+            <option value="Bege">Bege</option>
+            <option value="Branco">Branco</option>
+            <option value="Caramelo">Caramelo</option>
+            <option value="Bronze">Bronze</option>
+            <option value="Cobre">Cobre</option>
+            <option value="Dourado">Dourado</option>
+            <option value="Ferrugem">Ferrugem</option>
+            <option value="Marfim">Marfim</option>
+            <option value="Ouro">Ouro</option>
+            <option value="Preto">Preto</option>
+            <option value="Roxo">Roxo</option>
+            <option value="Vermelho">Vermelho</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Tipo Anilha <span class="req">*</span></label>
+          <select id="f-tipo" required>
+            <option value="">Selecione...</option>
+            <option value="Aberta">Aberta</option>
+            <option value="Comercial">Comercial</option>
+            <option value="FOB">FOB</option>
+            <option value="IBAMA">IBAMA</option>
+            <option value="Marcação">Marcação</option>
+            <option value="Sispass">Sispass</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Número <span class="req">*</span></label>
+          <input type="text" id="f-numero" placeholder="Ex: FOB/CA.065/025/2022" required>
+        </div>
+
+        <div class="field">
+          <label>Dimensão</label>
+          <input type="text" id="f-dimensao" placeholder="Ex: 2.5mm">
+        </div>
+
+        <div class="field field-full">
+          <label>Observação</label>
+          <textarea id="f-observacao" placeholder="Observações sobre a anilha..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Ativo</label>
+          <div class="radio-group">
+            <label><input type="radio" name="ativo" value="Sim" checked> Sim</label>
+            <label><input type="radio" name="ativo" value="Não"> Não</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Disponível</label>
+          <div class="radio-group">
+            <label><input type="radio" name="disponivel" value="Sim"> Sim</label>
+            <label><input type="radio" name="disponivel" value="Não" checked> Não</label>
+          </div>
+        </div>
+
+        <div class="field field-full">
+          <label>Data Cadastro</label>
+          <input type="date" id="f-data-cadastro">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="fecharModalAnilha()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL DE LOTE ===== -->
+<div class="modal-overlay" id="modal-lote" onclick="if(event.target===this) fecharModalLote()">
+  <div class="modal-box lote-modal">
+    <div class="modal-head">
+      <div><span>📦 Anilhas em Lote</span></div>
+      <button class="modal-close" onclick="fecharModalLote()">✕</button>
+    </div>
+
+    <form id="form-lote" onsubmit="salvarLote(event)">
+      <div class="field-grid">
+        <div class="field">
+          <label>Cor <span class="req">*</span></label>
+          <select id="lote-cor" required>
+            <option value="">Selecione...</option>
+            <option value="Prata">Prata</option>
+            <option value="Prata - Sispass">Prata - Sispass</option>
+            <option value="Amarelo">Amarelo</option>
+            <option value="Azul">Azul</option>
+            <option value="Castanho">Castanho</option>
+            <option value="Cinza">Cinza</option>
+            <option value="Laranja">Laranja</option>
+            <option value="Marrom">Marrom</option>
+            <option value="Rosa">Rosa</option>
+            <option value="Verde">Verde</option>
+            <option value="Bege">Bege</option>
+            <option value="Branco">Branco</option>
+            <option value="Caramelo">Caramelo</option>
+            <option value="Bronze">Bronze</option>
+            <option value="Cobre">Cobre</option>
+            <option value="Dourado">Dourado</option>
+            <option value="Ferrugem">Ferrugem</option>
+            <option value="Marfim">Marfim</option>
+            <option value="Ouro">Ouro</option>
+            <option value="Preto">Preto</option>
+            <option value="Roxo">Roxo</option>
+            <option value="Vermelho">Vermelho</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Tipo Anilha <span class="req">*</span></label>
+          <select id="lote-tipo" required>
+            <option value="">Selecione...</option>
+            <option value="Aberta">Aberta</option>
+            <option value="Comercial">Comercial</option>
+            <option value="FOB">FOB</option>
+            <option value="IBAMA">IBAMA</option>
+            <option value="Marcação">Marcação</option>
+            <option value="Sispass">Sispass</option>
+          </select>
+        </div>
+
+        <div class="field field-full">
+          <label>Prefixo <span class="req">*</span></label>
+          <input type="text" id="lote-prefixo" placeholder="Ex: FOB II 889" required>
+          <div style="font-size:10px;color:var(--text-muted);">Texto fixo que vem antes do número (ex: FOB II 889)</div>
+        </div>
+
+        <div class="field">
+          <label>Ano <span class="req">*</span></label>
+          <input type="text" id="lote-ano" placeholder="Ex: 23" required>
+          <div style="font-size:10px;color:var(--text-muted);">Ano da anilha (ex: 23 para 2023)</div>
+        </div>
+
+        <div class="field">
+          <label>Número Inicial <span class="req">*</span></label>
+          <input type="number" id="lote-inicio" value="1" min="1" required>
+        </div>
+
+        <div class="field">
+          <label>Número Final <span class="req">*</span></label>
+          <input type="number" id="lote-fim" value="10" min="1" required>
+        </div>
+
+        <div class="field field-full">
+          <label>Dimensão</label>
+          <input type="text" id="lote-dimensao" placeholder="Ex: 2.5mm">
+        </div>
+
+        <div class="field field-full">
+          <label>Observação</label>
+          <textarea id="lote-observacao" placeholder="Observações sobre o lote..."></textarea>
+        </div>
+
+        <div class="field field-full">
+          <label>Pré-visualização</label>
+          <div class="lote-preview" id="lote-preview">
+            <span style="color:var(--text-muted);">Preencha os campos para visualizar</span>
+          </div>
+          <div class="lote-info" id="lote-info">Total: <strong>0</strong> anilhas</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="fecharModalLote()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">📦 Gerar Lote</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('anilhas');</script>
+<script>
+// ============================================================
+// FUNÇÕES EXISTENTES (MANTIDAS)
+// ============================================================
+
+function getCorHex(cor) {
+  const cores = {
+    'Prata': '#C0C0C0', 'Prata - Sispass': '#A8A8A8', 'Amarelo': '#FFD700',
+    'Azul': '#4169E1', 'Castanho': '#8B4513', 'Cinza': '#808080',
+    'Laranja': '#FF8C00', 'Marrom': '#A52A2A', 'Rosa': '#FF69B4',
+    'Verde': '#32CD32', 'Bege': '#F5F5DC', 'Branco': '#FFFFFF',
+    'Caramelo': '#D2691E', 'Bronze': '#CD7F32', 'Cobre': '#B87333',
+    'Dourado': '#FFD700', 'Ferrugem': '#B7410E', 'Marfim': '#FFFFF0',
+    'Ouro': '#FFD700', 'Preto': '#1A1A1A', 'Roxo': '#8B008B',
+    'Vermelho': '#DC143C'
+  };
+  return cores[cor] || '#808080';
+}
+
+function getTipoClass(tipo) {
+  const classes = {
+    'Aberta': 'badge-aberta', 'Comercial': 'badge-comercial',
+    'FOB': 'badge-fob', 'IBAMA': 'badge-ibama',
+    'Marcação': 'badge-marcacao', 'Sispass': 'badge-sispass'
+  };
+  return classes[tipo] || 'badge-aberta';
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = data.split('-');
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+async function renderizarTabela() {
+  const busca = document.getElementById('busca-anilha').value.toLowerCase();
+  const filtroCor = document.getElementById('filtro-cor').value;
+  const filtroStatus = document.getElementById('filtro-status').value;
+  const filtroDisponivel = document.getElementById('filtro-disponivel').value;
+
+  let anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+
+  let lista = anilhas.filter(item => {
+    const matchBusca = item.numero.toLowerCase().includes(busca) || item.cor.toLowerCase().includes(busca);
+    const matchCor = filtroCor ? item.cor === filtroCor : true;
+    const matchStatus = filtroStatus ? item.ativo === filtroStatus : true;
+    const matchDisponivel = filtroDisponivel ? item.disponivel === filtroDisponivel : true;
+    return matchBusca && matchCor && matchStatus && matchDisponivel;
+  });
+
+  document.getElementById('total-anilhas').textContent = lista.length + ' anilhas';
+
+  const tbody = document.getElementById('anilhas-table');
+  if (lista.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="empty-state-table">
+            <div class="icon">🏷️</div>
+            <h3>Nenhuma anilha cadastrada</h3>
+            <p>Clique em "+ Nova Anilha" ou "Anilhas em Lote" para adicionar.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(item => `
+    <tr>
+      <td><span class="color-dot" style="background:${getCorHex(item.cor)};"></span> ${item.cor}</td>
+      <td><strong>${item.numero}</strong></td>
+      <td><span class="badge ${getTipoClass(item.tipo)}">${item.tipo}</span></td>
+      <td>${item.dimensao || '-'}</td>
+      <td><span class="badge ${item.ativo === 'Sim' ? 'badge-ativo' : 'badge-inativo'}">${item.ativo === 'Sim' ? 'Ativo' : 'Inativo'}</span></td>
+      <td><span class="badge ${item.disponivel === 'Sim' ? 'badge-disponivel' : 'badge-indisponivel'}">${item.disponivel === 'Sim' ? 'Disponível' : 'Indisponível'}</span></td>
+      <td>${formatarData(item.dataCadastro)}</td>
+      <td style="text-align:center;">
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="editarAnilha(${item.id})">✎</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="excluirAnilha(${item.id})">✕</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// MODAL DE CADASTRO INDIVIDUAL
+// ============================================================
+
+function abrirModalCadastro() {
+  document.getElementById('modal-title-anilha').textContent = 'Nova Anilha';
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-cor').value = '';
+  document.getElementById('f-tipo').value = '';
+  document.getElementById('f-numero').value = '';
+  document.getElementById('f-dimensao').value = '';
+  document.getElementById('f-observacao').value = '';
+  document.querySelector('input[name="ativo"][value="Sim"]').checked = true;
+  document.querySelector('input[name="disponivel"][value="Não"]').checked = true;
+  document.getElementById('f-data-cadastro').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-anilha').classList.add('open');
+}
+
+async function editarAnilha(id) {
+  const item = await DB.getById(DB.TABLES.ANILHAS, id);
+  if (!item) return;
+
+  document.getElementById('modal-title-anilha').textContent = 'Editar Anilha';
+  document.getElementById('edit-id').value = id;
+  document.getElementById('f-cor').value = item.cor;
+  document.getElementById('f-tipo').value = item.tipo;
+  document.getElementById('f-numero').value = item.numero;
+  document.getElementById('f-dimensao').value = item.dimensao || '';
+  document.getElementById('f-observacao').value = item.observacao || '';
+  document.querySelector(`input[name="ativo"][value="${item.ativo}"]`).checked = true;
+  document.querySelector(`input[name="disponivel"][value="${item.disponivel}"]`).checked = true;
+  document.getElementById('f-data-cadastro').value = item.dataCadastro || '';
+  document.getElementById('modal-anilha').classList.add('open');
+}
+
+function fecharModalAnilha() {
+  document.getElementById('modal-anilha').classList.remove('open');
+}
+
+async function salvarAnilha(event) {
+  event.preventDefault();
+
+  const dados = {
+    cor: document.getElementById('f-cor').value,
+    tipo: document.getElementById('f-tipo').value,
+    numero: document.getElementById('f-numero').value.trim(),
+    dimensao: document.getElementById('f-dimensao').value.trim(),
+    observacao: document.getElementById('f-observacao').value.trim(),
+    ativo: document.querySelector('input[name="ativo"]:checked').value,
+    disponivel: document.querySelector('input[name="disponivel"]:checked').value,
+    dataCadastro: document.getElementById('f-data-cadastro').value,
+  };
+
+  if (!dados.cor || !dados.tipo || !dados.numero) {
+    alert('Preencha os campos obrigatórios: Cor, Tipo e Número.');
+    return;
+  }
+
+  const editId = document.getElementById('edit-id').value;
+
+  try {
+    if (editId) {
+      await DB.update(DB.TABLES.ANILHAS, parseInt(editId), dados);
+    } else {
+      await DB.add(DB.TABLES.ANILHAS, dados);
+    }
+    fecharModalAnilha();
+    renderizarTabela();
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
+}
+
+async function excluirAnilha(id) {
+  if (!confirm('Tem certeza que deseja excluir esta anilha?')) return;
+  await DB.delete(DB.TABLES.ANILHAS, id);
+  renderizarTabela();
+}
+
+// ============================================================
+// ===== FUNÇÕES PARA LOTE =====
+// ============================================================
+
+function abrirModalLote() {
+  document.getElementById('lote-cor').value = '';
+  document.getElementById('lote-tipo').value = '';
+  document.getElementById('lote-prefixo').value = '';
+  document.getElementById('lote-ano').value = new Date().getFullYear().toString().slice(-2);
+  document.getElementById('lote-inicio').value = 1;
+  document.getElementById('lote-fim').value = 10;
+  document.getElementById('lote-dimensao').value = '';
+  document.getElementById('lote-observacao').value = '';
+  document.getElementById('lote-preview').innerHTML = '<span style="color:var(--text-muted);">Preencha os campos para visualizar</span>';
+  document.getElementById('lote-info').innerHTML = 'Total: <strong>0</strong> anilhas';
+  document.getElementById('modal-lote').classList.add('open');
+  atualizarPreviewLote();
+}
+
+function fecharModalLote() {
+  document.getElementById('modal-lote').classList.remove('open');
+}
+
+function atualizarPreviewLote() {
+  const prefixo = document.getElementById('lote-prefixo').value.trim();
+  const ano = document.getElementById('lote-ano').value.trim();
+  const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
+  const fim = parseInt(document.getElementById('lote-fim').value) || 10;
+  const tipo = document.getElementById('lote-tipo').value;
+  
+  const previewEl = document.getElementById('lote-preview');
+  const infoEl = document.getElementById('lote-info');
+  
+  if (!prefixo || !ano || !tipo) {
+    previewEl.innerHTML = '<span style="color:var(--text-muted);">Preencha Prefixo, Ano e Tipo para visualizar</span>';
+    infoEl.innerHTML = 'Total: <strong>0</strong> anilhas';
+    return;
+  }
+  
+  // Tipos que NÃO permitem lote (Sispass e IBAMA)
+  const tiposBloqueados = ['Sispass', 'IBAMA'];
+  if (tiposBloqueados.includes(tipo)) {
+    previewEl.innerHTML = `<span style="color:#e2988a;">⚠️ O tipo "${tipo}" não permite cadastro em lote. Cadastre uma por vez.</span>`;
+    infoEl.innerHTML = 'Total: <strong>0</strong> anilhas';
+    return;
+  }
+  
+  if (inicio > fim) {
+    previewEl.innerHTML = '<span style="color:#e2988a;">⚠️ Número inicial não pode ser maior que o final.</span>';
+    infoEl.innerHTML = 'Total: <strong>0</strong> anilhas';
+    return;
+  }
+  
+  // Gerar prévia (máximo 20 itens para não poluir)
+  const total = fim - inicio + 1;
+  let previewHtml = '';
+  const maxPreview = Math.min(total, 20);
+  
+  for (let i = inicio; i <= maxPreview; i++) {
+    const numeroFormatado = String(i).padStart(3, '0');
+    const numeroCompleto = `${prefixo} ${numeroFormatado} ${ano}`;
+    previewHtml += `<div>${numeroCompleto}</div>`;
+  }
+  
+  if (total > 20) {
+    previewHtml += `<div style="color:var(--text-muted);">... e mais ${total - 20} anilhas</div>`;
+  }
+  
+  previewEl.innerHTML = previewHtml;
+  infoEl.innerHTML = `Total: <strong>${total}</strong> anilhas | ${tipo} | ${ano}`;
+}
+
+// Event listeners para atualizar preview
+document.getElementById('lote-prefixo').addEventListener('input', atualizarPreviewLote);
+document.getElementById('lote-ano').addEventListener('input', atualizarPreviewLote);
+document.getElementById('lote-inicio').addEventListener('input', atualizarPreviewLote);
+document.getElementById('lote-fim').addEventListener('input', atualizarPreviewLote);
+document.getElementById('lote-tipo').addEventListener('change', atualizarPreviewLote);
+
+async function salvarLote(event) {
+  event.preventDefault();
+  
+  const cor = document.getElementById('lote-cor').value;
+  const tipo = document.getElementById('lote-tipo').value;
+  const prefixo = document.getElementById('lote-prefixo').value.trim();
+  const ano = document.getElementById('lote-ano').value.trim();
+  const inicio = parseInt(document.getElementById('lote-inicio').value) || 1;
+  const fim = parseInt(document.getElementById('lote-fim').value) || 10;
+  const dimensao = document.getElementById('lote-dimensao').value.trim();
+  const observacao = document.getElementById('lote-observacao').value.trim();
+  
+  // Validações
+  if (!cor) { alert('Selecione a cor da anilha.'); return; }
+  if (!tipo) { alert('Selecione o tipo da anilha.'); return; }
+  if (!prefixo) { alert('Digite o prefixo da anilha.'); return; }
+  if (!ano) { alert('Digite o ano da anilha.'); return; }
+  if (inicio > fim) { alert('O número inicial não pode ser maior que o final.'); return; }
+  
+  // Tipos que NÃO permitem lote
+  const tiposBloqueados = ['Sispass', 'IBAMA'];
+  if (tiposBloqueados.includes(tipo)) {
+    alert(`⚠️ O tipo "${tipo}" não permite cadastro em lote. Cadastre uma por vez no botão "+ Nova Anilha".`);
+    return;
+  }
+  
+  const total = fim - inicio + 1;
+  if (total > 500) {
+    if (!confirm(`⚠️ Você está prestes a cadastrar ${total} anilhas. Tem certeza?`)) return;
+  }
+  
+  const anilhasExistentes = await DB.getAll(DB.TABLES.ANILHAS);
+  const numerosExistentes = new Set(anilhasExistentes.map(a => a.numero));
+  
+  let anilhasParaAdicionar = [];
+  let duplicados = [];
+  
+  for (let i = inicio; i <= fim; i++) {
+    const numeroFormatado = String(i).padStart(3, '0');
+    const numeroCompleto = `${prefixo} ${numeroFormatado} ${ano}`;
+    
+    if (numerosExistentes.has(numeroCompleto)) {
+      duplicados.push(numeroCompleto);
+    } else {
+      anilhasParaAdicionar.push({
+        cor: cor,
+        tipo: tipo,
+        numero: numeroCompleto,
+        dimensao: dimensao,
+        observacao: observacao || `Lote ${prefixo} ${ano}`,
+        ativo: 'Sim',
+        disponivel: 'Sim',
+        dataCadastro: new Date().toISOString().split('T')[0]
+      });
+    }
+  }
+  
+  if (duplicados.length > 0) {
+    const msg = `⚠️ ${duplicados.length} anilha(s) já existe(m) no sistema:\n${duplicados.slice(0, 5).join('\n')}${duplicados.length > 5 ? `\n... e mais ${duplicados.length - 5}` : ''}\n\nDeseja continuar com as restantes?`;
+    if (!confirm(msg)) return;
+  }
+  
+  if (anilhasParaAdicionar.length === 0) {
+    alert('Nenhuma anilha nova para adicionar. Todas já existem.');
+    return;
+  }
+  
+  // Adicionar em lote (uma de cada vez, aguardando cada requisição)
+  let adicionadas = 0;
+  for (const anilha of anilhasParaAdicionar) {
+    try {
+      await DB.add(DB.TABLES.ANILHAS, anilha);
+      adicionadas++;
+    } catch (e) {
+      console.warn('Falha ao adicionar', anilha.numero, e.message);
+    }
+  }
+  
+  fecharModalLote();
+  renderizarTabela();
+  
+  alert(`✅ ${adicionadas} anilhas cadastradas com sucesso!${duplicados.length > 0 ? `\n⚠️ ${duplicados.length} anilhas ignoradas (já existiam).` : ''}`);
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+renderizarTabela();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    fecharModalAnilha();
+    fecharModalLote();
+  }
+});
+
+document.getElementById('modal-lote').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalLote();
+});
+</script>
+</body>
+</html>

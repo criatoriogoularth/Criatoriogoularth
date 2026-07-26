@@ -1,0 +1,230 @@
+<!-- admin-db.html - CONSERTADO: a versão antiga chamava DB.isAdmin(), DB.exportarMeuCriatorio()
+     e outras funções que nunca existiram no db.js single-user. Reescrito do zero,
+     mais simples, usando só o que a API realmente oferece. -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Backup & Dados</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.db-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.db-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: center;
+}
+.db-card .count {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+.db-card .label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.db-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.db-actions .btn {
+  flex: 1;
+  justify-content: center;
+  min-width: 160px;
+}
+.db-actions .btn-success {
+  background: rgba(92,154,124,0.15);
+  border: 1px solid rgba(92,154,124,0.3);
+  color: var(--sage-soft);
+}
+.db-actions .btn-success:hover { background: rgba(92,154,124,0.25); }
+.modal-box .preview-json {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 300px;
+  overflow: auto;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.preview-count { font-size: 12px; color: var(--text-muted); margin: 8px 0; }
+.preview-count strong { color: var(--brass-soft); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-admin-db">
+
+      <div class="topbar">
+        <div>
+          <h1>🗄️ Backup & Dados</h1>
+          <div class="lede">Exporte um arquivo de backup ou importe dados de um backup anterior.</div>
+        </div>
+      </div>
+
+      <div class="db-admin-grid" id="db-stats">
+        <div class="db-card"><div class="count">…</div><div class="label">Carregando</div></div>
+      </div>
+
+      <div class="db-actions">
+        <button class="btn btn-success" onclick="exportarBackup()">📤 Baixar Backup</button>
+        <button class="btn btn-primary" onclick="importarBackup()">📥 Importar Backup</button>
+      </div>
+
+      <div style="margin-top:20px;display:none;" id="preview-container">
+        <div class="preview-count" id="preview-count"></div>
+        <pre id="db-export-preview" style="background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius);padding:16px;overflow:auto;max-height:300px;font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;"></pre>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+renderSidebar('admin-db');
+
+async function atualizarStats() {
+  const grid = document.getElementById('db-stats');
+  try {
+    const [aves, anilhas, reproducoes] = await Promise.all([
+      DB.getAll(DB.TABLES.AVES),
+      DB.getAll(DB.TABLES.ANILHAS),
+      DB.getAll(DB.TABLES.REPRODUCOES)
+    ]);
+    grid.innerHTML = `
+      <div class="db-card"><div class="count">${aves.length}</div><div class="label">🐦 Aves</div></div>
+      <div class="db-card"><div class="count">${anilhas.length}</div><div class="label">🏷️ Anilhas</div></div>
+      <div class="db-card"><div class="count">${reproducoes.length}</div><div class="label">🥚 Reproduções</div></div>
+    `;
+  } catch (e) {
+    grid.innerHTML = `<div class="db-card"><div class="label">❌ Erro ao carregar estatísticas</div></div>`;
+  }
+}
+
+// ============================================================
+// EXPORTAR
+// ============================================================
+async function exportarBackup() {
+  try {
+    const [aves, anilhas, reproducoes] = await Promise.all([
+      DB.getAll(DB.TABLES.AVES),
+      DB.getAll(DB.TABLES.ANILHAS),
+      DB.getAll(DB.TABLES.REPRODUCOES)
+    ]);
+
+    const dados = {
+      dataExportacao: new Date().toISOString(),
+      versao: '2.0',
+      dados: { aves, anilhas, reproducoes }
+    };
+
+    const container = document.getElementById('preview-container');
+    const preview = document.getElementById('db-export-preview');
+    const count = document.getElementById('preview-count');
+    container.style.display = 'block';
+    count.innerHTML = `<strong>📊 Backup</strong> · ${aves.length} aves · ${anilhas.length} anilhas · ${reproducoes.length} reproduções`;
+    preview.textContent = JSON.stringify(dados, null, 2);
+
+    const json = JSON.stringify(dados, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_criatorio_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('❌ Erro ao exportar: ' + e.message);
+  }
+}
+
+// ============================================================
+// IMPORTAR
+// ============================================================
+function importarBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function (event) {
+      try {
+        const backup = JSON.parse(event.target.result);
+        if (!backup.dados) throw new Error('Arquivo de backup inválido.');
+
+        if (!confirm('⚠️ Isso vai adicionar os registros do backup ao que já existe (sem apagar nada). Continuar?')) return;
+
+        let importados = 0, ignorados = 0;
+
+        if (Array.isArray(backup.dados.aves)) {
+          const existentes = await DB.getAll(DB.TABLES.AVES);
+          const anilhasExistentes = new Set(existentes.map(a => a.anilha));
+          for (const ave of backup.dados.aves) {
+            if (ave.anilha && anilhasExistentes.has(ave.anilha)) { ignorados++; continue; }
+            const { id, criado_em, atualizado_em, usuario_id, ...dadosAve } = ave;
+            await DB.add(DB.TABLES.AVES, dadosAve);
+            importados++;
+          }
+        }
+
+        if (Array.isArray(backup.dados.anilhas)) {
+          const existentes = await DB.getAll(DB.TABLES.ANILHAS);
+          const numerosExistentes = new Set(existentes.map(a => a.numero));
+          for (const anilha of backup.dados.anilhas) {
+            if (numerosExistentes.has(anilha.numero)) { ignorados++; continue; }
+            const { id, criado_em, usuario_id, ...dadosAnilha } = anilha;
+            await DB.add(DB.TABLES.ANILHAS, dadosAnilha);
+            importados++;
+          }
+        }
+
+        if (Array.isArray(backup.dados.reproducoes)) {
+          for (const rep of backup.dados.reproducoes) {
+            const { id, criado_em, usuario_id, ...dadosRep } = rep;
+            await DB.add(DB.TABLES.REPRODUCOES, dadosRep);
+            importados++;
+          }
+        }
+
+        alert(`✅ Importação concluída!\n${importados} registros importados, ${ignorados} ignorados (já existiam).`);
+        atualizarStats();
+      } catch (error) {
+        alert('❌ Erro ao importar: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+atualizarStats();
+</script>
+</body>
+</html>

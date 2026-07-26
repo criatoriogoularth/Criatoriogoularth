@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Crachás / Etiquetas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+/* ===== ESTILOS DA PÁGINA ===== */
+.crachas-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.crachas-toolbar .filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+.crachas-toolbar .filters input,
+.crachas-toolbar .filters select {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+  min-width: 150px;
+}
+.crachas-toolbar .filters input:focus,
+.crachas-toolbar .filters select:focus {
+  border-color: var(--brass);
+}
+.crachas-toolbar .filters select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+.crachas-toolbar .filters select {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c7973f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+  cursor: pointer !important;
+}
+.crachas-toolbar .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.crachas-toolbar .actions .btn {
+  white-space: nowrap;
+}
+
+.btn-config {
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  padding: 8px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-config:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+}
+
+.config-panel {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  display: none;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.config-panel.open {
+  display: block;
+}
+.config-panel .config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.config-panel .config-group {
+  background: rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+.config-panel .config-group label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.config-panel .config-group input[type="color"] {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.config-panel .config-group input[type="number"],
+.config-panel .config-group input[type="text"],
+.config-panel .config-group select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  outline: none;
+}
+.config-panel .config-group input[type="number"]:focus,
+.config-panel .config-group input[type="text"]:focus,
+.config-panel .config-group select:focus {
+  border-color: var(--brass);
+}
+.config-panel .config-group .radio-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+.config-panel .config-group .radio-group label {
+  font-size: 11px;
+  color: var(--text);
+  text-transform: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.config-panel .config-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  justify-content: flex-end;
+}
+.config-panel .file-upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.config-panel .file-upload-area:hover {
+  border-color: var(--brass);
+}
+.config-panel .file-upload-area .icon {
+  font-size: 20px;
+}
+.config-panel .file-upload-area p {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 2px 0;
+}
+.config-panel .file-upload-area .aviso {
+  font-size: 9px;
+  color: var(--danger);
+  opacity: 0.7;
+}
+
+/* ===== PRÉVIA DENTRO DO PAINEL ===== */
+.preview-mini {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 350px;
+  overflow: hidden;
+  position: relative;
+}
+.preview-mini .label {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: var(--text-muted);
+  background: var(--bg-elevated-2);
+  padding: 1px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  z-index: 1;
+}
+.preview-mini .mini-content {
+  transform: scale(0.95);
+  transform-origin: top left;
+  margin-top: 25px;
+  margin-left: 5px;
+}
+.preview-mini .sem-ave {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ===== CONTROLE DAS CAIXAS ===== */
+.caixa-control {
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border-left: 2px solid var(--brass-dim);
+}
+.caixa-control .cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.caixa-control .cabecalho .nome {
+  font-size: 9px;
+  color: var(--brass-soft);
+  font-weight: 600;
+}
+.caixa-control .cabecalho .ordem {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.caixa-control .cabecalho .ordem label {
+  font-size: 7px;
+  color: var(--text-muted);
+  text-transform: none;
+}
+.caixa-control .cabecalho .ordem select {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--text);
+  font-size: 9px;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+  width: 40px;
+}
+.caixa-control .controles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+}
+.caixa-control .controles .campo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.caixa-control .controles .campo label {
+  font-size: 6.5px;
+  color: var(--text-muted);
+  text-transform: none;
+}
+.caixa-control .controles .campo input[type="color"] {
+  width: 100%;
+  height: 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 1px;
+}
+.caixa-control .controles .campo input[type="number"],
+.caixa-control .controles .campo select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 3px;
+  color: var(--text);
+  font-size: 9px;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+}
+.caixa-control .controles .campo select option {
+  background: var(--bg-elevated-2);
+  color: var(--text);
+}
+
+/* ===== NOME COMO CAIXA ===== */
+.nome-config-item {
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border-left: 2px solid var(--brass-dim);
+}
+.nome-config-item .cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.nome-config-item .cabecalho .nome {
+  font-size: 9px;
+  color: var(--brass-soft);
+  font-weight: 600;
+}
+.nome-config-item .cabecalho .ordem {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.nome-config-item .cabecalho .ordem label {
+  font-size: 7px;
+  color: var(--text-muted);
+  text-transform: none;
+}
+.nome-config-item .cabecalho .ordem select {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--text);
+  font-size: 9px;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+  width: 40px;
+}
+.nome-config-item .controles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+}
+.nome-config-item .controles .campo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nome-config-item .controles .campo label {
+  font-size: 6.5px;
+  color: var(--text-muted);
+  text-transform: none;
+}
+.nome-config-item .controles .campo input[type="color"] {
+  width: 100%;
+  height: 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 1px;
+}
+.nome-config-item .controles .campo input[type="number"],
+.nome-config-item .controles .campo select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 3px;
+  color: var(--text);
+  font-size: 9px;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+}
+.nome-config-item .controles .campo select option {
+  background: var(--bg-elevated-2);
+  color: var(--text);
+}
+
+/* ===== CONTROLE DO RODAPÉ EM 3 CAIXAS ===== */
+.rodape-config-item {
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border-left: 2px solid var(--brass-dim);
+}
+.rodape-config-item .cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.rodape-config-item .cabecalho .nome {
+  font-size: 9px;
+  color: var(--brass-soft);
+  font-weight: 600;
+}
+.rodape-config-item .controles {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+}
+.rodape-config-item .controles .campo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rodape-config-item .controles .campo label {
+  font-size: 6.5px;
+  color: var(--text-muted);
+  text-transform: none;
+}
+.rodape-config-item .controles .campo input[type="color"] {
+  width: 100%;
+  height: 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 1px;
+}
+.rodape-config-item .controles .campo input[type="number"],
+.rodape-config-item .controles .campo select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 3px;
+  color: var(--text);
+  font-size: 9px;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+}
+.rodape-config-item .controles .campo select option {
+  background: var(--bg-elevated-2);
+  color: var(--text);
+}
+
+/* ===== ESTILOS DA LISTA DE AVES ===== */
+.aves-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.ave-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: .15s ease;
+  cursor: pointer;
+}
+.ave-check-item:hover {
+  border-color: var(--brass-dim);
+}
+.ave-check-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brass);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ave-check-item label {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+}
+.ave-check-item .anilha-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.ave-check-item .sexo-tag {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.sexo-macho {
+  background: rgba(70, 130, 200, 0.15);
+  color: #5a8ab0;
+}
+.sexo-femea {
+  background: rgba(200, 100, 130, 0.15);
+  color: #e2a898;
+}
+.sexo-indefinido {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+
+.select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+.select-all-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.select-all-row label {
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.select-all-row .count {
+  font-size: 12px;
+  color: var(--brass-soft);
+  margin-left: auto;
+}
+
+.preview-crachas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3mm;
+  justify-content: flex-start;
+  padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+  .config-panel .config-grid {
+    grid-template-columns: 1fr;
+  }
+  .aves-check-grid {
+    grid-template-columns: 1fr;
+  }
+  .caixa-control .controles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .nome-config-item .controles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rodape-config-item .controles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .preview-mini {
+    min-height: 180px;
+  }
+  .preview-mini .mini-content {
+    transform: scale(0.45);
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-crachas">
+
+      <div class="topbar">
+        <div>
+          <h1>🏷️ Crachás / Etiquetas</h1>
+          <div class="lede">Gere etiquetas para gaiolas com informações da ave e árvore genealógica.</div>
+        </div>
+        <div>
+          <button class="btn-config" onclick="toggleConfig()">⚙️ Configurar</button>
+          <button class="btn btn-primary" onclick="gerarPDF()">📄 Gerar PDF</button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE CONFIGURAÇÃO -->
+      <div class="config-panel" id="config-panel">
+        <div class="config-grid">
+          
+          <!-- PRÉVIA EM MINIATURA DENTRO DO PAINEL -->
+          <div class="config-group" style="grid-column:1/-1;">
+            <label>📋 Prévia</label>
+            <div class="preview-mini" id="preview-mini">
+              <span class="label">Prévia</span>
+              <div class="sem-ave">Nenhuma ave cadastrada</div>
+            </div>
+          </div>
+
+          <!-- FUNDO LADO ESQUERDO -->
+          <div class="config-group">
+            <label>🎨 Fundo - Lado Esquerdo</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Cor</span>
+                <input type="color" id="fundo-esq-cor" value="#ffffff" onchange="aplicarConfig()" style="flex:1;">
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Transparência</span>
+                <input type="number" id="fundo-esq-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+              </div>
+              <div class="file-upload-area" onclick="document.getElementById('fundo-esq-img-input').click()" style="padding:6px;">
+                <div class="icon">🖼️</div>
+                <p style="font-size:8px;">Imagem de fundo</p>
+              </div>
+              <input type="file" id="fundo-esq-img-input" accept="image/*" style="display:none;" onchange="carregarFundoEsq(event)">
+              <input type="hidden" id="fundo-esq-img" value="">
+              <div style="display:flex;gap:4px;margin-top:2px;">
+                <button class="btn btn-ghost" style="padding:2px 8px;font-size:8px;" onclick="removerFundoEsq()">🗑️ Remover imagem</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- FUNDO LADO DIREITO -->
+          <div class="config-group">
+            <label>🎨 Fundo - Lado Direito (Árvore)</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Cor</span>
+                <input type="color" id="fundo-dir-cor" value="#fafaf8" onchange="aplicarConfig()" style="flex:1;">
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Transparência</span>
+                <input type="number" id="fundo-dir-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+              </div>
+              <div class="file-upload-area" onclick="document.getElementById('fundo-dir-img-input').click()" style="padding:6px;">
+                <div class="icon">🖼️</div>
+                <p style="font-size:8px;">Imagem de fundo</p>
+              </div>
+              <input type="file" id="fundo-dir-img-input" accept="image/*" style="display:none;" onchange="carregarFundoDir(event)">
+              <input type="hidden" id="fundo-dir-img" value="">
+              <div style="display:flex;gap:4px;margin-top:2px;">
+                <button class="btn btn-ghost" style="padding:2px 8px;font-size:8px;" onclick="removerFundoDir()">🗑️ Remover imagem</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <label>🎨 Bordas</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Borda</span>
+                <input type="color" id="cracha-borda" value="#dddddd" onchange="aplicarConfig()" style="flex:1;">
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-muted);width:60px;">Espessura</span>
+                <input type="number" id="cracha-borda-espessura" value="1" min="0" max="5" step="0.5" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- DISTÂNCIA ENTRE CAIXAS -->
+          <div class="config-group">
+            <label>📏 Distância entre caixas</label>
+            <input type="number" id="espacamento-caixas" value="1.5" min="0" max="10" step="0.5" onchange="aplicarConfig()" style="width:100%;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--text);font-size:12px;">
+            <span style="font-size:8px;color:var(--text-muted);">Valor em pixels (0 = sem espaçamento)</span>
+          </div>
+
+          <div class="config-group">
+            <label>🖼️ Logo</label>
+            <div class="file-upload-area" onclick="document.getElementById('logo-input').click()">
+              <div class="icon">🖼️</div>
+              <p><strong>Clique para imagem</strong></p>
+              <p class="aviso">⚠️ Use imagens pequenas (até 200x200px)</p>
+            </div>
+            <input type="file" id="logo-input" accept="image/*" style="display:none;" onchange="carregarLogo(event)">
+            <div style="display:flex;gap:6px;margin-top:4px;align-items:center;">
+              <span style="font-size:10px;color:var(--text-muted);">Formato</span>
+              <select id="logo-formato" onchange="aplicarConfig()" style="flex:1;">
+                <option value="circulo">⚪ Circular</option>
+                <option value="quadrado">⬜ Quadrado</option>
+              </select>
+              <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;" onclick="removerLogo()">🗑️</button>
+            </div>
+            <div style="margin-top:4px;">
+              <label style="font-size:9px;color:var(--text-muted);">Tamanho (px)</label>
+              <input type="number" id="logo-tamanho" value="90" min="16" max="200" onchange="aplicarConfig()" style="width:100%;">
+            </div>
+            <div style="margin-top:4px;">
+              <label style="font-size:9px;color:var(--text-muted);">Posição</label>
+              <select id="logo-posicao" onchange="aplicarConfig()" style="width:100%;">
+                <option value="topo">🔝 Topo</option>
+                <option value="meio" selected>⬛ Meio</option>
+                <option value="baixo">🔽 Baixo</option>
+              </select>
+            </div>
+            <div style="margin-top:4px;">
+              <label style="font-size:9px;color:var(--text-muted);">Alinhamento</label>
+              <select id="logo-alinhamento" onchange="aplicarConfig()" style="width:100%;">
+                <option value="esquerda">⬅️ Esquerda</option>
+                <option value="centro" selected>⬛ Centro</option>
+                <option value="direita">➡️ Direita</option>
+              </select>
+            </div>
+            <div style="margin-top:4px;">
+              <label style="font-size:9px;color:var(--text-muted);">Exibir Logo</label>
+              <select id="logo-visivel" onchange="aplicarConfig()" style="width:100%;">
+                <option value="sim">✅ Sim</option>
+                <option value="nao" selected>❌ Não</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <label>👤 Proprietário</label>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <input type="text" id="prop-nome" placeholder="Nome" onchange="aplicarConfig()" style="width:100%;">
+              <input type="text" id="prop-contato" placeholder="Contato" onchange="aplicarConfig()" style="width:100%;">
+              <input type="text" id="prop-registro" placeholder="Registro (ex: 3348370 / FOB II.889)" onchange="aplicarConfig()" style="width:100%;">
+            </div>
+          </div>
+
+          <!-- ===== CONTROLE DAS CAIXAS ===== -->
+          <div class="config-group" style="grid-column:1/-1;">
+            <label>📦 Caixas de Informação</label>
+            
+            <!-- NOME DA AVE -->
+            <div class="nome-config-item" id="caixa-nome">
+              <div class="cabecalho">
+                <span class="nome">1. Nome da Ave</span>
+                <div class="ordem">
+                  <label>Ordem</label>
+                  <select id="nome-ordem" onchange="aplicarConfig()">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="controles">
+                <div class="campo"><label>Fundo</label><input type="color" id="nome-bg" value="#2f5a9e" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="nome-texto" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="nome-borda" value="#1a3a6a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Fonte</label><input type="number" id="nome-font" value="14" min="8" max="28" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Altura</label><input type="number" id="nome-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                <div class="campo"><label>Exibir</label>
+                  <select id="nome-visivel" onchange="aplicarConfig()">
+                    <option value="sim">✅ Sim</option>
+                    <option value="nao">❌ Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Caixa 2: Espécie + Raça -->
+            <div class="caixa-control" id="caixa-2">
+              <div class="cabecalho">
+                <span class="nome">2. Espécie + Raça</span>
+                <div class="ordem">
+                  <label>Ordem</label>
+                  <select id="c2-ordem" onchange="aplicarConfig()">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="controles">
+                <div class="campo"><label>Fundo</label><input type="color" id="c2-bg" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="c2-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="c2-borda" value="#dddddd" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Fonte</label><input type="number" id="c2-font" value="8" min="4" max="16" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Altura</label><input type="number" id="c2-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                <div class="campo"><label>Exibir</label>
+                  <select id="c2-visivel" onchange="aplicarConfig()">
+                    <option value="sim">✅ Sim</option>
+                    <option value="nao">❌ Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Caixa 3: Anilha -->
+            <div class="caixa-control" id="caixa-3">
+              <div class="cabecalho">
+                <span class="nome">3. Anilha</span>
+                <div class="ordem">
+                  <label>Ordem</label>
+                  <select id="c3-ordem" onchange="aplicarConfig()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="controles">
+                <div class="campo"><label>Fundo</label><input type="color" id="c3-bg" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="c3-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="c3-borda" value="#dddddd" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Fonte</label><input type="number" id="c3-font" value="9" min="4" max="16" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Altura</label><input type="number" id="c3-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                <div class="campo"><label>Exibir</label>
+                  <select id="c3-visivel" onchange="aplicarConfig()">
+                    <option value="sim">✅ Sim</option>
+                    <option value="nao">❌ Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Caixa 4: Data + Sexo (mesma linha) -->
+            <div class="caixa-control" id="caixa-4">
+              <div class="cabecalho">
+                <span class="nome">4. Data Nascimento + Sexo</span>
+                <div class="ordem">
+                  <label>Ordem</label>
+                  <select id="c4-ordem" onchange="aplicarConfig()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="controles">
+                <div class="campo"><label>Fundo</label><input type="color" id="c4-bg" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="c4-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="c4-borda" value="#dddddd" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Fonte</label><input type="number" id="c4-font" value="8" min="4" max="16" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Altura</label><input type="number" id="c4-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                <div class="campo"><label>Exibir</label>
+                  <select id="c4-visivel" onchange="aplicarConfig()">
+                    <option value="sim">✅ Sim</option>
+                    <option value="nao">❌ Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Caixa 5: Pai + Mãe (mesma linha) -->
+            <div class="caixa-control" id="caixa-5">
+              <div class="cabecalho">
+                <span class="nome">5. Pai + Mãe</span>
+                <div class="ordem">
+                  <label>Ordem</label>
+                  <select id="c5-ordem" onchange="aplicarConfig()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                  </select>
+                </div>
+              </div>
+              <div class="controles">
+                <div class="campo"><label>Fundo</label><input type="color" id="c5-bg" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="c5-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="c5-borda" value="#dddddd" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Fonte</label><input type="number" id="c5-font" value="7" min="4" max="14" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Altura</label><input type="number" id="c5-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                <div class="campo"><label>Exibir</label>
+                  <select id="c5-visivel" onchange="aplicarConfig()">
+                    <option value="sim">✅ Sim</option>
+                    <option value="nao">❌ Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== RODAPÉ EM 3 CAIXAS (NOME, REGISTRO, TELEFONE) ===== -->
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+              <label style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;">📌 Rodapé (3 Caixas)</label>
+              
+              <!-- Caixa Nome do Criador -->
+              <div class="rodape-config-item">
+                <div class="cabecalho">
+                  <span class="nome">A. Nome do Criador</span>
+                </div>
+                <div class="controles">
+                  <div class="campo"><label>Fundo</label><input type="color" id="rodape-nome-bg" value="#f5f5f5" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Texto</label><input type="color" id="rodape-nome-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Borda</label><input type="color" id="rodape-nome-borda" value="#cccccc" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Fonte</label><input type="number" id="rodape-nome-font" value="7" min="4" max="14" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Altura</label><input type="number" id="rodape-nome-altura" value="0" min="0" max="20" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                  <div class="campo"><label>Exibir</label>
+                    <select id="rodape-nome-visivel" onchange="aplicarConfig()">
+                      <option value="sim">✅ Sim</option>
+                      <option value="nao">❌ Não</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Caixa Registro -->
+              <div class="rodape-config-item">
+                <div class="cabecalho">
+                  <span class="nome">B. Registro (SISPASS + FOB)</span>
+                </div>
+                <div class="controles">
+                  <div class="campo"><label>Fundo</label><input type="color" id="rodape-registro-bg" value="#f5f5f5" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Texto</label><input type="color" id="rodape-registro-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Borda</label><input type="color" id="rodape-registro-borda" value="#cccccc" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Fonte</label><input type="number" id="rodape-registro-font" value="7" min="4" max="14" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Altura</label><input type="number" id="rodape-registro-altura" value="0" min="0" max="20" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                  <div class="campo"><label>Exibir</label>
+                    <select id="rodape-registro-visivel" onchange="aplicarConfig()">
+                      <option value="sim">✅ Sim</option>
+                      <option value="nao">❌ Não</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Caixa Telefone -->
+              <div class="rodape-config-item">
+                <div class="cabecalho">
+                  <span class="nome">C. Telefone</span>
+                </div>
+                <div class="controles">
+                  <div class="campo"><label>Fundo</label><input type="color" id="rodape-telefone-bg" value="#f5f5f5" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Texto</label><input type="color" id="rodape-telefone-texto" value="#1a1a1a" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Borda</label><input type="color" id="rodape-telefone-borda" value="#cccccc" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Fonte</label><input type="number" id="rodape-telefone-font" value="7" min="4" max="14" onchange="aplicarConfig()"></div>
+                  <div class="campo"><label>Altura</label><input type="number" id="rodape-telefone-altura" value="0" min="0" max="20" onchange="aplicarConfig()" placeholder="0=auto"></div>
+                  <div class="campo"><label>Exibir</label>
+                    <select id="rodape-telefone-visivel" onchange="aplicarConfig()">
+                      <option value="sim">✅ Sim</option>
+                      <option value="nao">❌ Não</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="config-actions">
+          <button class="btn btn-ghost" onclick="toggleConfig()">← Fechar</button>
+          <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar</button>
+        </div>
+      </div>
+
+      <!-- LISTA DE AVES -->
+      <div class="crachas-toolbar">
+        <div class="filters">
+          <input type="text" id="busca-ave" placeholder="Pesquisar por nome ou anilha..." oninput="renderizarLista()">
+          <select id="filtro-especie" onchange="renderizarLista()">
+            <option value="">Todas as espécies</option>
+          </select>
+          <select id="filtro-sexo" onchange="renderizarLista()">
+            <option value="">Todos os sexos</option>
+            <option value="M">Machos</option>
+            <option value="F">Fêmeas</option>
+          </select>
+        </div>
+        <div class="actions">
+          <span style="font-size:12px;color:var(--text-muted);" id="total-selecionados">0 selecionados</span>
+          <button class="btn btn-ghost" onclick="selecionarTodos()">Selecionar Todos</button>
+          <button class="btn btn-ghost" onclick="desmarcarTodos()">Desmarcar Todos</button>
+        </div>
+      </div>
+
+      <div class="select-all-row">
+        <input type="checkbox" id="select-all" onchange="selecionarTodosCheckbox()">
+        <label for="select-all">Selecionar todas as aves</label>
+        <span class="count" id="total-aves-disponiveis">0 aves</span>
+      </div>
+
+      <div class="aves-check-grid" id="aves-check-grid"></div>
+
+      <div style="margin-top:20px;">
+        <h3 style="font-family:'Fraunces',serif;font-size:18px;color:var(--brass-soft);margin-bottom:10px;">📋 Prévia dos Crachás</h3>
+        <div id="preview-crachas" class="preview-crachas">
+          <div style="padding:20px;color:var(--text-muted);text-align:center;width:100%;">
+            Selecione pelo menos uma ave para visualizar a prévia.
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+renderSidebar('crachas');
+
+// ============================================================
+// VARIÁVEIS GLOBAIS
+// ============================================================
+
+let avesSelecionadas = new Set();
+let crachaConfig = {};
+
+// ============================================================
+// CONFIGURAÇÕES DO CRAChÁ
+// ============================================================
+
+function getConfig() {
+  try {
+    const data = localStorage.getItem('cracha_config');
+    if (data) {
+      const config = JSON.parse(data);
+      // Tenta carregar a logo do storage separado se estiver como 'LOGO_EM_SEPARADO'
+      if (config.logoUrl === 'LOGO_EM_SEPARADO') {
+        const logoSalva = localStorage.getItem('cracha_logo');
+        config.logoUrl = logoSalva || '';
+      }
+      config.fundoEsqImg = crachaConfig?.fundoEsqImg || '';
+      config.fundoDirImg = crachaConfig?.fundoDirImg || '';
+      return config;
+    }
+  } catch (e) {}
+  return {
+    fundoEsqCor: '#ffffff',
+    fundoEsqOpacidade: 100,
+    fundoEsqImg: '',
+    fundoDirCor: '#fafaf8',
+    fundoDirOpacidade: 100,
+    fundoDirImg: '',
+    bordaCor: '#dddddd',
+    bordaEspessura: 1,
+    espacamentoCaixas: 1.5,
+    logoUrl: '',
+    logoFormato: 'circulo',
+    logoTamanho: 90,
+    logoPosicao: 'meio',
+    logoAlinhamento: 'centro',
+    logoVisivel: 'nao',
+    propNome: 'Fabio Alves Goulart',
+    propContato: '(11) 94149-3657',
+    propRegistro: '3348370 / FOB II.889',
+    rodapeNome: { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' },
+    rodapeRegistro: { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' },
+    rodapeTelefone: { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' },
+    nome: { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 },
+    c2: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 },
+    c3: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 },
+    c4: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 },
+    c5: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 7, altura: 0, visivel: 'sim', ordem: 5 }
+  };
+}
+
+function salvarConfig() {
+  // Pega a URL da logo antes de salvar
+  let logoUrl = document.getElementById('cracha-logo-url').value || '';
+  
+  // Se a logo for grande, salva em um storage separado
+  if (logoUrl && logoUrl.length > 100000) { // > 100KB
+    try {
+      localStorage.setItem('cracha_logo', logoUrl);
+      // Salva apenas uma referência no config principal
+      logoUrl = 'LOGO_EM_SEPARADO';
+    } catch (e) {
+      alert('⚠️ Logo muito grande! Use uma imagem menor (máx 200x200 pixels).');
+      return;
+    }
+  }
+  
+  const config = {
+    fundoEsqCor: document.getElementById('fundo-esq-cor').value,
+    fundoEsqOpacidade: parseInt(document.getElementById('fundo-esq-opacidade').value) || 100,
+    fundoEsqImg: document.getElementById('fundo-esq-img').value || '',
+    fundoDirCor: document.getElementById('fundo-dir-cor').value,
+    fundoDirOpacidade: parseInt(document.getElementById('fundo-dir-opacidade').value) || 100,
+    fundoDirImg: document.getElementById('fundo-dir-img').value || '',
+    bordaCor: document.getElementById('cracha-borda').value,
+    bordaEspessura: parseFloat(document.getElementById('cracha-borda-espessura').value) || 1,
+    espacamentoCaixas: parseFloat(document.getElementById('espacamento-caixas').value) || 1.5,
+    logoFormato: document.getElementById('logo-formato').value,
+    logoTamanho: parseInt(document.getElementById('logo-tamanho').value) || 90,
+    logoPosicao: document.getElementById('logo-posicao').value,
+    logoAlinhamento: document.getElementById('logo-alinhamento').value,
+    logoVisivel: document.getElementById('logo-visivel').value,
+    propNome: document.getElementById('prop-nome').value,
+    propContato: document.getElementById('prop-contato').value,
+    propRegistro: document.getElementById('prop-registro').value,
+    logoUrl: logoUrl,
+    rodapeNome: {
+      bg: document.getElementById('rodape-nome-bg').value,
+      texto: document.getElementById('rodape-nome-texto').value,
+      borda: document.getElementById('rodape-nome-borda').value,
+      font: parseInt(document.getElementById('rodape-nome-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-nome-altura').value) || 0,
+      visivel: document.getElementById('rodape-nome-visivel').value
+    },
+    rodapeRegistro: {
+      bg: document.getElementById('rodape-registro-bg').value,
+      texto: document.getElementById('rodape-registro-texto').value,
+      borda: document.getElementById('rodape-registro-borda').value,
+      font: parseInt(document.getElementById('rodape-registro-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-registro-altura').value) || 0,
+      visivel: document.getElementById('rodape-registro-visivel').value
+    },
+    rodapeTelefone: {
+      bg: document.getElementById('rodape-telefone-bg').value,
+      texto: document.getElementById('rodape-telefone-texto').value,
+      borda: document.getElementById('rodape-telefone-borda').value,
+      font: parseInt(document.getElementById('rodape-telefone-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-telefone-altura').value) || 0,
+      visivel: document.getElementById('rodape-telefone-visivel').value
+    },
+    nome: {
+      bg: document.getElementById('nome-bg').value,
+      texto: document.getElementById('nome-texto').value,
+      borda: document.getElementById('nome-borda').value,
+      font: parseInt(document.getElementById('nome-font').value) || 14,
+      altura: parseInt(document.getElementById('nome-altura').value) || 0,
+      visivel: document.getElementById('nome-visivel').value,
+      ordem: parseInt(document.getElementById('nome-ordem').value) || 1
+    },
+    c2: {
+      bg: document.getElementById('c2-bg').value,
+      texto: document.getElementById('c2-texto').value,
+      borda: document.getElementById('c2-borda').value,
+      font: parseInt(document.getElementById('c2-font').value) || 8,
+      altura: parseInt(document.getElementById('c2-altura').value) || 0,
+      visivel: document.getElementById('c2-visivel').value,
+      ordem: parseInt(document.getElementById('c2-ordem').value) || 2
+    },
+    c3: {
+      bg: document.getElementById('c3-bg').value,
+      texto: document.getElementById('c3-texto').value,
+      borda: document.getElementById('c3-borda').value,
+      font: parseInt(document.getElementById('c3-font').value) || 9,
+      altura: parseInt(document.getElementById('c3-altura').value) || 0,
+      visivel: document.getElementById('c3-visivel').value,
+      ordem: parseInt(document.getElementById('c3-ordem').value) || 3
+    },
+    c4: {
+      bg: document.getElementById('c4-bg').value,
+      texto: document.getElementById('c4-texto').value,
+      borda: document.getElementById('c4-borda').value,
+      font: parseInt(document.getElementById('c4-font').value) || 8,
+      altura: parseInt(document.getElementById('c4-altura').value) || 0,
+      visivel: document.getElementById('c4-visivel').value,
+      ordem: parseInt(document.getElementById('c4-ordem').value) || 4
+    },
+    c5: {
+      bg: document.getElementById('c5-bg').value,
+      texto: document.getElementById('c5-texto').value,
+      borda: document.getElementById('c5-borda').value,
+      font: parseInt(document.getElementById('c5-font').value) || 7,
+      altura: parseInt(document.getElementById('c5-altura').value) || 0,
+      visivel: document.getElementById('c5-visivel').value,
+      ordem: parseInt(document.getElementById('c5-ordem').value) || 5
+    }
+  };
+  
+  try {
+    localStorage.setItem('cracha_config', JSON.stringify(config));
+    crachaConfig = config;
+    alert('✅ Configurações salvas com sucesso!');
+    atualizarPreviewMini();
+    if (avesSelecionadas.size > 0) {
+      renderizarPrevia();
+    }
+  } catch (erro) {
+    console.error('Erro ao salvar:', erro);
+    alert('❌ Erro ao salvar configurações: ' + erro.message + '\n\nTente usar imagens menores.');
+  }
+}
+
+function carregarConfig() {
+  crachaConfig = getConfig();
+  
+  document.getElementById('fundo-esq-cor').value = crachaConfig.fundoEsqCor || '#ffffff';
+  document.getElementById('fundo-esq-opacidade').value = crachaConfig.fundoEsqOpacidade || 100;
+  document.getElementById('fundo-esq-img').value = crachaConfig.fundoEsqImg || '';
+  document.getElementById('fundo-dir-cor').value = crachaConfig.fundoDirCor || '#fafaf8';
+  document.getElementById('fundo-dir-opacidade').value = crachaConfig.fundoDirOpacidade || 100;
+  document.getElementById('fundo-dir-img').value = crachaConfig.fundoDirImg || '';
+  document.getElementById('cracha-borda').value = crachaConfig.bordaCor || '#dddddd';
+  document.getElementById('cracha-borda-espessura').value = crachaConfig.bordaEspessura || 1;
+  document.getElementById('espacamento-caixas').value = crachaConfig.espacamentoCaixas || 1.5;
+  document.getElementById('logo-formato').value = crachaConfig.logoFormato || 'circulo';
+  document.getElementById('logo-tamanho').value = crachaConfig.logoTamanho || 90;
+  document.getElementById('logo-posicao').value = crachaConfig.logoPosicao || 'meio';
+  document.getElementById('logo-alinhamento').value = crachaConfig.logoAlinhamento || 'centro';
+  document.getElementById('logo-visivel').value = crachaConfig.logoVisivel || 'nao';
+  document.getElementById('prop-nome').value = crachaConfig.propNome || '';
+  document.getElementById('prop-contato').value = crachaConfig.propContato || '';
+  document.getElementById('prop-registro').value = crachaConfig.propRegistro || '';
+  
+  // Rodapé Nome
+  const rNome = crachaConfig.rodapeNome || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  document.getElementById('rodape-nome-bg').value = rNome.bg;
+  document.getElementById('rodape-nome-texto').value = rNome.texto;
+  document.getElementById('rodape-nome-borda').value = rNome.borda;
+  document.getElementById('rodape-nome-font').value = rNome.font;
+  document.getElementById('rodape-nome-altura').value = rNome.altura;
+  document.getElementById('rodape-nome-visivel').value = rNome.visivel;
+  
+  // Rodapé Registro
+  const rReg = crachaConfig.rodapeRegistro || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  document.getElementById('rodape-registro-bg').value = rReg.bg;
+  document.getElementById('rodape-registro-texto').value = rReg.texto;
+  document.getElementById('rodape-registro-borda').value = rReg.borda;
+  document.getElementById('rodape-registro-font').value = rReg.font;
+  document.getElementById('rodape-registro-altura').value = rReg.altura;
+  document.getElementById('rodape-registro-visivel').value = rReg.visivel;
+  
+  // Rodapé Telefone
+  const rTel = crachaConfig.rodapeTelefone || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  document.getElementById('rodape-telefone-bg').value = rTel.bg;
+  document.getElementById('rodape-telefone-texto').value = rTel.texto;
+  document.getElementById('rodape-telefone-borda').value = rTel.borda;
+  document.getElementById('rodape-telefone-font').value = rTel.font;
+  document.getElementById('rodape-telefone-altura').value = rTel.altura;
+  document.getElementById('rodape-telefone-visivel').value = rTel.visivel;
+  
+  const nome = crachaConfig.nome || { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 };
+  document.getElementById('nome-bg').value = nome.bg;
+  document.getElementById('nome-texto').value = nome.texto;
+  document.getElementById('nome-borda').value = nome.borda;
+  document.getElementById('nome-font').value = nome.font;
+  document.getElementById('nome-altura').value = nome.altura;
+  document.getElementById('nome-visivel').value = nome.visivel;
+  document.getElementById('nome-ordem').value = nome.ordem;
+  
+  const c2 = crachaConfig.c2 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 };
+  const c3 = crachaConfig.c3 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 };
+  const c4 = crachaConfig.c4 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 };
+  const c5 = crachaConfig.c5 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 7, altura: 0, visivel: 'sim', ordem: 5 };
+  
+  document.getElementById('c2-bg').value = c2.bg;
+  document.getElementById('c2-texto').value = c2.texto;
+  document.getElementById('c2-borda').value = c2.borda;
+  document.getElementById('c2-font').value = c2.font;
+  document.getElementById('c2-altura').value = c2.altura;
+  document.getElementById('c2-visivel').value = c2.visivel;
+  document.getElementById('c2-ordem').value = c2.ordem;
+
+  document.getElementById('c3-bg').value = c3.bg;
+  document.getElementById('c3-texto').value = c3.texto;
+  document.getElementById('c3-borda').value = c3.borda;
+  document.getElementById('c3-font').value = c3.font;
+  document.getElementById('c3-altura').value = c3.altura;
+  document.getElementById('c3-visivel').value = c3.visivel;
+  document.getElementById('c3-ordem').value = c3.ordem;
+
+  document.getElementById('c4-bg').value = c4.bg;
+  document.getElementById('c4-texto').value = c4.texto;
+  document.getElementById('c4-borda').value = c4.borda;
+  document.getElementById('c4-font').value = c4.font;
+  document.getElementById('c4-altura').value = c4.altura;
+  document.getElementById('c4-visivel').value = c4.visivel;
+  document.getElementById('c4-ordem').value = c4.ordem;
+
+  document.getElementById('c5-bg').value = c5.bg;
+  document.getElementById('c5-texto').value = c5.texto;
+  document.getElementById('c5-borda').value = c5.borda;
+  document.getElementById('c5-font').value = c5.font;
+  document.getElementById('c5-altura').value = c5.altura;
+  document.getElementById('c5-visivel').value = c5.visivel;
+  document.getElementById('c5-ordem').value = c5.ordem;
+  
+  // Carrega a logo
+  let logoUrl = crachaConfig.logoUrl || '';
+  if (logoUrl === 'LOGO_EM_SEPARADO') {
+    const logoSalva = localStorage.getItem('cracha_logo');
+    logoUrl = logoSalva || '';
+  }
+  
+  if (!document.getElementById('cracha-logo-url')) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.id = 'cracha-logo-url';
+    input.value = logoUrl;
+    document.getElementById('logo-formato').parentElement.appendChild(input);
+  } else {
+    document.getElementById('cracha-logo-url').value = logoUrl;
+  }
+}
+
+function toggleConfig() {
+  const panel = document.getElementById('config-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    carregarConfig();
+    atualizarPreviewMini();
+  }
+}
+
+function aplicarConfig() {
+  crachaConfig = {
+    fundoEsqCor: document.getElementById('fundo-esq-cor').value,
+    fundoEsqOpacidade: parseInt(document.getElementById('fundo-esq-opacidade').value) || 100,
+    fundoEsqImg: document.getElementById('fundo-esq-img').value || '',
+    fundoDirCor: document.getElementById('fundo-dir-cor').value,
+    fundoDirOpacidade: parseInt(document.getElementById('fundo-dir-opacidade').value) || 100,
+    fundoDirImg: document.getElementById('fundo-dir-img').value || '',
+    bordaCor: document.getElementById('cracha-borda').value,
+    bordaEspessura: parseFloat(document.getElementById('cracha-borda-espessura').value) || 1,
+    espacamentoCaixas: parseFloat(document.getElementById('espacamento-caixas').value) || 1.5,
+    logoFormato: document.getElementById('logo-formato').value,
+    logoTamanho: parseInt(document.getElementById('logo-tamanho').value) || 90,
+    logoPosicao: document.getElementById('logo-posicao').value,
+    logoAlinhamento: document.getElementById('logo-alinhamento').value,
+    logoVisivel: document.getElementById('logo-visivel').value,
+    propNome: document.getElementById('prop-nome').value,
+    propContato: document.getElementById('prop-contato').value,
+    propRegistro: document.getElementById('prop-registro').value,
+    logoUrl: document.getElementById('cracha-logo-url').value || '',
+    rodapeNome: {
+      bg: document.getElementById('rodape-nome-bg').value,
+      texto: document.getElementById('rodape-nome-texto').value,
+      borda: document.getElementById('rodape-nome-borda').value,
+      font: parseInt(document.getElementById('rodape-nome-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-nome-altura').value) || 0,
+      visivel: document.getElementById('rodape-nome-visivel').value
+    },
+    rodapeRegistro: {
+      bg: document.getElementById('rodape-registro-bg').value,
+      texto: document.getElementById('rodape-registro-texto').value,
+      borda: document.getElementById('rodape-registro-borda').value,
+      font: parseInt(document.getElementById('rodape-registro-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-registro-altura').value) || 0,
+      visivel: document.getElementById('rodape-registro-visivel').value
+    },
+    rodapeTelefone: {
+      bg: document.getElementById('rodape-telefone-bg').value,
+      texto: document.getElementById('rodape-telefone-texto').value,
+      borda: document.getElementById('rodape-telefone-borda').value,
+      font: parseInt(document.getElementById('rodape-telefone-font').value) || 7,
+      altura: parseInt(document.getElementById('rodape-telefone-altura').value) || 0,
+      visivel: document.getElementById('rodape-telefone-visivel').value
+    },
+    nome: {
+      bg: document.getElementById('nome-bg').value,
+      texto: document.getElementById('nome-texto').value,
+      borda: document.getElementById('nome-borda').value,
+      font: parseInt(document.getElementById('nome-font').value) || 14,
+      altura: parseInt(document.getElementById('nome-altura').value) || 0,
+      visivel: document.getElementById('nome-visivel').value,
+      ordem: parseInt(document.getElementById('nome-ordem').value) || 1
+    },
+    c2: {
+      bg: document.getElementById('c2-bg').value,
+      texto: document.getElementById('c2-texto').value,
+      borda: document.getElementById('c2-borda').value,
+      font: parseInt(document.getElementById('c2-font').value) || 8,
+      altura: parseInt(document.getElementById('c2-altura').value) || 0,
+      visivel: document.getElementById('c2-visivel').value,
+      ordem: parseInt(document.getElementById('c2-ordem').value) || 2
+    },
+    c3: {
+      bg: document.getElementById('c3-bg').value,
+      texto: document.getElementById('c3-texto').value,
+      borda: document.getElementById('c3-borda').value,
+      font: parseInt(document.getElementById('c3-font').value) || 9,
+      altura: parseInt(document.getElementById('c3-altura').value) || 0,
+      visivel: document.getElementById('c3-visivel').value,
+      ordem: parseInt(document.getElementById('c3-ordem').value) || 3
+    },
+    c4: {
+      bg: document.getElementById('c4-bg').value,
+      texto: document.getElementById('c4-texto').value,
+      borda: document.getElementById('c4-borda').value,
+      font: parseInt(document.getElementById('c4-font').value) || 8,
+      altura: parseInt(document.getElementById('c4-altura').value) || 0,
+      visivel: document.getElementById('c4-visivel').value,
+      ordem: parseInt(document.getElementById('c4-ordem').value) || 4
+    },
+    c5: {
+      bg: document.getElementById('c5-bg').value,
+      texto: document.getElementById('c5-texto').value,
+      borda: document.getElementById('c5-borda').value,
+      font: parseInt(document.getElementById('c5-font').value) || 7,
+      altura: parseInt(document.getElementById('c5-altura').value) || 0,
+      visivel: document.getElementById('c5-visivel').value,
+      ordem: parseInt(document.getElementById('c5-ordem').value) || 5
+    }
+  };
+  atualizarPreviewMini();
+  renderizarPrevia();
+}
+
+function carregarLogo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // Redimensiona para no máximo 150x150 para economizar espaço
+      const MAX_SIZE = 150;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > MAX_SIZE || height > MAX_SIZE) {
+        if (width > height) {
+          height = Math.round(height * MAX_SIZE / width);
+          width = MAX_SIZE;
+        } else {
+          width = Math.round(width * MAX_SIZE / height);
+          height = MAX_SIZE;
+        }
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Comprime como JPEG com qualidade 60%
+      const url = canvas.toDataURL('image/jpeg', 0.6);
+      
+      // Verifica se a imagem comprimida ainda é muito grande
+      if (url.length > 500000) {
+        alert('⚠️ A imagem ainda é muito grande! Use uma imagem com no máximo 200x200 pixels.');
+        event.target.value = '';
+        return;
+      }
+      
+      document.getElementById('cracha-logo-url').value = url;
+      crachaConfig.logoUrl = url;
+      document.getElementById('logo-visivel').value = 'sim';
+      aplicarConfig();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removerLogo() {
+  document.getElementById('cracha-logo-url').value = '';
+  crachaConfig.logoUrl = '';
+  document.getElementById('logo-visivel').value = 'nao';
+  // Remove do storage separado também
+  localStorage.removeItem('cracha_logo');
+  aplicarConfig();
+}
+
+function carregarFundoEsq(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Redimensiona imagem de fundo também
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const MAX_SIZE = 300;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > MAX_SIZE || height > MAX_SIZE) {
+        if (width > height) {
+          height = Math.round(height * MAX_SIZE / width);
+          width = MAX_SIZE;
+        } else {
+          width = Math.round(width * MAX_SIZE / height);
+          height = MAX_SIZE;
+        }
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const url = canvas.toDataURL('image/jpeg', 0.5);
+      document.getElementById('fundo-esq-img').value = url;
+      crachaConfig.fundoEsqImg = url;
+      atualizarPreviewMini();
+      renderizarPrevia();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removerFundoEsq() {
+  document.getElementById('fundo-esq-img').value = '';
+  crachaConfig.fundoEsqImg = '';
+  atualizarPreviewMini();
+  renderizarPrevia();
+}
+
+function carregarFundoDir(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const MAX_SIZE = 300;
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > MAX_SIZE || height > MAX_SIZE) {
+        if (width > height) {
+          height = Math.round(height * MAX_SIZE / width);
+          width = MAX_SIZE;
+        } else {
+          width = Math.round(width * MAX_SIZE / height);
+          height = MAX_SIZE;
+        }
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const url = canvas.toDataURL('image/jpeg', 0.5);
+      document.getElementById('fundo-dir-img').value = url;
+      crachaConfig.fundoDirImg = url;
+      atualizarPreviewMini();
+      renderizarPrevia();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removerFundoDir() {
+  document.getElementById('fundo-dir-img').value = '';
+  crachaConfig.fundoDirImg = '';
+  atualizarPreviewMini();
+  renderizarPrevia();
+}
+
+// ============================================================
+// FUNÇÕES DA LISTA DE AVES
+// ============================================================
+
+async function renderizarLista() {
+  const busca = document.getElementById('busca-ave').value.toLowerCase();
+  const filtroEspecie = document.getElementById('filtro-especie').value;
+  const filtroSexo = document.getElementById('filtro-sexo').value;
+  
+  let aves = await DB.getAll(DB.TABLES.AVES);
+  
+  const selectEspecie = document.getElementById('filtro-especie');
+  const especies = [...new Set(aves.map(a => a.especie).filter(Boolean))];
+  const valorAtual = selectEspecie.value;
+  selectEspecie.innerHTML = '<option value="">Todas as espécies</option>';
+  especies.sort().forEach(esp => {
+    selectEspecie.innerHTML += `<option value="${esp}">${esp}</option>`;
+  });
+  if (valorAtual) selectEspecie.value = valorAtual;
+  
+  if (busca) {
+    aves = aves.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  }
+  if (filtroEspecie) {
+    aves = aves.filter(a => a.especie === filtroEspecie);
+  }
+  if (filtroSexo) {
+    aves = aves.filter(a => a.sexo === filtroSexo);
+  }
+  
+  document.getElementById('total-aves-disponiveis').textContent = aves.length + ' aves';
+  
+  const grid = document.getElementById('aves-check-grid');
+  if (aves.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;color:var(--text-muted);text-align:center;grid-column:1/-1;">Nenhuma ave encontrada.</div>';
+    return;
+  }
+  
+  grid.innerHTML = aves.map(ave => {
+    const sexoClass = ave.sexo === 'M' ? 'sexo-macho' : ave.sexo === 'F' ? 'sexo-femea' : 'sexo-indefinido';
+    const sexoLabel = ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪';
+    const checked = avesSelecionadas.has(ave.id) ? 'checked' : '';
+    
+    return `
+      <div class="ave-check-item">
+        <input type="checkbox" id="ave-${ave.id}" ${checked} onchange="toggleAve(${ave.id})">
+        <label for="ave-${ave.id}" onclick="document.getElementById('ave-${ave.id}').click()">
+          ${ave.nome}
+          <span class="anilha-tag">${ave.anilha}</span>
+        </label>
+        <span class="sexo-tag ${sexoClass}">${sexoLabel}</span>
+      </div>
+    `;
+  }).join('');
+  
+  atualizarContador();
+  renderizarPrevia();
+  atualizarPreviewMini();
+}
+
+function toggleAve(id) {
+  if (avesSelecionadas.has(id)) {
+    avesSelecionadas.delete(id);
+  } else {
+    avesSelecionadas.add(id);
+  }
+  atualizarContador();
+  renderizarPrevia();
+  atualizarSelectAll();
+}
+
+async function selecionarTodos() {
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  aves.forEach(a => avesSelecionadas.add(a.id));
+  renderizarLista();
+  atualizarSelectAll();
+}
+
+function desmarcarTodos() {
+  avesSelecionadas.clear();
+  renderizarLista();
+  atualizarSelectAll();
+}
+
+async function selecionarTodosCheckbox() {
+  const checked = document.getElementById('select-all').checked;
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  if (checked) {
+    aves.forEach(a => avesSelecionadas.add(a.id));
+  } else {
+    avesSelecionadas.clear();
+  }
+  renderizarLista();
+  atualizarSelectAll();
+}
+
+async function atualizarSelectAll() {
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const todosSelecionados = aves.every(a => avesSelecionadas.has(a.id));
+  document.getElementById('select-all').checked = todosSelecionados && aves.length > 0;
+}
+
+function atualizarContador() {
+  document.getElementById('total-selecionados').textContent = avesSelecionadas.size + ' selecionados';
+}
+
+// ============================================================
+// FUNÇÕES DA ÁRVORE
+// ============================================================
+
+function gerarCaminhos(depth) {
+  let paths = [''];
+  for (let i = 0; i < depth; i++) {
+    const next = [];
+    paths.forEach(p => {
+      next.push(p ? p + '.pai' : 'pai');
+      next.push(p ? p + '.mae' : 'mae');
+    });
+    paths = next;
+  }
+  return paths;
+}
+
+function obterAncestrais(ave, todasAves) {
+  const tree = {};
+  tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
+  
+  if (ave.pai && ave.pai !== ave.nome) {
+    const paiEncontrado = todasAves.find(a => a.nome === ave.pai);
+    if (paiEncontrado) {
+      tree['pai'] = { nome: paiEncontrado.nome, anilha: paiEncontrado.anilha || '' };
+      if (paiEncontrado.pai && paiEncontrado.pai !== paiEncontrado.nome) {
+        tree['pai.pai'] = { nome: paiEncontrado.pai, anilha: paiEncontrado.anilhaPai || '' };
+      }
+      if (paiEncontrado.mae && paiEncontrado.mae !== paiEncontrado.nome) {
+        tree['pai.mae'] = { nome: paiEncontrado.mae, anilha: paiEncontrado.anilhaMae || '' };
+      }
+    } else {
+      tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
+    }
+  }
+  
+  if (ave.mae && ave.mae !== ave.nome) {
+    const maeEncontrada = todasAves.find(a => a.nome === ave.mae);
+    if (maeEncontrada) {
+      tree['mae'] = { nome: maeEncontrada.nome, anilha: maeEncontrada.anilha || '' };
+      if (maeEncontrada.pai && maeEncontrada.pai !== maeEncontrada.nome) {
+        tree['mae.pai'] = { nome: maeEncontrada.pai, anilha: maeEncontrada.anilhaPai || '' };
+      }
+      if (maeEncontrada.mae && maeEncontrada.mae !== maeEncontrada.nome) {
+        tree['mae.mae'] = { nome: maeEncontrada.mae, anilha: maeEncontrada.anilhaMae || '' };
+      }
+    } else {
+      tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
+    }
+  }
+  
+  if (ave.avoPaterno && !tree['pai.pai']) {
+    tree['pai.pai'] = { nome: ave.avoPaterno, anilha: ave.anilhaAvoPaterno || '' };
+  }
+  if (ave.avoPaterna && !tree['pai.mae']) {
+    tree['pai.mae'] = { nome: ave.avoPaterna, anilha: ave.anilhaAvoPaterna || '' };
+  }
+  if (ave.avoMaterno && !tree['mae.pai']) {
+    tree['mae.pai'] = { nome: ave.avoMaterno, anilha: ave.anilhaAvoMaterno || '' };
+  }
+  if (ave.avoMaterna && !tree['mae.mae']) {
+    tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
+  }
+  
+  return tree;
+}
+
+function obterAncestral(tree, caminho) {
+  const encontrado = tree[caminho];
+  return (encontrado && encontrado.nome) ? encontrado.nome : null;
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = data.split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
+// ============================================================
+// GERAR CRAChÁ HTML - ORDEM DINÂMICA
+// ============================================================
+
+function gerarCrachaHTML(ave, config, todasAves) {
+  if (!ave) return '';
+  
+  const tree = obterAncestrais(ave, todasAves);
+  
+  // FUNDOS
+  const fundoEsqCor = config.fundoEsqCor || '#ffffff';
+  const fundoEsqOpacidade = (config.fundoEsqOpacidade || 100) / 100;
+  const fundoEsqImg = config.fundoEsqImg || '';
+  
+  const fundoDirCor = config.fundoDirCor || '#fafaf8';
+  const fundoDirOpacidade = (config.fundoDirOpacidade || 100) / 100;
+  const fundoDirImg = config.fundoDirImg || '';
+  
+  const bordaCor = config.bordaCor || '#dddddd';
+  const bordaEspessura = config.bordaEspessura || 1;
+  
+  const espacamento = config.espacamentoCaixas || 1.5;
+  
+  const logoTamanho = config.logoTamanho || 90;
+  const logoUrl = config.logoUrl || '';
+  const logoFormato = config.logoFormato || 'circulo';
+  const logoPosicao = config.logoPosicao || 'meio';
+  const logoAlinhamento = config.logoAlinhamento || 'centro';
+  const logoVisivel = config.logoVisivel || 'nao';
+  
+  const sexoLabel = ave.sexo === 'M' ? 'Macho' : ave.sexo === 'F' ? 'Fêmea' : 'Indefinido';
+  const especieRaca = ave.especie ? (ave.raca ? `${ave.especie} · ${ave.raca}` : ave.especie) : (ave.raca || '-');
+  
+  // Configurações das caixas
+  const nomeCfg = config.nome || { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 };
+  const c2Cfg = config.c2 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 };
+  const c3Cfg = config.c3 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 };
+  const c4Cfg = config.c4 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 };
+  const c5Cfg = config.c5 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 7, altura: 0, visivel: 'sim', ordem: 5 };
+  
+  const rodapeNomeCfg = config.rodapeNome || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  const rodapeRegistroCfg = config.rodapeRegistro || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  const rodapeTelefoneCfg = config.rodapeTelefone || { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' };
+  
+  // Função para criar uma caixa individual
+  const box = (conteudo, cfg, isNome = false) => {
+    if (cfg.visivel === 'nao' || !conteudo) return '';
+    const font = cfg.font || (isNome ? 14 : 8);
+    const altura = cfg.altura ? `${cfg.altura}px` : 'auto';
+    const bg = cfg.bg || (isNome ? '#2f5a9e' : '#ffffff');
+    const text = cfg.texto || (isNome ? '#ffffff' : '#1a1a1a');
+    const borda = cfg.borda || (isNome ? '#1a3a6a' : '#dddddd');
+    const fontFamily = isNome ? "'Fraunces',serif" : "'Manrope',sans-serif";
+    const fontWeight = isNome ? '800' : '600';
+    return `
+      <div style="border:1px solid ${borda};border-radius:4px;background:${bg};text-align:center;padding:1px 6px;font-size:${font}px;font-weight:${fontWeight};font-family:${fontFamily};color:${text};box-sizing:border-box;height:${altura};display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%;">
+        ${conteudo}
+      </div>
+    `;
+  };
+  
+  // LOGO
+  const logoRadius = logoFormato === 'quadrado' ? '6px' : '50%';
+  const logoStyle = logoUrl ? 
+    `background-image:url(${logoUrl});background-size:cover;background-position:center;` : 
+    `background:rgba(199,151,63,0.1);`;
+  const logoTamanhoFonte = logoTamanho * 0.3;
+  const mostrarLogo = logoVisivel === 'sim' && logoUrl;
+
+  const criarLogoDiv = (extraStyle) => `
+    <div style="${extraStyle}width:${logoTamanho}px;height:${logoTamanho}px;border-radius:${logoRadius};display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:${logoTamanhoFonte}px;font-weight:700;${logoStyle}border:2px solid #c7973f;box-shadow:0 0 0 1px ${bordaCor};color:#c7973f;flex-shrink:0;overflow:hidden;">${logoUrl ? '' : 'CG'}</div>
+  `;
+  
+  // ==== CRIA TODAS AS CAIXAS COM SEUS CONTEÚDOS ====
+  const caixas = [];
+  
+  // Nome
+  const nomeHtml = box(ave.nome || '-', nomeCfg, true);
+  if (nomeHtml) caixas.push({ html: nomeHtml, ordem: parseInt(nomeCfg.ordem) || 1, id: 'nome' });
+  
+  // Espécie + Raça
+  const especieHtml = box(especieRaca, c2Cfg);
+  if (especieHtml) caixas.push({ html: especieHtml, ordem: parseInt(c2Cfg.ordem) || 2, id: 'c2' });
+  
+  // Anilha
+  const anilhaHtml = box(ave.anilha || '-', c3Cfg);
+  if (anilhaHtml) caixas.push({ html: anilhaHtml, ordem: parseInt(c3Cfg.ordem) || 3, id: 'c3' });
+  
+  // Data + Sexo (sempre juntos)
+  const dataSexoHtml = `
+    <div style="display:flex;gap:3px;width:100%;">
+      <div style="flex:1;">${box(formatarData(ave.dataNasc) || '-', c4Cfg)}</div>
+      <div style="flex:1;">${box(sexoLabel, c4Cfg)}</div>
+    </div>
+  `;
+  if (c4Cfg.visivel !== 'nao') caixas.push({ html: dataSexoHtml, ordem: parseInt(c4Cfg.ordem) || 4, id: 'c4' });
+  
+  // Pai + Mãe (sempre juntos)
+  const pai = ave.pai || '—';
+  const mae = ave.mae || '—';
+  const paiMaeHtml = `
+    <div style="display:flex;gap:3px;width:100%;">
+      <div style="flex:1;">${box(`Pai: ${pai}`, c5Cfg)}</div>
+      <div style="flex:1;">${box(`Mãe: ${mae}`, c5Cfg)}</div>
+    </div>
+  `;
+  if (c5Cfg.visivel !== 'nao') caixas.push({ html: paiMaeHtml, ordem: parseInt(c5Cfg.ordem) || 5, id: 'c5' });
+  
+  // Rodapé - 3 caixas lado a lado (sempre no final)
+  const rodapeHtml = `
+    <div style="display:flex;gap:3px;width:100%;">
+      <div style="flex:1;">${box(config.propNome || 'Criatório Goularth', rodapeNomeCfg)}</div>
+      <div style="flex:1;">${box(config.propRegistro || '3348370 / FOB II.889', rodapeRegistroCfg)}</div>
+      <div style="flex:1;">${box(config.propContato || '(11) 94149-3657', rodapeTelefoneCfg)}</div>
+    </div>
+  `;
+  if (rodapeNomeCfg.visivel === 'sim' || rodapeRegistroCfg.visivel === 'sim' || rodapeTelefoneCfg.visivel === 'sim') {
+    caixas.push({ html: rodapeHtml, ordem: 999, id: 'rodape' });
+  }
+  
+  // ==== ORDENA AS CAIXAS PELO NÚMERO ====
+  caixas.sort((a, b) => a.ordem - b.ordem);
+  
+  // ==== MONTA OS ITENS ORDENADOS ====
+  let itens = caixas.map(c => c.html);
+  
+  // ==== INSERE O LOGO SE FOR VISÍVEL ====
+  let camposMiolo;
+  if (!mostrarLogo) {
+    camposMiolo = itens.join('');
+  } else if (logoAlinhamento === 'centro') {
+    let idx = logoPosicao === 'topo' ? 0 : (logoPosicao === 'baixo' ? itens.length : Math.floor(itens.length / 2));
+    const logoBloco = `<div style="display:flex;justify-content:center;margin:0.5mm 0;">${criarLogoDiv('')}</div>`;
+    const copia = [...itens];
+    copia.splice(idx, 0, logoBloco);
+    camposMiolo = copia.join('');
+  } else {
+    const itensLado = Math.max(1, Math.min(itens.length, Math.round(logoTamanho / 28)));
+    let ladoItens, restoAntes, restoDepois;
+    if (logoPosicao === 'topo') {
+      ladoItens = itens.slice(0, itensLado);
+      restoAntes = [];
+      restoDepois = itens.slice(itensLado);
+    } else if (logoPosicao === 'baixo') {
+      ladoItens = itens.slice(-itensLado);
+      restoAntes = itens.slice(0, itens.length - itensLado);
+      restoDepois = [];
+    } else {
+      const inicioMeio = Math.max(0, Math.floor((itens.length - itensLado) / 2));
+      ladoItens = itens.slice(inicioMeio, inicioMeio + itensLado);
+      restoAntes = itens.slice(0, inicioMeio);
+      restoDepois = itens.slice(inicioMeio + itensLado);
+    }
+    const colunaLado = `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:${espacamento}px;min-width:0;">${ladoItens.join('')}</div>`;
+    const linhaLogo = `
+      <div style="display:flex;align-items:center;gap:2mm;">
+        ${logoAlinhamento === 'direita' ? colunaLado + criarLogoDiv('') : criarLogoDiv('') + colunaLado}
+      </div>
+    `;
+    camposMiolo = restoAntes.join('') + linhaLogo + restoDepois.join('');
+  }
+  
+  // FUNDOS
+  const fundoEsqStyle = fundoEsqImg ? 
+    `background-image:url(${fundoEsqImg});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:${fundoEsqCor};background-blend-mode:normal;opacity:${fundoEsqOpacidade};` : 
+    `background:${fundoEsqCor};opacity:${fundoEsqOpacidade};`;
+  
+  const fundoDirStyle = fundoDirImg ? 
+    `background-image:url(${fundoDirImg});background-size:cover;background-position:center;background-repeat:no-repeat;background-color:${fundoDirCor};background-blend-mode:normal;opacity:${fundoDirOpacidade};` : 
+    `background:${fundoDirCor};opacity:${fundoDirOpacidade};`;
+  
+  // ÁRVORE
+  const profundidades = [1, 2, 3, 4];
+  const colunas = profundidades.map(depth => {
+    const caminhos = gerarCaminhos(depth);
+    return caminhos.map(caminho => {
+      const nome = obterAncestral(tree, caminho);
+      const sexo = caminho.endsWith('pai') ? 'M' : 'F';
+      const isIndefinido = !nome || nome === 'Indefinido';
+      const classe = isIndefinido ? 'indefinido' : (sexo === 'F' ? 'female' : '');
+      return { nome: nome || 'Indefinido', classe };
+    });
+  });
+  
+  let colunasHtml = '';
+  colunas.forEach(col => {
+    colunasHtml += `<div style="display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:1px;min-width:0;">`;
+    col.forEach(no => {
+      const tamArvore = config.tamArvore || 6.5;
+      colunasHtml += `<div style="font-size:${tamArvore}px;padding:1px 2px;border-radius:2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${no.classe === 'female' ? '#f5e8ea' : no.classe === 'indefinido' ? '#f5f5f5' : '#e8f0f8'};border-left:2px solid ${no.classe === 'female' ? '#9a5a6a' : no.classe === 'indefinido' ? '#cccccc' : '#3a6a9a'};color:#333;line-height:1.2;">${no.nome}</div>`;
+    });
+    colunasHtml += `</div>`;
+  });
+  
+  return `
+    <div style="width:193mm;height:65mm;border:${bordaEspessura}px solid ${bordaCor};border-radius:4px;display:flex;overflow:hidden;font-family:'Manrope',sans-serif;box-sizing:border-box;font-size:12px;">
+      <div style="width:96.5mm;height:100%;padding:2mm;display:flex;flex-direction:column;gap:${espacamento}px;${fundoEsqStyle}border-right:${bordaEspessura}px solid ${bordaCor};box-sizing:border-box;color:${config.textoColor || '#1a1a1a'};">
+        ${camposMiolo}
+      </div>
+      <div style="width:96.5mm;height:100%;padding:2mm 2.5mm;overflow:hidden;${fundoDirStyle}box-sizing:border-box;display:flex;flex-direction:column;border-left:${bordaEspessura}px solid ${bordaCor};">
+        <div style="font-size:6.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1px;text-align:center;">Árvore Genealógica</div>
+        <div style="display:flex;flex:1;gap:2px;min-height:0;">
+          ${colunasHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// PRÉVIA EM MINIATURA DENTRO DO PAINEL
+// ============================================================
+
+async function atualizarPreviewMini() {
+  const container = document.getElementById('preview-mini');
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  
+  const aveExemplo = aves.length > 0 ? aves[0] : null;
+  
+  if (!aveExemplo) {
+    container.innerHTML = `
+      <span class="label">Prévia</span>
+      <div class="sem-ave">Nenhuma ave cadastrada</div>
+    `;
+    return;
+  }
+  
+  const config = crachaConfig;
+  const todasAves = aves;
+  const html = gerarCrachaHTML(aveExemplo, config, todasAves);
+  
+  container.innerHTML = `
+    <span class="label">Prévia (${aveExemplo.nome})</span>
+    <div class="mini-content">${html}</div>
+  `;
+}
+
+// ============================================================
+// RENDERIZAR PRÉVIA PRINCIPAL
+// ============================================================
+
+async function renderizarPrevia() {
+  const container = document.getElementById('preview-crachas');
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const selecionadas = aves.filter(a => avesSelecionadas.has(a.id));
+  
+  if (selecionadas.length === 0) {
+    container.innerHTML = `
+      <div style="padding:20px;color:var(--text-muted);text-align:center;width:100%;">
+        Selecione pelo menos uma ave para visualizar a prévia.
+      </div>
+    `;
+    return;
+  }
+  
+  const config = crachaConfig;
+  const todasAves = aves;
+  const mostrar = selecionadas.slice(0, 6);
+  
+  container.innerHTML = mostrar.map(ave => {
+    const html = gerarCrachaHTML(ave, config, todasAves);
+    return `<div style="transform:scale(0.35);transform-origin:top left;margin:3mm;">${html}</div>`;
+  }).join('');
+}
+
+// ============================================================
+// GERAR PDF
+// ============================================================
+
+async function gerarPDF() {
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const selecionadas = aves.filter(a => avesSelecionadas.has(a.id));
+  
+  if (selecionadas.length === 0) {
+    alert('Selecione pelo menos uma ave!');
+    return;
+  }
+
+  const btn = document.querySelector('.topbar .btn-primary');
+  const txtOriginal = btn.textContent;
+  btn.textContent = '⏳ Gerando PDF...';
+  btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('portrait', 'mm', 'a4');
+    const config = crachaConfig;
+    const todasAves = aves;
+    
+    const tamCartao = 193;
+    const altCartao = 65;
+    const quantidade = selecionadas.length;
+    
+    let espacoVertical;
+    switch (Math.min(quantidade, 4)) {
+      case 1: espacoVertical = (297 - 65) / 2; break;
+      case 2: espacoVertical = (297 - (65 * 2)) / 3; break;
+      case 3: espacoVertical = (297 - (65 * 3)) / 4; break;
+      default: espacoVertical = (297 - (65 * 4)) / 5; break;
+    }
+    
+    const x = (210 - 193) / 2;
+    
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '193mm';
+    container.style.height = '65mm';
+    container.style.zIndex = '-1';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < selecionadas.length; i++) {
+      const y = espacoVertical + (i % 4) * (65 + espacoVertical);
+      
+      const html = gerarCrachaHTML(selecionadas[i], config, todasAves);
+      container.innerHTML = html;
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(container, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+        width: 193 * 3.78,
+        height: 65 * 3.78
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      
+      pdf.addImage(imgData, 'PNG', x, y, tamCartao, altCartao);
+      
+      if ((i + 1) % 4 === 0 && i < selecionadas.length - 1) {
+        pdf.addPage();
+      }
+    }
+    
+    document.body.removeChild(container);
+
+    pdf.save('crachas.pdf');
+    alert(`✅ Pronto! ${selecionadas.length} crachás em ${Math.ceil(selecionadas.length/4)} página(s)`);
+
+  } catch (erro) {
+    console.error('ERRO:', erro);
+    alert('Erro ao gerar: ' + erro.message);
+  }
+
+  btn.textContent = txtOriginal;
+  btn.disabled = false;
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+carregarConfig();
+renderizarLista();
+
+setTimeout(function() {
+  atualizarPreviewMini();
+}, 100);
+
+if (typeof renderSidebar === 'function') {
+  renderSidebar('crachas');
+}
+</script>
+</body>
+</html>

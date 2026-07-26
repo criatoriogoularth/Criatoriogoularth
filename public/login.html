@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(ellipse at top, rgba(199,151,63,0.08), transparent 55%), var(--bg);
+}
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+.login-card .mark {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+}
+.login-card .mark .ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--brass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    color: var(--brass-soft);
+    background: rgba(199,151,63,0.06);
+}
+.login-card h2 { margin: 0; font-size: 20px; text-align: center; color: var(--brass-soft); }
+.login-card .sub { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 2px; }
+.login-card .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.login-card .field label { font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
+.login-card .field input {
+    background: rgba(0,0,0,0.35) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    color: var(--text) !important;
+    font-size: 14px !important;
+    outline: none !important;
+    transition: .15s !important;
+}
+.login-card .field input:focus {
+    border-color: var(--brass) !important;
+    box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+}
+.login-card .btn-login {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--brass-soft), var(--brass));
+    color: #20170a;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: .15s ease;
+    margin-top: 8px;
+}
+.login-card .btn-login:hover { filter: brightness(1.08); }
+.login-card .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+.login-card .erro {
+    color: #e2988a;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+}
+.login-card .erro.visible { display: block; }
+.login-card .info-site { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 16px; }
+.login-card .info-site a { color: var(--brass-soft); text-decoration: none; }
+.login-card .info-site a:hover { text-decoration: underline; }
+.creditos { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 14px; opacity: 0.5; }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+    <div class="login-card">
+        <div class="mark">
+            <div class="ring">🐦</div>
+            <h2>Painel de Gerenciamento</h2>
+            <div class="sub">Acesse o sistema do criatório</div>
+        </div>
+
+        <div class="field">
+            <label>CPF / E-mail</label>
+            <input type="text" id="login-email" placeholder="Seu CPF ou e-mail" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="Sua senha" autocomplete="current-password">
+        </div>
+        <button class="btn-login" id="btn-login" onclick="fazerLogin()">🔐 Entrar</button>
+        <div class="erro" id="login-erro"></div>
+
+        <div class="info-site">
+            <a href="site-home.html">🌐 Visitar o Site do Criatório</a>
+        </div>
+
+        <div class="creditos">Aviário — Sistema de Gestão de Criatórios</div>
+    </div>
+</div>
+
+<script>
+async function fazerLogin() {
+    const identificador = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const erro = document.getElementById('login-erro');
+    const btn = document.getElementById('btn-login');
+
+    erro.classList.remove('visible');
+
+    if (!identificador || !senha) {
+        erro.textContent = '⚠️ Preencha CPF/E-mail e senha.';
+        erro.classList.add('visible');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Entrando...';
+
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identificador, senha })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            erro.textContent = '❌ ' + (data.error || 'Não foi possível entrar.');
+            erro.classList.add('visible');
+            btn.disabled = false;
+            btn.textContent = '🔐 Entrar';
+            return;
+        }
+
+        // Token JWT — não é mais "logado: true" que qualquer um seta no console.
+        // A validade dele é conferida no servidor a cada requisição.
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        window.location.href = 'dashboard.html';
+
+    } catch (err) {
+        erro.textContent = '❌ Erro de conexão com o servidor.';
+        erro.classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = '🔐 Entrar';
+    }
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') fazerLogin();
+});
+
+// Se já existir um token, confere se ainda é válido antes de pular o login
+(async function () {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) window.location.href = 'dashboard.html';
+        else localStorage.removeItem('token');
+    } catch (e) { /* servidor fora do ar — deixa a pessoa tentar logar de novo */ }
+})();
+</script>
+</body>
+</html>

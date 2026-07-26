@@ -1,0 +1,260 @@
+<!-- dashboard.html - PAINEL (apenas logados) — MIGRADO PARA API -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Painel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: center;
+}
+.stat-card .stat-number {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--brass-soft);
+  line-height: 1.2;
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-top: 4px;
+}
+.stat-card .stat-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.stat-card.male .stat-number { color: #3a6a9a; }
+.stat-card.female .stat-number { color: #9a5a6a; }
+.stat-card.filhote .stat-number { color: var(--sage-soft); }
+.table-wrap {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 18px;
+}
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table-wrap th {
+  background: rgba(0,0,0,0.2);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 12px 16px;
+  text-align: left;
+}
+.table-wrap td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+}
+.table-wrap tr:last-child td { border-bottom: none; }
+.table-wrap .badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-disponivel { background: rgba(92,154,124,0.2); color: var(--sage-soft); }
+.badge-usada { background: rgba(199,151,63,0.15); color: var(--brass-soft); }
+.badge-esgotada { background: rgba(192,89,74,0.2); color: #e2988a; }
+.species-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+.species-tag {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.species-tag .count {
+  font-weight: 700;
+  color: var(--brass-soft);
+  font-size: 16px;
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 24px 0 12px;
+}
+.section-title:first-of-type { margin-top: 0; }
+.empty-state-painel {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.empty-state-painel .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-painel h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.empty-state-painel p { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-dashboard">
+
+      <div class="topbar">
+        <div>
+          <h1>Painel do Plantel</h1>
+          <div class="lede">Visão geral do seu criatório — estatísticas e estoque de anilhas.</div>
+        </div>
+        <button class="btn btn-primary" onclick="location.href='cadastro-ave.html'">+ Nova Ave</button>
+      </div>
+
+      <div class="stats-grid" id="stats-grid"><div class="empty-state-painel">Carregando...</div></div>
+
+      <div class="section-title">📋 Espécies no Plantel</div>
+      <div class="species-list" id="species-list"></div>
+
+      <div class="section-title">🏷️ Estoque de Anilhas</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cor</th><th>Número</th><th>Tipo</th><th>Dimensão</th><th>Status</th><th>Disponível</th></tr></thead>
+          <tbody id="anilhas-table"></tbody>
+        </table>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('dashboard');</script>
+
+<script>
+async function calcularEstatisticas(aves) {
+  return {
+    total: aves.length,
+    machos: aves.filter(a => a.sexo === 'M').length,
+    femeas: aves.filter(a => a.sexo === 'F').length,
+    filhotes: aves.filter(a => a.filhote === true).length,
+    plantelAtivo: aves.filter(a => a.situacao === 'Plantel').length
+  };
+}
+
+function contarEspecies(aves) {
+  const especies = {};
+  aves.forEach(a => {
+    if (!a.especie) return;
+    especies[a.especie] = (especies[a.especie] || 0) + 1;
+  });
+  return especies;
+}
+
+async function renderizarEstatisticas(aves) {
+  const stats = await calcularEstatisticas(aves);
+  const grid = document.getElementById('stats-grid');
+  if (stats.total === 0) {
+    grid.innerHTML = `<div class="empty-state-painel" style="grid-column:1/-1;"><div class="icon">🐦</div><h3>Nenhuma ave cadastrada</h3><p>Cadastre sua primeira ave clicando em "+ Nova Ave".</p></div>`;
+    return;
+  }
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-number">${stats.total}</div><div class="stat-label">Total de Aves</div><div class="stat-sub">${stats.plantelAtivo} no plantel ativo</div></div>
+    <div class="stat-card male"><div class="stat-number">${stats.machos}</div><div class="stat-label">♂ Machos</div></div>
+    <div class="stat-card female"><div class="stat-number">${stats.femeas}</div><div class="stat-label">♀ Fêmeas</div></div>
+    <div class="stat-card filhote"><div class="stat-number">${stats.filhotes}</div><div class="stat-label">🐣 Filhotes</div></div>
+  `;
+}
+
+function renderizarEspecies(aves) {
+  const especies = contarEspecies(aves);
+  const container = document.getElementById('species-list');
+  const keys = Object.keys(especies);
+  if (keys.length === 0) {
+    container.innerHTML = '<div class="empty-note" style="padding:16px;">Nenhuma espécie cadastrada.</div>';
+    return;
+  }
+  container.innerHTML = Object.entries(especies).map(([nome, qtd]) => `
+    <div class="species-tag"><span>${nome}</span><span class="count">${qtd}</span></div>
+  `).join('');
+}
+
+function renderizarAnilhas(anilhas) {
+  const tbody = document.getElementById('anilhas-table');
+  if (anilhas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-note" style="padding:20px;">Nenhuma anilha cadastrada.</td></tr>';
+    return;
+  }
+  const cores = {
+    'Prata': '#C0C0C0', 'Prata - Sispass': '#A8A8A8', 'Amarelo': '#FFD700',
+    'Azul': '#4169E1', 'Castanho': '#8B4513', 'Cinza': '#808080',
+    'Laranja': '#FF8C00', 'Marrom': '#A52A2A', 'Rosa': '#FF69B4',
+    'Verde': '#32CD32', 'Bege': '#F5F5DC', 'Branco': '#FFFFFF',
+    'Caramelo': '#D2691E', 'Bronze': '#CD7F32', 'Cobre': '#B87333',
+    'Dourado': '#FFD700', 'Ferrugem': '#B7410E', 'Marfim': '#FFFFF0',
+    'Ouro': '#FFD700', 'Preto': '#1A1A1A', 'Roxo': '#8B008B',
+    'Vermelho': '#DC143C'
+  };
+  tbody.innerHTML = anilhas.map(item => {
+    let statusClass = 'badge-disponivel', statusText = 'Disponível';
+    if (item.disponivel === 'Não') { statusClass = 'badge-usada'; statusText = 'Indisponível'; }
+    if (item.ativo === 'Não') { statusClass = 'badge-esgotada'; statusText = 'Inativo'; }
+    const corHex = cores[item.cor] || '#808080';
+    return `<tr><td><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${corHex};border:1px solid rgba(255,255,255,0.2);vertical-align:middle;margin-right:6px;"></span> ${item.cor}</td><td><strong>${item.numero}</strong></td><td>${item.tipo}</td><td>${item.dimensao || '-'}</td><td><span class="badge ${statusClass}">${statusText}</span></td><td>${item.disponivel === 'Sim' ? '✅ Sim' : '❌ Não'}</td></tr>`;
+  }).join('');
+}
+
+async function iniciar() {
+  try {
+    const [aves, anilhas] = await Promise.all([
+      DB.getAll(DB.TABLES.AVES),
+      DB.getAll(DB.TABLES.ANILHAS)
+    ]);
+    await renderizarEstatisticas(aves);
+    renderizarEspecies(aves);
+    renderizarAnilhas(anilhas);
+  } catch (e) {
+    console.error('Erro ao carregar painel:', e);
+  }
+}
+
+iniciar();
+</script>
+</body>
+</html>

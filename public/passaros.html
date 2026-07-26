@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Pássaros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.passaros-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.passaros-toolbar .filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+.passaros-toolbar .filters input,
+.passaros-toolbar .filters select {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+  min-width: 150px;
+}
+.passaros-toolbar .filters input:focus,
+.passaros-toolbar .filters select:focus {
+  border-color: var(--brass);
+}
+.passaros-toolbar .filters select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+.passaros-toolbar .filters select {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c7973f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+  cursor: pointer !important;
+}
+.passaros-toolbar .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.passaros-toolbar .actions .btn {
+  white-space: nowrap;
+}
+.situacao-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.situacao-filters .situacao-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .15s ease;
+  font-family: 'Manrope', sans-serif;
+}
+.situacao-filters .situacao-btn:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+.situacao-filters .situacao-btn.active {
+  background: rgba(199,151,63,0.15);
+  border-color: var(--brass);
+  color: var(--brass-soft);
+}
+.situacao-filters .situacao-btn .count {
+  background: rgba(0,0,0,0.2);
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.passaros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+}
+.passaro-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: .15s ease;
+}
+.passaro-card:hover {
+  border-color: var(--brass-dim);
+}
+.passaro-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.passaro-card .card-header .nome {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  flex: 1;
+}
+.passaro-card .card-header .sexo-badge {
+  font-size: 13px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.sexo-macho {
+  background: rgba(70, 130, 200, 0.15);
+  color: #5a8ab0;
+}
+.sexo-femea {
+  background: rgba(200, 100, 130, 0.15);
+  color: #e2a898;
+}
+.sexo-indefinido {
+  background: rgba(199, 151, 63, 0.15);
+  color: var(--brass-soft);
+}
+.passaro-card .card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+  font-size: 12.5px;
+}
+.passaro-card .card-body .label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.passaro-card .card-body .value {
+  color: var(--text);
+}
+.passaro-card .card-body .value .pai-mae {
+  font-size: 11px;
+  color: var(--brass-soft);
+}
+.passaro-card .card-body .value .pai-mae .sem {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.passaro-card .card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.passaro-card .card-actions .btn {
+  padding: 4px 12px;
+  font-size: 11px;
+}
+.status-badge {
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.status-badge.plantel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
+.status-badge.filhote { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
+.status-badge.quarentena { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
+.status-badge.pareamento { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+.status-badge.fuga { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
+.status-badge.obito { background: rgba(0, 0, 0, 0.3); color: #666; }
+.status-badge.saida { background: rgba(192, 89, 74, 0.15); color: #c0594a; }
+.status-badge.disponivel { background: rgba(92, 154, 124, 0.15); color: var(--sage-soft); }
+
+.situacao-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.situacao-select-wrapper select {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 4px !important;
+  color: var(--text) !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  padding-right: 20px !important;
+  outline: none !important;
+  font-family: 'Manrope', sans-serif !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239aa89e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 6px center !important;
+}
+
+.situacao-select-wrapper select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.situacao-select-wrapper select:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.situacao-select-wrapper select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+.empty-state .icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+.empty-state h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.empty-state p {
+  font-size: 14px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ===== MODAL DE HISTÓRICO ===== */
+.modal-box.historico-modal {
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.modal-box .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal-box .field-grid .field-full {
+  grid-column: 1 / -1;
+}
+
+.modal-box .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-box .field label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.modal-box .field label .req {
+  color: var(--rose);
+}
+
+.modal-box .field input,
+.modal-box .field select,
+.modal-box .field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: .15s !important;
+}
+
+.modal-box .field input:focus,
+.modal-box .field select:focus,
+.modal-box .field textarea:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+}
+
+.modal-box .field select option {
+  background: #1a2e28 !important;
+  color: var(--text) !important;
+}
+
+.modal-box .field textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-aviso {
+  background: rgba(192, 89, 74, 0.1);
+  border: 1px solid rgba(192, 89, 74, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  color: #e2988a;
+  font-size: 13px;
+}
+
+.modal-aviso strong {
+  color: var(--danger);
+}
+
+.campo-destacar {
+  border-left: 3px solid var(--brass) !important;
+  padding-left: 14px !important;
+}
+
+/* ===== MODAL DE SELEÇÃO DE AVE ===== */
+.modal-box.ave-select-modal {
+  max-width: 480px;
+}
+.modal-list .modal-item .mi-especie {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.modal-box.import-modal {
+  max-width: 750px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+.modal-box .modal-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  max-height: 55vh;
+  min-height: 200px;
+}
+.modal-box .file-upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.modal-box .file-upload-area:hover {
+  border-color: var(--brass);
+}
+.modal-box .file-upload-area .icon {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+.modal-box .file-upload-area p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0;
+}
+.modal-box .file-upload-area .format {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.modal-box .import-preview-content {
+  background: rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.modal-box .modal-footer-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .passaros-grid { grid-template-columns: 1fr; }
+  .passaros-toolbar { flex-direction: column; align-items: stretch; }
+  .passaros-toolbar .filters { flex-direction: column; }
+  .passaros-toolbar .filters input,
+  .passaros-toolbar .filters select { width: 100%; min-width: unset; }
+  .passaros-toolbar .actions { justify-content: center; }
+  .situacao-filters { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .situacao-filters .situacao-btn { white-space: nowrap; }
+  .passaro-card .card-body { grid-template-columns: 1fr; }
+  .modal-box.import-modal { max-width: 95%; max-height: 95vh; padding: 14px; }
+  .modal-box .modal-body-scroll { max-height: 40vh; min-height: 150px; }
+  .modal-box .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-passaros">
+
+      <div class="topbar">
+        <div>
+          <h1>Pássaros</h1>
+          <div class="lede">Plantel completo do criatório — gerencie todas as aves.</div>
+        </div>
+      </div>
+
+      <!-- ===== FILTROS DE SITUAÇÃO ===== -->
+      <div class="situacao-filters" id="situacao-filters"></div>
+
+      <div class="passaros-toolbar">
+        <div class="filters">
+          <input type="text" id="busca-passaro" placeholder="Pesquisar por nome ou anilha..." oninput="renderizarPassaros()">
+          
+          <!-- ===== FILTRO POR ESPÉCIE ===== -->
+          <select id="filtro-especie" onchange="renderizarPassaros()">
+            <option value="">Todas as espécies</option>
+          </select>
+          
+          <!-- ===== FILTRO POR SEXO ===== -->
+          <select id="filtro-sexo" onchange="renderizarPassaros()">
+            <option value="">Todos os sexos</option>
+            <option value="M">♂ Machos</option>
+            <option value="F">♀ Fêmeas</option>
+            <option value="Indefinido">⚪ Indefinidos</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="abrirModalImportar()">📥 Importar CSV</button>
+          <button class="btn btn-primary" onclick="location.href='cadastro-ave.html'">+ Novo Pássaro</button>
+        </div>
+      </div>
+
+      <div id="total-passaros" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">0 pássaros</div>
+
+      <div class="passaros-grid" id="passaros-grid"></div>
+
+    </section>
+  </main>
+</div>
+
+<!-- MODAL DE IMPORTAR CSV -->
+<div class="modal-overlay" id="modal-importar" onclick="if(event.target===this) fecharModalImportar()">
+  <div class="modal-box import-modal">
+    <div class="modal-head">
+      <div><span>📥 Importar Aves do CSV</span></div>
+      <button class="modal-close" onclick="fecharModalImportar()">✕</button>
+    </div>
+    <div class="modal-body-scroll" id="modal-body-scroll">
+      <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="icon">📂</div>
+        <p><strong>Clique para selecionar um arquivo</strong></p>
+        <p class="format">Formatos aceitos: .csv, .xls, .xlsx</p>
+        <p class="format" style="margin-top:6px;">O sistema identifica automaticamente as colunas pelo cabeçalho.</p>
+        <p class="format">Colunas suportadas: Código, Nome, Anilha, Sexo, Espécie, Nascimento, Situação, Pai, Anilha do Pai, Mãe, Anilha da Mãe, Avô Paterno, Avó Paterna, Avô Materno, Avó Materna</p>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xls,.xlsx" style="display:none;" onchange="importarCSV(event)">
+      <div id="import-preview" style="margin-top:12px;display:none;">
+        <div class="import-preview-content" id="import-preview-content"></div>
+      </div>
+    </div>
+    <div class="modal-footer-actions" id="import-actions" style="display:none;">
+      <button class="btn btn-ghost" onclick="fecharModalImportar()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarImportacao()">✅ Confirmar Importação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DE HISTÓRICO ===== -->
+<div class="modal-overlay" id="modal-historico" onclick="if(event.target===this) fecharModalHistorico()">
+  <div class="modal-box historico-modal">
+    <div class="modal-head">
+      <div><span id="modal-historico-title">Adicionar Histórico</span></div>
+      <button class="modal-close" onclick="fecharModalHistorico()">✕</button>
+    </div>
+
+    <form id="form-historico" onsubmit="salvarHistorico(event)">
+      <input type="hidden" id="edit-historico-id" value="">
+      <input type="hidden" id="historico-ave-id" value="">
+
+      <div class="field-grid">
+        <div class="field field-full">
+          <label>Motivo <span class="req">*</span></label>
+          <select id="f-historico-motivo" required onchange="atualizarCamposHistorico()">
+            <option value="">Selecione...</option>
+            <option value="Pareamento">Pareamento</option>
+            <option value="Fuga">Fuga</option>
+            <option value="Óbito">Óbito</option>
+            <option value="Quarentena">Quarentena</option>
+            <option value="Saída do plantel">Saída do plantel</option>
+            <option value="Entrada no plantel">Entrada no plantel</option>
+            <option value="Observação">Observação</option>
+          </select>
+        </div>
+
+        <div id="campos-dinamicos"></div>
+
+        <div class="field field-full">
+          <label>Data do histórico <span class="req">*</span></label>
+          <input type="date" id="f-historico-data" required>
+        </div>
+
+        <div id="aviso-quarentena" class="modal-aviso" style="display:none;">
+          <strong>⚠️ AVISO</strong><br>
+          A quarentena em aves é um procedimento essencial para evitar a entrada e a disseminação de doenças no seu plantel.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="fecharModalHistorico()">Fechar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>renderSidebar('passaros');</script>
+<script>
+const SITUACOES = ['Disponível','Filhote','Fuga','Óbito','Pareamento','Plantel','Quarentena','Saída do plantel'];
+const SITUACOES_CLASSES = {
+  'Disponível': 'disponivel','Filhote': 'filhote','Fuga': 'fuga','Óbito': 'obito',
+  'Pareamento': 'pareamento','Plantel': 'plantel','Quarentena': 'quarentena','Saída do plantel': 'saida'
+};
+let situacaoSelecionada = 'Todas';
+let dadosImportados = [];
+let aveEmEdicao = null;
+
+// ============================================================
+// FUNÇÕES DE RENDERIZAÇÃO
+// ============================================================
+
+async function getSituacaoCount(aves) {
+  const counts = { Todas: aves.length };
+  SITUACOES.forEach(s => { counts[s] = aves.filter(a => a.situacao === s).length; });
+  return counts;
+}
+
+async function renderizarFiltros() {
+  const container = document.getElementById('situacao-filters');
+  if (!container) return;
+  const aves = await DB.getAll(DB.TABLES.AVES);
+  const counts = await getSituacaoCount(aves);
+  let html = `<button class="situacao-btn ${situacaoSelecionada === 'Todas' ? 'active' : ''}" onclick="setSituacao('Todas')">Todas <span class="count">${counts.Todas}</span></button>`;
+  SITUACOES.forEach(s => {
+    if (counts[s] > 0 || situacaoSelecionada === s) {
+      html += `<button class="situacao-btn ${situacaoSelecionada === s ? 'active' : ''}" onclick="setSituacao('${s}')">${s} <span class="count">${counts[s]}</span></button>`;
+    }
+  });
+  container.innerHTML = html;
+  
+  // ===== POPULAR FILTRO DE ESPÉCIES =====
+  const selectEspecie = document.getElementById('filtro-especie');
+  if (selectEspecie) {
+    const especies = [...new Set(aves.map(a => a.especie).filter(Boolean))];
+    const valorAtual = selectEspecie.value;
+    selectEspecie.innerHTML = '<option value="">Todas as espécies</option>';
+    especies.sort().forEach(esp => {
+      selectEspecie.innerHTML += `<option value="${esp}">${esp}</option>`;
+    });
+    if (valorAtual) selectEspecie.value = valorAtual;
+  }
+}
+
+function setSituacao(situacao) {
+  situacaoSelecionada = situacao;
+  renderizarFiltros();
+  renderizarPassaros();
+}
+
+function formatarData(data) {
+  if (!data || data === '') return '-';
+  const partes = data.split('-');
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+async function renderizarPassaros() {
+  const busca = document.getElementById('busca-passaro')?.value?.toLowerCase() || '';
+  const filtroEspecie = document.getElementById('filtro-especie')?.value || '';
+  const filtroSexo = document.getElementById('filtro-sexo')?.value || '';
+  
+  let aves = await DB.getAll(DB.TABLES.AVES);
+  
+  // Filtrar por situação
+  if (situacaoSelecionada !== 'Todas') {
+    aves = aves.filter(a => a.situacao === situacaoSelecionada);
+  }
+  
+  // Filtrar por espécie
+  if (filtroEspecie) {
+    aves = aves.filter(a => a.especie === filtroEspecie);
+  }
+  
+  // Filtrar por sexo
+  if (filtroSexo) {
+    aves = aves.filter(a => a.sexo === filtroSexo);
+  }
+  
+  // Filtrar por busca
+  if (busca) {
+    aves = aves.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  }
+  
+  const totalEl = document.getElementById('total-passaros');
+  if (totalEl) totalEl.textContent = aves.length + ' pássaros';
+  const container = document.getElementById('passaros-grid');
+  if (!container) return;
+  if (aves.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🐦</div><h3>Nenhum pássaro encontrado</h3><p>Tente ajustar os filtros ou adicione um novo pássaro.</p></div>`;
+    return;
+  }
+  container.innerHTML = aves.map(ave => {
+    const sexoClass = ave.sexo === 'M' ? 'sexo-macho' : ave.sexo === 'F' ? 'sexo-femea' : 'sexo-indefinido';
+    const sexoLabel = ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪';
+    
+    let paiHtml = '';
+    let maeHtml = '';
+    if (ave.pai) {
+      paiHtml = `<span class="pai-mae">${ave.pai}</span>`;
+    } else {
+      paiHtml = `<span class="pai-mae sem">—</span>`;
+    }
+    if (ave.mae) {
+      maeHtml = `<span class="pai-mae">${ave.mae}</span>`;
+    } else {
+      maeHtml = `<span class="pai-mae sem">—</span>`;
+    }
+    
+    return `
+    <div class="passaro-card">
+      <div class="card-header">
+        <span class="nome">${ave.nome}</span>
+        <span class="sexo-badge ${sexoClass}">${sexoLabel}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span class="band-tag" style="font-size:11px;">${ave.anilha}</span>
+        <span class="status-badge ${SITUACOES_CLASSES[ave.situacao] || ''}">${ave.situacao}</span>
+      </div>
+      <div class="card-body">
+        <span class="label">Espécie:</span><span class="value">${ave.especie}</span>
+        <span class="label">Nascimento:</span><span class="value">${formatarData(ave.dataNasc)}</span>
+        <span class="label">👨 Pai:</span><span class="value">${paiHtml}</span>
+        <span class="label">👩 Mãe:</span><span class="value">${maeHtml}</span>
+        <span class="label">Situação:</span>
+        <span class="value">
+          <div class="situacao-select-wrapper">
+            <select onchange="mudarSituacao(${ave.id}, this.value, this)">
+              ${SITUACOES.map(s => `<option value="${s}" ${s === ave.situacao ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+        </span>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-ghost" onclick="location.href='cadastro-ave.html?id=${ave.id}'">✎ Editar</button>
+        <button class="btn btn-danger" onclick="excluirPassaro(${ave.id})">🗑 Excluir</button>
+        <button class="btn btn-primary" onclick="location.href='arvore.html?id=${ave.id}'">🌳 Ver Árvore</button>
+        <button class="btn btn-ghost" onclick="verHistorico(${ave.id})" style="font-size:10px;">📜 Histórico</button>
+      </div>
+    </div>
+  `}).join('');
+}
+
+// ============================================================
+// MUDAR SITUAÇÃO
+// ============================================================
+
+async function mudarSituacao(id, novaSituacao, selectElement) {
+  const ave = await DB.getById(DB.TABLES.AVES, id);
+  if (!ave) return;
+  
+  if (ave.situacao === novaSituacao) return;
+
+  const situacoesComHistorico = ['Pareamento', 'Fuga', 'Óbito', 'Quarentena', 'Saída do plantel', 'Entrada no plantel'];
+  
+  if (situacoesComHistorico.includes(novaSituacao)) {
+    if (selectElement) selectElement.value = ave.situacao;
+    abrirModalHistoricoParaAve(id, novaSituacao);
+  } else {
+    if (confirm(`Deseja alterar a situação de "${ave.nome}" de "${ave.situacao}" para "${novaSituacao}"?`)) {
+      await DB.update(DB.TABLES.AVES, id, { situacao: novaSituacao, filhote: novaSituacao === 'Filhote' });
+      renderizarFiltros();
+      renderizarPassaros();
+    } else {
+      if (selectElement) selectElement.value = ave.situacao;
+    }
+  }
+}
+
+// ============================================================
+// MODAL DE HISTÓRICO
+// ============================================================
+
+async function abrirModalHistoricoParaAve(id, motivo) {
+  const ave = await DB.getById(DB.TABLES.AVES, id);
+  if (!ave) return;
+
+  aveEmEdicao = ave;
+  
+  document.getElementById('modal-historico-title').textContent = `Histórico - ${ave.nome}`;
+  document.getElementById('historico-ave-id').value = id;
+  document.getElementById('edit-historico-id').value = '';
+  document.getElementById('f-historico-motivo').value = motivo || '';
+  document.getElementById('f-historico-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('aviso-quarentena').style.display = 'none';
+  
+  const nomeAve = ave.nome;
+  
+  atualizarCamposHistorico();
+  
+  setTimeout(() => {
+    const desc = document.getElementById('f-historico-descricao');
+    if (desc) {
+      const motivosDesc = {
+        'Pareamento': `Início de pareamento da ave ${nomeAve}`,
+        'Fuga': `Registro de fuga da ave ${nomeAve}`,
+        'Óbito': `Óbito da ave ${nomeAve}`,
+        'Quarentena': `Início de quarentena da ave ${nomeAve}`,
+        'Saída do plantel': `Saída do plantel da ave ${nomeAve}`,
+        'Entrada no plantel': `Entrada no plantel da ave ${nomeAve}`,
+        'Observação': `Observação sobre a ave ${nomeAve}`
+      };
+      desc.value = motivosDesc[motivo] || `Registro de ${motivo} da ave ${nomeAve}`;
+    }
+  }, 50);
+  
+  document.getElementById('modal-historico').classList.add('open');
+}
+
+function verHistorico(id) {
+  location.href = `cadastro-ave.html?id=${id}#historico`;
+}
+
+function fecharModalHistorico() {
+  document.getElementById('modal-historico').classList.remove('open');
+  aveEmEdicao = null;
+}
+
+function atualizarCamposHistorico() {
+  const motivo = document.getElementById('f-historico-motivo').value;
+  const container = document.getElementById('campos-dinamicos');
+  const aviso = document.getElementById('aviso-quarentena');
+  
+  container.innerHTML = '';
+  aviso.style.display = 'none';
+
+  let html = `
+    <div class="field field-full">
+      <label>Descrição <span class="req">*</span></label>
+      <textarea id="f-historico-descricao" placeholder="Descreva o evento..." required></textarea>
+    </div>
+    <div class="field field-full">
+      <label>Observação</label>
+      <textarea id="f-historico-observacao" placeholder="Observações adicionais..."></textarea>
+    </div>
+  `;
+
+  if (motivo === 'Saída do plantel') {
+    html += `
+      <div class="field">
+        <label>CNPJ/CPF</label>
+        <input type="text" id="f-historico-cnpj" placeholder="CNPJ/CPF do destinatário">
+      </div>
+      <div class="field">
+        <label>Data Saída</label>
+        <input type="date" id="f-historico-data-saida" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Nome <span class="req">*</span></label>
+        <input type="text" id="f-historico-nome-destino" placeholder="Nome do destinatário" required>
+      </div>
+      <div class="field">
+        <label>Valor</label>
+        <input type="text" id="f-historico-valor" placeholder="R$ 0,00" value="R$ 0,00">
+      </div>
+      <div class="field">
+        <label>Registro <span class="req">*</span></label>
+        <input type="text" id="f-historico-registro" placeholder="Número do registro" required>
+      </div>
+    `;
+  } else if (motivo === 'Quarentena') {
+    aviso.style.display = 'block';
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data Início Quarentena</label>
+        <input type="date" id="f-historico-data-inicio" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Data Fim Quarentena</label>
+        <input type="date" id="f-historico-data-fim">
+      </div>
+      <div class="field field-full">
+        <label>Local da Quarentena</label>
+        <input type="text" id="f-historico-local" placeholder="Local onde a ave está em quarentena">
+      </div>
+    `;
+  } else if (motivo === 'Pareamento') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Nome do Parceiro <span class="req">*</span></label>
+        <input type="text" id="f-historico-parceiro" placeholder="Nome da ave parceira" required>
+      </div>
+      <div class="field">
+        <label>Anilha do Parceiro</label>
+        <input type="text" id="f-historico-anilha-parceiro" placeholder="Anilha do parceiro">
+      </div>
+      <div class="field">
+        <label>Data Início</label>
+        <input type="date" id="f-historico-data-inicio-pareamento" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+    `;
+  } else if (motivo === 'Fuga') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data da Fuga</label>
+        <input type="date" id="f-historico-data-fuga" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Local da Fuga</label>
+        <input type="text" id="f-historico-local-fuga" placeholder="Local onde ocorreu a fuga">
+      </div>
+      <div class="field field-full">
+        <label>Circunstâncias</label>
+        <textarea id="f-historico-circunstancia" placeholder="Descreva as circunstâncias da fuga..."></textarea>
+      </div>
+    `;
+  } else if (motivo === 'Óbito') {
+    html += `
+      <div class="field field-full campo-destacar">
+        <label>Data do Óbito</label>
+        <input type="date" id="f-historico-data-obito" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field field-full">
+        <label>Causa da Morte</label>
+        <input type="text" id="f-historico-causa" placeholder="Causa do óbito">
+      </div>
+      <div class="field field-full">
+        <label>Necropsia</label>
+        <select id="f-historico-necropsia">
+          <option value="">Selecione...</option>
+          <option value="Não realizada">Não realizada</option>
+          <option value="Realizada">Realizada</option>
+          <option value="Em andamento">Em andamento</option>
+        </select>
+      </div>
+      <div class="field field-full">
+        <label>Laudo</label>
+        <input type="text" id="f-historico-laudo" placeholder="Número do laudo ou resultado">
+      </div>
+    `;
+  } else if (motivo === 'Entrada no plantel') {
+    html += `
+      <div class="field field-full">
+        <label>Origem <span class="req">*</span></label>
+        <input type="text" id="f-historico-origem" placeholder="De onde veio a ave" required>
+      </div>
+      <div class="field">
+        <label>Data de Compra</label>
+        <input type="date" id="f-historico-data-compra" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="field">
+        <label>Valor Pago</label>
+        <input type="text" id="f-historico-valor-compra" placeholder="R$ 0,00" value="R$ 0,00">
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+async function salvarHistorico(event) {
+  event.preventDefault();
+
+  const aveId = parseInt(document.getElementById('historico-ave-id').value);
+  const motivo = document.getElementById('f-historico-motivo').value;
+  const descricao = document.getElementById('f-historico-descricao').value.trim();
+  const observacao = document.getElementById('f-historico-observacao').value.trim();
+  const data = document.getElementById('f-historico-data').value;
+
+  if (!aveId) {
+    alert('Erro: Ave não identificada.');
+    return;
+  }
+
+  if (!motivo || !descricao || !data) {
+    alert('Preencha todos os campos obrigatórios.');
+    return;
+  }
+
+  const ave = await DB.getById(DB.TABLES.AVES, aveId);
+  if (!ave) {
+    alert('Ave não encontrada!');
+    return;
+  }
+
+  const historicoItem = {
+    motivo: motivo,
+    descricao: descricao,
+    observacao: observacao,
+    data: data,
+    detalhes: ''
+  };
+
+  if (motivo === 'Saída do plantel') {
+    const cnpj = document.getElementById('f-historico-cnpj')?.value || '';
+    const dataSaida = document.getElementById('f-historico-data-saida')?.value || '';
+    const nomeDestino = document.getElementById('f-historico-nome-destino')?.value || '';
+    const valor = document.getElementById('f-historico-valor')?.value || 'R$ 0,00';
+    const registro = document.getElementById('f-historico-registro')?.value || '';
+    
+    historicoItem.detalhes = `Destino: ${nomeDestino} | Registro: ${registro} | Valor: ${valor}`;
+    if (cnpj) historicoItem.detalhes += ` | CNPJ/CPF: ${cnpj}`;
+    if (dataSaida) historicoItem.detalhes += ` | Data Saída: ${formatarData(dataSaida)}`;
+  } else if (motivo === 'Quarentena') {
+    const dataInicio = document.getElementById('f-historico-data-inicio')?.value || '';
+    const dataFim = document.getElementById('f-historico-data-fim')?.value || '';
+    const local = document.getElementById('f-historico-local')?.value || '';
+    
+    historicoItem.detalhes = `Início: ${formatarData(dataInicio)}`;
+    if (dataFim) historicoItem.detalhes += ` | Fim: ${formatarData(dataFim)}`;
+    if (local) historicoItem.detalhes += ` | Local: ${local}`;
+  } else if (motivo === 'Pareamento') {
+    const parceiro = document.getElementById('f-historico-parceiro')?.value || '';
+    const anilhaParceiro = document.getElementById('f-historico-anilha-parceiro')?.value || '';
+    const dataInicio = document.getElementById('f-historico-data-inicio-pareamento')?.value || '';
+    
+    historicoItem.detalhes = `Parceiro: ${parceiro}`;
+    if (anilhaParceiro) historicoItem.detalhes += ` | Anilha: ${anilhaParceiro}`;
+    if (dataInicio) historicoItem.detalhes += ` | Início: ${formatarData(dataInicio)}`;
+  } else if (motivo === 'Fuga') {
+    const dataFuga = document.getElementById('f-historico-data-fuga')?.value || '';
+    const localFuga = document.getElementById('f-historico-local-fuga')?.value || '';
+    
+    historicoItem.detalhes = `Data: ${formatarData(dataFuga)}`;
+    if (localFuga) historicoItem.detalhes += ` | Local: ${localFuga}`;
+  } else if (motivo === 'Óbito') {
+    const dataObito = document.getElementById('f-historico-data-obito')?.value || '';
+    const causa = document.getElementById('f-historico-causa')?.value || '';
+    const necropsia = document.getElementById('f-historico-necropsia')?.value || '';
+    const laudo = document.getElementById('f-historico-laudo')?.value || '';
+    
+    historicoItem.detalhes = `Data: ${formatarData(dataObito)}`;
+    if (causa) historicoItem.detalhes += ` | Causa: ${causa}`;
+    if (necropsia) historicoItem.detalhes += ` | Necropsia: ${necropsia}`;
+    if (laudo) historicoItem.detalhes += ` | Laudo: ${laudo}`;
+  } else if (motivo === 'Entrada no plantel') {
+    const origem = document.getElementById('f-historico-origem')?.value || '';
+    const dataCompra = document.getElementById('f-historico-data-compra')?.value || '';
+    const valorCompra = document.getElementById('f-historico-valor-compra')?.value || 'R$ 0,00';
+    
+    historicoItem.detalhes = `Origem: ${origem}`;
+    if (dataCompra) historicoItem.detalhes += ` | Data: ${formatarData(dataCompra)}`;
+    if (valorCompra) historicoItem.detalhes += ` | Valor: ${valorCompra}`;
+  }
+
+  const historicoAtual = ave.historico || [];
+  historicoAtual.push(historicoItem);
+
+  await DB.update(DB.TABLES.AVES, aveId, { 
+    situacao: motivo,
+    filhote: motivo === 'Filhote',
+    historico: historicoAtual 
+  });
+
+  fecharModalHistorico();
+  renderizarFiltros();
+  renderizarPassaros();
+  
+  alert(`✅ Histórico de "${motivo}" salvo com sucesso para ${ave.nome}!`);
+}
+
+// ============================================================
+// EXCLUIR PÁSSARO
+// ============================================================
+
+async function excluirPassaro(id) {
+  const ave = await DB.getById(DB.TABLES.AVES, id);
+  if (!ave) { 
+    alert('Ave não encontrada!'); 
+    return; 
+  }
+  if (!confirm(`Tem certeza que deseja excluir "${ave.nome}" (${ave.anilha})?`)) return;
+  if (!confirm(`⚠️ Esta ação é irreversível! Confirmar exclusão de "${ave.nome}"?`)) return;
+  await DB.delete(DB.TABLES.AVES, id);
+  renderizarFiltros();
+  renderizarPassaros();
+}
+
+// ============================================================
+// IMPORTAR CSV
+// ============================================================
+
+function abrirModalImportar() {
+  dadosImportados = [];
+  const previewEl = document.getElementById('import-preview');
+  const actionsEl = document.getElementById('import-actions');
+  const contentEl = document.getElementById('import-preview-content');
+  if (previewEl) previewEl.style.display = 'none';
+  if (actionsEl) actionsEl.style.display = 'none';
+  if (contentEl) contentEl.textContent = '';
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) fileInput.value = '';
+  const modal = document.getElementById('modal-importar');
+  if (modal) modal.classList.add('open');
+}
+
+function fecharModalImportar() {
+  const modal = document.getElementById('modal-importar');
+  if (modal) modal.classList.remove('open');
+}
+
+function importarCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      const linhas = text.split('\n').filter(line => line.trim() !== '');
+      if (linhas.length === 0) { alert('Arquivo vazio!'); return; }
+      
+      let startIndex = 0;
+      let colunas = [];
+      for (let i = 0; i < Math.min(linhas.length, 10); i++) {
+        const linha = linhas[i].toLowerCase();
+        if (linha.includes('código') || linha.includes('codigo') || linha.includes('nome')) {
+          startIndex = i;
+          colunas = linhas[i].split(';').map(c => c.trim().toLowerCase());
+          colunas = colunas.map(c => c.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ç/g, 'c'));
+          break;
+        }
+      }
+      
+      if (colunas.length === 0) {
+        alert('❌ Não foi possível identificar o cabeçalho do arquivo.');
+        return;
+      }
+      
+      function findCol(nomesPossiveis) {
+        for (const nome of nomesPossiveis) {
+          const nomeNormalizado = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ç/g, 'c').toLowerCase();
+          const idx = colunas.findIndex(c => c.includes(nomeNormalizado) || nomeNormalizado.includes(c));
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      }
+      
+      const idxCodigo = findCol(['codigo', 'código']);
+      const idxNome = findCol(['nome']);
+      const idxAnilha = findCol(['anilha']);
+      const idxSexo = findCol(['sexo']);
+      const idxEspecie = findCol(['especie', 'espécie']);
+      const idxNascimento = findCol(['nascimento', 'nasc', 'data nascimento']);
+      const idxSituacao = findCol(['situacao', 'situação', 'status']);
+      const idxPai = findCol(['pai']);
+      const idxAnilhaPai = findCol(['anilha do pai', 'anilha pai']);
+      const idxMae = findCol(['mae', 'mãe']);
+      const idxAnilhaMae = findCol(['anilha da mae', 'anilha mae']);
+      const idxAvoPaterno = findCol(['avo paterno', 'avô paterno']);
+      const idxAvoPaterna = findCol(['avo paterna', 'avó paterna']);
+      const idxAvoMaterno = findCol(['avo materno', 'avô materno']);
+      const idxAvoMaterna = findCol(['avo materna', 'avó materna']);
+      
+      if (idxNome === -1 || idxAnilha === -1) {
+        alert('❌ Não foi possível identificar as colunas "Nome" e "Anilha".');
+        return;
+      }
+      
+      const aves = [];
+      for (let i = startIndex + 1; i < linhas.length; i++) {
+        const cols = linhas[i].split(';').map(c => c.trim());
+        if (cols.length < 2) continue;
+        
+        const nome = cols[idxNome] || '';
+        if (!nome || nome === '' || nome === 'Relaçăo das Aves') continue;
+        
+        let codigo = null;
+        if (idxCodigo !== -1 && cols[idxCodigo]) {
+          codigo = parseInt(cols[idxCodigo]);
+          if (isNaN(codigo)) codigo = null;
+        }
+        
+        let anilha = cols[idxAnilha] || '-';
+        let sexoMapeado = 'Indefinido';
+        if (idxSexo !== -1) {
+          const sexo = (cols[idxSexo] || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          if (sexo.includes('macho') || sexo === 'm') sexoMapeado = 'M';
+          else if (sexo.includes('femea') || sexo === 'f') sexoMapeado = 'F';
+        }
+        
+        let especie = (idxEspecie !== -1) ? (cols[idxEspecie] || 'Não identificada') : 'Não identificada';
+        
+        let dataNasc = '';
+        if (idxNascimento !== -1) {
+          dataNasc = cols[idxNascimento] || '';
+          if (dataNasc && dataNasc.includes('/')) {
+            const partes = dataNasc.split('/');
+            if (partes.length === 3) {
+              dataNasc = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
+            }
+          }
+        }
+        
+        let situacao = 'Plantel';
+        if (idxSituacao !== -1) {
+          const sitRaw = (cols[idxSituacao] || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const situacaoMap = {
+            'plantel': 'Plantel','pareamento': 'Pareamento','filhote': 'Filhote',
+            'quarentena': 'Quarentena','fuga': 'Fuga','obito': 'Óbito',
+            'saida do plantel': 'Saída do plantel','disponivel': 'Disponível'
+          };
+          situacao = situacaoMap[sitRaw] || 'Plantel';
+        }
+        
+        let pai = '';
+        let anilhaPai = '';
+        let mae = '';
+        let anilhaMae = '';
+        let avoPaterno = '';
+        let avoPaterna = '';
+        let avoMaterno = '';
+        let avoMaterna = '';
+        
+        if (idxPai !== -1) pai = cols[idxPai] || '';
+        if (idxAnilhaPai !== -1) anilhaPai = cols[idxAnilhaPai] || '';
+        if (idxMae !== -1) mae = cols[idxMae] || '';
+        if (idxAnilhaMae !== -1) anilhaMae = cols[idxAnilhaMae] || '';
+        if (idxAvoPaterno !== -1) avoPaterno = cols[idxAvoPaterno] || '';
+        if (idxAvoPaterna !== -1) avoPaterna = cols[idxAvoPaterna] || '';
+        if (idxAvoMaterno !== -1) avoMaterno = cols[idxAvoMaterno] || '';
+        if (idxAvoMaterna !== -1) avoMaterna = cols[idxAvoMaterna] || '';
+        
+        if (pai && pai.toLowerCase() === nome.toLowerCase()) {
+          pai = '';
+          anilhaPai = '';
+        }
+        if (mae && mae.toLowerCase() === nome.toLowerCase()) {
+          mae = '';
+          anilhaMae = '';
+        }
+        
+        const ave = {
+          id: codigo,
+          nome: nome,
+          anilha: anilha || '-',
+          sexo: sexoMapeado,
+          especie: especie || 'Não identificada',
+          dataNasc: dataNasc || '',
+          situacao: situacao,
+          filhote: situacao === 'Filhote',
+          pai: pai || '',
+          anilhaPai: anilhaPai || '',
+          mae: mae || '',
+          anilhaMae: anilhaMae || '',
+          avoPaterno: avoPaterno || '',
+          avoPaterna: avoPaterna || '',
+          avoMaterno: avoMaterno || '',
+          avoMaterna: avoMaterna || '',
+          observacao: '',
+          historico: []
+        };
+        
+        aves.push(ave);
+      }
+      
+      if (aves.length === 0) { alert('❌ Nenhuma ave foi encontrada.'); return; }
+      dadosImportados = aves;
+      
+      const previewEl = document.getElementById('import-preview');
+      const contentEl = document.getElementById('import-preview-content');
+      const actionsEl = document.getElementById('import-actions');
+      
+      if (!contentEl) { alert('Erro: elemento de preview não encontrado.'); return; }
+      
+      let previewText = `📊 ${aves.length} aves encontradas\n\n`;
+      previewText += `📍 Colunas identificadas:\n`;
+      previewText += `  Código (ID): ${idxCodigo !== -1 ? '✅' : '❌'}\n`;
+      previewText += `  Nome: ${idxNome !== -1 ? '✅' : '❌'}\n`;
+      previewText += `  Anilha: ${idxAnilha !== -1 ? '✅' : '❌'}\n`;
+      previewText += `  Sexo: ${idxSexo !== -1 ? '✅' : '⚠️'}\n`;
+      previewText += `  Espécie: ${idxEspecie !== -1 ? '✅' : '⚠️'}\n`;
+      previewText += `  Nascimento: ${idxNascimento !== -1 ? '✅' : '⚠️'}\n`;
+      previewText += `  Situação: ${idxSituacao !== -1 ? '✅' : '⚠️'}\n`;
+      previewText += `  Pai: ${idxPai !== -1 ? '✅' : '⚠️'}\n`;
+      previewText += `  Mãe: ${idxMae !== -1 ? '✅' : '⚠️'}\n\n`;
+      
+      previewText += `📋 Prévia (primeiras 5):\n`;
+      previewText += aves.slice(0, 5).map(a => 
+        `  • ${a.id} | ${a.nome} | ${a.anilha} | ${a.sexo} | ${a.especie}`
+      ).join('\n');
+      if (aves.length > 5) previewText += `\n  ... e mais ${aves.length - 5} aves`;
+      
+      contentEl.textContent = previewText;
+      if (previewEl) previewEl.style.display = 'block';
+      if (actionsEl) actionsEl.style.display = 'flex';
+      
+    } catch (error) {
+      console.error('Erro ao importar:', error);
+      alert('❌ Erro ao processar o arquivo: ' + error.message);
+    }
+  };
+  reader.readAsText(file, 'ISO-8859-1');
+}
+
+async function confirmarImportacao() {
+  if (!dadosImportados || dadosImportados.length === 0) {
+    alert('Nenhum dado para importar.');
+    return;
+  }
+  
+  const total = dadosImportados.length;
+  
+  let msg = `⚠️ Deseja importar ${total} aves?\n\n`;
+  msg += `As aves com Código (ID) existente serão ATUALIZADAS.\n`;
+  msg += `As aves com Código (ID) novo serão ADICIONADAS.`;
+  
+  if (!confirm(msg)) return;
+  
+  try {
+    let atualizadas = 0;
+    let adicionadas = 0;
+    
+    for (const ave of dadosImportados) {
+      // O "código" do CSV antigo era um ID local — no banco novo os IDs são
+      // gerados automaticamente, então usamos a anilha para achar se a ave
+      // já existe (mais confiável do que reaproveitar o código antigo).
+      const existente = ave.anilha && ave.anilha !== '-'
+        ? await DB.getAvePorAnilha(ave.anilha)
+        : null;
+
+      const { id, ...dadosAve } = ave;
+
+      if (existente) {
+        dadosAve.historico = existente.historico || [];
+        await DB.update(DB.TABLES.AVES, existente.id, dadosAve);
+        atualizadas++;
+      } else {
+        await DB.add(DB.TABLES.AVES, dadosAve);
+        adicionadas++;
+      }
+    }
+    
+    fecharModalImportar();
+    renderizarFiltros();
+    renderizarPassaros();
+    
+    alert(`✅ Importação concluída!\n\nAtualizadas: ${atualizadas}\nAdicionadas: ${adicionadas}\nTotal: ${total}`);
+    
+  } catch (error) {
+    alert('❌ Erro ao importar: ' + error.message);
+  }
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+renderizarFiltros();
+renderizarPassaros();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    fecharModalImportar();
+    fecharModalHistorico();
+  }
+});
+</script>
+</body>
+</html>

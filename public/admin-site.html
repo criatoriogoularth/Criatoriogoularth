@@ -1,0 +1,132 @@
+<!-- admin-site.html - MIGRADO. O antigo conceito de "sincronizar aves pro site" não
+     existe mais: agora cada ave tem um campo no_site (true/false) direto na tabela,
+     então não tem uma lista separada pra sincronizar. -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+.admin-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  text-align: center;
+  transition: .15s ease;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+}
+.admin-card:hover { border-color: var(--brass-dim); transform: translateY(-3px); }
+.admin-card .icon { font-size: 40px; margin-bottom: 8px; }
+.admin-card h3 { font-family: 'Fraunces', serif; font-size: 16px; color: var(--brass-soft); }
+.admin-card p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.estatisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.estatistica-item {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  text-align: center;
+}
+.estatistica-item .numero { font-family: 'Fraunces', serif; font-size: 28px; color: var(--brass-soft); }
+.estatistica-item .label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.sync-status { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+      <div class="topbar">
+        <div>
+          <h1>🏠 Painel Administrativo</h1>
+          <div class="lede">Gerencie todas as áreas do site</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='site-home.html'">🌐 Ver Site</button>
+        </div>
+      </div>
+
+      <div class="estatisticas" id="estatisticas">
+        <div class="estatistica-item"><div class="numero" id="total-aves">0</div><div class="label">Total de Aves</div></div>
+        <div class="estatistica-item"><div class="numero" id="total-machos">0</div><div class="label">Machos</div></div>
+        <div class="estatistica-item"><div class="numero" id="total-femeas">0</div><div class="label">Fêmeas</div></div>
+        <div class="estatistica-item"><div class="numero" id="total-site">0</div><div class="label">No Site</div></div>
+      </div>
+
+      <div id="sync-status" class="sync-status">Carregando…</div>
+
+      <div class="admin-grid">
+        <a href="cadastro-ave.html" class="admin-card"><div class="icon">🐦</div><h3>Cadastrar Ave</h3><p>Adicionar nova ave ao plantel</p></a>
+        <a href="passaros.html" class="admin-card"><div class="icon">📋</div><h3>Lista de Aves</h3><p>Ver todas as aves cadastradas</p></a>
+        <a href="site-editor-personalizacao.html" class="admin-card"><div class="icon">🎨</div><h3>Personalizar Site</h3><p>Logo, cores e identidade</p></a>
+        <a href="site-editor-especies.html" class="admin-card"><div class="icon">🐦</div><h3>Espécies da Home</h3><p>Espécies em destaque</p></a>
+        <a href="site-editor-banner.html" class="admin-card"><div class="icon">🖼️</div><h3>Banner do Site</h3><p>Imagem de cabeçalho</p></a>
+        <a href="site-editar.html?pagina=home" class="admin-card"><div class="icon">📝</div><h3>Editar Home</h3><p>Conteúdo da página inicial</p></a>
+        <a href="site-editar.html?pagina=criatorio" class="admin-card"><div class="icon">🏷️</div><h3>Editar Criatório</h3><p>História e genética</p></a>
+        <a href="site-editar.html?pagina=contato" class="admin-card"><div class="icon">📧</div><h3>Editar Contato</h3><p>Informações de contato</p></a>
+        <a href="site-editar.html?pagina=noticias" class="admin-card"><div class="icon">📰</div><h3>Editar Notícias</h3><p>Gerenciar notícias</p></a>
+        <a href="site-editar.html?pagina=plantel" class="admin-card"><div class="icon">🐦</div><h3>Editar Plantel</h3><p>Selecionar aves do plantel</p></a>
+        <a href="site-editar.html?pagina=adultos" class="admin-card"><div class="icon">🐤</div><h3>Editar Adultos</h3><p>Adultos disponíveis</p></a>
+        <a href="site-editar.html?pagina=filhotes" class="admin-card"><div class="icon">🐣</div><h3>Editar Filhotes</h3><p>Filhotes disponíveis</p></a>
+        <a href="site-editar.html?pagina=fotos" class="admin-card"><div class="icon">📸</div><h3>Editar Fotos</h3><p>Galeria de imagens</p></a>
+        <a href="site-editar.html?pagina=videos" class="admin-card"><div class="icon">🎬</div><h3>Editar Vídeos</h3><p>Vídeos do YouTube</p></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+renderSidebar('admin-site');
+
+async function atualizarEstatisticas() {
+  const status = document.getElementById('sync-status');
+  try {
+    const aves = await DB.getAll(DB.TABLES.AVES);
+    const machos = aves.filter(a => a.sexo === 'M').length;
+    const femeas = aves.filter(a => a.sexo === 'F').length;
+    const noSite = aves.filter(a => a.no_site === true).length;
+
+    document.getElementById('total-aves').textContent = aves.length;
+    document.getElementById('total-machos').textContent = machos;
+    document.getElementById('total-femeas').textContent = femeas;
+    document.getElementById('total-site').textContent = noSite;
+
+    if (aves.length === 0) {
+      status.textContent = '⚠️ Nenhuma ave cadastrada. Cadastre aves em "Cadastrar Ave".';
+    } else if (noSite === 0) {
+      status.textContent = `ℹ️ ${aves.length} aves cadastradas. Vá em "Editar Plantel" para selecionar quais aparecem no site.`;
+    } else {
+      status.textContent = `✅ ${aves.length} aves cadastradas, ${noSite} visíveis no site.`;
+    }
+  } catch (e) {
+    status.textContent = '❌ Erro ao carregar dados.';
+  }
+}
+
+atualizarEstatisticas();
+</script>
+</body>
+</html>

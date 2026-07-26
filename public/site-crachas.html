@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Crachás Goularth</title>
+<style>
+/* =========================================================================
+   CRACHÁS DE GAIOLA — arquivo único, sem dependências externas.
+   Sem CDN, sem servidor, sem login. Tudo roda nesta página.
+   Os dados (aves + configuração visual) ficam em memória nesta aba;
+   use "Exportar dados" para guardar num arquivo .json e "Importar dados"
+   pra continuar depois.
+   ========================================================================= */
+
+:root{
+  --bg:#15231d;
+  --bg-elevated:#1b2b23;
+  --bg-elevated-2:#22362c;
+  --bg-elevated-3:#2a4235;
+  --line:rgba(199,151,63,.22);
+  --line-strong:rgba(199,151,63,.42);
+  --brass:#c7973f;
+  --brass-soft:#e0bd7c;
+  --text:#f1ece0;
+  --text-muted:#9fac9f;
+  --danger:#d9645c;
+  --success:#6fae7c;
+  --radius:12px;
+  --font-display:Georgia,'Times New Roman',serif;
+  --font-body:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --font-mono:'Courier New',ui-monospace,SFMono-Regular,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(ellipse at top,#1a2c24,var(--bg) 60%);
+  color:var(--text);font-family:var(--font-body);min-height:100vh;padding:28px 20px 80px;
+}
+.wrap{max-width:1220px;margin:0 auto;}
+
+header.top{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--line);
+}
+header.top h1{font-family:var(--font-display);font-weight:700;font-size:28px;margin:0 0 4px;color:var(--brass-soft);}
+header.top .lede{color:var(--text-muted);font-size:13.5px;max-width:600px;}
+header.top .stat{font-size:12px;color:var(--text-muted);background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:20px;padding:6px 14px;white-space:nowrap;}
+
+h2.section-title{font-family:var(--font-display);font-size:17px;color:var(--brass-soft);margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+h2.section-title .n{width:22px;height:22px;border-radius:50%;background:var(--bg-elevated-2);border:1px solid var(--line-strong);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:var(--brass);font-family:var(--font-mono);}
+h3.sub-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:700;margin:0 0 10px;}
+
+.card{background:var(--bg-elevated);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:22px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media (max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+label.field-label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:5px;font-weight:600;}
+input[type=text],input[type=date],input[type=number],textarea,select{
+  width:100%;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:8px;
+  padding:9px 11px;color:var(--text);font-family:var(--font-body);font-size:13.5px;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--brass);}
+textarea{resize:vertical;min-height:52px;}
+select option{background:#1c2f27;color:var(--text);}
+.field{margin-bottom:12px;}
+input[type=color]{width:100%;height:32px;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer;padding:2px;}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg-elevated-2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:.15s ease;}
+.btn:hover{border-color:var(--brass);}
+.btn-primary{background:var(--brass);border-color:var(--brass);color:#1b2b23;}
+.btn-primary:hover{background:var(--brass-soft);}
+.btn-ghost{background:transparent;}
+.btn-danger{color:var(--danger);border-color:rgba(217,100,92,.4);}
+.btn-danger:hover{border-color:var(--danger);background:rgba(217,100,92,.08);}
+.btn-sm{padding:5px 11px;font-size:11.5px;border-radius:7px;}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.helptext{font-size:11.5px;color:var(--text-muted);margin-top:6px;line-height:1.5;}
+
+/* ---------- lista de aves ---------- */
+.toolbar-lista{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.toolbar-lista input,.toolbar-lista select{max-width:220px;}
+.toolbar-lista .spacer{flex:1;}
+.count-badge{font-size:12px;color:var(--brass-soft);}
+.tabela-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+table.lista-aves{width:100%;border-collapse:collapse;font-size:13px;}
+table.lista-aves th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:10px 12px;background:var(--bg-elevated-2);border-bottom:1px solid var(--line);white-space:nowrap;}
+table.lista-aves td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;}
+table.lista-aves tr:last-child td{border-bottom:none;}
+table.lista-aves tr:hover td{background:rgba(199,151,63,.05);}
+.anilha-mono{font-family:var(--font-mono);color:var(--brass-soft);font-size:12px;}
+.tag-sexo{font-size:10.5px;padding:2px 9px;border-radius:20px;font-weight:700;letter-spacing:.03em;}
+.tag-sexo.M{background:rgba(90,138,176,.18);color:#8fb6d8;}
+.tag-sexo.F{background:rgba(226,168,152,.18);color:#e6b3a3;}
+.tag-sexo.I{background:rgba(199,151,63,.18);color:var(--brass-soft);}
+.row-actions{display:flex;gap:6px;}
+.empty-row{padding:34px 12px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* ---------- editor de modelo ---------- */
+.tabs-sexo{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.tab-sexo{padding:9px 18px;border-radius:9px;border:1.5px solid var(--line);background:var(--bg-elevated-2);cursor:pointer;font-weight:700;font-size:13px;color:var(--text-muted);}
+.tab-sexo.ativa{border-color:var(--brass);color:var(--brass-soft);background:rgba(199,151,63,.12);}
+
+.presets-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+.preset-chip{
+  display:flex;align-items:center;gap:8px;padding:7px 12px 7px 7px;border-radius:20px;
+  border:1.5px solid var(--line);background:rgba(0,0,0,.15);cursor:pointer;transition:.15s ease;
+}
+.preset-chip:hover{border-color:var(--line-strong);}
+.preset-chip.ativo{border-color:var(--brass);background:rgba(199,151,63,.12);}
+.preset-chip .sw{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex-shrink:0;}
+.preset-chip span{font-size:12px;font-weight:600;}
+
+.editor-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+@media (max-width:980px){.editor-layout{grid-template-columns:1fr;}}
+
+.config-group{background:rgba(0,0,0,.15);border-radius:10px;padding:14px;margin-bottom:12px;}
+.config-group .titulo-grupo{font-size:12px;font-weight:700;color:var(--brass-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.linha-controles{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;}
+@media (max-width:640px){.linha-controles{grid-template-columns:1fr 1fr 1fr;}}
+.mini-campo label{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);display:block;margin-bottom:3px;}
+.mini-campo input[type=number]{padding:5px 6px;font-size:11px;}
+.mini-campo select{padding:5px 6px;font-size:11px;}
+.mini-campo input[type=color]{height:26px;}
+
+.caixa-toggle{display:flex;align-items:center;gap:6px;}
+.caixa-toggle input{width:15px;height:15px;accent-color:var(--brass);cursor:pointer;}
+
+.upload-area{border:1.5px dashed var(--line);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:11px;color:var(--text-muted);}
+.upload-area:hover{border-color:var(--brass);}
+
+.preview-side{position:sticky;top:20px;}
+.preview-box{background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.preview-box .label{font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;}
+.preview-holder{transform:scale(1.25);transform-origin:center;margin:14px 0;}
+
+/* ---------- prévia / crachás em si ---------- */
+#area-impressao{display:grid;grid-template-columns:repeat(2,90mm);gap:4mm 8mm;justify-content:start;padding:14px 0;}
+.sem-selecao{color:var(--text-muted);font-size:13px;padding:30px;text-align:center;width:100%;grid-column:1/-1;}
+
+.badge-cracha{width:90mm;height:58mm;box-sizing:border-box;border-radius:2.5mm;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(0,0,0,.35);font-family:var(--font-body);position:relative;}
+.badge-logo-flutuante{position:absolute;z-index:5;}
+.badge-cracha .miolo{flex:1;display:flex;flex-direction:column;padding:2.4mm 3mm;min-height:0;box-sizing:border-box;}
+.badge-caixa{border-radius:4px;text-align:center;padding:1mm 2mm;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%;box-sizing:border-box;line-height:1.25;}
+.badge-caixa.nome-caixa{font-family:var(--font-display);}
+.badge-dupla{display:flex;gap:1mm;width:100%;}
+.badge-dupla > div{flex:1;min-width:0;}
+.badge-logo{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;border:2px solid var(--brass);color:var(--brass);flex-shrink:0;overflow:hidden;background:rgba(199,151,63,.1);background-size:cover;background-position:center;}
+.badge-logo.quadrado{border-radius:6px;}
+
+.oculto{display:none !important;}
+
+/* =========================================================================
+   IMPRESSÃO
+   ========================================================================= */
+@media print{
+  body{background:#fff !important;padding:0;margin:0;}
+  .no-print{display:none !important;}
+  .wrap{max-width:none;background:none !important;}
+  .card{background:none !important;border:none !important;box-shadow:none !important;padding:0 !important;border-radius:0 !important;}
+  #area-impressao{padding:0;}
+  .badge-cracha{box-shadow:none;}
+  /* só o crachá em si precisa forçar a impressão de cor/fundo — o resto da
+     página (cartões, fundo escuro do editor) fica sempre em branco na folha */
+  .badge-cracha, .badge-cracha *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+}
+</style>
+<style id="estilo-dinamico-folha"></style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top no-print">
+    <div>
+      <h1>🏷️ Gerador de Crachás Goularth</h1>
+      <div class="lede">Cadastre os pássaros, personalize o modelo caixa por caixa (ou parta de um pronto), escolha quem vai entrar na folha e imprima — tudo numa página só, sem depender de mais nada.</div>
+    </div>
+    <div class="stat" id="stat-total">0 aves cadastradas</div>
+    <div class="stat" id="stat-contador-global" title="Total de crachás impressos por todo mundo que usa este site">🏷️ carregando total…</div>
+  </header>
+
+  <!-- ===================== 1. DADOS DO CRIADOR ===================== -->
+  <section class="card no-print">
+    <h2 class="section-title"><span class="n">1</span> Dados do criador (texto do rodapé do crachá)</h2>
+    <div class="grid3">
+      <div class="field">
+        <label class="field-label">Nome do criador</label>
+        <input type="text" id="cr-nome" placeholder="Ex: Criatório Goularth">
+      </div>
+      <div class="field">
+        <label class="field-label">Registro (SISPASS / FOB etc.)</label>
+        <input type="text" id="cr-registro" placeholder="Ex: 000000 / FOB 000">
+      </div>
+      <div class="field">
+        <label class="field-label">Telefone</label>
+        <input type="text" id="cr-telefone" placeholder="Ex: 00 00000-0000">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. CADASTRO / EDIÇÃO DE AVES ===================== -->
+  <section class="card no-print">
+    <h2 class="section-title"><span class="n">2</span> <span id="form-titulo">Cadastrar ave</span></h2>
+    <form id="form-ave">
+      <input type="hidden" id="ave-id">
+      <div class="grid3">
+        <div class="field"><label class="field-label">Nome *</label><input type="text" id="f-nome" required></div>
+        <div class="field"><label class="field-label">Anilha *</label><input type="text" id="f-anilha" required></div>
+        <div class="field">
+          <label class="field-label">Sexo</label>
+          <select id="f-sexo">
+            <option value="I">Indefinido</option>
+            <option value="M">Macho</option>
+            <option value="F">Fêmea</option>
+          </select>
+        </div>
+        <div class="field"><label class="field-label">Espécie</label><input type="text" id="f-especie" placeholder="Ex: Agapornis roseicollis"></div>
+        <div class="field"><label class="field-label">Mutação / Raça</label><input type="text" id="f-mutacao" placeholder="Ex: Lutino olho vermelho"></div>
+        <div class="field"><label class="field-label">Data de nascimento</label><input type="date" id="f-nasc"></div>
+        <div class="field"><label class="field-label">Pai</label><input type="text" id="f-pai" placeholder="Nome do pai (opcional)"></div>
+        <div class="field" style="grid-column:span 2;"><label class="field-label">Mãe</label><input type="text" id="f-mae" placeholder="Nome da mãe (opcional)"></div>
+      </div>
+      <div class="actions-row">
+        <button type="submit" class="btn btn-primary">💾 Salvar ave</button>
+        <button type="button" class="btn btn-ghost" id="btn-cancelar-edicao" style="display:none;" onclick="cancelarEdicao()">Cancelar edição</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================== 3. LISTA DE AVES ===================== -->
+  <section class="card no-print">
+    <h2 class="section-title"><span class="n">3</span> Aves cadastradas</h2>
+    <div class="toolbar-lista">
+      <input type="text" id="busca" placeholder="Buscar por nome ou anilha..." oninput="renderLista()">
+      <select id="filtro-sexo" onchange="renderLista()">
+        <option value="">Todos os sexos</option>
+        <option value="M">Machos</option>
+        <option value="F">Fêmeas</option>
+        <option value="I">Indefinido</option>
+      </select>
+      <div class="spacer"></div>
+      <span class="count-badge" id="count-selecionados">0 selecionadas</span>
+      <button class="btn btn-sm btn-ghost" onclick="selecionarTodas(true)">Selecionar todas</button>
+      <button class="btn btn-sm btn-ghost" onclick="selecionarTodas(false)">Limpar seleção</button>
+    </div>
+    <div class="tabela-wrap">
+      <table class="lista-aves">
+        <thead><tr><th style="width:34px;"></th><th>Nome</th><th>Anilha</th><th>Sexo</th><th>Espécie</th><th>Pai</th><th style="width:110px;">Ações</th></tr></thead>
+        <tbody id="tbody-aves"></tbody>
+      </table>
+    </div>
+    <div class="helptext">Seus dados ficam salvos automaticamente <b>neste navegador, neste aparelho</b> — pode fechar e voltar depois que vai estar tudo aqui. Cada pessoa que usar o site tem os próprios dados, sem se misturar com os de mais ninguém. Use <b>Exportar dados</b> se quiser guardar um arquivo de backup ou continuar em outro aparelho.</div>
+    <div class="actions-row">
+      <button class="btn btn-sm" onclick="exportarDados()">⬇️ Exportar dados (.json)</button>
+      <button class="btn btn-sm" onclick="document.getElementById('input-importar').click()">⬆️ Importar dados (.json)</button>
+      <input type="file" id="input-importar" accept="application/json" style="display:none;" onchange="importarDados(event)">
+    </div>
+  </section>
+
+  <!-- ===================== 4. EDITOR DO MODELO ===================== -->
+  <section class="card no-print">
+    <h2 class="section-title"><span class="n">4</span> Editor do modelo do crachá</h2>
+
+    <div class="tabs-sexo">
+      <div class="tab-sexo ativa" data-sexo="M" onclick="trocarSexoEditando('M')">♂ Machos</div>
+      <div class="tab-sexo" data-sexo="F" onclick="trocarSexoEditando('F')">♀ Fêmeas</div>
+      <div class="tab-sexo" data-sexo="I" onclick="trocarSexoEditando('I')">— Indefinido</div>
+    </div>
+
+    <h3 class="sub-title">Modelos prontos (ponto de partida — depois é só ajustar)</h3>
+    <div class="presets-row" id="presets-row"></div>
+
+    <div class="editor-layout">
+      <div id="grupos-config"></div>
+
+      <div class="preview-side">
+        <div class="preview-box">
+          <span class="label">Prévia ao vivo</span>
+          <div class="preview-holder" id="preview-mini"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. PRÉVIA / IMPRESSÃO ===================== -->
+  <section class="card">
+    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+      <h2 class="section-title" style="margin:0;"><span class="n">5</span> Prévia dos crachás selecionados</h2>
+      <button class="btn btn-primary" onclick="imprimirCrachas()">🖨️ Imprimir / Gerar PDF</button>
+    </div>
+
+    <div class="config-group no-print">
+      <div class="titulo-grupo">📐 Tamanho do crachá e da folha</div>
+      <div class="linha-controles">
+        <div class="mini-campo"><label>Largura (mm)</label><input type="number" id="folha-largura" value="90" min="30" max="120" step="1" onchange="lerConfigFolha()"></div>
+        <div class="mini-campo"><label>Altura (mm)</label><input type="number" id="folha-altura" value="58" min="25" max="100" step="1" onchange="lerConfigFolha()"></div>
+        <div class="mini-campo"><label>Espaço entre eles (mm)</label><input type="number" id="folha-espaco" value="2" min="0" max="15" step="0.5" onchange="lerConfigFolha()"></div>
+        <div class="mini-campo"><label>Margem da folha (mm)</label><input type="number" id="folha-margem" value="8" min="0" max="20" step="1" onchange="lerConfigFolha()"></div>
+        <div></div><div></div>
+      </div>
+      <div class="helptext" id="folha-info" style="margin-top:6px;"></div>
+    </div>
+
+    <div class="helptext no-print" style="margin-bottom:10px;">Ao imprimir, escolha "Salvar como PDF" na janela de impressão do navegador e confira se a opção "Imagens/gráficos de segundo plano" está marcada, pra garantir que as cores saiam.</div>
+    <div id="area-impressao"></div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+
+/* =========================================================================
+   ESTADO EM MEMÓRIA
+   ========================================================================= */
+let aves = [];
+let selecionadas = new Set();
+let editandoId = null;
+let criador = { nome:'', registro:'', telefone:'' };
+let sexoEditando = 'M';
+
+function uid(){ return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(v){ if (v===null||v===undefined) return ''; return String(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function formatarData(iso){ if (!iso) return ''; const [y,m,d]=iso.split('-'); if(!y||!m||!d) return iso; return `${d}/${m}/${y}`; }
+function sexoLabelTxt(s){ return s==='M'?'Macho':s==='F'?'Fêmea':'Indefinido'; }
+
+/* =========================================================================
+   CONFIGURAÇÃO VISUAL — uma para cada sexo (M / F / I)
+   ========================================================================= */
+function caixaPadrao(over){
+  return Object.assign({ bg:'#ffffff', texto:'#1a1a1a', borda:'#dddddd', font:8, altura:0, visivel:'sim', ordem:2 }, over||{});
+}
+function configPadrao(paleta){
+  const p = paleta;
+  return {
+    fundoCor: p.fundo, fundoOpacidade: 100, fundoImg: '',
+    bordaCor: p.borda, bordaEspessura: p.bordaEspessura || 1,
+    espacamentoCaixas: 1.3,
+    logoUrl: '', logoIniciais: '', logoFormato: 'circulo', logoTamanho: 60, logoPosicao: 'baixo', logoAlinhamento: 'centro', logoVisivel: 'nao',
+    logoBordaCor: '#c7973f', logoBordaEspessura: 2, logoRaio: 6,
+    logoModoPosicao: 'fluxo', logoCanto: 'topo-direita', logoMargem: 2,
+    nome: caixaPadrao({ bg:p.nomeBg, texto:p.nomeTexto, borda:p.nomeBorda, font:13.5, ordem:1 }),
+    c2: caixaPadrao({ bg:p.caixaBg, texto:p.caixaTexto, borda:p.caixaBorda, font:7.5, ordem:2 }),
+    c3: caixaPadrao({ bg:p.caixaBg, texto:p.caixaTexto, borda:p.caixaBorda, font:8.5, ordem:3 }),
+    c4: caixaPadrao({ bg:p.caixaBg, texto:p.caixaTexto, borda:p.caixaBorda, font:7.5, ordem:4 }),
+    c5: caixaPadrao({ bg:p.caixaBg, texto:p.caixaTexto, borda:p.caixaBorda, font:7, ordem:5 }),
+    rodapeNome: caixaPadrao({ bg:p.rodapeBg, texto:p.rodapeTexto, borda:p.rodapeBorda, font:6.3 }),
+    rodapeRegistro: caixaPadrao({ bg:p.rodapeBg, texto:p.rodapeTexto, borda:p.rodapeBorda, font:6.3 }),
+    rodapeTelefone: caixaPadrao({ bg:p.rodapeBg, texto:p.rodapeTexto, borda:p.rodapeBorda, font:6.3 })
+  };
+}
+
+/* ----- 8 modelos prontos: 6 para macho, 2 para fêmea (paletas de cor) ----- */
+const PRESETS = [
+  { id:'azul-real',    nome:'Azul Real',         sexo:'M', sw:'#1d3a6e',
+    paleta:{ fundo:'#ffffff', borda:'#1d3a6e', bordaEspessura:1, nomeBg:'#1d3a6e', nomeTexto:'#f3d9a0', nomeBorda:'#14285a', caixaBg:'#eef2f8', caixaTexto:'#1d3a6e', caixaBorda:'#c9d3e6', rodapeBg:'#1d3a6e', rodapeTexto:'#f3d9a0', rodapeBorda:'#14285a' } },
+  { id:'verde-aviario',nome:'Verde Aviário',     sexo:'M', sw:'#234134',
+    paleta:{ fundo:'#fbf8f0', borda:'#234134', bordaEspessura:1, nomeBg:'#234134', nomeTexto:'#e0bd7c', nomeBorda:'#16281f', caixaBg:'#ffffff', caixaTexto:'#234134', caixaBorda:'#cddccf', rodapeBg:'#234134', rodapeTexto:'#e0bd7c', rodapeBorda:'#16281f' } },
+  { id:'minimalista',  nome:'Minimalista Cinza', sexo:'M', sw:'#2b2b2b',
+    paleta:{ fundo:'#ffffff', borda:'#2b2b2b', bordaEspessura:0.75, nomeBg:'#f5f5f5', nomeTexto:'#111111', nomeBorda:'#2b2b2b', caixaBg:'#ffffff', caixaTexto:'#333333', caixaBorda:'#dddddd', rodapeBg:'#ffffff', rodapeTexto:'#333333', rodapeBorda:'#c7973f' } },
+  { id:'moderno-petroleo', nome:'Moderno Petróleo', sexo:'M', sw:'#0f3d3e',
+    paleta:{ fundo:'#ffffff', borda:'#0f3d3e', bordaEspessura:1, nomeBg:'#0f3d3e', nomeTexto:'#bfe9e6', nomeBorda:'#082626', caixaBg:'#eafaf9', caixaTexto:'#0f3d3e', caixaBorda:'#bfe9e6', rodapeBg:'#0f3d3e', rodapeTexto:'#bfe9e6', rodapeBorda:'#082626' } },
+  { id:'retro-kraft',  nome:'Retrô Kraft',       sexo:'M', sw:'#7a5c3e',
+    paleta:{ fundo:'#e9dcc2', borda:'#7a5c3e', bordaEspessura:1.5, nomeBg:'#e9dcc2', nomeTexto:'#4a3521', nomeBorda:'#7a5c3e', caixaBg:'#f2e9d6', caixaTexto:'#4a3521', caixaBorda:'#a88a5e', rodapeBg:'#e9dcc2', rodapeTexto:'#4a3521', rodapeBorda:'#7a5c3e' } },
+  { id:'industrial',   nome:'Industrial Grafite',sexo:'M', sw:'#20232b',
+    paleta:{ fundo:'#20232b', borda:'#4fd1c5', bordaEspessura:1, nomeBg:'#20232b', nomeTexto:'#f1ece0', nomeBorda:'#4fd1c5', caixaBg:'#262b34', caixaTexto:'#d7d7d7', caixaBorda:'#3a4048', rodapeBg:'#123634', rodapeTexto:'#8fe4da', rodapeBorda:'#4fd1c5' } },
+  { id:'rose-elegante',nome:'Rosé Elegante',     sexo:'F', sw:'#d98a92',
+    paleta:{ fundo:'#fff9f7', borda:'#d98a92', bordaEspessura:1, nomeBg:'#f4c6c9', nomeTexto:'#7a2e37', nomeBorda:'#d98a92', caixaBg:'#fff2f2', caixaTexto:'#5a3336', caixaBorda:'#eecdd0', rodapeBg:'#faeaea', rodapeTexto:'#7a2e37', rodapeBorda:'#eecdd0' } },
+  { id:'bordo-classico',nome:'Bordô Clássico',   sexo:'F', sw:'#5c1a2b',
+    paleta:{ fundo:'#faf3e8', borda:'#5c1a2b', bordaEspessura:1, nomeBg:'#5c1a2b', nomeTexto:'#e9c98f', nomeBorda:'#3d0f1c', caixaBg:'#fff9ef', caixaTexto:'#4a2a33', caixaBorda:'#dccb9f', rodapeBg:'#5c1a2b', rodapeTexto:'#e9c98f', rodapeBorda:'#3d0f1c' } }
+];
+
+let configs = {
+  M: configPadrao(PRESETS[1].paleta), // Verde Aviário como padrão inicial
+  F: configPadrao(PRESETS[6].paleta), // Rosé Elegante como padrão inicial
+  I: configPadrao(PRESETS[2].paleta)  // Minimalista Cinza como padrão inicial
+};
+let presetAtivo = { M:'verde-aviario', F:'rose-elegante', I:'minimalista' };
+
+/* Tamanho do crachá e da folha de impressão — é global (vale pra todo mundo,
+   macho ou fêmea), diferente das configurações de cor/fonte que são por sexo. */
+let folha = { largura:90, altura:58, espaco:2, margem:8 };
+
+/* =========================================================================
+   PERSISTÊNCIA NO NAVEGADOR (localStorage)
+   Cada visitante guarda os próprios dados só no aparelho dele — não existe
+   servidor nem banco de dados aqui, então não há login e ninguém vê os
+   dados de mais ninguém. Se o localStorage não estiver disponível (ex.:
+   aba anônima com bloqueio, ou visualização dentro de um preview), o site
+   continua funcionando normalmente, só não guarda entre sessões.
+   ========================================================================= */
+const CHAVE_STORAGE = 'goularth_crachas_dados_v1';
+
+/* =========================================================================
+   CONTADOR GLOBAL DE CRACHÁS (Supabase)
+   Isso é a ÚNICA parte do site que fala com um servidor de verdade — só
+   pra somar "quantos crachás já foram gerados por todo mundo que usa o
+   site", desde o lançamento. Não guarda nenhum dado de ave, nem quem
+   imprimiu — é só um número compartilhado. Se o Supabase estiver fora do
+   ar ou o visitante estiver offline, o site continua funcionando 100%
+   normalmente, só o contador não atualiza.
+   ========================================================================= */
+const SUPABASE_URL = 'https://etrprppcqbmapjqvjjwh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hbrSUAXvAuWBQGWHK5PFOQ_iBnOP_xG';
+
+function formatarNumero(n){
+  return new Intl.NumberFormat('pt-BR').format(n);
+}
+
+async function buscarTotalCrachas(){
+  const elemento = document.getElementById('stat-contador-global');
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/contador_crachas?select=total`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!resp.ok) throw new Error('resposta ' + resp.status);
+    const linhas = await resp.json();
+    const total = (linhas && linhas[0] && linhas[0].total) || 0;
+    elemento.textContent = `🏷️ ${formatarNumero(total)} crachás gerados`;
+  } catch (err){
+    console.warn('Não foi possível carregar o contador global:', err);
+    elemento.textContent = '';
+  }
+}
+
+async function incrementarContadorGlobal(quantidade){
+  const elemento = document.getElementById('stat-contador-global');
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/incrementar_crachas`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantidade })
+    });
+    if (!resp.ok) throw new Error('resposta ' + resp.status);
+    const novoTotal = await resp.json();
+    if (typeof novoTotal === 'number') elemento.textContent = `🏷️ ${formatarNumero(novoTotal)} crachás gerados`;
+  } catch (err){
+    console.warn('Não foi possível atualizar o contador global:', err);
+  }
+}
+
+function imprimirCrachas(){
+  const qtd = selecionadas.size;
+  if (qtd > 0) incrementarContadorGlobal(qtd); // não trava a impressão se a rede falhar
+  window.print();
+}
+
+function salvarEstado(){
+  try {
+    const pacote = { versao:2, salvoEm:new Date().toISOString(), criador, aves, configs, presetAtivo, folha };
+    window.localStorage.setItem(CHAVE_STORAGE, JSON.stringify(pacote));
+  } catch (err){
+    console.warn('Não foi possível salvar automaticamente neste navegador:', err);
+  }
+}
+
+function carregarEstadoSalvo(){
+  try {
+    const bruto = window.localStorage.getItem(CHAVE_STORAGE);
+    if (!bruto) return false;
+    const pacote = JSON.parse(bruto);
+    if (!Array.isArray(pacote.aves)) return false;
+    aves = pacote.aves;
+    criador = pacote.criador || criador;
+    if (pacote.configs) configs = pacote.configs;
+    if (pacote.presetAtivo) presetAtivo = pacote.presetAtivo;
+    if (pacote.folha) folha = pacote.folha;
+    return true;
+  } catch (err){
+    console.warn('Não foi possível carregar dados salvos deste navegador:', err);
+    return false;
+  }
+}
+
+/* =========================================================================
+   FORMULÁRIO DE CADASTRO / EDIÇÃO DE AVES
+   ========================================================================= */
+const form = document.getElementById('form-ave');
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  const nome = document.getElementById('f-nome').value.trim();
+  const anilha = document.getElementById('f-anilha').value.trim();
+  if (!nome || !anilha){ alert('Nome e anilha são obrigatórios.'); return; }
+  const dados = {
+    nome, anilha,
+    sexo: document.getElementById('f-sexo').value,
+    especie: document.getElementById('f-especie').value.trim(),
+    mutacao: document.getElementById('f-mutacao').value.trim(),
+    nasc: document.getElementById('f-nasc').value,
+    pai: document.getElementById('f-pai').value.trim(),
+    mae: document.getElementById('f-mae').value.trim()
+  };
+  if (editandoId){
+    const idx = aves.findIndex(a => a.id === editandoId);
+    if (idx > -1) aves[idx] = { ...aves[idx], ...dados };
+    cancelarEdicao();
+  } else {
+    aves.push({ id: uid(), ...dados });
+    form.reset();
+    document.getElementById('f-sexo').value = 'I';
+  }
+  renderLista(); renderPrevia(); renderPreviewMini();
+  salvarEstado();
+});
+
+function editarAve(id){
+  const ave = aves.find(a => a.id === id); if (!ave) return;
+  editandoId = id;
+  document.getElementById('ave-id').value = id;
+  document.getElementById('f-nome').value = ave.nome || '';
+  document.getElementById('f-anilha').value = ave.anilha || '';
+  document.getElementById('f-sexo').value = ave.sexo || 'I';
+  document.getElementById('f-especie').value = ave.especie || '';
+  document.getElementById('f-mutacao').value = ave.mutacao || '';
+  document.getElementById('f-nasc').value = ave.nasc || '';
+  document.getElementById('f-pai').value = ave.pai || '';
+  document.getElementById('f-mae').value = ave.mae || '';
+  document.getElementById('form-titulo').textContent = 'Editando: ' + ave.nome;
+  document.getElementById('btn-cancelar-edicao').style.display = 'inline-flex';
+  form.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function cancelarEdicao(){
+  editandoId = null; form.reset();
+  document.getElementById('ave-id').value = '';
+  document.getElementById('f-sexo').value = 'I';
+  document.getElementById('form-titulo').textContent = 'Cadastrar ave';
+  document.getElementById('btn-cancelar-edicao').style.display = 'none';
+}
+function excluirAve(id){
+  const ave = aves.find(a => a.id === id); if (!ave) return;
+  if (!confirm(`Excluir "${ave.nome}"? Essa ação não pode ser desfeita.`)) return;
+  aves = aves.filter(a => a.id !== id);
+  selecionadas.delete(id);
+  if (editandoId === id) cancelarEdicao();
+  renderLista(); renderPrevia();
+  salvarEstado();
+}
+function duplicarAve(id){
+  const ave = aves.find(a => a.id === id); if (!ave) return;
+  aves.push({ ...ave, id: uid(), anilha: ave.anilha + ' (cópia)' });
+  renderLista();
+  salvarEstado();
+}
+
+/* =========================================================================
+   LISTA / SELEÇÃO DE AVES
+   ========================================================================= */
+function renderLista(){
+  const busca = document.getElementById('busca').value.trim().toLowerCase();
+  const filtroSexo = document.getElementById('filtro-sexo').value;
+  const tbody = document.getElementById('tbody-aves');
+  const filtradas = aves.filter(a => {
+    if (filtroSexo && a.sexo !== filtroSexo) return false;
+    if (busca && !(a.nome + ' ' + a.anilha).toLowerCase().includes(busca)) return false;
+    return true;
+  });
+  if (filtradas.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-row">${aves.length===0 ? 'Nenhuma ave cadastrada ainda. Use o formulário acima.' : 'Nenhuma ave encontrada com esse filtro.'}</td></tr>`;
+  } else {
+    tbody.innerHTML = filtradas.map(a => `
+      <tr>
+        <td><input type="checkbox" ${selecionadas.has(a.id)?'checked':''} onchange="toggleSelecao('${a.id}', this.checked)"></td>
+        <td>${esc(a.nome)}</td>
+        <td class="anilha-mono">${esc(a.anilha)}</td>
+        <td><span class="tag-sexo ${a.sexo}">${sexoLabelTxt(a.sexo)}</span></td>
+        <td>${esc(a.especie) || '—'}</td>
+        <td>${esc(a.pai) || '—'}</td>
+        <td class="row-actions">
+          <button class="btn btn-sm btn-ghost" onclick="editarAve('${a.id}')" title="Editar">✏️</button>
+          <button class="btn btn-sm btn-ghost" onclick="duplicarAve('${a.id}')" title="Duplicar">⧉</button>
+          <button class="btn btn-sm btn-danger" onclick="excluirAve('${a.id}')" title="Excluir">🗑️</button>
+        </td>
+      </tr>`).join('');
+  }
+  document.getElementById('stat-total').textContent = `${aves.length} ave${aves.length===1?'':'s'} cadastrada${aves.length===1?'':'s'}`;
+  atualizarContagemSelecao();
+}
+function toggleSelecao(id, checked){ if (checked) selecionadas.add(id); else selecionadas.delete(id); atualizarContagemSelecao(); renderPrevia(); }
+function selecionarTodas(valor){
+  const busca = document.getElementById('busca').value.trim().toLowerCase();
+  const filtroSexo = document.getElementById('filtro-sexo').value;
+  aves.filter(a => (!filtroSexo || a.sexo===filtroSexo) && (!busca || (a.nome+' '+a.anilha).toLowerCase().includes(busca)))
+      .forEach(a => valor ? selecionadas.add(a.id) : selecionadas.delete(a.id));
+  renderLista(); renderPrevia();
+}
+function atualizarContagemSelecao(){ document.getElementById('count-selecionados').textContent = `${selecionadas.size} selecionada${selecionadas.size===1?'':'s'}`; }
+
+/* =========================================================================
+   EDITOR — TABS DE SEXO + PRESETS
+   ========================================================================= */
+function trocarSexoEditando(sexo){
+  sexoEditando = sexo;
+  document.querySelectorAll('.tab-sexo').forEach(t => t.classList.toggle('ativa', t.dataset.sexo === sexo));
+  montarPresets();
+  montarGruposConfig();
+  renderPreviewMini();
+}
+
+function montarPresets(){
+  const cont = document.getElementById('presets-row');
+  const visiveis = PRESETS.filter(p => p.sexo === sexoEditando || sexoEditando === 'I');
+  cont.innerHTML = visiveis.map(p => `
+    <div class="preset-chip ${presetAtivo[sexoEditando] === p.id ? 'ativo' : ''}" onclick="aplicarPreset('${p.id}')">
+      <div class="sw" style="background:${p.sw}"></div>
+      <span>${p.nome}</span>
+    </div>`).join('');
+}
+
+function aplicarPreset(id){
+  const preset = PRESETS.find(p => p.id === id);
+  if (!preset) return;
+  // mantém logo já carregada, troca só as cores/estilos
+  const logoAtual = { logoUrl: configs[sexoEditando].logoUrl, logoIniciais: configs[sexoEditando].logoIniciais, logoFormato: configs[sexoEditando].logoFormato, logoTamanho: configs[sexoEditando].logoTamanho, logoPosicao: configs[sexoEditando].logoPosicao, logoAlinhamento: configs[sexoEditando].logoAlinhamento, logoVisivel: configs[sexoEditando].logoVisivel, logoBordaCor: configs[sexoEditando].logoBordaCor, logoBordaEspessura: configs[sexoEditando].logoBordaEspessura, logoRaio: configs[sexoEditando].logoRaio, logoModoPosicao: configs[sexoEditando].logoModoPosicao, logoCanto: configs[sexoEditando].logoCanto, logoMargem: configs[sexoEditando].logoMargem };
+  configs[sexoEditando] = Object.assign(configPadrao(preset.paleta), logoAtual);
+  presetAtivo[sexoEditando] = id;
+  montarPresets();
+  montarGruposConfig();
+  renderPreviewMini();
+  renderPrevia();
+  salvarEstado();
+}
+
+/* =========================================================================
+   EDITOR — GRUPOS DE CONFIGURAÇÃO (fundo/borda, logo, caixas, rodapé)
+   ========================================================================= */
+function linhaCaixa(chave, titulo, cfg, comOrdem){
+  return `
+    <div class="config-group">
+      <div class="titulo-grupo">
+        <label class="caixa-toggle"><input type="checkbox" id="cx-${chave}-visivel" ${cfg.visivel==='sim'?'checked':''} onchange="lerFormularioConfig()"> ${titulo}</label>
+      </div>
+      <div class="linha-controles">
+        <div class="mini-campo"><label>Fundo</label><input type="color" id="cx-${chave}-bg" value="${cfg.bg}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Texto</label><input type="color" id="cx-${chave}-texto" value="${cfg.texto}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Borda</label><input type="color" id="cx-${chave}-borda" value="${cfg.borda}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Fonte (pt)</label><input type="number" id="cx-${chave}-font" value="${cfg.font}" min="5" max="24" step="0.5" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Altura (0=auto)</label><input type="number" id="cx-${chave}-altura" value="${cfg.altura}" min="0" max="30" onchange="lerFormularioConfig()"></div>
+        ${comOrdem ? `<div class="mini-campo"><label>Ordem</label><input type="number" id="cx-${chave}-ordem" value="${cfg.ordem}" min="1" max="9" onchange="lerFormularioConfig()"></div>` : '<div></div>'}
+      </div>
+    </div>`;
+}
+
+function montarGruposConfig(){
+  const c = configs[sexoEditando];
+  const cont = document.getElementById('grupos-config');
+  cont.innerHTML = `
+
+    <div class="config-group">
+      <div class="titulo-grupo">🎨 Fundo &amp; borda do crachá</div>
+      <div class="linha-controles">
+        <div class="mini-campo"><label>Cor de fundo</label><input type="color" id="cfg-fundo-cor" value="${c.fundoCor}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Opacidade (%)</label><input type="number" id="cfg-fundo-opacidade" value="${c.fundoOpacidade}" min="0" max="100" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Cor da borda</label><input type="color" id="cfg-borda-cor" value="${c.bordaCor}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Espessura</label><input type="number" id="cfg-borda-espessura" value="${c.bordaEspessura}" min="0" max="5" step="0.25" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Espaço entre caixas</label><input type="number" id="cfg-espacamento" value="${c.espacamentoCaixas}" min="0" max="6" step="0.25" onchange="lerFormularioConfig()"></div>
+        <div></div>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="upload-area" onclick="document.getElementById('input-fundo-img').click()">🖼️ Imagem de fundo (opcional)</div>
+        <input type="file" id="input-fundo-img" accept="image/*" style="display:none;" onchange="carregarImagemFundo(event)">
+        ${c.fundoImg ? `<button class="btn btn-sm btn-ghost" style="margin-top:6px;" onclick="removerImagemFundo()">🗑️ Remover imagem de fundo</button>` : ''}
+      </div>
+    </div>
+
+    <div class="config-group">
+      <div class="titulo-grupo">🖼️ Logo</div>
+      <div class="upload-area" onclick="document.getElementById('input-logo').click()">Clique para escolher uma imagem (será reduzida automaticamente)</div>
+      <input type="file" id="input-logo" accept="image/*" style="display:none;" onchange="carregarLogo(event)">
+      <div class="field" style="margin-top:8px;">
+        <label class="field-label">Não tem logo? Gera um automático com as iniciais</label>
+        <input type="text" id="cfg-logo-iniciais" maxlength="3" placeholder="Ex: FG" value="${c.logoIniciais || ''}" oninput="aoDigitarIniciaisLogo()">
+        <div class="helptext">Se não tiver uma imagem, digite até 3 letras aqui (ex: as iniciais do criatório) e um selo simples é montado automaticamente com as cores do modelo. Se você subir uma imagem, ela tem prioridade.</div>
+      </div>
+      <div class="linha-controles" style="margin-top:8px;">
+        <div class="mini-campo"><label>Formato</label>
+          <select id="cfg-logo-formato" onchange="lerFormularioConfig(); montarGruposConfig();">
+            <option value="circulo" ${c.logoFormato==='circulo'?'selected':''}>Circular</option>
+            <option value="quadrado" ${c.logoFormato==='quadrado'?'selected':''}>Quadrado</option>
+          </select>
+        </div>
+        <div class="mini-campo"><label>Tamanho (px)</label><input type="number" id="cfg-logo-tamanho" value="${c.logoTamanho}" min="16" max="120" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Posição</label>
+          <select id="cfg-logo-posicao" onchange="lerFormularioConfig()">
+            <option value="topo" ${c.logoPosicao==='topo'?'selected':''}>Topo</option>
+            <option value="meio" ${c.logoPosicao==='meio'?'selected':''}>Meio</option>
+            <option value="baixo" ${c.logoPosicao==='baixo'?'selected':''}>Baixo</option>
+          </select>
+        </div>
+        <div class="mini-campo"><label>Alinhamento</label>
+          <select id="cfg-logo-alinhamento" onchange="lerFormularioConfig()">
+            <option value="esquerda" ${c.logoAlinhamento==='esquerda'?'selected':''}>Esquerda</option>
+            <option value="centro" ${c.logoAlinhamento==='centro'?'selected':''}>Centro</option>
+            <option value="direita" ${c.logoAlinhamento==='direita'?'selected':''}>Direita</option>
+          </select>
+        </div>
+        <div class="mini-campo"><label>Exibir</label>
+          <select id="cfg-logo-visivel" onchange="lerFormularioConfig()">
+            <option value="nao" ${c.logoVisivel==='nao'?'selected':''}>Não</option>
+            <option value="sim" ${c.logoVisivel==='sim'?'selected':''}>Sim</option>
+          </select>
+        </div>
+        <div>${c.logoUrl ? `<button class="btn btn-sm btn-ghost" onclick="removerLogo()">🗑️ Remover logo</button>` : ''}</div>
+      </div>
+      <div class="linha-controles" style="margin-top:8px;">
+        <div class="mini-campo"><label>Cor da borda do logo</label><input type="color" id="cfg-logo-borda-cor" value="${c.logoBordaCor}" onchange="lerFormularioConfig()"></div>
+        <div class="mini-campo"><label>Espessura da borda</label><input type="number" id="cfg-logo-borda-espessura" value="${c.logoBordaEspessura}" min="0" max="8" step="0.5" onchange="lerFormularioConfig()"></div>
+        ${c.logoFormato === 'quadrado' ? `<div class="mini-campo"><label>Cantos arredondados</label><input type="number" id="cfg-logo-raio" value="${c.logoRaio}" min="0" max="60" onchange="lerFormularioConfig()"></div>` : '<div></div>'}
+        <div class="mini-campo"><label>Como posicionar</label>
+          <select id="cfg-logo-modo" onchange="lerFormularioConfig(); montarGruposConfig();">
+            <option value="fluxo" ${c.logoModoPosicao==='fluxo'?'selected':''}>Junto às caixas</option>
+            <option value="flutuante" ${c.logoModoPosicao==='flutuante'?'selected':''}>Livre (flutuante)</option>
+          </select>
+        </div>
+        ${c.logoModoPosicao === 'flutuante' ? `
+          <div class="mini-campo"><label>Canto</label>
+            <select id="cfg-logo-canto" onchange="lerFormularioConfig()">
+              <option value="topo-esquerda" ${c.logoCanto==='topo-esquerda'?'selected':''}>Superior esquerdo</option>
+              <option value="topo-direita" ${c.logoCanto==='topo-direita'?'selected':''}>Superior direito</option>
+              <option value="baixo-esquerda" ${c.logoCanto==='baixo-esquerda'?'selected':''}>Inferior esquerdo</option>
+              <option value="baixo-direita" ${c.logoCanto==='baixo-direita'?'selected':''}>Inferior direito</option>
+              <option value="centro" ${c.logoCanto==='centro'?'selected':''}>Centro</option>
+            </select>
+          </div>
+          <div class="mini-campo"><label>Margem (mm)</label><input type="number" id="cfg-logo-margem" value="${c.logoMargem}" min="0" max="20" step="0.5" onchange="lerFormularioConfig()"></div>
+        ` : '<div></div><div></div>'}
+      </div>
+      <div class="helptext" style="margin-top:2px;">"Junto às caixas" empurra o conteúdo pra abrir espaço pro logo (como já era). "Livre (flutuante)" cola o logo num canto do crachá por cima, sem mexer no resto — como em modelos antigos.</div>
+    </div>
+
+    ${linhaCaixa('nome', '1. Nome da ave', c.nome, true)}
+    ${linhaCaixa('c2', '2. Espécie + Mutação', c.c2, true)}
+    ${linhaCaixa('c3', '3. Anilha', c.c3, true)}
+    ${linhaCaixa('c4', '4. Data de nascimento + Sexo', c.c4, true)}
+    ${linhaCaixa('c5', '5. Pai + Mãe', c.c5, true)}
+
+    <div class="config-group">
+      <div class="titulo-grupo">📌 Rodapé (nome do criador · registro · telefone)</div>
+      ${linhaCaixa('rodapeNome', 'Caixa: Nome do criador', c.rodapeNome, false)}
+      ${linhaCaixa('rodapeRegistro', 'Caixa: Registro', c.rodapeRegistro, false)}
+      ${linhaCaixa('rodapeTelefone', 'Caixa: Telefone', c.rodapeTelefone, false)}
+    </div>
+  `;
+}
+
+function lerCaixaForm(chave){
+  return {
+    bg: document.getElementById(`cx-${chave}-bg`).value,
+    texto: document.getElementById(`cx-${chave}-texto`).value,
+    borda: document.getElementById(`cx-${chave}-borda`).value,
+    font: parseFloat(document.getElementById(`cx-${chave}-font`).value) || 8,
+    altura: parseInt(document.getElementById(`cx-${chave}-altura`).value) || 0,
+    visivel: document.getElementById(`cx-${chave}-visivel`).checked ? 'sim' : 'nao',
+    ordem: document.getElementById(`cx-${chave}-ordem`) ? (parseInt(document.getElementById(`cx-${chave}-ordem`).value) || 1) : 1
+  };
+}
+
+function aoDigitarIniciaisLogo(){
+  const campo = document.getElementById('cfg-logo-iniciais');
+  const selVisivel = document.getElementById('cfg-logo-visivel');
+  if (campo.value.trim() && selVisivel.value !== 'sim'){
+    selVisivel.value = 'sim';
+  }
+  lerFormularioConfig();
+}
+
+function lerConfigFolha(){
+  folha.largura = parseFloat(document.getElementById('folha-largura').value) || 90;
+  folha.altura = parseFloat(document.getElementById('folha-altura').value) || 58;
+  folha.espaco = parseFloat(document.getElementById('folha-espaco').value) || 0;
+  folha.margem = parseFloat(document.getElementById('folha-margem').value) || 0;
+  atualizarEstiloFolha();
+  salvarEstado();
+}
+
+function calcularBadgesPorPagina(){
+  const A4_LARGURA = 210, A4_ALTURA = 297;
+  const larguraUtil = Math.max(0, A4_LARGURA - 2 * folha.margem);
+  const alturaUtil = Math.max(0, A4_ALTURA - 2 * folha.margem);
+  const colunas = Math.max(1, Math.floor((larguraUtil + folha.espaco) / (folha.largura + folha.espaco)));
+  const linhas = Math.max(1, Math.floor((alturaUtil + folha.espaco) / (folha.altura + folha.espaco)));
+  return { colunas, linhas, total: colunas * linhas };
+}
+
+function atualizarEstiloFolha(){
+  const { colunas, linhas, total } = calcularBadgesPorPagina();
+  const estilo = document.getElementById('estilo-dinamico-folha');
+  estilo.textContent = `
+    #area-impressao{ grid-template-columns:repeat(${colunas}, ${folha.largura}mm); gap:${folha.espaco}mm; }
+    .badge-cracha{ width:${folha.largura}mm; height:${folha.altura}mm; }
+    @media print{
+      .badge-cracha:nth-child(${total}n){ page-break-after:always; }
+      @page{ size:A4; margin:${folha.margem}mm; }
+    }
+  `;
+  const info = document.getElementById('folha-info');
+  if (info) info.textContent = `Cabem ${total} crachás por folha (${colunas} coluna${colunas===1?'':'s'} × ${linhas} linha${linhas===1?'':'s'}).`;
+}
+
+function lerFormularioConfig(){
+  const c = configs[sexoEditando];
+  c.fundoCor = document.getElementById('cfg-fundo-cor').value;
+  c.fundoOpacidade = parseInt(document.getElementById('cfg-fundo-opacidade').value) || 100;
+  c.bordaCor = document.getElementById('cfg-borda-cor').value;
+  c.bordaEspessura = parseFloat(document.getElementById('cfg-borda-espessura').value) || 0;
+  c.espacamentoCaixas = parseFloat(document.getElementById('cfg-espacamento').value) || 0;
+  c.logoFormato = document.getElementById('cfg-logo-formato').value;
+  c.logoTamanho = parseInt(document.getElementById('cfg-logo-tamanho').value) || 60;
+  c.logoPosicao = document.getElementById('cfg-logo-posicao').value;
+  c.logoAlinhamento = document.getElementById('cfg-logo-alinhamento').value;
+  c.logoVisivel = document.getElementById('cfg-logo-visivel').value;
+  c.logoIniciais = document.getElementById('cfg-logo-iniciais').value.trim();
+  c.logoBordaCor = document.getElementById('cfg-logo-borda-cor').value;
+  c.logoBordaEspessura = parseFloat(document.getElementById('cfg-logo-borda-espessura').value) || 0;
+  const campoRaio = document.getElementById('cfg-logo-raio');
+  if (campoRaio) c.logoRaio = parseInt(campoRaio.value) || 0;
+  c.logoModoPosicao = document.getElementById('cfg-logo-modo').value;
+  const campoCanto = document.getElementById('cfg-logo-canto');
+  if (campoCanto) c.logoCanto = campoCanto.value;
+  const campoMargem = document.getElementById('cfg-logo-margem');
+  if (campoMargem) c.logoMargem = parseFloat(campoMargem.value) || 0;
+  c.nome = lerCaixaForm('nome');
+  c.c2 = lerCaixaForm('c2');
+  c.c3 = lerCaixaForm('c3');
+  c.c4 = lerCaixaForm('c4');
+  c.c5 = lerCaixaForm('c5');
+  c.rodapeNome = lerCaixaForm('rodapeNome');
+  c.rodapeRegistro = lerCaixaForm('rodapeRegistro');
+  c.rodapeTelefone = lerCaixaForm('rodapeTelefone');
+  presetAtivo[sexoEditando] = null;
+  montarPresets();
+  renderPreviewMini();
+  renderPrevia();
+  salvarEstado();
+}
+
+function redimensionarImagem(dataUrl, maxSize, qualidade, callback){
+  const img = new Image();
+  img.onload = function(){
+    let w = img.width, h = img.height;
+    if (w > maxSize || h > maxSize){
+      if (w > h){ h = Math.round(h * maxSize / w); w = maxSize; }
+      else { w = Math.round(w * maxSize / h); h = maxSize; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', qualidade));
+  };
+  img.src = dataUrl;
+}
+
+function carregarLogo(event){
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => redimensionarImagem(e.target.result, 150, 0.65, url => {
+    configs[sexoEditando].logoUrl = url;
+    configs[sexoEditando].logoVisivel = 'sim';
+    montarGruposConfig(); renderPreviewMini(); renderPrevia();
+    salvarEstado();
+  });
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+function removerLogo(){
+  configs[sexoEditando].logoUrl = '';
+  if (!configs[sexoEditando].logoIniciais) configs[sexoEditando].logoVisivel = 'nao';
+  montarGruposConfig(); renderPreviewMini(); renderPrevia();
+  salvarEstado();
+}
+function carregarImagemFundo(event){
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => redimensionarImagem(e.target.result, 400, 0.55, url => {
+    configs[sexoEditando].fundoImg = url;
+    montarGruposConfig(); renderPreviewMini(); renderPrevia();
+    salvarEstado();
+  });
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+function removerImagemFundo(){
+  configs[sexoEditando].fundoImg = '';
+  montarGruposConfig(); renderPreviewMini(); renderPrevia();
+  salvarEstado();
+}
+
+/* =========================================================================
+   GERAÇÃO DO HTML DO CRACHÁ
+   ========================================================================= */
+function hexToRgba(hex, opacidadePct){
+  const h = (hex || '#ffffff').replace('#','');
+  const r = parseInt(h.substring(0,2),16) || 255;
+  const g = parseInt(h.substring(2,4),16) || 255;
+  const b = parseInt(h.substring(4,6),16) || 255;
+  return `rgba(${r},${g},${b},${(opacidadePct===undefined?100:opacidadePct)/100})`;
+}
+
+function caixaHtml(conteudo, cfg, extraClass){
+  if (cfg.visivel !== 'sim' || !conteudo) return '';
+  const altura = cfg.altura ? `${cfg.altura}px` : 'auto';
+  return `<div class="badge-caixa ${extraClass||''}" style="background:${cfg.bg};color:${cfg.texto};border:1px solid ${cfg.borda};font-size:${cfg.font}pt;height:${altura};">${conteudo}</div>`;
+}
+
+function construirBadgeHTML(ave, cfg){
+  const especieMutacao = [ave.especie, ave.mutacao].filter(Boolean).join(' · ') || '';
+  const dataSexoHtml = (cfg.c4.visivel === 'sim') ? `<div class="badge-dupla">
+      ${caixaHtml(formatarData(ave.nasc) || '—', cfg.c4)}
+      ${caixaHtml(sexoLabelTxt(ave.sexo), cfg.c4)}
+    </div>` : '';
+  const paiMaeHtml = (cfg.c5.visivel === 'sim') ? `<div class="badge-dupla">
+      ${caixaHtml(ave.pai ? ('Pai: ' + esc(ave.pai)) : '—', cfg.c5)}
+      ${caixaHtml(ave.mae ? ('Mãe: ' + esc(ave.mae)) : '—', cfg.c5)}
+    </div>` : '';
+
+  const rodapeVisivel = [cfg.rodapeNome, cfg.rodapeRegistro, cfg.rodapeTelefone].some(x => x.visivel === 'sim');
+  const rodapeHtml = rodapeVisivel ? `<div class="badge-dupla" style="margin-top:auto;">
+      ${caixaHtml(esc(criador.nome) || 'Criador', cfg.rodapeNome)}
+      ${caixaHtml(esc(criador.registro) || 'Registro', cfg.rodapeRegistro)}
+      ${caixaHtml(esc(criador.telefone) || 'Telefone', cfg.rodapeTelefone)}
+    </div>` : '';
+
+  const caixas = [
+    { id:'nome', ordem: cfg.nome.ordem, html: caixaHtml(esc(ave.nome) || '—', cfg.nome, 'nome-caixa') },
+    { id:'c2', ordem: cfg.c2.ordem, html: caixaHtml(esc(especieMutacao) || '—', cfg.c2) },
+    { id:'c3', ordem: cfg.c3.ordem, html: caixaHtml('Nº ' + (esc(ave.anilha) || '—'), cfg.c3) },
+    { id:'c4', ordem: cfg.c4.ordem, html: dataSexoHtml },
+    { id:'c5', ordem: cfg.c5.ordem, html: paiMaeHtml }
+  ].filter(c => c.html);
+  caixas.sort((a,b) => a.ordem - b.ordem);
+
+  let itens = caixas.map(c => c.html);
+
+  // logo
+  const mostrarLogo = cfg.logoVisivel === 'sim' && (cfg.logoUrl || cfg.logoIniciais);
+  const bordaLogo = (cfg.logoBordaEspessura || 0) > 0 ? `border:${cfg.logoBordaEspessura}px solid ${cfg.logoBordaCor || '#c7973f'};` : 'border:none;';
+  const raioLogo = cfg.logoFormato === 'quadrado' ? `${cfg.logoRaio || 0}px` : '50%';
+  // se tiver imagem, usa ela; senão, monta um selo simples com as iniciais nas cores do modelo
+  let conteudoLogoStyle, conteudoLogoHtml;
+  if (cfg.logoUrl){
+    conteudoLogoStyle = `background-image:url(${cfg.logoUrl});`;
+    conteudoLogoHtml = '';
+  } else {
+    const fonteIniciais = Math.max(10, Math.round((cfg.logoTamanho || 60) * 0.36));
+    conteudoLogoStyle = `background:${cfg.nome.bg};display:flex;align-items:center;justify-content:center;`;
+    conteudoLogoHtml = `<span style="color:${cfg.nome.texto};font-size:${fonteIniciais}px;font-weight:800;font-family:var(--font-display);letter-spacing:.03em;">${esc((cfg.logoIniciais || '').toUpperCase().slice(0,3))}</span>`;
+  }
+  let logoFlutuanteHtml = '';
+
+  if (mostrarLogo && cfg.logoModoPosicao === 'flutuante'){
+    const margem = cfg.logoMargem || 0;
+    let posStyle = '';
+    switch (cfg.logoCanto){
+      case 'topo-esquerda': posStyle = `top:${margem}mm;left:${margem}mm;`; break;
+      case 'baixo-esquerda': posStyle = `bottom:${margem}mm;left:${margem}mm;`; break;
+      case 'baixo-direita': posStyle = `bottom:${margem}mm;right:${margem}mm;`; break;
+      case 'centro': posStyle = `top:50%;left:50%;transform:translate(-50%,-50%);`; break;
+      default: posStyle = `top:${margem}mm;right:${margem}mm;`; break; // topo-direita
+    }
+    logoFlutuanteHtml = `<div class="badge-logo badge-logo-flutuante" style="width:${cfg.logoTamanho}px;height:${cfg.logoTamanho}px;border-radius:${raioLogo};${bordaLogo}${conteudoLogoStyle}${posStyle}">${conteudoLogoHtml}</div>`;
+  } else if (mostrarLogo && cfg.logoAlinhamento === 'centro'){
+    // logo sozinho, centralizado numa linha própria
+    const logoDiv = `<div class="badge-logo" style="width:${cfg.logoTamanho}px;height:${cfg.logoTamanho}px;border-radius:${raioLogo};${bordaLogo}${conteudoLogoStyle}">${conteudoLogoHtml}</div>`;
+    const linhaLogo = `<div style="display:flex;justify-content:center;">${logoDiv}</div>`;
+    const idx = cfg.logoPosicao === 'topo' ? 0 : cfg.logoPosicao === 'baixo' ? itens.length : Math.floor(itens.length/2);
+    itens.splice(idx, 0, linhaLogo);
+  } else if (mostrarLogo){
+    // alinhado à esquerda/direita: algumas caixas ficam ao lado do logo (3mm de distância),
+    // em vez de deixar um vão vazio — igual ao comportamento do modelo antigo.
+    const logoDiv = `<div class="badge-logo" style="width:${cfg.logoTamanho}px;height:${cfg.logoTamanho}px;border-radius:${raioLogo};${bordaLogo}${conteudoLogoStyle}flex-shrink:0;">${conteudoLogoHtml}</div>`;
+    const itensLado = Math.max(1, Math.min(itens.length, Math.round(cfg.logoTamanho / 28)));
+    let ladoItens, restoAntes, restoDepois;
+    if (cfg.logoPosicao === 'topo'){
+      ladoItens = itens.slice(0, itensLado); restoAntes = []; restoDepois = itens.slice(itensLado);
+    } else if (cfg.logoPosicao === 'baixo'){
+      ladoItens = itens.slice(-itensLado); restoAntes = itens.slice(0, itens.length - itensLado); restoDepois = [];
+    } else {
+      const inicioMeio = Math.max(0, Math.floor((itens.length - itensLado) / 2));
+      ladoItens = itens.slice(inicioMeio, inicioMeio + itensLado);
+      restoAntes = itens.slice(0, inicioMeio);
+      restoDepois = itens.slice(inicioMeio + itensLado);
+    }
+    const colunaLado = `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:${cfg.espacamentoCaixas}mm;">${ladoItens.join('')}</div>`;
+    const linhaLogo = `<div style="display:flex;align-items:center;gap:3mm;">${cfg.logoAlinhamento === 'direita' ? colunaLado + logoDiv : logoDiv + colunaLado}</div>`;
+    itens = [...restoAntes, linhaLogo, ...restoDepois];
+  }
+
+  const fundoStyle = cfg.fundoImg
+    ? `background-image:url(${cfg.fundoImg});background-size:cover;background-position:center;`
+    : `background:${hexToRgba(cfg.fundoCor, cfg.fundoOpacidade)};`;
+
+  return `
+    <div class="badge-cracha" style="border:${cfg.bordaEspessura}px solid ${cfg.bordaCor};${fundoStyle}">
+      <div class="miolo" style="gap:${cfg.espacamentoCaixas}mm;">${itens.join('')}${rodapeHtml}</div>
+      ${logoFlutuanteHtml}
+    </div>
+  `;
+}
+
+const AVE_EXEMPLO = { nome:'Exemplo', anilha:'0000', especie:'Espécie', mutacao:'Mutação', nasc:'2024-01-15', pai:'Nome do pai', mae:'Nome da mãe', sexo:'M' };
+
+function renderPreviewMini(){
+  const holder = document.getElementById('preview-mini');
+  const amostra = aves.find(a => a.sexo === sexoEditando) || { ...AVE_EXEMPLO, sexo: sexoEditando };
+  holder.innerHTML = construirBadgeHTML(amostra, configs[sexoEditando]);
+}
+
+function renderPrevia(){
+  atualizarCriadorDoFormulario();
+  const area = document.getElementById('area-impressao');
+  const lista = aves.filter(a => selecionadas.has(a.id));
+  if (lista.length === 0){
+    area.innerHTML = '<div class="sem-selecao">Marque pelo menos uma ave na lista acima para ver a prévia dos crachás.</div>';
+    return;
+  }
+  area.innerHTML = lista.map(a => construirBadgeHTML(a, configs[a.sexo] || configs.I)).join('');
+}
+
+function atualizarCriadorDoFormulario(){
+  criador.nome = document.getElementById('cr-nome').value.trim();
+  criador.registro = document.getElementById('cr-registro').value.trim();
+  criador.telefone = document.getElementById('cr-telefone').value.trim();
+}
+['cr-nome','cr-registro','cr-telefone'].forEach(id => document.getElementById(id).addEventListener('input', () => { renderPrevia(); salvarEstado(); }));
+
+/* =========================================================================
+   EXPORTAR / IMPORTAR DADOS (aves + criador + configuração visual)
+   ========================================================================= */
+function exportarDados(){
+  atualizarCriadorDoFormulario();
+  const pacote = { versao:2, exportadoEm:new Date().toISOString(), criador, aves, configs, presetAtivo };
+  const blob = new Blob([JSON.stringify(pacote, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'crachas-dados.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importarDados(event){
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const pacote = JSON.parse(e.target.result);
+      if (!Array.isArray(pacote.aves)) throw new Error('Arquivo inválido.');
+      aves = pacote.aves;
+      criador = pacote.criador || criador;
+      if (pacote.configs) configs = pacote.configs;
+      if (pacote.presetAtivo) presetAtivo = pacote.presetAtivo;
+      selecionadas = new Set();
+
+      document.getElementById('cr-nome').value = criador.nome || '';
+      document.getElementById('cr-registro').value = criador.registro || '';
+      document.getElementById('cr-telefone').value = criador.telefone || '';
+
+      montarPresets();
+      montarGruposConfig();
+      renderLista();
+      renderPreviewMini();
+      renderPrevia();
+      salvarEstado();
+      alert(`✅ ${aves.length} ave(s) importada(s) com sucesso.`);
+    } catch (err){
+      alert('❌ Não foi possível importar este arquivo: ' + err.message);
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================================================================
+   INICIALIZAÇÃO
+   ========================================================================= */
+document.getElementById('f-sexo').value = 'I';
+const tinhaDadosSalvos = carregarEstadoSalvo();
+if (tinhaDadosSalvos){
+  document.getElementById('cr-nome').value = criador.nome || '';
+  document.getElementById('cr-registro').value = criador.registro || '';
+  document.getElementById('cr-telefone').value = criador.telefone || '';
+}
+document.getElementById('folha-largura').value = folha.largura;
+document.getElementById('folha-altura').value = folha.altura;
+document.getElementById('folha-espaco').value = folha.espaco;
+document.getElementById('folha-margem').value = folha.margem;
+atualizarEstiloFolha();
+montarPresets();
+montarGruposConfig();
+renderLista();
+renderPreviewMini();
+renderPrevia();
+buscarTotalCrachas();
+</script>
+</body>
+</html>
