@@ -36,7 +36,10 @@ router.post('/', asyncHandler(async (req, res) => {
 }));
 
 router.put('/:id', asyncHandler(async (req, res) => {
-  const { cor, tipo, numero, dimensao, observacao, data_cadastro, disponivel, ativo } = req.body || {};
+  const { cor, tipo, numero, dimensao, observacao, disponivel, ativo } = req.body || {};
+  // String vazia não é NULL para o Postgres, então o COALESCE abaixo não a
+  // trocaria pelo valor já existente e o banco rejeitaria "" como data.
+  const data_cadastro = (req.body && req.body.data_cadastro) ? req.body.data_cadastro : null;
 
   if (numero) {
     const dup = await pool.query(
