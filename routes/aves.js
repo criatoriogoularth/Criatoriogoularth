@@ -13,41 +13,102 @@ const CAMPOS = [
   'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico'
 ];
 
-// Colunas JSONB que guardam um ARRAY (ancestrais, historico). O driver
-// pg, quando recebe um array JS puro, serializa como array NATIVO do
-// Postgres (formato "{a,b,c}") em vez de JSON ("[a,b,c]") — quebra a
-// coluna jsonb. Por isso essas precisam ser serializadas manualmente
-// com JSON.stringify antes de entrar na query.
+// Colunas JSONB que guardam um ARRAY
 const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico']);
+const CAMPOS_BOOLEAN = new Set(['filhote', 'no_site']);
+const CAMPOS_DATE = new Set(['data_nasc']);
+const CAMPOS_NUMERIC = new Set([]); // se tiver algum campo numérico no futuro
 
+/**
+ * LIMPA E PREPARA QUALQUER VALOR PARA O BANCO
+ * - Strings vazias → null
+ * - undefined → null
+ * - Arrays → JSON.stringify (para JSONB)
+ * - Booleanos → mantém como boolean
+ * - Datas vazias → null
+ * - null/undefined com fallback para arrays vazios
+ */
 function prepararValor(campo, valor) {
-  // Se for undefined, retorna null (exceto para campos que precisam de array vazio)
+  // 1. TRATA UNDEFINED E STRING VAZIA
   if (valor === undefined) {
-    // Para ancestrais e historico, se não vier nada, usa array vazio
-    if (campo === 'ancestrais' || campo === 'historico') {
+    return getDefaultForField(campo);
+  }
+  
+  if (typeof valor === 'string' && valor.trim() === '') {
+    // Se for string vazia, verifica se é um campo que precisa de valor especial
+    if (CAMPOS_JSON_ARRAY.has(campo)) {
       return JSON.stringify([]);
+    }
+    if (CAMPOS_DATE.has(campo)) {
+      return null; // data vazia → null
+    }
+    if (CAMPOS_BOOLEAN.has(campo)) {
+      return false; // boolean vazio → false
+    }
+    return null; // outros campos string vazia → null
+  }
+
+  // 2. TRATA CAMPOS JSON (arrays)
+  if (CAMPOS_JSON_ARRAY.has(campo)) {
+    if (valor === null) return JSON.stringify([]);
+    if (Array.isArray(valor)) return JSON.stringify(valor);
+    if (typeof valor === 'string') {
+      try {
+        // Se veio como string JSON, faz parse e serializa de novo
+        const parsed = JSON.parse(valor);
+        return JSON.stringify(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        return JSON.stringify([]);
+      }
+    }
+    return JSON.stringify([]);
+  }
+
+  // 3. TRATA CAMPOS BOOLEANOS
+  if (CAMPOS_BOOLEAN.has(campo)) {
+    if (typeof valor === 'boolean') return valor;
+    if (valor === 'true' || valor === '1' || valor === 1) return true;
+    if (valor === 'false' || valor === '0' || valor === 0) return false;
+    return false; // padrão
+  }
+
+  // 4. TRATA CAMPOS DE DATA
+  if (CAMPOS_DATE.has(campo)) {
+    if (valor === null) return null;
+    if (typeof valor === 'string' && valor.trim() === '') return null;
+    // Tenta criar uma data válida
+    const date = new Date(valor);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD
     }
     return null;
   }
-  
-  if (CAMPOS_JSON_ARRAY.has(campo) && valor !== null) {
-    // Se for array, serializa; se for null, usa array vazio
-    if (valor === null) {
-      return JSON.stringify([]);
-    }
-    return JSON.stringify(valor);
+
+  // 5. TRATA CAMPOS NUMÉRICOS (se houver)
+  if (CAMPOS_NUMERIC.has(campo)) {
+    const num = Number(valor);
+    return isNaN(num) ? null : num;
   }
-  
-  // Garante que booleanos sejam enviados corretamente
-  if (typeof valor === 'boolean') return valor;
+
+  // 6. QUALQUER OUTRO CAMPO - retorna o valor limpo
+  if (typeof valor === 'string') {
+    return valor.trim() || null;
+  }
   return valor;
 }
 
-function linhaParaAve(row) {
-  return row; // node-pg já entrega JSONB como objeto/array JS
+function getDefaultForField(campo) {
+  if (CAMPOS_JSON_ARRAY.has(campo)) return JSON.stringify([]);
+  if (CAMPOS_BOOLEAN.has(campo)) return false;
+  if (CAMPOS_DATE.has(campo)) return null;
+  return null;
 }
 
-// ---------- ROTAS PRIVADAS (exigem login) ----------
+function linhaParaAve(row) {
+  return row;
+}
+
+// ---------- ROTAS PRIVADAS ----------
 
 router.get('/', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
@@ -68,30 +129,30 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
 
 router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
-  if (!body.nome || !body.anilha) {
-    return res.status(400).json({ error: 'Nome e anilha são obrigatórios.' });
+  
+  // Validação básica
+  if (!body.nome || (typeof body.nome === 'string' && body.nome.trim() === '')) {
+    return res.status(400).json({ error: 'Nome é obrigatório.' });
+  }
+  if (!body.anilha || (typeof body.anilha === 'string' && body.anilha.trim() === '')) {
+    return res.status(400).json({ error: 'Anilha é obrigatória.' });
   }
 
-  // Impede duplicar anilha para o mesmo usuário
+  // Impede duplicar anilha
   const dup = await pool.query(
     'SELECT id FROM aves WHERE anilha = $1 AND usuario_id = $2',
-    [body.anilha, req.user.id]
+    [body.anilha.trim(), req.user.id]
   );
   if (dup.rows.length > 0) {
     return res.status(409).json({ error: 'Esta anilha já está sendo usada por outra ave.' });
   }
 
-  // Valores padrão para campos obrigatórios
-  const valoresParaInserir = {
-    ...body,
-    no_site: body.no_site !== undefined ? body.no_site : false,
-    ativo: body.ativo !== undefined ? body.ativo : true,
-    ancestrais: body.ancestrais !== undefined && body.ancestrais !== null ? body.ancestrais : [],
-    historico: body.historico !== undefined && body.historico !== null ? body.historico : []
-  };
-
+  // Prepara todos os campos com a função de limpeza
   const cols = ['usuario_id', ...CAMPOS];
-  const valores = [req.user.id, ...CAMPOS.map(c => prepararValor(c, valoresParaInserir[c] ?? null))];
+  const valores = [
+    req.user.id,
+    ...CAMPOS.map(c => prepararValor(c, body[c]))
+  ];
   const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
 
   const { rows } = await pool.query(
@@ -104,23 +165,26 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
 router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
 
-  if (body.anilha) {
+  // Verifica duplicidade se estiver mudando a anilha
+  if (body.anilha && typeof body.anilha === 'string' && body.anilha.trim() !== '') {
     const dup = await pool.query(
       'SELECT id FROM aves WHERE anilha = $1 AND usuario_id = $2 AND id != $3',
-      [body.anilha, req.user.id, req.params.id]
+      [body.anilha.trim(), req.user.id, req.params.id]
     );
     if (dup.rows.length > 0) {
       return res.status(409).json({ error: 'Esta anilha já está sendo usada por outra ave.' });
     }
   }
 
-  const camposPresentes = CAMPOS.filter(c => body[c] !== undefined);
-  if (camposPresentes.length === 0) {
+  // Filtra apenas campos que foram enviados
+  const camposEnviados = CAMPOS.filter(c => body[c] !== undefined);
+  if (camposEnviados.length === 0) {
     return res.status(400).json({ error: 'Nenhum campo para atualizar.' });
   }
 
-  const sets = camposPresentes.map((c, i) => `${c} = $${i + 1}`).join(', ');
-  const valores = camposPresentes.map(c => prepararValor(c, body[c]));
+  // Prepara cada campo com a função de limpeza
+  const sets = camposEnviados.map((c, i) => `${c} = $${i + 1}`).join(', ');
+  const valores = camposEnviados.map(c => prepararValor(c, body[c]));
   valores.push(req.params.id, req.user.id);
 
   const { rows } = await pool.query(
@@ -142,8 +206,8 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// ---------- ROTA PÚBLICA (site do criatório, sem login) ----------
-// Só devolve o que foi marcado explicitamente para aparecer no site.
+// ---------- ROTAS PÚBLICAS ----------
+
 router.get('/publico/site', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
@@ -154,11 +218,6 @@ router.get('/publico/site', asyncHandler(async (req, res) => {
   res.json(rows);
 }));
 
-// Certificado público de uma ave específica. Só funciona se a ave estiver
-// marcada para aparecer no site (no_site = true) — assim não expõe o
-// plantel privado inteiro, só resolve os avós dessa ave em particular
-// (a versão antiga mandava a tabela "aves" completa pro navegador do
-// visitante fazer essa busca, o que vazava todo o plantel privado).
 router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
   const aveRes = await pool.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
