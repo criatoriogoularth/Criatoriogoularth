@@ -25,6 +25,8 @@ function prepararValor(campo, valor) {
   if (CAMPOS_JSON_ARRAY.has(campo) && valor !== null) {
     return JSON.stringify(valor);
   }
+  // Garante que booleanos sejam enviados corretamente
+  if (typeof valor === 'boolean') return valor;
   return valor;
 }
 
@@ -66,8 +68,15 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
     return res.status(409).json({ error: 'Esta anilha já está sendo usada por outra ave.' });
   }
 
+  // Valores padrão para campos obrigatórios
+  const valoresParaInserir = {
+    ...body,
+    no_site: body.no_site !== undefined ? body.no_site : false,
+    ativo: body.ativo !== undefined ? body.ativo : true
+  };
+
   const cols = ['usuario_id', ...CAMPOS];
-  const valores = [req.user.id, ...CAMPOS.map(c => prepararValor(c, body[c] ?? null))];
+  const valores = [req.user.id, ...CAMPOS.map(c => prepararValor(c, valoresParaInserir[c] ?? null))];
   const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
 
   const { rows } = await pool.query(
