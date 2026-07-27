@@ -21,10 +21,23 @@ const CAMPOS = [
 const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico']);
 
 function prepararValor(campo, valor) {
-  if (valor === undefined) return null;
+  // Se for undefined, retorna null (exceto para campos que precisam de array vazio)
+  if (valor === undefined) {
+    // Para ancestrais e historico, se não vier nada, usa array vazio
+    if (campo === 'ancestrais' || campo === 'historico') {
+      return JSON.stringify([]);
+    }
+    return null;
+  }
+  
   if (CAMPOS_JSON_ARRAY.has(campo) && valor !== null) {
+    // Se for array, serializa; se for null, usa array vazio
+    if (valor === null) {
+      return JSON.stringify([]);
+    }
     return JSON.stringify(valor);
   }
+  
   // Garante que booleanos sejam enviados corretamente
   if (typeof valor === 'boolean') return valor;
   return valor;
@@ -72,7 +85,9 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const valoresParaInserir = {
     ...body,
     no_site: body.no_site !== undefined ? body.no_site : false,
-    ativo: body.ativo !== undefined ? body.ativo : true
+    ativo: body.ativo !== undefined ? body.ativo : true,
+    ancestrais: body.ancestrais !== undefined && body.ancestrais !== null ? body.ancestrais : [],
+    historico: body.historico !== undefined && body.historico !== null ? body.historico : []
   };
 
   const cols = ['usuario_id', ...CAMPOS];
