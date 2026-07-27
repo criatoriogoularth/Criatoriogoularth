@@ -620,7 +620,7 @@ body {
 
     function formatarData(data) {
       if (!data) return '-';
-      const partes = data.split('-');
+      const partes = String(data).slice(0, 10).split('-');
       if (partes.length === 3) {
         return `${partes[2]}/${partes[1]}/${partes[0]}`;
       }
@@ -783,10 +783,11 @@ body {
       }
       document.getElementById('cert-footer-text').style.color = config.corRodapeTexto || '#4a5347';
 
-      const classeAvatar = ave.sexo === 'M' ? '' : ' female';
-      const avatarBg = ave.sexo === 'M' 
-        ? `radial-gradient(circle at 35% 30%, ${config.corAvatarFundo || '#c7973f'}dd, ${config.corAvatarFundo || '#c7973f'} 60%, ${config.corAvatarFundo || '#c7973f'}aa)`
-        : `radial-gradient(circle at 35% 30%, ${config.corFemeaFundo || '#2e1a1a'}dd, ${config.corFemeaFundo || '#2e1a1a'} 60%, ${config.corFemeaFundo || '#2e1a1a'}aa)`;
+      const classeAvatar = ave.sexo === 'M' ? '' : (ave.sexo === 'F' ? ' female' : ' indefinido');
+      const corAvatarPorSexo = ave.sexo === 'M' ? (config.corMachoFundo || '#1a2e28')
+        : ave.sexo === 'F' ? (config.corFemeaFundo || '#2e1a1a')
+        : (config.corAvatarFundo || '#c7973f');
+      const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
       
       let linhasHtml = `
         <div class="subject-line" style="color:${config.corSexo || '#4a5347'};"><b style="color:${config.corSexo || '#4a5347'};">Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
@@ -801,7 +802,7 @@ body {
       
       const painel = document.getElementById('cert-subject-panel');
       painel.innerHTML = `
-        <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : '♀'}</div>
+        <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</div>
         <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
         ${linhasHtml}
       `;
@@ -875,7 +876,7 @@ body {
         }
       });
 
-      setTimeout(() => ajustarPilulas(), 100);
+      requestAnimationFrame(() => ajustarPilulas());
     }
 
     function ajustarPilulas() {
@@ -914,8 +915,15 @@ body {
         col.querySelectorAll('.cert-pill').forEach(pilula => {
           pilula.style.height = alturaPilula + 'px';
           pilula.style.fontSize = tamanhoFonte + 'px';
-          pilula.style.lineHeight = alturaPilula + 'px';
           pilula.style.padding = '0 6px';
+          if (depth <= 2) {
+            pilula.style.whiteSpace = 'normal';
+            pilula.style.wordBreak = 'break-word';
+            pilula.style.lineHeight = '1.2';
+          } else {
+            pilula.style.whiteSpace = 'nowrap';
+            pilula.style.lineHeight = alturaPilula + 'px';
+          }
         });
       });
     }

@@ -618,7 +618,7 @@ function setSituacao(situacao) {
 
 function formatarData(data) {
   if (!data || data === '') return '-';
-  const partes = data.split('-');
+  const partes = String(data).slice(0, 10).split('-');
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 

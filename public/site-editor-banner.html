@@ -190,29 +190,15 @@
 renderSidebar('admin-site');
 
 // ============================================================
-// FUNÇÕES DE BANCO (API — antes era localStorage, por isso o
-// banner não aparecia pra ninguém além de quem salvou no navegador)
+// FUNÇÕES DE BANCO (via API)
 // ============================================================
 
 async function getBanner() {
-  try {
-    const conteudo = (await DB.getConfig('site_conteudo')) || {};
-    const home = conteudo.home || {};
-    return {
-      url: home.bannerUrl || '',
-      titulo: home.bannerTitulo || '',
-      subtitulo: home.bannerSubtitulo || ''
-    };
-  } catch (e) { return {}; }
+  return (await DB.getConfig('site_banner')) || {};
 }
 
 async function saveBanner(banner) {
-  const conteudo = (await DB.getConfig('site_conteudo')) || {};
-  conteudo.home = conteudo.home || {};
-  conteudo.home.bannerUrl = banner.url || '';
-  conteudo.home.bannerTitulo = banner.titulo || '';
-  conteudo.home.bannerSubtitulo = banner.subtitulo || '';
-  return DB.setConfig('site_conteudo', conteudo);
+  await DB.setConfig('site_banner', banner);
 }
 
 // ============================================================
@@ -290,13 +276,9 @@ async function excluirBanner() {
   banner.titulo = '';
   banner.subtitulo = '';
   
-  try {
-    await saveBanner(banner);
-    renderizarBanner();
-    alert('✅ Banner excluído com sucesso!');
-  } catch (e) {
-    alert('❌ Erro ao excluir: ' + e.message);
-  }
+  await saveBanner(banner);
+  renderizarBanner();
+  alert('✅ Banner excluído com sucesso!');
 }
 
 async function salvarBanner() {
@@ -304,12 +286,8 @@ async function salvarBanner() {
   banner.titulo = document.getElementById('banner-titulo').value.trim();
   banner.subtitulo = document.getElementById('banner-subtitulo').value.trim();
   
-  try {
-    await saveBanner(banner);
-    alert('✅ Banner salvo com sucesso!');
-  } catch (e) {
-    alert('❌ Erro ao salvar: ' + e.message);
-  }
+  await saveBanner(banner);
+  alert('✅ Banner salvo com sucesso!');
 }
 
 // ============================================================

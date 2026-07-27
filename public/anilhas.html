@@ -661,7 +661,7 @@ function getTipoClass(tipo) {
 
 function formatarData(data) {
   if (!data) return '-';
-  const partes = data.split('-');
+  const partes = String(data).slice(0, 10).split('-');
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 

@@ -1091,10 +1091,11 @@ function renderizarCertificado() {
     const encontrado = tree[caminho];
     return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
   }
-  const classeAvatar = ave.sexo === 'M' ? '' : ' female';
-  const avatarBg = ave.sexo === 'M' 
-    ? `radial-gradient(circle at 35% 30%, ${CONFIG.corAvatarFundo}dd, ${CONFIG.corAvatarFundo} 60%, ${CONFIG.corAvatarFundo}aa)`
-    : `radial-gradient(circle at 35% 30%, ${CONFIG.corFemeaFundo}dd, ${CONFIG.corFemeaFundo} 60%, ${CONFIG.corFemeaFundo}aa)`;
+  const classeAvatar = ave.sexo === 'M' ? '' : (ave.sexo === 'F' ? ' female' : ' indefinido');
+  const corAvatarPorSexo = ave.sexo === 'M' ? CONFIG.corMachoFundo
+    : ave.sexo === 'F' ? CONFIG.corFemeaFundo
+    : CONFIG.corAvatarFundo;
+  const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
   let linhasHtml = `
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
     <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
@@ -1105,7 +1106,7 @@ function renderizarCertificado() {
     linhasHtml += `<div class="subject-line" style="color:${CONFIG.corRaizTexto};">${ave.raca}</div>`;
   }
   document.getElementById('cert-subject-panel').innerHTML = `
-    <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${CONFIG.corAvatarTexto};">${ave.sexo === 'M' ? '♂' : '♀'}</div>
+    <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${CONFIG.corAvatarTexto};">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</div>
     <div class="subject-name" style="color:${CONFIG.corRaizTexto};">${ave.nome}</div>
     ${linhasHtml}
   `;

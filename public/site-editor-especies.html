@@ -174,17 +174,14 @@
 renderSidebar('admin-site');
 
 // ============================================================
-// FUNÇÕES DE BANCO (API — antes era localStorage, por isso as
-// espécies editadas aqui não apareciam no site pra outras pessoas)
+// FUNÇÕES DE BANCO (via API)
 // ============================================================
 
 async function getEspecies() {
-  try {
-    const especies = await DB.getConfig('site_especies');
-    if (especies && Object.keys(especies).length > 0) {
-      return especies;
-    }
-  } catch (e) {}
+  const especies = await DB.getConfig('site_especies');
+  if (especies && Object.keys(especies).length > 0) {
+    return especies;
+  }
   
   // Valores padrão
   return {
@@ -207,7 +204,7 @@ async function getEspecies() {
 }
 
 async function saveEspecies(especies) {
-  return DB.setConfig('site_especies', especies);
+  await DB.setConfig('site_especies', especies);
 }
 
 // ============================================================
@@ -261,7 +258,7 @@ function renderizarEspecies() {
 // EDITAR ESPÉCIE
 // ============================================================
 
-function editarEspecie(key) {
+async function editarEspecie(key) {
   const esp = especies[key];
   if (!esp) return;
   
@@ -366,18 +363,14 @@ async function salvarEdicaoEspecie(key) {
     imagem: imagem
   };
   
-  try {
-    await saveEspecies(especies);
-    renderizarEspecies();
-    
-    // Fechar modal
-    const modal = document.querySelector('div[style*="position: fixed"]');
-    if (modal) modal.remove();
-    
-    alert('✅ Espécie atualizada com sucesso!');
-  } catch (e) {
-    alert('❌ Erro ao salvar: ' + e.message);
-  }
+  await saveEspecies(especies);
+  renderizarEspecies();
+  
+  // Fechar modal
+  const modal = document.querySelector('div[style*="position: fixed"]');
+  if (modal) modal.remove();
+  
+  alert('✅ Espécie atualizada com sucesso!');
 }
 
 // ============================================================
@@ -385,12 +378,8 @@ async function salvarEdicaoEspecie(key) {
 // ============================================================
 
 async function salvarEspecies() {
-  try {
-    await saveEspecies(especies);
-    alert('✅ Espécies salvas com sucesso!');
-  } catch (e) {
-    alert('❌ Erro ao salvar: ' + e.message);
-  }
+  await saveEspecies(especies);
+  alert('✅ Espécies salvas com sucesso!');
 }
 
 // ============================================================
