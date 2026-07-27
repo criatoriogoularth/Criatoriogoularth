@@ -788,6 +788,15 @@ let CONFIG = {
   fonteCertificado: "'Manrope', sans-serif"
 };
 
+function formatarData(data) {
+  if (!data) return 'Indefinido';
+  const partes = String(data).slice(0, 10).split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
 function toggleConfig() {
   const panel = document.getElementById('config-panel');
   panel.classList.toggle('open');
@@ -1100,7 +1109,7 @@ function renderizarCertificado() {
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
     <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${ave.especie}</div>
-    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${ave.dataNasc || 'Indefinido'}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
   `;
   if (ave.raca && ave.raca.trim() !== '') {
     linhasHtml += `<div class="subject-line" style="color:${CONFIG.corRaizTexto};">${ave.raca}</div>`;

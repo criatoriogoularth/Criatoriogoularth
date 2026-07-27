@@ -634,6 +634,17 @@ body {
     }
 
     const CERT_MAX_GEN = 5;
+    // Mesmos valores do editor (arvore.html) — cada geração tem sua largura de
+    // coluna (colWidth) e faixa de tamanho de pílula/fonte. Antes esse arquivo
+    // usava um valor genérico fixo (colWidth: 1) pra todas as gerações, por
+    // isso as colunas ficavam com largura errada em relação ao gerenciador.
+    const CERT_CONFIG = {
+      1: { minPill: 18, maxPill: 32, minFont: 8, maxFont: 14, colWidth: 1.8 },
+      2: { minPill: 16, maxPill: 28, minFont: 7, maxFont: 12, colWidth: 1.5 },
+      3: { minPill: 14, maxPill: 24, minFont: 6, maxFont: 10, colWidth: 1.3 },
+      4: { minPill: 12, maxPill: 20, minFont: 5, maxFont: 8.5, colWidth: 1.1 },
+      5: { minPill: 10, maxPill: 17, minFont: 4.5, maxFont: 7.5, colWidth: 0.95 }
+    };
 
     function geracaoPaths(depth) {
       let paths = [''];
@@ -790,14 +801,14 @@ body {
       const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
       
       let linhasHtml = `
-        <div class="subject-line" style="color:${config.corSexo || '#4a5347'};"><b style="color:${config.corSexo || '#4a5347'};">Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
-        <div class="subject-line mono" style="color:${config.corAnilhaLabel || '#4a5347'};"><b style="color:${config.corAnilhaLabel || '#4a5347'};">Anilha:</b> ${ave.anilha}</div>
-        <div class="subject-line" style="color:${config.corEspecie || '#4a5347'};"><b style="color:${config.corEspecie || '#4a5347'};">Espécie:</b> ${ave.especie}</div>
-        <div class="subject-line" style="color:${config.corNasc || '#4a5347'};"><b style="color:${config.corNasc || '#4a5347'};">Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
+        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
+        <div class="subject-line mono" style="color:${config.corRaizTexto || '#4a5347'};"><b>Anilha:</b> ${ave.anilha}</div>
+        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Espécie:</b> ${ave.especie}</div>
+        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
       `;
       
       if (ave.raca && ave.raca.trim() !== '') {
-        linhasHtml += `<div class="subject-line" style="color:${config.corRaca || '#4a5347'};">${ave.raca}</div>`;
+        linhasHtml += `<div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};">${ave.raca}</div>`;
       }
       
       const painel = document.getElementById('cert-subject-panel');
@@ -815,13 +826,13 @@ body {
       painel.style.minHeight = `${config.alturaRaiz || 180}px`;
 
       document.querySelectorAll('.cert-pill-anilha').forEach(el => {
-        el.style.color = (config.corAnilha || '#e4c583') + ' !important';
+        el.style.color = (config.corRaizTexto || '#e4c583') + ' !important';
       });
 
       let htmlColunas = '';
       for (let profundidade = 1; profundidade <= CERT_MAX_GEN; profundidade++) {
         const caminhos = geracaoPaths(profundidade);
-        const configPill = { minPill: 10, maxPill: 32, minFont: 6, maxFont: 14, colWidth: 1 };
+        const configPill = CERT_CONFIG[profundidade] || CERT_CONFIG[5];
         
         htmlColunas += `
           <div class="cert-col" 
@@ -891,14 +902,7 @@ body {
         const count = parseInt(col.dataset.count, 10);
         if (!count) return;
 
-        const configs = {
-          1: { minPill: 18, maxPill: 32, minFont: 8, maxFont: 14 },
-          2: { minPill: 16, maxPill: 28, minFont: 7, maxFont: 12 },
-          3: { minPill: 14, maxPill: 24, minFont: 6, maxFont: 10 },
-          4: { minPill: 12, maxPill: 20, minFont: 5, maxFont: 8.5 },
-          5: { minPill: 10, maxPill: 17, minFont: 4.5, maxFont: 7.5 }
-        };
-        const config = configs[depth] || configs[5];
+        const config = CERT_CONFIG[depth] || CERT_CONFIG[5];
 
         const espacamento = 2;
         const alturaPilula = Math.max(
