@@ -54,7 +54,7 @@ const DB = {
     ANILHAS: 'anilhas',
     AVES: 'aves',
     REPRODUCOES: 'reproducoes',
-    ANCESTRAIS: 'ancestrais'
+    ANCESTRAIS: 'ancestrais'  // <-- ADICIONADO
   },
 
   async getAll(table) {
@@ -113,28 +113,34 @@ const DB = {
     return anilhas.find(a => a.numero === numero) || null;
   },
 
-  // ---- ANCESTRAIS (NÃO FAZEM PARTE DO PLANTEL) ----
+  // ============================================================
+  // ===== FUNÇÕES DE ANCESTRAIS (NOVAS) =====
+  // ============================================================
   async getAncestrais() {
     const rows = await apiFetch('/ancestrais');
     return rows;
   },
+
   async addAncestral(dados) {
-    const row = await apiFetch('/ancestrais', { 
-      method: 'POST', 
-      body: JSON.stringify(paraSnake(dados)) 
+    const row = await apiFetch('/ancestrais', {
+      method: 'POST',
+      body: JSON.stringify(paraSnake(dados))
     });
     return row;
   },
+
   async updateAncestral(id, dados) {
-    const row = await apiFetch(`/ancestrais/${id}`, { 
-      method: 'PUT', 
-      body: JSON.stringify(paraSnake(dados)) 
+    const row = await apiFetch(`/ancestrais/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(paraSnake(dados))
     });
     return row;
   },
+
   async deleteAncestral(id) {
     return apiFetch(`/ancestrais/${id}`, { method: 'DELETE' });
   },
+
   async getAncestralPorNome(nome) {
     if (!nome) return null;
     const ancestrais = await this.getAncestrais();
