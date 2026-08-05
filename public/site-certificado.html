@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ===== TODO O CSS ORIGINAL ===== */
 :root {
   --bg: #0d1a16;
   --bg-elevated: #132621;
@@ -108,18 +107,36 @@ body {
   border-color: var(--brass-dim);
 }
 
-/* ================================================================
-   ===== CONTAINER DO CERTIFICADO =====
-   ================================================================ */
+/* ===== LOADING ===== */
+.cert-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--text-muted);
+}
+.cert-loading .spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--brass-dim);
+  border-top-color: var(--brass);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== CONTAINER DO CERTIFICADO ===== */
 .cert-container {
   max-width: 100%;
   margin: 0 auto;
   padding: 0 4px;
 }
 
-/* ================================================================
-   ===== CERTIFICADO ORIGINAL =====
-   ================================================================ */
+/* ===== CERTIFICADO ===== */
 .cert-wrap {
   background: var(--parchment);
   color: var(--ink);
@@ -135,9 +152,14 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  /* ZOOM - começa em 1 */
   transform: scale(1);
   transform-origin: top center;
+  /* Esconde enquanto carrega */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cert-wrap.loaded {
+  opacity: 1;
 }
 
 .cert-bg-color {
@@ -239,7 +261,6 @@ body {
   border-radius: 10px;
   padding: 10px 12px;
   text-align: center;
-  transition: all 0.15s ease;
   align-self: center;
   position: relative;
   z-index: 1;
@@ -287,13 +308,11 @@ body {
   padding: 0 4px;
   width: 100%;
   min-height: 12px;
-  transition: all 0.15s ease;
 }
 
 .cert-pill.wrap {
   white-space: normal;
   word-break: break-word;
-  text-overflow: clip;
   line-height: 1.1;
   padding: 0 4px;
 }
@@ -324,7 +343,6 @@ body {
   font-size: 19px;
   color: #20170a;
   flex-shrink: 0;
-  transition: all 0.15s ease;
 }
 
 .subject-avatar.female { background: radial-gradient(circle at 35% 30%, #d4a098, #b97462 65%, #7c3b2c 100%) !important; }
@@ -339,7 +357,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all 0.15s ease;
 }
 
 .subject-line {
@@ -351,7 +368,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all 0.15s ease;
 }
 
 .subject-line b {
@@ -414,9 +430,7 @@ body {
   background: rgba(199,151,63,0.2);
 }
 
-/* ================================================================
-   ===== BOTÕES DE ZOOM =====
-   ================================================================ */
+/* ===== ZOOM ===== */
 .zoom-controls {
   display: flex;
   justify-content: center;
@@ -452,7 +466,7 @@ body {
 }
 
 /* ================================================================
-   ===== RESPONSIVO - CELULAR (NÃO ESTICA, SÓ AJUSTA O ZOOM) =====
+   ===== RESPONSIVO - CELULAR =====
    ================================================================ */
 @media (max-width: 768px) {
   body { padding: 8px; }
@@ -467,56 +481,93 @@ body {
   .site-nav { text-align: center; }
   .site-nav a { font-size: 11px; padding: 4px 10px; }
 
-  /* ===== IMPORTANTE: CERTIFICADO NÃO ESTICA ===== */
   .cert-wrap {
     width: 100%;
-    max-width: 297mm;
-    /* MANTÉM A PROPORÇÃO CORRETA */
-    aspect-ratio: 297 / 210;
-    /* NO CELULAR, DIMINUI UM POUCO PARA CABER NA TELA */
-    transform: scale(0.85);
-    transform-origin: top center;
+    max-width: 100%;
+    aspect-ratio: auto;
+    min-height: 400px;
     border-radius: 6px;
-    min-height: auto;
+    transform: scale(1);
   }
 
-  /* Ajusta fontes para caber melhor */
-  .cert-title { font-size: 16px; }
-  .cert-criador { font-size: 10px; }
-  .cert-responsavel { font-size: 8px; }
-  .cert-registros { font-size: 7.5px; }
-  .cert-contato { font-size: 7.5px; }
+  /* ===== AJUSTES MOBILE ===== */
+  .cert-title { font-size: 14px; }
+  .cert-criador { font-size: 9px; }
+  .cert-responsavel { font-size: 7.5px; }
+  .cert-registros { font-size: 7px; }
+  .cert-contato { font-size: 7px; }
+
+  .cert-header {
+    padding: 4px 10px;
+    gap: 4px;
+  }
+
+  .cert-body {
+    padding: 6px 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
 
   .cert-subject-panel {
-    flex: 0 0 60px;
-    min-height: 120px;
-    padding: 6px 8px;
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 70px;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 6px 10px;
+    gap: 6px;
+    justify-content: flex-start;
+    align-items: center;
   }
   .subject-avatar {
     width: 32px;
     height: 32px;
     font-size: 14px;
+    margin: 0;
   }
-  .subject-name { font-size: 12px; }
-  .subject-line { font-size: 8px; }
+  .subject-name {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .subject-line {
+    font-size: 8px;
+    white-space: nowrap;
+  }
 
+  .cert-columns {
+    min-height: 100px;
+    gap: 2px;
+    flex-wrap: nowrap;
+  }
+  .cert-col {
+    padding: 1px 2px;
+    gap: 1px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .cert-col:not(:last-child) {
+    padding-right: 2px;
+    border-right: 1px dashed rgba(199,151,63,0.3);
+  }
   .cert-pill {
-    font-size: 7px;
+    font-size: 6.5px;
     min-height: 10px;
-    padding: 0 2px;
+    padding: 1px 2px;
     border-left-width: 2px;
+    line-height: 1.1;
   }
-  .cert-pill-anilha { font-size: 6px; }
-  .cert-footer { font-size: 7.5px; padding: 4px 10px; }
-
-  /* DICA DE ZOOM */
-  .cert-container .dica-zoom {
-    display: block;
-    text-align: center;
-    font-size: 10px;
-    color: var(--text-muted);
-    padding: 4px 0 8px;
-    opacity: 0.6;
+  .cert-pill.wrap {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.1;
+  }
+  .cert-pill-anilha {
+    font-size: 5.5px;
+  }
+  .cert-footer {
+    padding: 4px 10px;
+    font-size: 7px;
   }
 
   .zoom-controls button {
@@ -525,34 +576,39 @@ body {
     font-size: 13px;
     padding: 4px 12px;
   }
+  .zoom-controls .zoom-level {
+    font-size: 12px;
+    min-width: 40px;
+  }
+
+  .dica-zoom {
+    display: block !important;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    padding: 4px 0 8px;
+    opacity: 0.6;
+  }
 }
 
 @media (max-width: 400px) {
-  .cert-wrap {
-    transform: scale(0.7);
-  }
-  .cert-title { font-size: 14px; }
-  .cert-subject-panel { min-height: 90px; }
+  .cert-subject-panel { min-height: 60px; }
   .subject-avatar { width: 28px; height: 28px; font-size: 12px; }
   .subject-name { font-size: 10px; }
   .subject-line { font-size: 7px; }
-  .cert-pill { font-size: 6px; min-height: 8px; }
+  .cert-pill { font-size: 5.5px; min-height: 8px; }
   .cert-pill-anilha { font-size: 5px; }
+  .cert-title { font-size: 12px; }
+  .cert-criador { font-size: 8px; }
 }
 
-/* Mostra a dica de zoom apenas no celular */
 .dica-zoom {
   display: none;
-}
-@media (max-width: 768px) {
-  .dica-zoom {
-    display: block !important;
-  }
 }
 
 /* ===== IMPRESSÃO ===== */
 @media print {
-  .site-header, .btn-voltar, .zoom-controls, .dica-zoom { display: none !important; }
+  .site-header, .btn-voltar, .zoom-controls, .dica-zoom, .cert-loading { display: none !important; }
   .cert-wrap {
     box-shadow: none !important;
     border-radius: 0 !important;
@@ -561,6 +617,7 @@ body {
     height: 210mm !important;
     aspect-ratio: auto !important;
     transform: scale(1) !important;
+    opacity: 1 !important;
   }
   body { background: white !important; padding: 0 !important; }
   @page { size: landscape; margin: 0; }
@@ -578,8 +635,14 @@ body {
   </header>
 
   <div class="cert-container">
+    <!-- LOADING -->
+    <div class="cert-loading" id="cert-loading">
+      <div class="spinner"></div>
+      <span>Carregando certificado...</span>
+    </div>
+
     <!-- Dica de zoom para celular -->
-    <div class="dica-zoom">🔍 Use os botões de zoom para ampliar o certificado</div>
+    <div class="dica-zoom">🔍 Use os botões de zoom para ampliar</div>
 
     <!-- Controles de Zoom -->
     <div class="zoom-controls">
@@ -590,7 +653,7 @@ body {
     </div>
 
     <!-- CERTIFICADO -->
-    <div class="cert-wrap" id="cert-wrap">
+    <div class="cert-wrap" id="cert-wrap" style="transform: scale(1); transform-origin: top center;">
       <div class="cert-bg-color" id="cert-bg-color" style="background:#f3ecda;"></div>
       <img class="cert-bg-image" id="cert-bg-image" style="display:none;" alt="Fundo">
       
@@ -630,9 +693,9 @@ body {
     function updateZoom() {
       const wrap = document.getElementById('cert-wrap');
       if (wrap) {
-        // No celular, o zoom começa em 0.85 (para caber na tela)
-        // O usuário pode aumentar a partir daí
-        const baseZoom = window.innerWidth <= 768 ? 0.85 : 1;
+        const isMobile = window.innerWidth <= 768;
+        // No mobile, base é 0.7 para caber, no desktop é 1
+        const baseZoom = isMobile ? 0.7 : 1;
         const totalZoom = baseZoom * currentZoom;
         wrap.style.transform = `scale(${totalZoom})`;
         wrap.style.transformOrigin = 'top center';
@@ -655,12 +718,9 @@ body {
       updateZoom();
     }
 
-    // Atualiza zoom ao redimensionar
-    window.addEventListener('resize', function() {
-      updateZoom();
-    });
+    // ===== CARREGAR CERTIFICADO COM LOADING =====
+    let certificadoCarregado = false;
 
-    // ===== TODO O JAVASCRIPT ORIGINAL (mantido) =====
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
     }
@@ -695,52 +755,8 @@ body {
     async function getCertConfig() {
       try {
         const config = await DB.getConfig('cert_config');
-        if (config) {
-          return {
-            bgColor: config.bgColor || '#f3ecda',
-            bgImage: config.bgImage || null,
-            bgOpacidade: config.bgOpacidade || 100,
-            bgBrilho: config.bgBrilho || 100,
-            corTitulo: config.corTitulo || '#c7973f',
-            corCriador: config.corCriador || '#23291f',
-            corResponsavel: config.corResponsavel || '#4a5347',
-            corRegistros: config.corRegistros || '#4a5347',
-            corContato: config.corContato || '#4a5347',
-            corLinhaHeader: config.corLinhaHeader || '#c7973f',
-            corMachoFundo: config.corMachoFundo || '#1a2e28',
-            corMachoTexto: config.corMachoTexto || '#ece6d6',
-            corFemeaFundo: config.corFemeaFundo || '#2e1a1a',
-            corFemeaTexto: config.corFemeaTexto || '#ece6d6',
-            corRaizFundo: config.corRaizFundo || '#132621',
-            corRaizOpacidade: config.corRaizOpacidade || 100,
-            corRaizTexto: config.corRaizTexto || '#e4c583',
-            corBordaNos: config.corBordaNos || '#c7973f',
-            corAvatarFundo: config.corAvatarFundo || '#c7973f',
-            corAvatarTexto: config.corAvatarTexto || '#20170a',
-            corBordaRaiz: config.corBordaRaiz || '#c7973f',
-            corSexo: config.corSexo || '#4a5347',
-            corAnilhaLabel: config.corAnilhaLabel || '#4a5347',
-            corEspecie: config.corEspecie || '#4a5347',
-            corNasc: config.corNasc || '#4a5347',
-            corRaca: config.corRaca || '#4a5347',
-            corAnilha: config.corAnilha || '#e4c583',
-            corRodapeTexto: config.corRodapeTexto || '#4a5347',
-            corRodapeLinha: config.corRodapeLinha || '#c7973f',
-            corRodapeFundo: config.corRodapeFundo || 'rgba(199,151,63,0.06)',
-            larguraRaiz: config.larguraRaiz || 86,
-            alturaRaiz: config.alturaRaiz || 180,
-            tamNome: config.tamNome || 15,
-            tamInfo: config.tamInfo || 10.5,
-            tamAvatar: config.tamAvatar || 46,
-            negritoNome: config.negritoNome || 'bold',
-            fonteCertificado: config.fonteCertificado || "'Manrope', sans-serif"
-          };
-        }
+        if (config) return config;
       } catch (e) {}
-      return getConfigPadrao();
-    }
-
-    function getConfigPadrao() {
       return {
         bgColor: '#f3ecda',
         bgImage: null,
@@ -763,12 +779,6 @@ body {
         corAvatarFundo: '#c7973f',
         corAvatarTexto: '#20170a',
         corBordaRaiz: '#c7973f',
-        corSexo: '#4a5347',
-        corAnilhaLabel: '#4a5347',
-        corEspecie: '#4a5347',
-        corNasc: '#4a5347',
-        corRaca: '#4a5347',
-        corAnilha: '#e4c583',
         corRodapeTexto: '#4a5347',
         corRodapeLinha: '#c7973f',
         corRodapeFundo: 'rgba(199,151,63,0.06)',
@@ -780,10 +790,6 @@ body {
         negritoNome: 'bold',
         fonteCertificado: "'Manrope', sans-serif"
       };
-    }
-
-    async function getAveCompleta(id) {
-      return DB.getCertificadoPublico(id);
     }
 
     function formatarData(data) {
@@ -828,219 +834,239 @@ body {
     }
 
     async function carregarCertificado() {
+      const loading = document.getElementById('cert-loading');
+      const wrap = document.getElementById('cert-wrap');
+      
       const params = new URLSearchParams(window.location.search);
       const id = parseInt(params.get('id'));
       
       if (!id) {
         document.getElementById('cert-subject-panel').innerHTML = '<div class="subject-name">Ave não encontrada</div>';
+        loading.style.display = 'none';
+        wrap.classList.add('loaded');
         return;
       }
       
-      const ave = await getAveCompleta(id);
-      
-      if (!ave) {
-        document.getElementById('cert-subject-panel').innerHTML = '<div class="subject-name">Ave não encontrada</div>';
-        return;
-      }
-
-      const config = await getCertConfig();
-
-      const tree = {};
-      tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
-      
-      if (ave.pai && ave.pai !== ave.nome) {
-        if (ave.paiEncontrado) {
-          tree['pai'] = { nome: ave.paiEncontrado.nome, anilha: ave.paiEncontrado.anilha || '' };
-          if (ave.paiEncontrado.pai && ave.paiEncontrado.pai !== ave.paiEncontrado.nome) {
-            tree['pai.pai'] = { nome: ave.paiEncontrado.pai, anilha: ave.paiEncontrado.anilhaPai || '' };
-          }
-          if (ave.paiEncontrado.mae && ave.paiEncontrado.mae !== ave.paiEncontrado.nome) {
-            tree['pai.mae'] = { nome: ave.paiEncontrado.mae, anilha: ave.paiEncontrado.anilhaMae || '' };
-          }
-        } else {
-          tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
-        }
-      }
-      
-      if (ave.mae && ave.mae !== ave.nome) {
-        if (ave.maeEncontrada) {
-          tree['mae'] = { nome: ave.maeEncontrada.nome, anilha: ave.maeEncontrada.anilha || '' };
-          if (ave.maeEncontrada.pai && ave.maeEncontrada.pai !== ave.maeEncontrada.nome) {
-            tree['mae.pai'] = { nome: ave.maeEncontrada.pai, anilha: ave.maeEncontrada.anilhaPai || '' };
-          }
-          if (ave.maeEncontrada.mae && ave.maeEncontrada.mae !== ave.maeEncontrada.nome) {
-            tree['mae.mae'] = { nome: ave.maeEncontrada.mae, anilha: ave.maeEncontrada.anilhaMae || '' };
-          }
-        } else {
-          tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
-        }
-      }
-      
-      if (ave.avoPaterno && !tree['pai.pai']) {
-        tree['pai.pai'] = { nome: ave.avoPaterno, anilha: ave.anilhaAvoPaterno || '' };
-      }
-      if (ave.avoPaterna && !tree['pai.mae']) {
-        tree['pai.mae'] = { nome: ave.avoPaterna, anilha: ave.anilhaAvoPaterna || '' };
-      }
-      if (ave.avoMaterno && !tree['mae.pai']) {
-        tree['mae.pai'] = { nome: ave.avoMaterno, anilha: ave.anilhaAvoMaterno || '' };
-      }
-      if (ave.avoMaterna && !tree['mae.mae']) {
-        tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
-      }
-
-      if (Array.isArray(ave.ancestrais)) {
-        ave.ancestrais.forEach(a => {
-          if (a && a.caminho && a.nome && !tree[a.caminho]) {
-            tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
-          }
-        });
-      }
-
-      function obterAncestral(caminho) {
-        const encontrado = tree[caminho];
-        return (encontrado && encontrado.nome) ? encontrado.nome : null;
-      }
-
-      function obterAnilha(caminho) {
-        const encontrado = tree[caminho];
-        return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
-      }
-
-      const bgColor = document.getElementById('cert-bg-color');
-      const bgImage = document.getElementById('cert-bg-image');
-      
-      if (config.bgImage) {
-        bgColor.style.background = 'transparent';
-        bgImage.src = config.bgImage;
-        bgImage.style.display = 'block';
-        bgImage.style.opacity = (config.bgOpacidade || 100) / 100;
-        bgImage.style.filter = `brightness(${(config.bgBrilho || 100) / 100})`;
-      } else {
-        bgColor.style.background = config.bgColor || '#f3ecda';
-        bgImage.style.display = 'none';
-        bgImage.style.opacity = 1;
-        bgImage.style.filter = 'none';
-      }
-
-      const certWrap = document.getElementById('cert-wrap');
-      if (certWrap) {
-        certWrap.style.fontFamily = config.fonteCertificado || "'Manrope', sans-serif";
-      }
-
-      const header = document.getElementById('cert-header');
-      if (header) {
-        header.style.borderBottomColor = config.corLinhaHeader || '#c7973f';
-        header.style.background = (config.corLinhaHeader || '#c7973f') + '11';
-      }
-      
-      document.getElementById('cert-title').style.color = config.corTitulo || '#c7973f';
-      document.getElementById('cert-criador').style.color = config.corCriador || '#23291f';
-      document.getElementById('cert-responsavel').style.color = config.corResponsavel || '#4a5347';
-      document.getElementById('cert-registros').style.color = config.corRegistros || '#4a5347';
-      document.getElementById('cert-contato').style.color = config.corContato || '#4a5347';
-
-      const footer = document.getElementById('cert-footer');
-      if (footer) {
-        footer.style.borderTopColor = config.corRodapeLinha || '#c7973f';
-        footer.style.background = config.corRodapeFundo || 'rgba(199,151,63,0.06)';
-      }
-      document.getElementById('cert-footer-text').style.color = config.corRodapeTexto || '#4a5347';
-
-      const classeAvatar = ave.sexo === 'M' ? 'male' : (ave.sexo === 'F' ? 'female' : '');
-      const corAvatarPorSexo = ave.sexo === 'M' ? (config.corMachoFundo || '#1a2e28')
-        : ave.sexo === 'F' ? (config.corFemeaFundo || '#2e1a1a')
-        : (config.corAvatarFundo || '#c7973f');
-      const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
-      
-      let linhasHtml = `
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
-        <div class="subject-line mono" style="color:${config.corRaizTexto || '#4a5347'};"><b>Anilha:</b> ${ave.anilha}</div>
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Espécie:</b> ${ave.especie}</div>
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
-      `;
-      
-      if (ave.raca && ave.raca.trim() !== '') {
-        linhasHtml += `<div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};">${ave.raca}</div>`;
-      }
-      
-      const painel = document.getElementById('cert-subject-panel');
-      painel.innerHTML = `
-        <div class="subject-avatar ${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</div>
-        <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
-        ${linhasHtml}
-      `;
-
-      painel.style.background = (config.corRaizFundo || '#132621') + hexAlpha(config.corRaizOpacidade || 100);
-      painel.style.borderColor = config.corBordaRaiz || '#c7973f';
-      painel.style.color = config.corRaizTexto || '#e4c583';
-      painel.style.flex = `0 0 ${config.larguraRaiz || 86}px`;
-      painel.style.height = `${config.alturaRaiz || 180}px`;
-      painel.style.minHeight = `${config.alturaRaiz || 180}px`;
-
-      document.querySelectorAll('.cert-pill-anilha').forEach(el => {
-        el.style.color = (config.corRaizTexto || '#e4c583') + ' !important';
-      });
-
-      let htmlColunas = '';
-      for (let profundidade = 1; profundidade <= 5; profundidade++) {
-        const caminhos = geracaoPaths(profundidade);
-        const configPill = CERT_CONFIG_GEN[profundidade] || CERT_CONFIG_GEN[5];
+      try {
+        const ave = await DB.getCertificadoPublico(id);
         
-        htmlColunas += `
-          <div class="cert-col" 
-               data-depth="${profundidade}" 
-               data-count="${caminhos.length}" 
-               style="flex: ${configPill.colWidth} 1 0; min-width: 50px;">
+        if (!ave) {
+          document.getElementById('cert-subject-panel').innerHTML = '<div class="subject-name">Ave não encontrada</div>';
+          loading.style.display = 'none';
+          wrap.classList.add('loaded');
+          return;
+        }
+
+        const config = await getCertConfig();
+
+        // Construir árvore
+        const tree = {};
+        tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
+        
+        if (ave.pai && ave.pai !== ave.nome) {
+          if (ave.paiEncontrado) {
+            tree['pai'] = { nome: ave.paiEncontrado.nome, anilha: ave.paiEncontrado.anilha || '' };
+            if (ave.paiEncontrado.pai && ave.paiEncontrado.pai !== ave.paiEncontrado.nome) {
+              tree['pai.pai'] = { nome: ave.paiEncontrado.pai, anilha: ave.paiEncontrado.anilhaPai || '' };
+            }
+            if (ave.paiEncontrado.mae && ave.paiEncontrado.mae !== ave.paiEncontrado.nome) {
+              tree['pai.mae'] = { nome: ave.paiEncontrado.mae, anilha: ave.paiEncontrado.anilhaMae || '' };
+            }
+          } else {
+            tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
+          }
+        }
+        
+        if (ave.mae && ave.mae !== ave.nome) {
+          if (ave.maeEncontrada) {
+            tree['mae'] = { nome: ave.maeEncontrada.nome, anilha: ave.maeEncontrada.anilha || '' };
+            if (ave.maeEncontrada.pai && ave.maeEncontrada.pai !== ave.maeEncontrada.nome) {
+              tree['mae.pai'] = { nome: ave.maeEncontrada.pai, anilha: ave.maeEncontrada.anilhaPai || '' };
+            }
+            if (ave.maeEncontrada.mae && ave.maeEncontrada.mae !== ave.maeEncontrada.nome) {
+              tree['mae.mae'] = { nome: ave.maeEncontrada.mae, anilha: ave.maeEncontrada.anilhaMae || '' };
+            }
+          } else {
+            tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
+          }
+        }
+        
+        if (ave.avoPaterno && !tree['pai.pai']) {
+          tree['pai.pai'] = { nome: ave.avoPaterno, anilha: ave.anilhaAvoPaterno || '' };
+        }
+        if (ave.avoPaterna && !tree['pai.mae']) {
+          tree['pai.mae'] = { nome: ave.avoPaterna, anilha: ave.anilhaAvoPaterna || '' };
+        }
+        if (ave.avoMaterno && !tree['mae.pai']) {
+          tree['mae.pai'] = { nome: ave.avoMaterno, anilha: ave.anilhaAvoMaterno || '' };
+        }
+        if (ave.avoMaterna && !tree['mae.mae']) {
+          tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
+        }
+
+        if (Array.isArray(ave.ancestrais)) {
+          ave.ancestrais.forEach(a => {
+            if (a && a.caminho && a.nome && !tree[a.caminho]) {
+              tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
+            }
+          });
+        }
+
+        function obterAncestral(caminho) {
+          const encontrado = tree[caminho];
+          return (encontrado && encontrado.nome) ? encontrado.nome : null;
+        }
+
+        function obterAnilha(caminho) {
+          const encontrado = tree[caminho];
+          return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
+        }
+
+        // Aplicar cores
+        const bgColor = document.getElementById('cert-bg-color');
+        const bgImage = document.getElementById('cert-bg-image');
+        
+        if (config.bgImage) {
+          bgColor.style.background = 'transparent';
+          bgImage.src = config.bgImage;
+          bgImage.style.display = 'block';
+          bgImage.style.opacity = (config.bgOpacidade || 100) / 100;
+          bgImage.style.filter = `brightness(${(config.bgBrilho || 100) / 100})`;
+        } else {
+          bgColor.style.background = config.bgColor || '#f3ecda';
+          bgImage.style.display = 'none';
+        }
+
+        const certWrap = document.getElementById('cert-wrap');
+        if (certWrap) {
+          certWrap.style.fontFamily = config.fonteCertificado || "'Manrope', sans-serif";
+        }
+
+        const header = document.getElementById('cert-header');
+        if (header) {
+          header.style.borderBottomColor = config.corLinhaHeader || '#c7973f';
+          header.style.background = (config.corLinhaHeader || '#c7973f') + '11';
+        }
+        
+        document.getElementById('cert-title').style.color = config.corTitulo || '#c7973f';
+        document.getElementById('cert-criador').style.color = config.corCriador || '#23291f';
+        document.getElementById('cert-responsavel').style.color = config.corResponsavel || '#4a5347';
+        document.getElementById('cert-registros').style.color = config.corRegistros || '#4a5347';
+        document.getElementById('cert-contato').style.color = config.corContato || '#4a5347';
+
+        const footer = document.getElementById('cert-footer');
+        if (footer) {
+          footer.style.borderTopColor = config.corRodapeLinha || '#c7973f';
+          footer.style.background = config.corRodapeFundo || 'rgba(199,151,63,0.06)';
+        }
+        document.getElementById('cert-footer-text').style.color = config.corRodapeTexto || '#4a5347';
+
+        // Painel da ave
+        const classeAvatar = ave.sexo === 'M' ? 'male' : (ave.sexo === 'F' ? 'female' : '');
+        const corAvatarPorSexo = ave.sexo === 'M' ? (config.corMachoFundo || '#1a2e28')
+          : ave.sexo === 'F' ? (config.corFemeaFundo || '#2e1a1a')
+          : (config.corAvatarFundo || '#c7973f');
+        const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
+        
+        let linhasHtml = `
+          <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
+          <div class="subject-line mono" style="color:${config.corRaizTexto || '#4a5347'};"><b>Anilha:</b> ${ave.anilha}</div>
+          <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Espécie:</b> ${ave.especie}</div>
+          <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
         `;
         
-        caminhos.forEach(caminho => {
-          const nome = obterAncestral(caminho);
-          const anilha = obterAnilha(caminho);
-          const isIndefinido = !nome || nome === 'Indefinido';
-          const sexo = caminho.endsWith('pai') ? 'M' : 'F';
-          const classeWrap = profundidade <= 2 ? ' wrap' : '';
-          const classePilula = 'cert-pill' + classeWrap + (sexo === 'F' ? ' female' : '') + (isIndefinido ? ' indefinido' : '');
+        if (ave.raca && ave.raca.trim() !== '') {
+          linhasHtml += `<div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};">${ave.raca}</div>`;
+        }
+        
+        const painel = document.getElementById('cert-subject-panel');
+        painel.innerHTML = `
+          <div class="subject-avatar ${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
+            ${linhasHtml}
+          </div>
+        `;
+
+        painel.style.background = (config.corRaizFundo || '#132621') + hexAlpha(config.corRaizOpacidade || 100);
+        painel.style.borderColor = config.corBordaRaiz || '#c7973f';
+        painel.style.color = config.corRaizTexto || '#e4c583';
+
+        // Árvore
+        let htmlColunas = '';
+        for (let profundidade = 1; profundidade <= 5; profundidade++) {
+          const caminhos = geracaoPaths(profundidade);
+          const configPill = CERT_CONFIG_GEN[profundidade] || CERT_CONFIG_GEN[5];
           
-          if (isIndefinido) {
-            htmlColunas += `<div class="${classePilula}" title="Indefinido">Indefinido</div>`;
+          htmlColunas += `
+            <div class="cert-col" 
+                 data-depth="${profundidade}" 
+                 data-count="${caminhos.length}">
+          `;
+          
+          caminhos.forEach(caminho => {
+            const nome = obterAncestral(caminho);
+            const anilha = obterAnilha(caminho);
+            const isIndefinido = !nome || nome === 'Indefinido';
+            const sexo = caminho.endsWith('pai') ? 'M' : 'F';
+            const classeWrap = profundidade <= 2 ? ' wrap' : '';
+            const classePilula = 'cert-pill' + classeWrap + (sexo === 'F' ? ' female' : '') + (isIndefinido ? ' indefinido' : '');
+            
+            if (isIndefinido) {
+              htmlColunas += `<div class="${classePilula}" title="Indefinido">Indefinido</div>`;
+            } else {
+              htmlColunas += `
+                <div class="${classePilula}" title="${nome}">${nome}${anilha ? `<div class="cert-pill-anilha">${anilha}</div>` : ''}</div>
+              `;
+            }
+          });
+          
+          htmlColunas += `</div>`;
+        }
+
+        document.getElementById('cert-columns').innerHTML = htmlColunas;
+
+        // Aplicar cores nas pílulas
+        document.querySelectorAll('.cert-pill:not(.indefinido)').forEach(pilula => {
+          const isFemale = pilula.classList.contains('female');
+          if (isFemale) {
+            pilula.style.background = config.corFemeaFundo || '#2e1a1a';
+            pilula.style.color = config.corFemeaTexto || '#ece6d6';
+            pilula.style.borderColor = (config.corFemeaFundo || '#2e1a1a') + '66';
+            pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
           } else {
-            htmlColunas += `
-              <div class="cert-pill-wrapper">
-                <div class="${classePilula}" title="${nome}" style="width:100%;">${nome}</div>
-                ${anilha ? `<div class="cert-pill-anilha">${anilha}</div>` : ''}
-              </div>
-            `;
+            pilula.style.background = config.corMachoFundo || '#1a2e28';
+            pilula.style.color = config.corMachoTexto || '#ece6d6';
+            pilula.style.borderColor = (config.corMachoFundo || '#1a2e28') + '66';
+            pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
+          }
+          pilula.style.border = `1px solid ${(config.corBordaNos || '#c7973f')}66`;
+          if (isFemale) {
+            pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
+          } else {
+            pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
           }
         });
-        
-        htmlColunas += `</div>`;
+
+        // Esconde loading e mostra certificado
+        loading.style.display = 'none';
+        wrap.classList.add('loaded');
+
+        // Ajusta as pílulas depois de renderizar
+        setTimeout(() => {
+          ajustarPilulas();
+          updateZoom();
+        }, 100);
+
+      } catch (error) {
+        console.error('Erro ao carregar certificado:', error);
+        document.getElementById('cert-subject-panel').innerHTML = `
+          <div class="subject-name">Erro ao carregar</div>
+          <div class="subject-line">${error.message}</div>
+        `;
+        document.getElementById('cert-loading').style.display = 'none';
+        wrap.classList.add('loaded');
       }
-
-      document.getElementById('cert-columns').innerHTML = htmlColunas;
-
-      document.querySelectorAll('.cert-pill:not(.indefinido)').forEach(pilula => {
-        const isFemale = pilula.classList.contains('female');
-        if (isFemale) {
-          pilula.style.background = config.corFemeaFundo || '#2e1a1a';
-          pilula.style.color = config.corFemeaTexto || '#ece6d6';
-          pilula.style.borderColor = (config.corFemeaFundo || '#2e1a1a') + '66';
-          pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
-        } else {
-          pilula.style.background = config.corMachoFundo || '#1a2e28';
-          pilula.style.color = config.corMachoTexto || '#ece6d6';
-          pilula.style.borderColor = (config.corMachoFundo || '#1a2e28') + '66';
-          pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
-        }
-        pilula.style.border = `1px solid ${(config.corBordaNos || '#c7973f')}66`;
-        if (isFemale) {
-          pilula.style.borderLeftColor = config.corFemeaFundo || '#2e1a1a';
-        } else {
-          pilula.style.borderLeftColor = config.corMachoFundo || '#1a2e28';
-        }
-      });
-
-      requestAnimationFrame(() => ajustarPilulas());
     }
 
     function ajustarPilulas() {
@@ -1048,7 +1074,8 @@ body {
       const container = document.getElementById('cert-columns');
       if (!container || cols.length === 0) return;
 
-      const alturaDisponivel = container.clientHeight || 400;
+      const alturaDisponivel = container.clientHeight || 300;
+      const isMobile = window.innerWidth <= 768;
       
       cols.forEach(col => {
         const depth = parseInt(col.dataset.depth, 10);
@@ -1056,46 +1083,58 @@ body {
         if (!count) return;
 
         const config = CERT_CONFIG_GEN[depth] || CERT_CONFIG_GEN[5];
-
-        const espacamento = 2;
+        
+        // No mobile, reduz o tamanho das pílulas
+        const factor = isMobile ? 0.6 : 1;
+        const minPill = Math.max(6, config.minPill * factor);
+        const maxPill = Math.max(10, config.maxPill * factor);
+        
+        const espacamento = isMobile ? 1 : 2;
         const alturaPilula = Math.max(
-          config.minPill,
-          Math.min(config.maxPill, (alturaDisponivel / count) - espacamento)
+          minPill,
+          Math.min(maxPill, (alturaDisponivel / count) - espacamento)
         );
 
-        const proporcao = (alturaPilula - config.minPill) / (config.maxPill - config.minPill);
+        const proporcao = (alturaPilula - minPill) / (maxPill - minPill);
+        const minFont = Math.max(4, config.minFont * factor);
+        const maxFont = Math.max(6, config.maxFont * factor);
         const tamanhoFonte = Math.max(
-          config.minFont,
-          Math.min(config.maxFont, config.minFont + (config.maxFont - config.minFont) * proporcao)
+          minFont,
+          Math.min(maxFont, minFont + (maxFont - minFont) * proporcao)
         );
 
         col.querySelectorAll('.cert-pill').forEach(pilula => {
-          pilula.style.height = alturaPilula + 'px';
-          pilula.style.fontSize = tamanhoFonte + 'px';
-          pilula.style.padding = '0 6px';
-          if (depth <= 2) {
+          pilula.style.height = Math.max(8, alturaPilula) + 'px';
+          pilula.style.fontSize = Math.max(4, tamanhoFonte) + 'px';
+          pilula.style.padding = isMobile ? '0 2px' : '0 6px';
+          if (depth <= 2 && !isMobile) {
             pilula.style.whiteSpace = 'normal';
             pilula.style.wordBreak = 'break-word';
-            pilula.style.lineHeight = '1.2';
+            pilula.style.lineHeight = '1.1';
           } else {
             pilula.style.whiteSpace = 'nowrap';
-            pilula.style.lineHeight = alturaPilula + 'px';
+            pilula.style.lineHeight = Math.max(8, alturaPilula) + 'px';
           }
         });
       });
     }
 
+    // Inicialização
     carregarLogo();
     carregarCertificado();
 
+    // Reajustar ao redimensionar
     let timeout;
     window.addEventListener('resize', function() {
       clearTimeout(timeout);
-      timeout = setTimeout(ajustarPilulas, 200);
+      timeout = setTimeout(() => {
+        ajustarPilulas();
+        updateZoom();
+      }, 300);
     });
 
-    // Inicializa o zoom
-    setTimeout(updateZoom, 100);
+    // Inicializa zoom
+    setTimeout(updateZoom, 200);
   </script>
   <script src="site-buttons.js"></script>
 </body>
