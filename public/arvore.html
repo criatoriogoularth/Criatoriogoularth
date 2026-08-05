@@ -888,6 +888,19 @@
             <option value="F">♀ Fêmea</option>
           </select>
         </div>
+        <div class="full-width">
+          <label>Espécie</label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select id="novo-anc-especie" style="flex:1;">
+              <option value="">Selecione uma espécie...</option>
+            </select>
+            <button type="button" class="btn-atualizar-especies" onclick="popularSelectEspecieAncestral()" title="Atualizar lista de espécies" style="padding:4px 8px;">⟳</button>
+          </div>
+        </div>
+        <div class="full-width">
+          <label>Raça (opcional)</label>
+          <input type="text" id="novo-anc-raca" placeholder="Ex: Timbrado Espanhol Original">
+        </div>
       </div>
       
       <div class="form-actions">
@@ -1490,9 +1503,11 @@ function editarAncestral(path) {
     document.getElementById('novo-anc-nome').value = '';
     document.getElementById('novo-anc-anilha').value = '';
     document.getElementById('novo-anc-sexo').value = sexo;
+    document.getElementById('novo-anc-raca').value = '';
     document.getElementById('novo-anc-botao').textContent = '+ Criar Novo Ancestral';
     document.getElementById('novo-anc-titulo').textContent = '✏️ Novo Ancestral';
     document.getElementById('modal-novo-ancestral').style.display = 'block';
+    popularSelectEspecieAncestral();
     renderModalLista();
     document.getElementById('modal-overlay').classList.add('open');
     return;
@@ -1508,9 +1523,14 @@ function editarAncestral(path) {
   document.getElementById('novo-anc-nome').value = existente.nome || '';
   document.getElementById('novo-anc-anilha').value = existente.anilha || '';
   document.getElementById('novo-anc-sexo').value = sexo;
+  document.getElementById('novo-anc-raca').value = existente.raca || '';
   document.getElementById('novo-anc-botao').textContent = '💾 Atualizar Ancestral';
   document.getElementById('novo-anc-titulo').textContent = `✏️ Editando: ${existente.nome}`;
   document.getElementById('modal-novo-ancestral').style.display = 'block';
+  popularSelectEspecieAncestral().then(() => {
+    const sel = document.getElementById('novo-anc-especie');
+    if (sel && existente.especie) sel.value = existente.especie;
+  });
   renderModalLista();
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -1532,10 +1552,12 @@ function abrirModal(path, sexo) {
   document.getElementById('novo-anc-nome').value = '';
   document.getElementById('novo-anc-anilha').value = '';
   document.getElementById('novo-anc-sexo').value = sexo;
+  document.getElementById('novo-anc-raca').value = '';
   
   if (modalEditando && existente) {
     document.getElementById('novo-anc-nome').value = existente.nome || '';
     document.getElementById('novo-anc-anilha').value = existente.anilha || '';
+    document.getElementById('novo-anc-raca').value = existente.raca || '';
     document.getElementById('novo-anc-botao').textContent = '💾 Atualizar Ancestral';
     document.getElementById('novo-anc-titulo').textContent = `✏️ Editando: ${existente.nome}`;
   } else {
@@ -1544,6 +1566,10 @@ function abrirModal(path, sexo) {
   }
   
   document.getElementById('modal-novo-ancestral').style.display = 'none';
+  popularSelectEspecieAncestral().then(() => {
+    const sel = document.getElementById('novo-anc-especie');
+    if (sel && modalEditando && existente && existente.especie) sel.value = existente.especie;
+  });
   renderModalLista();
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -1552,10 +1578,40 @@ function toggleNovoAncestral() {
   const form = document.getElementById('modal-novo-ancestral');
   if (form.style.display === 'none' || form.style.display === '') {
     form.style.display = 'block';
+    popularSelectEspecieAncestral();
     document.getElementById('novo-anc-nome').focus();
   } else {
     form.style.display = 'none';
   }
+}
+
+// ============================================================
+// ESPÉCIE DO ANCESTRAL
+// ============================================================
+
+async function getEspeciesAncestral() {
+  return (await DB.getConfig('especies_aves')) || [];
+}
+
+async function popularSelectEspecieAncestral() {
+  const select = document.getElementById('novo-anc-especie');
+  if (!select) return;
+
+  const especies = await getEspeciesAncestral();
+  const valorAtual = select.value || (aveSelecionada ? aveSelecionada.especie : '');
+
+  if (especies.length === 0) {
+    select.innerHTML = `<option value="">Nenhuma espécie cadastrada. Cadastre em Dados do Criatório.</option>`;
+    return;
+  }
+
+  let html = `<option value="">Selecione uma espécie...</option>`;
+  especies.forEach(e => {
+    const label = e.cientifico ? `${e.popular} (${e.cientifico})` : e.popular;
+    html += `<option value="${e.popular}">${label}</option>`;
+  });
+  select.innerHTML = html;
+  if (valorAtual) select.value = valorAtual;
 }
 
 function fecharNovoAncestral() {
@@ -1575,6 +1631,9 @@ async function salvarAncestralDireto() {
   const nome = document.getElementById('novo-anc-nome').value.trim();
   const anilha = document.getElementById('novo-anc-anilha').value.trim();
   const sexo = document.getElementById('novo-anc-sexo').value;
+  const especieSel = document.getElementById('novo-anc-especie');
+  const especie = (especieSel && especieSel.value) ? especieSel.value : (aveSelecionada ? aveSelecionada.especie : '');
+  const raca = document.getElementById('novo-anc-raca').value.trim();
   
   if (!nome) {
     alert('Digite o nome do ancestral.');
@@ -1599,7 +1658,7 @@ async function salvarAncestralDireto() {
   try { ancestralExistente = await DB.getAncestralPorNome(nome); } catch(e) { console.warn('Erro ao buscar ancestral:', e); }
   
   if (modalEditando) {
-    tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, id: aveExistente ? aveExistente.id : null, isAncestral: true };
+    tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, especie: especie || '', raca: raca || '', id: aveExistente ? aveExistente.id : null, isAncestral: true };
     treeModificada = true;
     
     if (!aveExistente && !ancestralExistente) {
@@ -1608,7 +1667,8 @@ async function salvarAncestralDireto() {
           nome: nome,
           anilha: anilha || '',
           sexo: sexo,
-          especie: aveSelecionada ? aveSelecionada.especie : ''
+          especie: especie || '',
+          raca: raca || ''
         });
         alert(`✅ Ancestral "${nome}" salvo com sucesso!`);
       } catch(e) {
@@ -1624,7 +1684,7 @@ async function salvarAncestralDireto() {
   }
   
   // CRIAÇÃO NOVA
-  tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, id: aveExistente ? aveExistente.id : null, isAncestral: true };
+  tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, especie: especie || '', raca: raca || '', id: aveExistente ? aveExistente.id : null, isAncestral: true };
   treeModificada = true;
   
   if (!aveExistente && !ancestralExistente) {
@@ -1633,7 +1693,8 @@ async function salvarAncestralDireto() {
         nome: nome,
         anilha: anilha || '',
         sexo: sexo,
-        especie: aveSelecionada ? aveSelecionada.especie : ''
+        especie: especie || '',
+        raca: raca || ''
       });
       alert(`✅ Ancestral "${nome}" salvo com sucesso! (NÃO vai para o plantel)`);
     } catch(e) {
@@ -1839,7 +1900,8 @@ async function salvarArvore() {
             nome: node.nome,
             anilha: node.anilha || '',
             sexo: node.sexo || (caminho.endsWith('pai') ? 'M' : 'F'),
-            especie: aveSelecionada ? aveSelecionada.especie : '',
+            especie: node.especie || (aveSelecionada ? aveSelecionada.especie : ''),
+            raca: node.raca || '',
             observacao: `Ancestral de ${aveSelecionada.nome} (${caminho})`
           });
         } catch(e) { console.warn('Erro ao salvar ancestral:', node.nome); }
@@ -1860,6 +1922,8 @@ async function salvarArvore() {
         sexo: sexo,
         nome: tree[caminho].nome || '',
         anilha: tree[caminho].anilha || '',
+        especie: tree[caminho].especie || '',
+        raca: tree[caminho].raca || '',
         nota: ''
       });
     }

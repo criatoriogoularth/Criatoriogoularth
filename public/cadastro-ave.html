@@ -825,7 +825,8 @@ async function salvarAncestraisDaArvore(ancestrais, nomeAve, especie) {
             nome: anc.nome,
             anilha: anc.anilha || '',
             sexo: anc.sexo || 'M',
-            especie: especie || '',
+            especie: anc.especie || especie || '',
+            raca: anc.raca || '',
             observacao: `Ancestral de ${nomeAve} (${anc.caminho || ''})`
           });
         } catch(e) {

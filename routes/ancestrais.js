@@ -25,7 +25,8 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 router.post('/', asyncHandler(async (req, res) => {
-  const { nome, anilha, sexo, especie, observacao } = req.body || {};
+  // ===== CORREÇÃO: ADICIONADO CAMPO 'raca' =====
+  const { nome, anilha, sexo, especie, raca, observacao } = req.body || {};
   
   if (!nome || !nome.trim()) {
     return res.status(400).json({ error: 'Nome é obrigatório.' });
@@ -42,16 +43,18 @@ router.post('/', asyncHandler(async (req, res) => {
     return res.status(409).json({ error: 'Este ancestral já está cadastrado.' });
   }
 
+  // ===== CORREÇÃO: ADICIONADO 'raca' NA LISTA DE COLUNAS E VALORES =====
   const { rows } = await pool.query(
-    `INSERT INTO ancestrais (usuario_id, nome, anilha, sexo, especie, observacao)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [req.user.id, nome.trim(), anilha || '', sexo, especie || '', observacao || '']
+    `INSERT INTO ancestrais (usuario_id, nome, anilha, sexo, especie, raca, observacao)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [req.user.id, nome.trim(), anilha || '', sexo, especie || '', raca || '', observacao || '']
   );
   res.status(201).json(rows[0]);
 }));
 
 router.put('/:id', asyncHandler(async (req, res) => {
-  const { nome, anilha, sexo, especie, observacao } = req.body || {};
+  // ===== CORREÇÃO: ADICIONADO CAMPO 'raca' =====
+  const { nome, anilha, sexo, especie, raca, observacao } = req.body || {};
   
   if (nome && nome.trim()) {
     const dup = await pool.query(
@@ -63,16 +66,18 @@ router.put('/:id', asyncHandler(async (req, res) => {
     }
   }
 
+  // ===== CORREÇÃO: ADICIONADO 'raca' NA ATUALIZAÇÃO =====
   const { rows } = await pool.query(
     `UPDATE ancestrais SET
        nome = COALESCE($1, nome),
        anilha = COALESCE($2, anilha),
        sexo = COALESCE($3, sexo),
        especie = COALESCE($4, especie),
-       observacao = COALESCE($5, observacao),
+       raca = COALESCE($5, raca),
+       observacao = COALESCE($6, observacao),
        atualizado_em = NOW()
-     WHERE id = $6 AND usuario_id = $7 RETURNING *`,
-    [nome ? nome.trim() : null, anilha || '', sexo, especie || '', observacao || '', req.params.id, req.user.id]
+     WHERE id = $7 AND usuario_id = $8 RETURNING *`,
+    [nome ? nome.trim() : null, anilha || '', sexo, especie || '', raca || '', observacao || '', req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ancestral não encontrado.' });
   res.json(rows[0]);
