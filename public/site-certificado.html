@@ -364,7 +364,6 @@ body {
 
 .subject-line {
   font-size: 10.5px;
-  color: var(--ink);
   text-align: left;
   margin-bottom: 1px;
   line-height: 1.3;
@@ -375,7 +374,6 @@ body {
 }
 
 .subject-line b {
-  color: var(--ink-soft);
   font-weight: 600;
 }
 
@@ -384,10 +382,8 @@ body {
   font-size: 9.5px;
 }
 
-/* ===== CORREÇÃO: ANILHA FORA DA PÍLULA COM COR ESCURA ===== */
 .cert-pill-anilha {
   font-family: 'JetBrains Mono', monospace;
-  color: #1a1a1a !important;
   white-space: nowrap;
   max-width: 100%;
   overflow: hidden;
@@ -554,7 +550,6 @@ body {
   }
   .cert-pill-anilha {
     font-size: 6px !important;
-    color: #1a1a1a !important;
   }
   .cert-footer {
     padding: 4px 10px;
@@ -1008,36 +1003,32 @@ body {
         : (config.corAvatarFundo || '#c7973f');
       const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
       
+      // ===== CORREÇÃO 1: LEGENDAS BRANCAS =====
       let linhasHtml = `
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
-        <div class="subject-line mono" style="color:${config.corRaizTexto || '#4a5347'};"><b>Anilha:</b> ${ave.anilha}</div>
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Espécie:</b> ${ave.especie}</div>
-        <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
+        <div class="subject-line" style="color:#ffffff !important;"><b style="color:#ffffff !important;">Sexo:</b> <span style="color:#ffffff !important;">${getSexoLabel(ave.sexo)}</span></div>
+        <div class="subject-line mono" style="color:#ffffff !important;"><b style="color:#ffffff !important;">Anilha:</b> <span style="color:#ffffff !important;">${ave.anilha}</span></div>
+        <div class="subject-line" style="color:#ffffff !important;"><b style="color:#ffffff !important;">Espécie:</b> <span style="color:#ffffff !important;">${ave.especie}</span></div>
+        <div class="subject-line" style="color:#ffffff !important;"><b style="color:#ffffff !important;">Nasc.:</b> <span style="color:#ffffff !important;">${formatarData(ave.dataNasc)}</span></div>
       `;
       
       if (ave.raca && ave.raca.trim() !== '') {
-        linhasHtml += `<div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};">${ave.raca}</div>`;
+        linhasHtml += `<div class="subject-line" style="color:#ffffff !important;">${ave.raca}</div>`;
       }
       
       const painel = document.getElementById('cert-subject-panel');
       painel.innerHTML = `
         <div class="subject-avatar ${classeAvatar}" style="background:${avatarBg};color:${config.corAvatarTexto || '#20170a'};width:${config.tamAvatar || 46}px;height:${config.tamAvatar || 46}px;font-size:${Math.round((config.tamAvatar || 46) * 0.4)}px;">${ave.sexo === 'M' ? '♂' : ave.sexo === 'F' ? '♀' : '⚪'}</div>
-        <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
-        ${linhasHtml}
+        <div style="flex:1;min-width:0;">
+          <div class="subject-name" style="color:${config.corRaizTexto || '#e4c583'};font-size:${config.tamNome || 15}px;font-weight:${config.negritoNome || 'bold'};">${ave.nome}</div>
+          ${linhasHtml}
+        </div>
       `;
 
       painel.style.background = (config.corRaizFundo || '#132621') + hexAlpha(config.corRaizOpacidade || 100);
       painel.style.borderColor = config.corBordaRaiz || '#c7973f';
       painel.style.color = config.corRaizTexto || '#e4c583';
-      painel.style.flex = `0 0 ${config.larguraRaiz || 86}px`;
-      painel.style.height = `${config.alturaRaiz || 180}px`;
-      painel.style.minHeight = `${config.alturaRaiz || 180}px`;
 
-      // ===== CORREÇÃO: ANILHA COM COR ESCURA =====
-      document.querySelectorAll('.cert-pill-anilha').forEach(el => {
-        el.style.color = '#1a1a1a !important';
-      });
-
+      // ===== CORREÇÃO 2: ANILHA BRANCA FORA DA PÍLULA =====
       let htmlColunas = '';
       for (let profundidade = 1; profundidade <= 5; profundidade++) {
         const caminhos = geracaoPaths(profundidade);
@@ -1064,7 +1055,7 @@ body {
             htmlColunas += `
               <div class="cert-pill-wrapper">
                 <div class="${classePilula}" title="${nome}" style="width:100%;">${nome}</div>
-                ${anilha ? `<div class="cert-pill-anilha" style="color:#1a1a1a !important;">${anilha}</div>` : ''}
+                ${anilha ? `<div class="cert-pill-anilha" style="color:#ffffff !important;">${anilha}</div>` : ''}
               </div>
             `;
           }
