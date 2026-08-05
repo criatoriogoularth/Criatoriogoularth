@@ -8,7 +8,7 @@ const avesRoutes = require('./routes/aves');
 const anilhasRoutes = require('./routes/anilhas');
 const reproducoesRoutes = require('./routes/reproducoes');
 const configRoutes = require('./routes/config');
-const ancestraisRoutes = require('./routes/ancestrais'); // <-- NOVA ROTA
+const ancestraisRoutes = require('./routes/ancestrais');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 const origin = process.env.FRONTEND_ORIGIN || true;
 app.use(cors({ origin }));
 
-app.use(express.json({ limit: '10mb' })); // 50mb era exagero; 10mb já cobre upload de imagem em base64
+app.use(express.json({ limit: '10mb' }));
 
 // ===== API =====
 app.use('/api/auth', authRoutes);
@@ -27,11 +27,9 @@ app.use('/api/aves', avesRoutes);
 app.use('/api/anilhas', anilhasRoutes);
 app.use('/api/reproducoes', reproducoesRoutes);
 app.use('/api/config', configRoutes);
-app.use('/api/ancestrais', ancestraisRoutes); // <-- NOVA ROTA
+app.use('/api/ancestrais', ancestraisRoutes);
 
 // ===== ARQUIVOS ESTÁTICOS (front-end) =====
-// express.static já resolve caminhos com segurança (sem path traversal),
-// diferente das rotas manuais com app.get('*.html', ...) da versão anterior.
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
@@ -43,10 +41,7 @@ app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Rota de API não encontrada.' });
 });
 
-// Handler de erro global: sem isso, um erro de banco em qualquer rota
-// (ex: coluna inexistente, JSON inválido) derrubava o processo do Node
-// inteiro e tirava o site do ar até o próximo deploy. Agora vira uma
-// resposta 500 normal e o servidor continua no ar.
+// Handler de erro global
 app.use((err, req, res, next) => {
   console.error('Erro não tratado:', err);
   if (res.headersSent) return next(err);
