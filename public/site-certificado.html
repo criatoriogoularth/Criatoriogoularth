@@ -108,7 +108,7 @@ body {
   border-color: var(--brass-dim);
 }
 
-/* ===== LOADING (NOVO) ===== */
+/* ===== LOADING ===== */
 .cert-loading {
   display: flex;
   flex-direction: column;
@@ -136,7 +136,7 @@ body {
   margin: 0 auto;
 }
 
-/* ===== CERTIFICADO ORIGINAL - SEM ALTERAÇÕES ===== */
+/* ===== CERTIFICADO ORIGINAL ===== */
 .cert-wrap {
   background: var(--parchment);
   color: var(--ink);
@@ -299,6 +299,7 @@ body {
   color: var(--ink);
   font-weight: 600;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -383,6 +384,7 @@ body {
   font-size: 9.5px;
 }
 
+/* ===== CORREÇÃO: ANILHA FORA DA PÍLULA COM COR ESCURA ===== */
 .cert-pill-anilha {
   font-family: 'JetBrains Mono', monospace;
   color: #1a1a1a !important;
@@ -394,6 +396,7 @@ body {
   font-weight: 500;
   letter-spacing: 0.02em;
   margin-top: 1px;
+  font-size: 9px;
 }
 
 .cert-col[data-depth="1"] .cert-pill-anilha { font-size: 9px; opacity: 0.85; }
@@ -434,7 +437,7 @@ body {
 }
 
 /* ================================================================
-   ===== BOTÕES DE ZOOM (NOVO) =====
+   ===== BOTÕES DE ZOOM =====
    ================================================================ */
 .zoom-controls {
   display: flex;
@@ -471,7 +474,7 @@ body {
 }
 
 /* ================================================================
-   ===== RESPONSIVO - SOMENTE AJUSTES MOBILE (SEM MODIFICAR ESTRUTURA) =====
+   ===== RESPONSIVO - SOMENTE AJUSTES MOBILE =====
    ================================================================ */
 @media (max-width: 768px) {
   body { padding: 10px; }
@@ -549,7 +552,10 @@ body {
     padding: 0 2px;
     border-left-width: 2px;
   }
-  .cert-pill-anilha { font-size: 6px; }
+  .cert-pill-anilha {
+    font-size: 6px !important;
+    color: #1a1a1a !important;
+  }
   .cert-footer {
     padding: 4px 10px;
     font-size: 7.5px;
@@ -582,7 +588,7 @@ body {
   .subject-name { font-size: 10px; }
   .subject-line { font-size: 7px; }
   .cert-pill { font-size: 6px; min-height: 10px; }
-  .cert-pill-anilha { font-size: 5px; }
+  .cert-pill-anilha { font-size: 5px !important; }
   .cert-title { font-size: 13px; }
   .cert-criador { font-size: 9px; }
 }
@@ -677,7 +683,6 @@ body {
     function updateZoom() {
       const wrap = document.getElementById('cert-wrap');
       if (wrap) {
-        // No mobile, base menor para caber na tela
         const isMobile = window.innerWidth <= 768;
         const baseZoom = isMobile ? 0.75 : 1;
         const totalZoom = baseZoom * currentZoom;
@@ -702,7 +707,7 @@ body {
       updateZoom();
     }
 
-    // ===== TODO O JAVASCRIPT ORIGINAL (MANTIDO) =====
+    // ===== TODO O JAVASCRIPT ORIGINAL =====
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
     }
@@ -956,7 +961,7 @@ body {
         return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
       }
 
-      // Cores e estilos - código original mantido
+      // Cores e estilos - código original
       const bgColor = document.getElementById('cert-bg-color');
       const bgImage = document.getElementById('cert-bg-image');
       
@@ -1028,8 +1033,9 @@ body {
       painel.style.height = `${config.alturaRaiz || 180}px`;
       painel.style.minHeight = `${config.alturaRaiz || 180}px`;
 
+      // ===== CORREÇÃO: ANILHA COM COR ESCURA =====
       document.querySelectorAll('.cert-pill-anilha').forEach(el => {
-        el.style.color = (config.corRaizTexto || '#e4c583') + ' !important';
+        el.style.color = '#1a1a1a !important';
       });
 
       let htmlColunas = '';
@@ -1058,7 +1064,7 @@ body {
             htmlColunas += `
               <div class="cert-pill-wrapper">
                 <div class="${classePilula}" title="${nome}" style="width:100%;">${nome}</div>
-                ${anilha ? `<div class="cert-pill-anilha">${anilha}</div>` : ''}
+                ${anilha ? `<div class="cert-pill-anilha" style="color:#1a1a1a !important;">${anilha}</div>` : ''}
               </div>
             `;
           }
@@ -1094,7 +1100,7 @@ body {
       loading.style.display = 'none';
       wrap.classList.add('loaded');
 
-      // Ajusta as pílulas depois de renderizar
+      // Ajusta as pílulas
       requestAnimationFrame(() => {
         ajustarPilulas();
         updateZoom();
@@ -1156,7 +1162,6 @@ body {
       }, 300);
     });
 
-    // Inicializa zoom após carregar
     setTimeout(updateZoom, 300);
   </script>
   <script src="site-buttons.js"></script>
