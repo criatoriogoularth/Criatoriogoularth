@@ -667,29 +667,50 @@ async function toggleTema() {
 }
 
 // ============================================================
-// VISIBILIDADE DAS ABAS
+// VISIBILIDADE DAS ABAS - CORRIGIDO
 // ============================================================
 
 async function atualizarVisibilidade() {
+  // Carregar a personalização atual do banco
   const personalizacao = await getPersonalizacao();
   
-  // Abas principais
+  // Se não existir visibilidade salva, cria um objeto vazio
+  if (!personalizacao.visibilidade) {
+    personalizacao.visibilidade = {};
+  }
+  
+  // Atualizar apenas as abas principais que existem no formulário
   const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
-  const visibilidadeAbas = {};
   abas.forEach(aba => {
     const el = document.getElementById(`vis-${aba}`);
-    visibilidadeAbas[aba] = el ? el.checked : true;
+    if (el) {
+      personalizacao.visibilidade[aba] = el.checked;
+    }
   });
   
-  // Subtabs de Fotos
-  visibilidadeAbas.fotosCriacao = document.getElementById('vis-fotos-criacao')?.checked ?? true;
-  visibilidadeAbas.fotosTorneios = document.getElementById('vis-fotos-torneios')?.checked ?? true;
+  // Atualizar subtabs de Fotos
+  const elFotosCriacao = document.getElementById('vis-fotos-criacao');
+  if (elFotosCriacao) {
+    personalizacao.visibilidade.fotosCriacao = elFotosCriacao.checked;
+  }
   
-  // Subtabs de Vídeos
-  visibilidadeAbas.videosCriacao = document.getElementById('vis-videos-criacao')?.checked ?? true;
-  visibilidadeAbas.videosTorneios = document.getElementById('vis-videos-torneios')?.checked ?? true;
+  const elFotosTorneios = document.getElementById('vis-fotos-torneios');
+  if (elFotosTorneios) {
+    personalizacao.visibilidade.fotosTorneios = elFotosTorneios.checked;
+  }
   
-  personalizacao.visibilidade = visibilidadeAbas;
+  // Atualizar subtabs de Vídeos
+  const elVideosCriacao = document.getElementById('vis-videos-criacao');
+  if (elVideosCriacao) {
+    personalizacao.visibilidade.videosCriacao = elVideosCriacao.checked;
+  }
+  
+  const elVideosTorneios = document.getElementById('vis-videos-torneios');
+  if (elVideosTorneios) {
+    personalizacao.visibilidade.videosTorneios = elVideosTorneios.checked;
+  }
+  
+  // Salvar no banco
   await savePersonalizacao(personalizacao);
 }
 
@@ -701,16 +722,32 @@ async function carregarVisibilidade() {
   const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
   abas.forEach(aba => {
     const el = document.getElementById(`vis-${aba}`);
-    if (el) el.checked = vis[aba] !== undefined ? vis[aba] : true;
+    if (el) {
+      el.checked = vis[aba] !== undefined ? vis[aba] : true;
+    }
   });
   
-  // Subtabs
-  const subtabs = ['fotos-criacao', 'fotos-torneios', 'videos-criacao', 'videos-torneios'];
-  subtabs.forEach(sub => {
-    const el = document.getElementById(`vis-${sub}`);
-    const key = sub.replace('-', '');
-    if (el) el.checked = vis[key] !== undefined ? vis[key] : true;
-  });
+  // Subtabs - Fotos
+  const elFotosCriacao = document.getElementById('vis-fotos-criacao');
+  if (elFotosCriacao) {
+    elFotosCriacao.checked = vis.fotosCriacao !== undefined ? vis.fotosCriacao : true;
+  }
+  
+  const elFotosTorneios = document.getElementById('vis-fotos-torneios');
+  if (elFotosTorneios) {
+    elFotosTorneios.checked = vis.fotosTorneios !== undefined ? vis.fotosTorneios : true;
+  }
+  
+  // Subtabs - Vídeos
+  const elVideosCriacao = document.getElementById('vis-videos-criacao');
+  if (elVideosCriacao) {
+    elVideosCriacao.checked = vis.videosCriacao !== undefined ? vis.videosCriacao : true;
+  }
+  
+  const elVideosTorneios = document.getElementById('vis-videos-torneios');
+  if (elVideosTorneios) {
+    elVideosTorneios.checked = vis.videosTorneios !== undefined ? vis.videosTorneios : true;
+  }
 }
 
 // ============================================================
@@ -724,7 +761,7 @@ function atualizarSidebar() {
 }
 
 // ============================================================
-// SALVAR PERSONALIZAÇÃO
+// SALVAR PERSONALIZAÇÃO - CORRIGIDO
 // ============================================================
 
 async function salvarPersonalizacao() {
@@ -734,8 +771,10 @@ async function salvarPersonalizacao() {
   const tamanhoNome = parseInt(document.getElementById('nome-tamanho').value) || 20;
   const subtitulo = document.getElementById('criatorio-subtitulo').value || 'Canários · Coleiros · Trinca-Ferro';
   
+  // Carregar a personalização atual (para não perder dados)
   const personalizacao = await getPersonalizacao();
   
+  // Atualizar apenas os campos que mudaram
   personalizacao.logoTamanho = tamanhoLogo;
   personalizacao.logoIniciais = iniciais;
   personalizacao.nome = nome;
@@ -746,11 +785,13 @@ async function salvarPersonalizacao() {
     personalizacao.tema = 'escuro';
   }
   
-  // Salvar visibilidade também
+  // Salvar visibilidade também (chama a função que mantém os valores)
   await atualizarVisibilidade();
   
+  // Salvar no banco
   await savePersonalizacao(personalizacao);
   
+  // Recarregar a interface
   await carregarPersonalizacao();
   atualizarSidebar();
   
