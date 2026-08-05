@@ -86,3 +86,22 @@ CREATE TABLE IF NOT EXISTS site_config (
   atualizado_em TIMESTAMP NOT NULL DEFAULT NOW(),
   PRIMARY KEY (usuario_id, chave)
 );
+
+-- ============================================================
+-- TABELA DE ANCESTRAIS (NÃO FAZEM PARTE DO PLANTEL)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ancestrais (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  nome VARCHAR(255) NOT NULL,
+  anilha VARCHAR(100),
+  sexo VARCHAR(20) NOT NULL,
+  especie VARCHAR(255),
+  observacao TEXT,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+  atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ancestrais_usuario ON ancestrais(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_ancestrais_nome ON ancestrais(nome);
+CREATE INDEX IF NOT EXISTS idx_ancestrais_anilha ON ancestrais(anilha);

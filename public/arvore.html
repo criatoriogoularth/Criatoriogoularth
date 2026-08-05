@@ -913,7 +913,6 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
-
 <script>
 // ============================================================
 // ===== CONFIGURAÇÕES DO CERTIFICADO =====
@@ -1540,6 +1539,10 @@ function removerAncestral(path, event) {
   renderTree();
 }
 
+// ============================================================
+// ===== FUNÇÃO EDIÇÃO DE ANCESTRAL =====
+// ============================================================
+
 function editarAncestral(path) {
   const existente = tree[path];
   if (!existente || !existente.nome) {
@@ -1579,6 +1582,10 @@ function editarAncestral(path) {
   renderModalLista();
   document.getElementById('modal-overlay').classList.add('open');
 }
+
+// ============================================================
+// ===== FUNÇÃO PARA ABRIR MODAL =====
+// ============================================================
 
 function abrirModal(path, sexo) {
   modalPath = path;
@@ -1631,6 +1638,10 @@ function fecharModal() {
   document.getElementById('modal-novo-ancestral').style.display = 'none';
 }
 
+// ============================================================
+// ===== SALVAR ANCESTRAL DIRETO =====
+// ============================================================
+
 async function salvarAncestralDireto() {
   const nome = document.getElementById('novo-anc-nome').value.trim();
   const anilha = document.getElementById('novo-anc-anilha').value.trim();
@@ -1653,10 +1664,16 @@ async function salvarAncestralDireto() {
     }
   }
   
-  // Verifica se já existe uma ave com esse nome no sistema
+  // Verifica se já existe uma ave com esse nome no sistema (PLANTEL)
   let aveExistente = null;
   try {
     aveExistente = await DB.getAvePorNome(nome);
+  } catch(e) {}
+  
+  // Verifica se já existe como ancestral (tabela separada)
+  let ancestralExistente = null;
+  try {
+    ancestralExistente = await DB.getAncestralPorNome(nome);
   } catch(e) {}
   
   // Se for edição, atualiza o ancestral existente
@@ -1665,9 +1682,26 @@ async function salvarAncestralDireto() {
       nome: nome, 
       anilha: anilha || '',
       sexo: sexo,
-      id: aveExistente ? aveExistente.id : null
+      id: aveExistente ? aveExistente.id : null,
+      isAncestral: true
     };
     treeModificada = true;
+    
+    // Se não existe nem como ave nem como ancestral, salva na tabela de ancestrais
+    if (!aveExistente && !ancestralExistente) {
+      try {
+        await DB.addAncestral({
+          nome: nome,
+          anilha: anilha || '',
+          sexo: sexo,
+          especie: aveSelecionada ? aveSelecionada.especie : '',
+          observacao: `Ancestral de ${aveSelecionada ? aveSelecionada.nome : 'desconhecido'}`
+        });
+      } catch(e) {
+        console.warn('Erro ao salvar ancestral:', e);
+      }
+    }
+    
     fecharModal();
     renderTree();
     return;
@@ -1678,15 +1712,31 @@ async function salvarAncestralDireto() {
     nome: nome, 
     anilha: anilha || '',
     sexo: sexo,
-    id: aveExistente ? aveExistente.id : null
+    id: aveExistente ? aveExistente.id : null,
+    isAncestral: true
   };
   treeModificada = true;
+  
+  // Salva na tabela de ancestrais se não existir em lugar nenhum
+  if (!aveExistente && !ancestralExistente) {
+    try {
+      await DB.addAncestral({
+        nome: nome,
+        anilha: anilha || '',
+        sexo: sexo,
+        especie: aveSelecionada ? aveSelecionada.especie : '',
+        observacao: `Ancestral de ${aveSelecionada ? aveSelecionada.nome : 'desconhecido'}`
+      });
+    } catch(e) {
+      console.warn('Erro ao salvar ancestral:', e);
+    }
+  }
   
   fecharModal();
   renderTree();
   
-  // Perguntar se quer criar a ave no sistema
-  if (!aveExistente && confirm(`Deseja criar "${nome}" como uma nova ave no sistema para referência futura?`)) {
+  // Só pergunta se quer criar no plantel se for uma ave nova (não existe em lugar nenhum)
+  if (!aveExistente && !ancestralExistente && confirm(`Deseja criar "${nome}" como uma nova ave no sistema (plantel)?`)) {
     try {
       if (anilha) {
         const anilhaExistente = await DB.getAnilhaPorNumero(anilha);
@@ -1707,12 +1757,64 @@ async function salvarAncestralDireto() {
         pai: '',
         mae: ''
       });
-      alert(`✅ Ave "${nome}" cadastrada com sucesso!`);
+      alert(`✅ Ave "${nome}" cadastrada no plantel com sucesso!`);
     } catch (e) {
       console.error('Erro ao criar ave:', e);
-      alert('⚠️ Ave criada na árvore, mas houve erro ao cadastrar no sistema: ' + e.message);
+      alert('⚠️ Ancestral criado, mas houve erro ao cadastrar no plantel: ' + e.message);
     }
   }
+}
+
+// ============================================================
+// ===== MODAL LISTA =====
+// ============================================================
+
+function renderModalLista() {
+  const busca = document.getElementById('modal-search').value.toLowerCase();
+  
+  // Busca no plantel E nos ancestrais
+  let lista = AVES.filter(a => a.sexo === modalSexo);
+  let listaAncestrais = [];
+  
+  // Buscar ancestrais do banco
+  (async () => {
+    try {
+      const ancestraisDB = await DB.getAncestrais();
+      listaAncestrais = ancestraisDB.filter(a => a.sexo === modalSexo);
+      
+      // Combinar listas
+      let todas = [...lista, ...listaAncestrais];
+      
+      if (aveSelecionada && aveSelecionada.especie) {
+        todas = todas.filter(a => a.especie === aveSelecionada.especie);
+      }
+      if (busca) {
+        todas = todas.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+      }
+      
+      const container = document.getElementById('modal-list');
+      if (todas.length === 0) {
+        container.innerHTML = '<div class="empty-note">Nenhuma ave ou ancestral encontrado.</div>';
+        return;
+      }
+      
+      container.innerHTML = todas.map(a => {
+        const isAncestral = listaAncestrais.some(anc => anc.id === a.id);
+        return `
+          <div class="modal-item ${modalSexo === 'M' ? 'male-item' : 'female-item'}" style="${isAncestral ? 'opacity:0.7;border-left-color:#666;' : ''}">
+            <div>
+              <div class="mi-name">${a.nome} ${isAncestral ? '📜' : ''}</div>
+              <div class="mi-band mono">${a.anilha} ${isAncestral ? '· Ancestral' : ''}</div>
+              <div class="mi-especie">${a.especie}</div>
+            </div>
+            <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick='selecionarAncestral(${JSON.stringify(a)})'>Selecionar</button>
+          </div>
+        `;
+      }).join('');
+    } catch(e) {
+      console.warn('Erro ao buscar ancestrais:', e);
+    }
+  })();
 }
 
 function selecionarAncestral(ave) {
@@ -1730,28 +1832,12 @@ function selecionarAncestral(ave) {
     nome: ave.nome, 
     anilha: ave.anilha || '',
     sexo: modalSexo,
-    id: ave.id
+    id: ave.id,
+    isAncestral: true
   };
   treeModificada = true;
   fecharModal();
   renderTree();
-}
-
-function renderModalLista() {
-  const busca = document.getElementById('modal-search').value.toLowerCase();
-  let lista = AVES.filter(a => a.sexo === modalSexo);
-  if (aveSelecionada && aveSelecionada.especie) {
-    lista = lista.filter(a => a.especie === aveSelecionada.especie);
-  }
-  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
-  document.getElementById('modal-list').innerHTML = lista.length === 0 ? 
-    '<div class="empty-note">Nenhuma ave encontrada com a mesma espécie.</div>' :
-    lista.map(a => `
-      <div class="modal-item ${modalSexo === 'M' ? 'male-item' : 'female-item'}">
-        <div><div class="mi-name">${a.nome}</div><div class="mi-band mono">${a.anilha}</div></div>
-        <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick='selecionarAncestral(${JSON.stringify(a)})'>Selecionar</button>
-      </div>
-    `).join('');
 }
 
 // ============================================================
@@ -1824,7 +1910,6 @@ function renderTree() {
       content = `<div class="node-ref">${getLabel(path)}</div><div class="node-plus">+</div>`;
     }
     const click = isRoot ? '' : `onclick="abrirModal('${path}','${sexo}')"`;
-    // ADICIONA O EVENTO DE DUPLO CLIQUE PARA EDITAR
     const dblclick = isFilled ? `ondblclick="editarAncestral('${path}')"` : '';
     nodesHtml += `<div class="${cls}" style="left:${x}px; top:${y}px; width:${w}px; height:${h}px;" ${click} ${dblclick}>${content}${removeBtn}</div>`;
   });
@@ -1861,6 +1946,33 @@ async function salvarArvore() {
   const caminhosExistentes = Object.keys(tree).filter(p => p !== '');
   const camposPrincipais = ['pai', 'mae', 'pai.pai', 'pai.mae', 'mae.pai', 'mae.mae'];
   
+  // Salvar todos os ancestrais na tabela separada (se não forem do plantel)
+  for (const caminho of caminhosExistentes) {
+    const node = tree[caminho];
+    if (node && node.nome && node.nome.trim() !== '') {
+      // Verifica se já existe como ave no plantel
+      const aveExistente = await DB.getAvePorNome(node.nome);
+      if (aveExistente) continue; // Se é do plantel, não salva como ancestral
+      
+      // Verifica se já existe como ancestral
+      const existente = await DB.getAncestralPorNome(node.nome);
+      if (!existente) {
+        try {
+          await DB.addAncestral({
+            nome: node.nome,
+            anilha: node.anilha || '',
+            sexo: node.sexo || (caminho.endsWith('pai') ? 'M' : 'F'),
+            especie: aveSelecionada ? aveSelecionada.especie : '',
+            observacao: `Ancestral de ${aveSelecionada.nome} (${caminho})`
+          });
+        } catch(e) {
+          console.warn('Erro ao salvar ancestral:', node.nome);
+        }
+      }
+    }
+  }
+  
+  // Construir array de ancestrais para salvar na ave
   caminhosExistentes.forEach(caminho => {
     if (!camposPrincipais.includes(caminho)) {
       const partes = caminho.split('.');
@@ -1901,7 +2013,7 @@ async function salvarArvore() {
   
   await DB.update(DB.TABLES.AVES, aveSelecionada.id, dadosAtualizados);
   treeModificada = false;
-  alert('✅ Árvore salva com sucesso! ' + ancestrais.length + ' ancestrais adicionais registrados.');
+  alert('✅ Árvore salva com sucesso! ' + ancestrais.length + ' ancestrais registrados.');
   
   const aveAtualizada = await DB.getById(DB.TABLES.AVES, aveSelecionada.id);
   if (aveAtualizada) aveSelecionada = { ...aveSelecionada, ...aveAtualizada };

@@ -8,6 +8,7 @@ const avesRoutes = require('./routes/aves');
 const anilhasRoutes = require('./routes/anilhas');
 const reproducoesRoutes = require('./routes/reproducoes');
 const configRoutes = require('./routes/config');
+const ancestraisRoutes = require('./routes/ancestrais'); // <-- NOVA ROTA
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use('/api/aves', avesRoutes);
 app.use('/api/anilhas', anilhasRoutes);
 app.use('/api/reproducoes', reproducoesRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/ancestrais', ancestraisRoutes); // <-- NOVA ROTA
 
 // ===== ARQUIVOS ESTÁTICOS (front-end) =====
 // express.static já resolve caminhos com segurança (sem path traversal),
