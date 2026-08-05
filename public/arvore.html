@@ -1568,7 +1568,7 @@ function fecharModal() {
 }
 
 // ============================================================
-// SALVAR ANCESTRAL DIRETO - VERSÃO CORRETA (NÃO VAI PARA PLANTEL)
+// SALVAR ANCESTRAL DIRETO - COMPLETO E CORRIGIDO
 // ============================================================
 
 async function salvarAncestralDireto() {
@@ -1593,10 +1593,10 @@ async function salvarAncestralDireto() {
   }
   
   let aveExistente = null;
-  try { aveExistente = await DB.getAvePorNome(nome); } catch(e) {}
+  try { aveExistente = await DB.getAvePorNome(nome); } catch(e) { console.warn('Erro ao buscar ave:', e); }
   
   let ancestralExistente = null;
-  try { ancestralExistente = await DB.getAncestralPorNome(nome); } catch(e) {}
+  try { ancestralExistente = await DB.getAncestralPorNome(nome); } catch(e) { console.warn('Erro ao buscar ancestral:', e); }
   
   if (modalEditando) {
     tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, id: aveExistente ? aveExistente.id : null, isAncestral: true };
@@ -1605,14 +1605,15 @@ async function salvarAncestralDireto() {
     if (!aveExistente && !ancestralExistente) {
       try {
         await DB.addAncestral({
-          nome: nome, anilha: anilha || '', sexo: sexo,
-          especie: aveSelecionada ? aveSelecionada.especie : '',
-          observacao: `Ancestral de ${aveSelecionada ? aveSelecionada.nome : 'desconhecido'}`
+          nome: nome,
+          anilha: anilha || '',
+          sexo: sexo,
+          especie: aveSelecionada ? aveSelecionada.especie : ''
         });
-        alert(`✅ Ancestral "${nome}" salvo como ancestral (não vai para o plantel).`);
+        alert(`✅ Ancestral "${nome}" salvo com sucesso!`);
       } catch(e) {
-        console.warn('Erro ao salvar ancestral:', e);
-        alert('⚠️ Ancestral criado na árvore, mas erro ao salvar no banco.');
+        console.error('Erro detalhado:', e);
+        alert('❌ Erro ao salvar: ' + e.message);
       }
     } else {
       alert(`✅ Ancestral "${nome}" já existe no sistema.`);
@@ -1622,21 +1623,22 @@ async function salvarAncestralDireto() {
     return;
   }
   
-  // CRIAÇÃO NOVA - SALVA NA TABELA ANCESTRAIS, NÃO NO PLANTEL
+  // CRIAÇÃO NOVA
   tree[modalPath] = { nome: nome, anilha: anilha || '', sexo: sexo, id: aveExistente ? aveExistente.id : null, isAncestral: true };
   treeModificada = true;
   
   if (!aveExistente && !ancestralExistente) {
     try {
       await DB.addAncestral({
-        nome: nome, anilha: anilha || '', sexo: sexo,
-        especie: aveSelecionada ? aveSelecionada.especie : '',
-        observacao: `Ancestral de ${aveSelecionada ? aveSelecionada.nome : 'desconhecido'}`
+        nome: nome,
+        anilha: anilha || '',
+        sexo: sexo,
+        especie: aveSelecionada ? aveSelecionada.especie : ''
       });
-      alert(`✅ Ancestral "${nome}" salvo como ancestral (NÃO vai para o plantel).`);
+      alert(`✅ Ancestral "${nome}" salvo com sucesso! (NÃO vai para o plantel)`);
     } catch(e) {
-      console.warn('Erro ao salvar ancestral:', e);
-      alert('⚠️ Ancestral criado na árvore, mas erro ao salvar no banco.');
+      console.error('Erro detalhado:', e);
+      alert('❌ Erro ao salvar: ' + e.message);
     }
   } else if (aveExistente) {
     alert(`ℹ️ "${nome}" já existe no plantel. Usando como referência.`);

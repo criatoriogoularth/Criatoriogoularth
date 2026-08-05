@@ -7,7 +7,6 @@ const asyncHandler = require('../middleware/asyncHandler');
 const router = express.Router();
 router.use(authMiddleware);
 
-// GET - Listar todos os ancestrais
 router.get('/', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM ancestrais WHERE usuario_id = $1 ORDER BY nome',
@@ -16,7 +15,6 @@ router.get('/', asyncHandler(async (req, res) => {
   res.json(rows);
 }));
 
-// GET - Buscar ancestral por ID
 router.get('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM ancestrais WHERE id = $1 AND usuario_id = $2',
@@ -26,7 +24,6 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(rows[0]);
 }));
 
-// POST - Criar ancestral
 router.post('/', asyncHandler(async (req, res) => {
   const { nome, anilha, sexo, especie, observacao } = req.body || {};
   
@@ -53,7 +50,6 @@ router.post('/', asyncHandler(async (req, res) => {
   res.status(201).json(rows[0]);
 }));
 
-// PUT - Atualizar ancestral
 router.put('/:id', asyncHandler(async (req, res) => {
   const { nome, anilha, sexo, especie, observacao } = req.body || {};
   
@@ -82,7 +78,6 @@ router.put('/:id', asyncHandler(async (req, res) => {
   res.json(rows[0]);
 }));
 
-// DELETE - Excluir ancestral
 router.delete('/:id', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'DELETE FROM ancestrais WHERE id = $1 AND usuario_id = $2 RETURNING id',

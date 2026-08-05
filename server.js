@@ -13,9 +13,6 @@ const ancestraisRoutes = require('./routes/ancestrais');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS restrito: em produção, defina FRONTEND_ORIGIN no .env com a URL real
-// do site (ex: https://criatoriogoularth.com). Sem essa variável, libera
-// tudo — ok para desenvolvimento local, mas troque antes de ir ao ar.
 const origin = process.env.FRONTEND_ORIGIN || true;
 app.use(cors({ origin }));
 
@@ -29,19 +26,17 @@ app.use('/api/reproducoes', reproducoesRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/ancestrais', ancestraisRoutes);
 
-// ===== ARQUIVOS ESTÁTICOS (front-end) =====
+// ===== ARQUIVOS ESTÁTICOS =====
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Qualquer rota não encontrada em /api devolve 404 em JSON, não HTML
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Rota de API não encontrada.' });
 });
 
-// Handler de erro global
 app.use((err, req, res, next) => {
   console.error('Erro não tratado:', err);
   if (res.headersSent) return next(err);
