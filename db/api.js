@@ -114,7 +114,7 @@ const DB = {
   },
 
   // ============================================================
-  // ===== FUNÇÕES DE ANCESTRAIS (NOVAS) =====
+  // ===== FUNÇÕES DE ANCESTRAIS =====
   // ============================================================
   async getAncestrais() {
     const rows = await apiFetch('/ancestrais');
