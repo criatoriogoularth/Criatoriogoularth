@@ -108,16 +108,18 @@ body {
   border-color: var(--brass-dim);
 }
 
-/* ===== CONTAINER DO CERTIFICADO ===== */
+/* ================================================================
+   ===== CONTAINER DO CERTIFICADO =====
+   ================================================================ */
 .cert-container {
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
-  /* NOVIDADE: scroll horizontal no celular */
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  padding: 0 4px;
 }
 
-/* ===== CERTIFICADO ORIGINAL - SEM ALTERAÇÕES ===== */
+/* ================================================================
+   ===== CERTIFICADO ORIGINAL =====
+   ================================================================ */
 .cert-wrap {
   background: var(--parchment);
   color: var(--ink);
@@ -133,7 +135,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  /* NOVIDADE: permite zoom no celular */
+  /* ZOOM - começa em 1 */
   transform: scale(1);
   transform-origin: top center;
 }
@@ -413,7 +415,7 @@ body {
 }
 
 /* ================================================================
-   ===== NOVIDADES: BOTÕES DE ZOOM =====
+   ===== BOTÕES DE ZOOM =====
    ================================================================ */
 .zoom-controls {
   display: flex;
@@ -450,10 +452,10 @@ body {
 }
 
 /* ================================================================
-   ===== RESPONSIVO - SOMENTE PARA CELULAR =====
+   ===== RESPONSIVO - CELULAR (NÃO ESTICA, SÓ AJUSTA O ZOOM) =====
    ================================================================ */
 @media (max-width: 768px) {
-  body { padding: 10px; }
+  body { padding: 8px; }
   
   .site-header {
     flex-direction: column;
@@ -465,91 +467,100 @@ body {
   .site-nav { text-align: center; }
   .site-nav a { font-size: 11px; padding: 4px 10px; }
 
+  /* ===== IMPORTANTE: CERTIFICADO NÃO ESTICA ===== */
   .cert-wrap {
     width: 100%;
-    min-width: 320px;
-    aspect-ratio: auto;
-    min-height: 400px;
-    border-radius: 8px;
+    max-width: 297mm;
+    /* MANTÉM A PROPORÇÃO CORRETA */
+    aspect-ratio: 297 / 210;
+    /* NO CELULAR, DIMINUI UM POUCO PARA CABER NA TELA */
+    transform: scale(0.85);
+    transform-origin: top center;
+    border-radius: 6px;
+    min-height: auto;
   }
 
-  .cert-header {
-    padding: 4px 10px;
-    gap: 4px;
-  }
+  /* Ajusta fontes para caber melhor */
   .cert-title { font-size: 16px; }
   .cert-criador { font-size: 10px; }
   .cert-responsavel { font-size: 8px; }
   .cert-registros { font-size: 7.5px; }
   .cert-contato { font-size: 7.5px; }
 
-  .cert-body {
-    padding: 6px 8px;
-    flex-direction: column;
-    gap: 6px;
-  }
-
   .cert-subject-panel {
-    flex: 0 0 auto;
-    width: 100%;
-    min-height: 80px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 6px 10px;
-    gap: 6px;
-    justify-content: flex-start;
-    height: auto;
+    flex: 0 0 60px;
+    min-height: 120px;
+    padding: 6px 8px;
   }
   .subject-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-    margin: 0;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
-  .subject-name {
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .subject-line {
-    font-size: 8.5px;
-    white-space: nowrap;
-  }
+  .subject-name { font-size: 12px; }
+  .subject-line { font-size: 8px; }
 
-  .cert-columns {
-    min-height: 80px;
-    gap: 2px;
-  }
-  .cert-col { padding: 1px 3px; gap: 1px; }
-  .cert-col:not(:last-child) { padding-right: 3px; }
   .cert-pill {
     font-size: 7px;
-    min-height: 14px;
-    padding: 1px 2px;
+    min-height: 10px;
+    padding: 0 2px;
     border-left-width: 2px;
   }
   .cert-pill-anilha { font-size: 6px; }
-  .cert-footer {
-    padding: 4px 10px;
-    font-size: 7.5px;
+  .cert-footer { font-size: 7.5px; padding: 4px 10px; }
+
+  /* DICA DE ZOOM */
+  .cert-container .dica-zoom {
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    padding: 4px 0 8px;
+    opacity: 0.6;
   }
 
   .zoom-controls button {
-    min-width: 40px;
-    min-height: 40px;
-    font-size: 14px;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .cert-wrap {
+    transform: scale(0.7);
+  }
+  .cert-title { font-size: 14px; }
+  .cert-subject-panel { min-height: 90px; }
+  .subject-avatar { width: 28px; height: 28px; font-size: 12px; }
+  .subject-name { font-size: 10px; }
+  .subject-line { font-size: 7px; }
+  .cert-pill { font-size: 6px; min-height: 8px; }
+  .cert-pill-anilha { font-size: 5px; }
+}
+
+/* Mostra a dica de zoom apenas no celular */
+.dica-zoom {
+  display: none;
+}
+@media (max-width: 768px) {
+  .dica-zoom {
+    display: block !important;
   }
 }
 
 /* ===== IMPRESSÃO ===== */
 @media print {
-  .site-header, .btn-voltar, .zoom-controls { display: none !important; }
+  .site-header, .btn-voltar, .zoom-controls, .dica-zoom { display: none !important; }
   .cert-wrap {
     box-shadow: none !important;
     border-radius: 0 !important;
     width: 297mm !important;
+    max-width: 297mm !important;
     height: 210mm !important;
-    max-width: none !important;
     aspect-ratio: auto !important;
+    transform: scale(1) !important;
   }
   body { background: white !important; padding: 0 !important; }
   @page { size: landscape; margin: 0; }
@@ -567,7 +578,10 @@ body {
   </header>
 
   <div class="cert-container">
-    <!-- NOVIDADE: Controles de Zoom -->
+    <!-- Dica de zoom para celular -->
+    <div class="dica-zoom">🔍 Use os botões de zoom para ampliar o certificado</div>
+
+    <!-- Controles de Zoom -->
     <div class="zoom-controls">
       <button onclick="zoomOut()">🔍−</button>
       <span class="zoom-level" id="zoom-level">100%</span>
@@ -575,7 +589,8 @@ body {
       <button onclick="resetZoom()" style="font-size:12px;">↺ Reset</button>
     </div>
 
-    <div class="cert-wrap" id="cert-wrap" style="transform: scale(1); transform-origin: top center;">
+    <!-- CERTIFICADO -->
+    <div class="cert-wrap" id="cert-wrap">
       <div class="cert-bg-color" id="cert-bg-color" style="background:#f3ecda;"></div>
       <img class="cert-bg-image" id="cert-bg-image" style="display:none;" alt="Fundo">
       
@@ -615,7 +630,12 @@ body {
     function updateZoom() {
       const wrap = document.getElementById('cert-wrap');
       if (wrap) {
-        wrap.style.transform = `scale(${currentZoom})`;
+        // No celular, o zoom começa em 0.85 (para caber na tela)
+        // O usuário pode aumentar a partir daí
+        const baseZoom = window.innerWidth <= 768 ? 0.85 : 1;
+        const totalZoom = baseZoom * currentZoom;
+        wrap.style.transform = `scale(${totalZoom})`;
+        wrap.style.transformOrigin = 'top center';
       }
       document.getElementById('zoom-level').textContent = Math.round(currentZoom * 100) + '%';
     }
@@ -635,7 +655,12 @@ body {
       updateZoom();
     }
 
-    // ===== CÓDIGO ORIGINAL =====
+    // Atualiza zoom ao redimensionar
+    window.addEventListener('resize', function() {
+      updateZoom();
+    });
+
+    // ===== TODO O JAVASCRIPT ORIGINAL (mantido) =====
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
     }
@@ -761,6 +786,15 @@ body {
       return DB.getCertificadoPublico(id);
     }
 
+    function formatarData(data) {
+      if (!data) return '-';
+      const partes = String(data).slice(0, 10).split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return data;
+    }
+
     function getSexoLabel(sexo) {
       if (sexo === 'M') return 'Macho';
       if (sexo === 'F') return 'Fêmea';
@@ -873,7 +907,6 @@ body {
         return (encontrado && encontrado.anilha) ? encontrado.anilha : null;
       }
 
-      // Cores e estilos - código original mantido
       const bgColor = document.getElementById('cert-bg-color');
       const bgImage = document.getElementById('cert-bg-image');
       
@@ -920,15 +953,6 @@ body {
         : (config.corAvatarFundo || '#c7973f');
       const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
       
-      function formatarData(data) {
-        if (!data) return '-';
-        const partes = String(data).slice(0, 10).split('-');
-        if (partes.length === 3) {
-          return `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-        return data;
-      }
-
       let linhasHtml = `
         <div class="subject-line" style="color:${config.corRaizTexto || '#4a5347'};"><b>Sexo:</b> ${getSexoLabel(ave.sexo)}</div>
         <div class="subject-line mono" style="color:${config.corRaizTexto || '#4a5347'};"><b>Anilha:</b> ${ave.anilha}</div>
@@ -1069,6 +1093,9 @@ body {
       clearTimeout(timeout);
       timeout = setTimeout(ajustarPilulas, 200);
     });
+
+    // Inicializa o zoom
+    setTimeout(updateZoom, 100);
   </script>
   <script src="site-buttons.js"></script>
 </body>
