@@ -570,6 +570,117 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== ESTILOS DO MODAL COM FORMULÁRIO DE NOVO ANCESTRAL ===== */
+.modal-novo-form {
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid var(--brass-dim);
+  display: none;
+}
+.modal-novo-form .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.modal-novo-form .form-header span {
+  font-size: 12px;
+  color: var(--brass-soft);
+  font-weight: 600;
+}
+.modal-novo-form .form-header button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal-novo-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.modal-novo-form .form-grid .full-width {
+  grid-column: 1 / -1;
+}
+.modal-novo-form .form-grid label {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 2px;
+}
+.modal-novo-form .form-grid input,
+.modal-novo-form .form-grid select {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.modal-novo-form .form-grid input:focus,
+.modal-novo-form .form-grid select:focus {
+  border-color: var(--brass);
+}
+.modal-novo-form .form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.modal-novo-form .form-actions .btn-novo {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--brass);
+  border: none;
+  color: #20170a;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+}
+.modal-novo-form .form-actions .btn-novo:hover {
+  filter: brightness(1.08);
+}
+.modal-novo-form .form-actions .btn-cancel {
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+}
+.modal-novo-form .form-actions .btn-cancel:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+.modal-novo-form .form-hint {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.btn-novo-ancestral {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  transition: .15s ease;
+}
+.btn-novo-ancestral:hover {
+  background: rgba(199,151,63,0.2);
+}
 </style>
 </head>
 <body>
@@ -744,12 +855,56 @@
   </main>
 </div>
 
+<!-- ===== MODAL DE SELEÇÃO/EDIÇÃO DE ANCESTRAL ===== -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) fecharModal()">
   <div class="modal-box">
     <div class="modal-head">
       <div><span id="modal-title">Selecione uma Ave</span></div>
       <button class="modal-close" onclick="fecharModal()">✕</button>
     </div>
+    
+    <!-- Botão para abrir formulário de novo ancestral -->
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <button class="btn-novo-ancestral" onclick="toggleNovoAncestral()">
+        ➕ Novo Ancestral
+      </button>
+    </div>
+
+    <!-- Formulário para criar/editar ancestral diretamente -->
+    <div class="modal-novo-form" id="modal-novo-ancestral">
+      <div class="form-header">
+        <span id="novo-anc-titulo">✏️ Novo Ancestral</span>
+        <button onclick="fecharNovoAncestral()">✕</button>
+      </div>
+      
+      <div class="form-grid">
+        <div class="full-width">
+          <label>Nome *</label>
+          <input type="text" id="novo-anc-nome" placeholder="Digite o nome do ancestral">
+        </div>
+        <div>
+          <label>Anilha (opcional)</label>
+          <input type="text" id="novo-anc-anilha" placeholder="Ex: FOB/CA.065">
+        </div>
+        <div>
+          <label>Sexo</label>
+          <select id="novo-anc-sexo">
+            <option value="M">♂ Macho</option>
+            <option value="F">♀ Fêmea</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button class="btn-novo" id="novo-anc-botao" onclick="salvarAncestralDireto()">+ Criar Novo Ancestral</button>
+        <button class="btn-cancel" onclick="fecharNovoAncestral()">Cancelar</button>
+      </div>
+      
+      <div class="form-hint">
+        💡 O ancestral será criado na árvore. Depois você pode salvá-lo no sistema.
+      </div>
+    </div>
+
     <input type="text" class="modal-search" id="modal-search" placeholder="Pesquisar..." oninput="renderModalLista()">
     <div class="modal-list" id="modal-list"></div>
   </div>
@@ -1163,6 +1318,7 @@ let listaFiltro = 'plantel';
 let aveSelecionada = null;
 let modalPath = null;
 let modalSexo = null;
+let modalEditando = false;
 let tree = {};
 let treeModificada = false;
 let timeoutRedimensionamento;
@@ -1261,7 +1417,6 @@ async function abrirGenealogia(id) {
       return; 
     }
     
-    // ===== CORREÇÃO: NÃO REDIRECIONA PARA CADASTRO =====
     if (!ave.especie || ave.especie === '' || ave.especie === 'undefined' || ave.especie === null) {
       await DB.update(DB.TABLES.AVES, ave.id, { especie: 'Não identificada' });
       ave.especie = 'Não identificada';
@@ -1279,13 +1434,11 @@ async function abrirGenealogia(id) {
       ave.situacao = 'Plantel';
     }
     
-    // ===== ABRE A ÁRVORE DIRETAMENTE =====
     aveSelecionada = ave;
     tree = {};
     treeModificada = false;
     tree[''] = { nome: ave.nome, anilha: ave.anilha };
     
-    // CARREGAR CAMPOS LEGADOS (PAI, MÃE, AVÓS)
     if (ave.pai) {
       tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
     }
@@ -1305,7 +1458,6 @@ async function abrirGenealogia(id) {
       tree['mae.mae'] = { nome: ave.avoMaterna, anilha: '' };
     }
     
-    // CARREGAR ANCESTRAIS ADICIONAIS
     const ancestrais = ave.ancestrais || [];
     if (Array.isArray(ancestrais) && ancestrais.length > 0) {
       ancestrais.forEach(a => {
@@ -1388,6 +1540,224 @@ function removerAncestral(path, event) {
   renderTree();
 }
 
+function editarAncestral(path) {
+  const existente = tree[path];
+  if (!existente || !existente.nome) {
+    // Se não existir, abrir para criação
+    const sexo = path.endsWith('pai') ? 'M' : 'F';
+    modalPath = path;
+    modalSexo = sexo;
+    modalEditando = false;
+    document.getElementById('modal-title').textContent = `Adicionar ${sexo === 'M' ? 'Macho' : 'Fêmea'}`;
+    document.getElementById('modal-search').value = '';
+    document.getElementById('novo-anc-nome').value = '';
+    document.getElementById('novo-anc-anilha').value = '';
+    document.getElementById('novo-anc-sexo').value = sexo;
+    document.getElementById('novo-anc-botao').textContent = '+ Criar Novo Ancestral';
+    document.getElementById('novo-anc-titulo').textContent = '✏️ Novo Ancestral';
+    document.getElementById('modal-novo-ancestral').style.display = 'block';
+    renderModalLista();
+    document.getElementById('modal-overlay').classList.add('open');
+    return;
+  }
+  
+  const sexo = getSexo(path);
+  modalPath = path;
+  modalSexo = sexo;
+  modalEditando = true;
+  
+  document.getElementById('modal-title').textContent = `✎ Editar ${sexo === 'M' ? 'Macho' : 'Fêmea'}: ${existente.nome}`;
+  document.getElementById('modal-search').value = '';
+  
+  document.getElementById('novo-anc-nome').value = existente.nome || '';
+  document.getElementById('novo-anc-anilha').value = existente.anilha || '';
+  document.getElementById('novo-anc-sexo').value = sexo;
+  document.getElementById('novo-anc-botao').textContent = '💾 Atualizar Ancestral';
+  document.getElementById('novo-anc-titulo').textContent = `✏️ Editando: ${existente.nome}`;
+  document.getElementById('modal-novo-ancestral').style.display = 'block';
+  
+  renderModalLista();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function abrirModal(path, sexo) {
+  modalPath = path;
+  modalSexo = sexo;
+  modalEditando = false;
+  
+  const existente = tree[path];
+  if (existente && existente.nome) {
+    modalEditando = true;
+  }
+  
+  document.getElementById('modal-title').textContent = (modalEditando ? '✎ Editar ' : 'Selecionar ') + (sexo === 'M' ? 'Macho' : 'Fêmea');
+  document.getElementById('modal-search').value = '';
+  
+  document.getElementById('novo-anc-nome').value = '';
+  document.getElementById('novo-anc-anilha').value = '';
+  document.getElementById('novo-anc-sexo').value = sexo;
+  
+  if (modalEditando && existente) {
+    document.getElementById('novo-anc-nome').value = existente.nome || '';
+    document.getElementById('novo-anc-anilha').value = existente.anilha || '';
+    document.getElementById('novo-anc-botao').textContent = '💾 Atualizar Ancestral';
+    document.getElementById('novo-anc-titulo').textContent = `✏️ Editando: ${existente.nome}`;
+  } else {
+    document.getElementById('novo-anc-botao').textContent = '+ Criar Novo Ancestral';
+    document.getElementById('novo-anc-titulo').textContent = '✏️ Novo Ancestral';
+  }
+  
+  document.getElementById('modal-novo-ancestral').style.display = 'none';
+  renderModalLista();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function toggleNovoAncestral() {
+  const form = document.getElementById('modal-novo-ancestral');
+  if (form.style.display === 'none' || form.style.display === '') {
+    form.style.display = 'block';
+    document.getElementById('novo-anc-nome').focus();
+  } else {
+    form.style.display = 'none';
+  }
+}
+
+function fecharNovoAncestral() {
+  document.getElementById('modal-novo-ancestral').style.display = 'none';
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-novo-ancestral').style.display = 'none';
+}
+
+async function salvarAncestralDireto() {
+  const nome = document.getElementById('novo-anc-nome').value.trim();
+  const anilha = document.getElementById('novo-anc-anilha').value.trim();
+  const sexo = document.getElementById('novo-anc-sexo').value;
+  
+  if (!nome) {
+    alert('Digite o nome do ancestral.');
+    document.getElementById('novo-anc-nome').focus();
+    return;
+  }
+  
+  // Verifica se o nome já existe na árvore em outro caminho
+  const caminhoExistente = Object.keys(tree).find(p => 
+    p !== modalPath && tree[p] && tree[p].nome && tree[p].nome.toLowerCase() === nome.toLowerCase()
+  );
+  
+  if (caminhoExistente) {
+    if (!confirm(`"${nome}" já está na árvore como "${caminhoExistente}". Deseja usá-lo aqui também?`)) {
+      return;
+    }
+  }
+  
+  // Verifica se já existe uma ave com esse nome no sistema
+  let aveExistente = null;
+  try {
+    aveExistente = await DB.getAvePorNome(nome);
+  } catch(e) {}
+  
+  // Se for edição, atualiza o ancestral existente
+  if (modalEditando) {
+    tree[modalPath] = { 
+      nome: nome, 
+      anilha: anilha || '',
+      sexo: sexo,
+      id: aveExistente ? aveExistente.id : null
+    };
+    treeModificada = true;
+    fecharModal();
+    renderTree();
+    return;
+  }
+  
+  // Criação nova
+  tree[modalPath] = { 
+    nome: nome, 
+    anilha: anilha || '',
+    sexo: sexo,
+    id: aveExistente ? aveExistente.id : null
+  };
+  treeModificada = true;
+  
+  fecharModal();
+  renderTree();
+  
+  // Perguntar se quer criar a ave no sistema
+  if (!aveExistente && confirm(`Deseja criar "${nome}" como uma nova ave no sistema para referência futura?`)) {
+    try {
+      if (anilha) {
+        const anilhaExistente = await DB.getAnilhaPorNumero(anilha);
+        if (anilhaExistente) {
+          if (!confirm(`A anilha "${anilha}" já existe no sistema. Continuar mesmo assim?`)) {
+            return;
+          }
+        }
+      }
+      
+      await DB.add(DB.TABLES.AVES, {
+        nome: nome,
+        anilha: anilha || '',
+        sexo: sexo,
+        especie: 'Não identificada',
+        situacao: 'Plantel',
+        filhote: false,
+        pai: '',
+        mae: ''
+      });
+      alert(`✅ Ave "${nome}" cadastrada com sucesso!`);
+    } catch (e) {
+      console.error('Erro ao criar ave:', e);
+      alert('⚠️ Ave criada na árvore, mas houve erro ao cadastrar no sistema: ' + e.message);
+    }
+  }
+}
+
+function selecionarAncestral(ave) {
+  const caminhoExistente = Object.keys(tree).find(p => 
+    p !== modalPath && tree[p] && tree[p].nome === ave.nome
+  );
+  
+  if (caminhoExistente) {
+    if (!confirm(`"${ave.nome}" já está na árvore como "${caminhoExistente}". Deseja usá-lo aqui também?`)) {
+      return;
+    }
+  }
+  
+  tree[modalPath] = { 
+    nome: ave.nome, 
+    anilha: ave.anilha || '',
+    sexo: modalSexo,
+    id: ave.id
+  };
+  treeModificada = true;
+  fecharModal();
+  renderTree();
+}
+
+function renderModalLista() {
+  const busca = document.getElementById('modal-search').value.toLowerCase();
+  let lista = AVES.filter(a => a.sexo === modalSexo);
+  if (aveSelecionada && aveSelecionada.especie) {
+    lista = lista.filter(a => a.especie === aveSelecionada.especie);
+  }
+  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  document.getElementById('modal-list').innerHTML = lista.length === 0 ? 
+    '<div class="empty-note">Nenhuma ave encontrada com a mesma espécie.</div>' :
+    lista.map(a => `
+      <div class="modal-item ${modalSexo === 'M' ? 'male-item' : 'female-item'}">
+        <div><div class="mi-name">${a.nome}</div><div class="mi-band mono">${a.anilha}</div></div>
+        <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick='selecionarAncestral(${JSON.stringify(a)})'>Selecionar</button>
+      </div>
+    `).join('');
+}
+
+// ============================================================
+// ===== RENDER TREE COM DUPLO CLIQUE =====
+// ============================================================
+
 function renderTree() {
   const container = document.getElementById('tree-viewport');
   if (!container) return;
@@ -1454,7 +1824,9 @@ function renderTree() {
       content = `<div class="node-ref">${getLabel(path)}</div><div class="node-plus">+</div>`;
     }
     const click = isRoot ? '' : `onclick="abrirModal('${path}','${sexo}')"`;
-    nodesHtml += `<div class="${cls}" style="left:${x}px; top:${y}px; width:${w}px; height:${h}px;" ${click}>${content}${removeBtn}</div>`;
+    // ADICIONA O EVENTO DE DUPLO CLIQUE PARA EDITAR
+    const dblclick = isFilled ? `ondblclick="editarAncestral('${path}')"` : '';
+    nodesHtml += `<div class="${cls}" style="left:${x}px; top:${y}px; width:${w}px; height:${h}px;" ${click} ${dblclick}>${content}${removeBtn}</div>`;
   });
   let linesSvg = '';
   edges.forEach(edge => {
@@ -1475,47 +1847,6 @@ function renderTree() {
       ${nodesHtml}
     </div>
   `;
-}
-
-// ============================================================
-// ===== FUNÇÕES DO MODAL =====
-// ============================================================
-
-function abrirModal(path, sexo) {
-  modalPath = path;
-  modalSexo = sexo;
-  document.getElementById('modal-title').textContent = 'Selecionar ' + (sexo === 'M' ? 'Macho' : 'Fêmea');
-  document.getElementById('modal-search').value = '';
-  renderModalLista();
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function fecharModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-function renderModalLista() {
-  const busca = document.getElementById('modal-search').value.toLowerCase();
-  let lista = AVES.filter(a => a.sexo === modalSexo);
-  if (aveSelecionada && aveSelecionada.especie) {
-    lista = lista.filter(a => a.especie === aveSelecionada.especie);
-  }
-  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
-  document.getElementById('modal-list').innerHTML = lista.length === 0 ? 
-    '<div class="empty-note">Nenhuma ave encontrada com a mesma espécie.</div>' :
-    lista.map(a => `
-      <div class="modal-item ${modalSexo === 'M' ? 'male-item' : 'female-item'}">
-        <div><div class="mi-name">${a.nome}</div><div class="mi-band mono">${a.anilha}</div></div>
-        <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;" onclick='selecionarAncestral(${JSON.stringify(a)})'>Selecionar</button>
-      </div>
-    `).join('');
-}
-
-function selecionarAncestral(ave) {
-  tree[modalPath] = { nome: ave.nome, anilha: ave.anilha, id: ave.id };
-  treeModificada = true;
-  fecharModal();
-  renderTree();
 }
 
 // ============================================================
