@@ -5,9 +5,9 @@ const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
-router.use(authMiddleware); // todas as rotas exigem login
+router.use(authMiddleware);
 
-// GET - Listar todos os ancestrais do usuário
+// GET - Listar todos os ancestrais
 router.get('/', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM ancestrais WHERE usuario_id = $1 ORDER BY nome',
@@ -26,18 +26,17 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(rows[0]);
 }));
 
-// POST - Criar novo ancestral
+// POST - Criar ancestral
 router.post('/', asyncHandler(async (req, res) => {
   const { nome, anilha, sexo, especie, observacao } = req.body || {};
   
-  if (!nome || (typeof nome === 'string' && nome.trim() === '')) {
+  if (!nome || !nome.trim()) {
     return res.status(400).json({ error: 'Nome é obrigatório.' });
   }
   if (!sexo) {
     return res.status(400).json({ error: 'Sexo é obrigatório.' });
   }
 
-  // Verifica se já existe um ancestral com esse nome
   const dup = await pool.query(
     'SELECT id FROM ancestrais WHERE nome = $1 AND usuario_id = $2',
     [nome.trim(), req.user.id]
@@ -58,7 +57,7 @@ router.post('/', asyncHandler(async (req, res) => {
 router.put('/:id', asyncHandler(async (req, res) => {
   const { nome, anilha, sexo, especie, observacao } = req.body || {};
   
-  if (nome && typeof nome === 'string' && nome.trim() !== '') {
+  if (nome && nome.trim()) {
     const dup = await pool.query(
       'SELECT id FROM ancestrais WHERE nome = $1 AND usuario_id = $2 AND id != $3',
       [nome.trim(), req.user.id, req.params.id]
