@@ -1,22 +1,10 @@
-// db-api.js — SUBSTITUI o antigo db.js (localStorage) por chamadas reais à API.
-//
-// IMPORTANTE PARA QUEM FOR ADAPTAR AS PÁGINAS HTML:
-// Antes: const aves = DB.getAll(DB.TABLES.AVES);              (síncrono)
-// Agora: const aves = await DB.getAll(DB.TABLES.AVES);        (precisa de await!)
-//
-// Toda função do DB agora devolve uma Promise. Isso significa que qualquer
-// função que chame DB.getAll/add/update/delete precisa virar `async function`
-// e usar `await` na chamada. É a única mudança estrutural exigida nas páginas.
-
+// db-api.js — COMPLETO COM FUNÇÕES DE ANCESTRAIS
 const API_BASE = '/api';
 
 function getToken() {
   return localStorage.getItem('token');
 }
 
-// Os formulários antigos usam camelCase (dataNasc, anilhaPai, avoPaterno...),
-// o banco usa snake_case (data_nasc, anilha_pai, avo_paterno...). Em vez de
-// reescrever campo por campo em cada tela, convertemos automaticamente aqui.
 function paraSnake(obj) {
   if (Array.isArray(obj) || obj === null || typeof obj !== 'object') return obj;
   const out = {};
@@ -46,7 +34,6 @@ async function apiFetch(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (res.status === 401) {
-    // Sessão expirada/inválida — manda pro login
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     if (!location.pathname.endsWith('login.html')) {
@@ -67,7 +54,7 @@ const DB = {
     ANILHAS: 'anilhas',
     AVES: 'aves',
     REPRODUCOES: 'reproducoes',
-    ANCESTRAIS: 'ancestrais' // <-- NOVO
+    ANCESTRAIS: 'ancestrais'
   },
 
   async getAll(table) {
@@ -94,7 +81,7 @@ const DB = {
     return apiFetch(`/${table}/${id}`, { method: 'DELETE' });
   },
 
-  // ---- Funções específicas que várias páginas já usavam ----
+  // ---- FUNÇÕES ESPECÍFICAS ----
   async getAvesPorSituacao(situacao) {
     const aves = await this.getAll(this.TABLES.AVES);
     return aves.filter(a => a.situacao === situacao);
@@ -126,7 +113,7 @@ const DB = {
     return anilhas.find(a => a.numero === numero) || null;
   },
 
-  // ---- ANCESTRAIS (não fazem parte do plantel) ----
+  // ---- ANCESTRAIS (NÃO FAZEM PARTE DO PLANTEL) ----
   async getAncestrais() {
     const rows = await apiFetch('/ancestrais');
     return rows;
@@ -154,7 +141,7 @@ const DB = {
     return ancestrais.find(a => a.nome && a.nome.toLowerCase() === nome.toLowerCase()) || null;
   },
 
-  // ---- Leitura pública das aves marcadas para aparecer no site (sem login) ----
+  // ---- PÚBLICO ----
   async getAvesPublicas() {
     const res = await fetch(`${API_BASE}/aves/publico/site`);
     if (!res.ok) return [];
@@ -166,12 +153,12 @@ const DB = {
     return paraCamel(await res.json());
   },
 
-  // ---- Conta do usuário ----
+  // ---- CONTA ----
   async trocarSenha(senhaAtual, novaSenha) {
     return apiFetch('/auth/senha', { method: 'PUT', body: JSON.stringify({ senhaAtual, novaSenha }) });
   },
 
-  // ---- Config do site (substitui os antigos localStorage 'site_xxx') ----
+  // ---- CONFIG ----
   async getConfig(chave) {
     const res = await fetch(`${API_BASE}/config/publico/${chave}`);
     if (!res.ok) return null;
@@ -183,4 +170,4 @@ const DB = {
 };
 
 window.DB = DB;
-console.log('✅ db-api.js carregado (API real, sem localStorage)');
+console.log('✅ db-api.js carregado');
