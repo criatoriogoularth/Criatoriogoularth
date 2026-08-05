@@ -1,4 +1,3 @@
-<!-- site-home.html - COMPLETO COM BOTÃO DE LOGIN CORRETO -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -112,7 +111,8 @@ body {
   flex: 1;
 }
 
-.nav-links > a {
+.nav-links > a,
+.nav-links > .dropdown > a {
   color: var(--text-muted);
   text-decoration: none;
   padding: 8px 18px;
@@ -124,13 +124,15 @@ body {
   border: 1px solid transparent;
 }
 
-.nav-links > a:hover {
+.nav-links > a:hover,
+.nav-links > .dropdown > a:hover {
   color: var(--text);
   background: rgba(199,151,63,0.08);
   border-color: var(--brass-dim);
 }
 
-.nav-links > a.active {
+.nav-links > a.active,
+.nav-links > .dropdown > a.active {
   color: var(--brass-soft);
   background: rgba(199,151,63,0.12);
   border-color: var(--brass);
@@ -143,27 +145,13 @@ body {
 }
 
 .dropdown > a {
-  color: var(--text-muted);
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  transition: .15s ease;
   cursor: pointer;
   display: inline-block;
-  border: 1px solid transparent;
 }
 
 .dropdown > a::after {
   content: ' ▼';
   font-size: 8px;
-}
-
-.dropdown > a:hover {
-  color: var(--text);
-  background: rgba(199,151,63,0.08);
-  border-color: var(--brass-dim);
 }
 
 .dropdown-content {
@@ -511,7 +499,7 @@ body {
     gap: 4px;
   }
   .nav-links > a,
-  .dropdown > a {
+  .nav-links > .dropdown > a {
     padding: 6px 12px;
     font-size: 12px;
   }
@@ -568,7 +556,7 @@ body {
 
     <!-- ===== NAVEGAÇÃO ABAIXO DO BANNER ===== -->
     <div class="site-nav">
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links">
         <a href="site-home.html" class="active">Home</a>
         <a href="site-criatorio.html">O Criatório</a>
         <a href="site-noticias.html">Notícias</a>
@@ -598,7 +586,9 @@ body {
     <div class="intro-text" id="intro-text"></div>
 
     <h2 style="font-family:'Fraunces',serif;font-size:24px;color:var(--brass-soft);text-align:center;margin-bottom:8px;">Nossas Espécies</h2>
-    <div class="species-grid" id="species-grid"></div>
+    <div id="species-grid-container">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
   </main>
 
   <!-- ===== MODAL DA ESPÉCIE ===== -->
@@ -621,7 +611,7 @@ body {
       <a href="site-filhotes.html">Filhotes</a>
       <a href="site-fotos.html">Fotos</a>
       <a href="site-videos.html">Vídeos</a>
-        <a href="site-crachas.html">Crachás</a>
+      <a href="site-crachas.html">Crachás</a>
       <a href="site-contato.html">Contato</a>
     </div>
     <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
@@ -639,6 +629,10 @@ body {
 
     async function getEspecies() {
       return (await DB.getConfig('site_especies')) || {};
+    }
+
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
     }
 
     function abrirModalEspecie(nome, info) {
@@ -665,6 +659,37 @@ body {
       if (e.key === 'Escape') fecharModalEspecie();
     });
 
+    // ===== CARREGAR VISIBILIDADE DO MENU =====
+    async function carregarVisibilidadeMenu() {
+      const personalizacao = await getPersonalizacao();
+      const vis = personalizacao.visibilidade || {};
+      
+      const links = document.querySelectorAll('.nav-links > a, .nav-links > .dropdown');
+      const mapa = {
+        'Home': 'home',
+        'O Criatório': 'criatorio',
+        'Notícias': 'noticias',
+        'Plantel': 'plantel',
+        'Adultos': 'adultos',
+        'Filhotes': 'filhotes',
+        'Fotos': 'fotos',
+        'Vídeos': 'videos',
+        'Crachás': 'crachas',
+        'Contato': 'contato'
+      };
+      
+      links.forEach(el => {
+        const texto = el.textContent.trim();
+        const chave = mapa[texto];
+        if (chave && vis[chave] === false) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = '';
+        }
+      });
+    }
+
+    // ===== CARREGAR HOME =====
     async function carregarHome() {
       const conteudo = await getSiteConteudo();
       const home = conteudo.home || {};
@@ -722,13 +747,13 @@ body {
 
       // ===== ESPÉCIES =====
       const especiesDestaque = home.especies || [];
-      const grid = document.getElementById('species-grid');
+      const gridContainer = document.getElementById('species-grid-container');
       
       const especiesSelecionadas = especiesDestaque.filter(esp => especiesInfo[esp]);
       
       if (especiesSelecionadas.length === 0) {
-        grid.innerHTML = `
-          <div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1;">
+        gridContainer.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
             <div style="font-size:48px;margin-bottom:12px;opacity:0.4;">🐦</div>
             <p>Nenhuma espécie selecionada para destaque.</p>
             <p style="font-size:12px;">Selecione as espécies no editor da Home.</p>
@@ -737,24 +762,35 @@ body {
         return;
       }
 
-      grid.innerHTML = especiesSelecionadas.map(esp => {
-        const info = especiesInfo[esp];
-        const count = avesSite.filter(a => a.especie === esp).length;
-        const imgHtml = info.imagem ? `<img src="${info.imagem}" class="especie-img" alt="${esp}" onerror="this.style.display='none'">` : `<div class="icon">🐦</div>`;
-        
-        return `
-          <div class="species-card" onclick="abrirModalEspecie('${esp}', ${JSON.stringify(info).replace(/"/g, '&quot;')})">
-            ${imgHtml}
-            <h3>${info.titulo || esp}</h3>
-            <div class="cientifico">${count} aves no plantel</div>
-            <div class="desc">${info.desc || ''}</div>
-            <span class="ver-mais">🔍 Clique para ver mais</span>
-            <a href="site-plantel.html?especie=${encodeURIComponent(esp)}" class="btn" onclick="event.stopPropagation();">Ver Plantel →</a>
-          </div>
-        `;
-      }).join('');
+      // Se tiver apenas 1 espécie, centraliza com max-width
+      const isSingle = especiesSelecionadas.length === 1;
+      const gridStyle = isSingle ? 'style="display:flex;justify-content:center;"' : '';
+
+      gridContainer.innerHTML = `
+        <div class="species-grid" ${gridStyle}>
+          ${especiesSelecionadas.map(esp => {
+            const info = especiesInfo[esp];
+            const count = avesSite.filter(a => a.especie === esp).length;
+            const imgHtml = info.imagem ? `<img src="${info.imagem}" class="especie-img" alt="${esp}" onerror="this.style.display='none'">` : `<div class="icon">🐦</div>`;
+            const maxWidth = isSingle ? 'max-width:320px;' : '';
+            
+            return `
+              <div class="species-card" style="${maxWidth}" onclick="abrirModalEspecie('${esp}', ${JSON.stringify(info).replace(/"/g, '&quot;')})">
+                ${imgHtml}
+                <h3>${info.titulo || esp}</h3>
+                <div class="cientifico">${count} aves no plantel</div>
+                <div class="desc">${info.desc || ''}</div>
+                <span class="ver-mais">🔍 Clique para ver mais</span>
+                <a href="site-plantel.html?especie=${encodeURIComponent(esp)}" class="btn" onclick="event.stopPropagation();">Ver Plantel →</a>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
 
+    // ===== INICIALIZAR =====
+    carregarVisibilidadeMenu();
     carregarHome();
   </script>
   <script src="site-buttons.js"></script>

@@ -183,6 +183,28 @@
   padding: 6px 16px;
   font-size: 12px;
 }
+.ave-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  border: 1px solid var(--line);
+}
+.ave-selector-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.ave-selector-item label {
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+}
 </style>
 </head>
 <body>
@@ -272,6 +294,88 @@
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Selecione o tema que será aplicado em todo o site.</div>
       </div>
 
+      <!-- ===== VISIBILIDADE DAS ABAS ===== -->
+      <div class="editor-card">
+        <h3>📑 Visibilidade das Abas do Site</h3>
+        <p style="color:var(--text-muted);margin-bottom:12px;">Marque as abas que aparecerão no menu do site. Desmarque as que ainda não têm conteúdo.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-home" checked onchange="atualizarVisibilidade()">
+            <label for="vis-home">🏠 Home</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-criatorio" checked onchange="atualizarVisibilidade()">
+            <label for="vis-criatorio">🏷️ Criatório</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-noticias" checked onchange="atualizarVisibilidade()">
+            <label for="vis-noticias">📰 Notícias</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-plantel" checked onchange="atualizarVisibilidade()">
+            <label for="vis-plantel">🐦 Plantel</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-adultos" checked onchange="atualizarVisibilidade()">
+            <label for="vis-adultos">🐤 Adultos</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-filhotes" checked onchange="atualizarVisibilidade()">
+            <label for="vis-filhotes">🐣 Filhotes</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-fotos" checked onchange="atualizarVisibilidade()">
+            <label for="vis-fotos">📸 Fotos</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-videos" checked onchange="atualizarVisibilidade()">
+            <label for="vis-videos">🎬 Vídeos</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-crachas" checked onchange="atualizarVisibilidade()">
+            <label for="vis-crachas">🏷️ Crachás</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-contato" checked onchange="atualizarVisibilidade()">
+            <label for="vis-contato">📧 Contato</label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+          💡 As abas desmarcadas serão ocultadas do menu de navegação em todas as páginas do site.
+        </div>
+      </div>
+
+      <!-- ===== VISIBILIDADE DOS SUBTABS DE FOTOS E VÍDEOS ===== -->
+      <div class="editor-card">
+        <h3>📸 Visibilidade dos Subtabs de Fotos e Vídeos</h3>
+        <p style="color:var(--text-muted);margin-bottom:12px;">Marque as categorias que aparecerão nas abas de Fotos e Vídeos.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-fotos-criacao" checked onchange="atualizarVisibilidade()">
+            <label for="vis-fotos-criacao">📸 Fotos - Criação</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-fotos-torneios" checked onchange="atualizarVisibilidade()">
+            <label for="vis-fotos-torneios">🏆 Fotos - Torneios</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-videos-criacao" checked onchange="atualizarVisibilidade()">
+            <label for="vis-videos-criacao">🎬 Vídeos - Criação</label>
+          </div>
+          <div class="ave-selector-item">
+            <input type="checkbox" id="vis-videos-torneios" checked onchange="atualizarVisibilidade()">
+            <label for="vis-videos-torneios">🏆 Vídeos - Torneios</label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+          💡 Se uma categoria estiver desmarcada, a aba correspondente não aparecerá.
+        </div>
+      </div>
+
       <div class="form-actions">
         <button class="btn btn-primary" onclick="salvarPersonalizacao()">💾 Salvar Personalização</button>
       </div>
@@ -296,39 +400,36 @@ let _salvarPersonalizacaoTimeout = null;
 async function savePersonalizacao(data) {
   await DB.setConfig('site_personalizacao', data);
 }
-// Versão com debounce, usada nos campos que salvam a cada tecla digitada
-// (evita mandar uma requisição pra API a cada letra).
+
 function savePersonalizacaoDebounced(data) {
   clearTimeout(_salvarPersonalizacaoTimeout);
   _salvarPersonalizacaoTimeout = setTimeout(() => savePersonalizacao(data), 400);
 }
 
 // ============================================================
-// FUNÇÃO PARA APLICAR TEMA - CORRIGIDA
+// FUNÇÃO PARA APLICAR TEMA
 // ============================================================
 
 function aplicarTema(tema) {
   const root = document.documentElement;
   
   if (tema === 'claro') {
-    // TEMA CLARO - Texto escuro para legibilidade
     root.style.setProperty('--bg', '#f5f0e8');
     root.style.setProperty('--bg-elevated', '#ede8df');
     root.style.setProperty('--bg-elevated-2', '#e5dfd4');
-    root.style.setProperty('--text', '#23291f');        // TEXTO ESCURO
-    root.style.setProperty('--text-muted', '#5a6355');  // TEXTO ESCURO MÉDIO
+    root.style.setProperty('--text', '#23291f');
+    root.style.setProperty('--text-muted', '#5a6355');
     root.style.setProperty('--line', 'rgba(199,151,63,0.3)');
     root.style.setProperty('--parchment', '#f5f0e8');
     root.style.setProperty('--parchment-dim', '#e5dfd4');
     root.style.setProperty('--ink', '#23291f');
     root.style.setProperty('--ink-soft', '#5a6355');
   } else {
-    // TEMA ESCURO - Texto claro
     root.style.setProperty('--bg', '#0d1a16');
     root.style.setProperty('--bg-elevated', '#132621');
     root.style.setProperty('--bg-elevated-2', '#17302a');
-    root.style.setProperty('--text', '#ece6d6');        // TEXTO CLARO
-    root.style.setProperty('--text-muted', '#9aa89e');  // TEXTO CLARO MÉDIO
+    root.style.setProperty('--text', '#ece6d6');
+    root.style.setProperty('--text-muted', '#9aa89e');
     root.style.setProperty('--line', 'rgba(199,151,63,0.22)');
     root.style.setProperty('--parchment', '#f3ecda');
     root.style.setProperty('--parchment-dim', '#e7dec5');
@@ -366,7 +467,7 @@ async function carregarPersonalizacao() {
   document.getElementById('preview-nome').style.fontSize = tamanhoNome + 'px';
   document.getElementById('preview-sub').textContent = personalizacao.subtitulo || 'Canários · Coleiros · Trinca-Ferro';
   
-  // TEMA - Carregar e aplicar o tema salvo
+  // TEMA
   const tema = personalizacao.tema || 'escuro';
   const toggle = document.getElementById('tema-toggle');
   const labelEscuro = document.getElementById('tema-label-escuro');
@@ -382,8 +483,10 @@ async function carregarPersonalizacao() {
     labelClaro.style.color = 'var(--text-muted)';
   }
   
-  // Aplicar o tema
   aplicarTema(tema);
+  
+  // VISIBILIDADE
+  carregarVisibilidade();
 }
 
 // ============================================================
@@ -531,7 +634,7 @@ async function atualizarPreviewLogo() {
 }
 
 // ============================================================
-// FUNÇÕES DO TEMA - CORRIGIDAS
+// FUNÇÕES DO TEMA
 // ============================================================
 
 async function toggleTema() {
@@ -543,29 +646,71 @@ async function toggleTema() {
   let novoTema;
   
   if (isEscuro) {
-    // Mudando para CLARO
     toggle.classList.remove('active');
     labelEscuro.style.color = 'var(--text-muted)';
     labelClaro.style.color = 'var(--brass-soft)';
     novoTema = 'claro';
   } else {
-    // Mudando para ESCURO
     toggle.classList.add('active');
     labelEscuro.style.color = 'var(--brass-soft)';
     labelClaro.style.color = 'var(--text-muted)';
     novoTema = 'escuro';
   }
   
-  // Aplicar o tema imediatamente
   aplicarTema(novoTema);
   
-  // Salvar via API
   const personalizacao = await getPersonalizacao();
   personalizacao.tema = novoTema;
   await savePersonalizacao(personalizacao);
   
-  // Atualizar sidebar
   atualizarSidebar();
+}
+
+// ============================================================
+// VISIBILIDADE DAS ABAS
+// ============================================================
+
+async function atualizarVisibilidade() {
+  const personalizacao = await getPersonalizacao();
+  
+  // Abas principais
+  const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
+  const visibilidadeAbas = {};
+  abas.forEach(aba => {
+    const el = document.getElementById(`vis-${aba}`);
+    visibilidadeAbas[aba] = el ? el.checked : true;
+  });
+  
+  // Subtabs de Fotos
+  visibilidadeAbas.fotosCriacao = document.getElementById('vis-fotos-criacao')?.checked ?? true;
+  visibilidadeAbas.fotosTorneios = document.getElementById('vis-fotos-torneios')?.checked ?? true;
+  
+  // Subtabs de Vídeos
+  visibilidadeAbas.videosCriacao = document.getElementById('vis-videos-criacao')?.checked ?? true;
+  visibilidadeAbas.videosTorneios = document.getElementById('vis-videos-torneios')?.checked ?? true;
+  
+  personalizacao.visibilidade = visibilidadeAbas;
+  await savePersonalizacao(personalizacao);
+}
+
+async function carregarVisibilidade() {
+  const personalizacao = await getPersonalizacao();
+  const vis = personalizacao.visibilidade || {};
+  
+  // Abas principais
+  const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
+  abas.forEach(aba => {
+    const el = document.getElementById(`vis-${aba}`);
+    if (el) el.checked = vis[aba] !== undefined ? vis[aba] : true;
+  });
+  
+  // Subtabs
+  const subtabs = ['fotos-criacao', 'fotos-torneios', 'videos-criacao', 'videos-torneios'];
+  subtabs.forEach(sub => {
+    const el = document.getElementById(`vis-${sub}`);
+    const key = sub.replace('-', '');
+    if (el) el.checked = vis[key] !== undefined ? vis[key] : true;
+  });
 }
 
 // ============================================================
@@ -573,7 +718,6 @@ async function toggleTema() {
 // ============================================================
 
 function atualizarSidebar() {
-  // Encontrar a página ativa pela URL
   const path = window.location.pathname.split('/').pop();
   const activePage = path.replace('.html', '');
   renderSidebar(activePage);
@@ -598,14 +742,15 @@ async function salvarPersonalizacao() {
   personalizacao.nomeTamanho = tamanhoNome;
   personalizacao.subtitulo = subtitulo;
   
-  // Mantém o tema atual
   if (!personalizacao.tema) {
     personalizacao.tema = 'escuro';
   }
   
+  // Salvar visibilidade também
+  await atualizarVisibilidade();
+  
   await savePersonalizacao(personalizacao);
   
-  // Atualizar preview
   await carregarPersonalizacao();
   atualizarSidebar();
   
@@ -616,10 +761,8 @@ async function salvarPersonalizacao() {
 // INICIALIZAR
 // ============================================================
 
-// Carregar personalização
 carregarPersonalizacao();
 
-// Adicionar eventos para atualizar preview em tempo real
 document.getElementById('logo-tamanho').addEventListener('input', atualizarPreviewLogo);
 document.getElementById('logo-iniciais').addEventListener('input', atualizarPreviewLogo);
 document.getElementById('criatorio-nome').addEventListener('input', atualizarPreviewLogo);

@@ -91,7 +91,8 @@ body {
   align-items: center;
 }
 
-.nav-links a {
+.nav-links > a,
+.nav-links > .dropdown > a {
   color: var(--text-muted);
   text-decoration: none;
   padding: 8px 14px;
@@ -102,13 +103,15 @@ body {
   border: 1px solid transparent;
 }
 
-.nav-links a:hover {
+.nav-links > a:hover,
+.nav-links > .dropdown > a:hover {
   color: var(--text);
   background: rgba(199,151,63,0.08);
   border-color: var(--brass-dim);
 }
 
-.nav-links a.active {
+.nav-links > a.active,
+.nav-links > .dropdown > a.active {
   color: var(--brass-soft);
   background: rgba(199,151,63,0.12);
   border-color: var(--brass);
@@ -294,6 +297,99 @@ body {
   color: var(--brass-soft);
 }
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown > a {
+  cursor: pointer;
+}
+
+.dropdown > a::after {
+  content: ' ▼';
+  font-size: 8px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 0;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content .sub-dropdown {
+  position: relative;
+}
+
+.dropdown-content .sub-dropdown > a {
+  display: block;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: .15s ease;
+}
+
+.dropdown-content .sub-dropdown > a:hover {
+  background: rgba(199,151,63,0.08);
+  color: var(--text);
+}
+
+.dropdown-content .sub-dropdown > a::after {
+  content: ' ►';
+  float: right;
+  font-size: 10px;
+}
+
+.sub-dropdown-content {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  min-width: 160px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 0;
+  z-index: 101;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.sub-dropdown:hover .sub-dropdown-content {
+  display: block;
+}
+
+.sub-dropdown-content a {
+  display: block;
+  padding: 6px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12px;
+  transition: .15s ease;
+}
+
+.sub-dropdown-content a:hover {
+  background: rgba(199,151,63,0.08);
+  color: var(--text);
+}
+
+.sub-dropdown-content a .sexo-icon {
+  font-size: 12px;
+  margin-right: 6px;
+}
+
 @media (max-width: 768px) {
   .site-nav {
     flex-direction: column;
@@ -317,6 +413,27 @@ body {
     font-size: 13px;
     padding: 8px 14px;
   }
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0;
+  }
+  .sub-dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    border-radius: 0;
+    padding-left: 16px;
+  }
+  .dropdown:hover .dropdown-content {
+    display: none;
+  }
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
 }
 </style>
 </head>
@@ -326,11 +443,14 @@ body {
       <div class="logo" id="logo-section">
         <!-- Preenchido pelo JavaScript -->
       </div>
-      <div class="nav-links">
+      <div class="nav-links" id="nav-links">
         <a href="site-home.html">Home</a>
         <a href="site-criatorio.html">O Criatório</a>
         <a href="site-noticias.html">Notícias</a>
-        <a href="site-plantel.html">Plantel</a>
+        <div class="dropdown">
+          <a>Plantel</a>
+          <div class="dropdown-content" id="plantel-dropdown"></div>
+        </div>
         <a href="site-adultos.html">Adultos</a>
         <a href="site-filhotes.html">Filhotes</a>
         <a href="site-fotos.html">Fotos</a>
@@ -371,7 +491,7 @@ body {
       <a href="site-filhotes.html">Filhotes</a>
       <a href="site-fotos.html">Fotos</a>
       <a href="site-videos.html">Vídeos</a>
-        <a href="site-crachas.html">Crachás</a>
+      <a href="site-crachas.html">Crachás</a>
       <a href="site-contato.html">Contato</a>
     </div>
     <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
@@ -433,11 +553,92 @@ body {
       document.getElementById(tabId).classList.add('active');
     }
 
+    async function carregarVisibilidadeMenu() {
+      const personalizacao = await getPersonalizacao();
+      const vis = personalizacao.visibilidade || {};
+      
+      const links = document.querySelectorAll('.nav-links > a, .nav-links > .dropdown');
+      const mapa = {
+        'Home': 'home',
+        'O Criatório': 'criatorio',
+        'Notícias': 'noticias',
+        'Plantel': 'plantel',
+        'Adultos': 'adultos',
+        'Filhotes': 'filhotes',
+        'Fotos': 'fotos',
+        'Vídeos': 'videos',
+        'Crachás': 'crachas',
+        'Contato': 'contato'
+      };
+      
+      links.forEach(el => {
+        const texto = el.textContent.trim();
+        const chave = mapa[texto];
+        if (chave && vis[chave] === false) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = '';
+        }
+      });
+    }
+
+    async function carregarDropdownPlantel() {
+      const avesSite = await DB.getAvesPublicas();
+      const dropdownPlantel = document.getElementById('plantel-dropdown');
+      const especiesPlantel = [...new Set(avesSite.map(a => a.especie).filter(Boolean))];
+      
+      let dropdownHtml = '';
+      especiesPlantel.sort().forEach(esp => {
+        const count = avesSite.filter(a => a.especie === esp).length;
+        if (count === 0) return;
+        
+        dropdownHtml += `
+          <div class="sub-dropdown">
+            <a href="site-plantel.html?especie=${encodeURIComponent(esp)}">${esp}</a>
+            <div class="sub-dropdown-content">
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=M">${esp} - <span class="sexo-icon">♂</span> Machos</a>
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=F">${esp} - <span class="sexo-icon">♀</span> Fêmeas</a>
+            </div>
+          </div>
+        `;
+      });
+      dropdownPlantel.innerHTML = dropdownHtml || `<a href="site-plantel.html" style="display:block;padding:8px 16px;color:var(--text-muted);text-decoration:none;">Ver Plantel</a>`;
+    }
+
     async function renderizarVideos() {
+      const personalizacao = await getPersonalizacao();
+      const vis = personalizacao.visibilidade || {};
       const videos = await getVideos();
 
       const criacao = videos.filter(v => v.categoria === 'Criação' || !v.categoria);
       const torneios = videos.filter(v => v.categoria === 'Torneios');
+      
+      const mostrarCriacao = vis.videosCriacao !== false;
+      const mostrarTorneios = vis.videosTorneios !== false;
+      
+      // Mostrar/esconder abas
+      const tabCriacao = document.querySelector('[data-tab="videos-criacao"]');
+      const tabTorneios = document.querySelector('[data-tab="videos-torneios"]');
+      if (tabCriacao) tabCriacao.style.display = mostrarCriacao ? '' : 'none';
+      if (tabTorneios) tabTorneios.style.display = mostrarTorneios ? '' : 'none';
+      
+      // Se nenhuma categoria estiver visível, mostrar mensagem
+      if (!mostrarCriacao && !mostrarTorneios) {
+        document.getElementById('videos-criacao-grid').innerHTML = `
+          <div class="empty-videos"><div class="icon">🎬</div><p>Nenhuma categoria de vídeos disponível no momento.</p></div>
+        `;
+        document.getElementById('videos-torneios-grid').innerHTML = '';
+        return;
+      }
+      
+      // Se só uma categoria estiver visível, ativar ela automaticamente
+      if (mostrarCriacao && !mostrarTorneios) {
+        const btn = document.querySelector('[data-tab="videos-criacao"]');
+        if (btn) switchTab('videos-criacao', btn);
+      } else if (!mostrarCriacao && mostrarTorneios) {
+        const btn = document.querySelector('[data-tab="videos-torneios"]');
+        if (btn) switchTab('videos-torneios', btn);
+      }
       
       renderizarGrid('videos-criacao-grid', criacao);
       renderizarGrid('videos-torneios-grid', torneios);
@@ -477,6 +678,8 @@ body {
     }
 
     carregarLogo();
+    carregarVisibilidadeMenu();
+    carregarDropdownPlantel();
     renderizarVideos();
   </script>
   <script src="site-buttons.js"></script>
