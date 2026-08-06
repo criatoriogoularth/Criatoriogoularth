@@ -45,13 +45,21 @@ router.put('/:chave', authMiddleware, validarChave, asyncHandler(async (req, res
   const { valor } = req.body || {};
   if (valor === undefined) return res.status(400).json({ error: 'Campo "valor" é obrigatório.' });
 
+  // CORREÇÃO: a leitura pública (rota acima) sempre busca usuario_id = 1,
+  // fixo, porque o site é single-user. Antes esta rota gravava com
+  // req.user.id (o id de quem está logado) — se esse id não fosse 1,
+  // a gravação ia para uma linha que a leitura pública nunca olhava, e
+  // as mudanças pareciam "não salvar" ou voltar ao estado antigo depois
+  // de recarregar a página. Agora escreve sempre na mesma linha (id=1)
+  // que a leitura usa, mas continua exigindo login (authMiddleware) para
+  // gravar.
   const { rows } = await pool.query(
     `INSERT INTO site_config (usuario_id, chave, valor, atualizado_em)
      VALUES ($1, $2, $3, NOW())
      ON CONFLICT (usuario_id, chave)
      DO UPDATE SET valor = $3, atualizado_em = NOW()
      RETURNING valor`,
-    [req.user.id, req.params.chave, JSON.stringify(valor)]
+    [1, req.params.chave, JSON.stringify(valor)]
   );
   res.json(rows[0].valor);
 }));

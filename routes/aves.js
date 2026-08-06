@@ -242,8 +242,13 @@ router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
     return r.rows[0] || null;
   }
 
-  const paiEncontrado = await buscarPorNome(ave.pai);
-  const maeEncontrada = await buscarPorNome(ave.mae);
+  // CORREÇÃO: pai e mãe eram buscados um depois do outro (await sequencial),
+  // dobrando o tempo de espera à toa — as duas buscas não dependem uma da
+  // outra, então rodam em paralelo agora.
+  const [paiEncontrado, maeEncontrada] = await Promise.all([
+    buscarPorNome(ave.pai),
+    buscarPorNome(ave.mae)
+  ]);
 
   res.json({ ...ave, paiEncontrado, maeEncontrada });
 }));
