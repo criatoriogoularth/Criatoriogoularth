@@ -758,6 +758,56 @@ async function popularSelectEspecie() {
    FUNÇÃO PARA HERDAR ANCESTRAIS - CORRIGIDA
    ============================================================ */
 
+function parseAncestraisArray(obj) {
+  let lista = obj ? obj.ancestrais : null;
+  if (typeof lista === 'string') {
+    try { lista = JSON.parse(lista); } catch(e) { lista = []; }
+  }
+  return Array.isArray(lista) ? lista : [];
+}
+
+const NOME_GERACAO = { 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
+
+// Recebe o registro completo do pai OU da mãe (nível 1 relativo à ave que
+// está sendo cadastrada) e devolve todos os ancestrais de nível 3 em diante
+// (bisavós pra frente) já com o caminho prefixado corretamente ('pai.' ou 'mae.').
+function extrairGeracoesProfundas(base, completo) {
+  const out = [];
+  const add = (caminho, nome, anilha, especie, raca) => {
+    if (!nome) return;
+    const geracao = caminho.split('.').length;
+    out.push({
+      geracao,
+      nomeGeracao: NOME_GERACAO[geracao] || `G${geracao}`,
+      caminho,
+      sexo: caminho.endsWith('pai') ? 'M' : 'F',
+      nome, anilha: anilha || '', especie: especie || '', raca: raca || '', nota: ''
+    });
+  };
+
+  // Nível 3 relativo à ave atual = avós do pai/mãe selecionado (bisavós da ave atual)
+  add(`${base}.pai.pai`, completo.avoPaterno, '');
+  add(`${base}.pai.mae`, completo.avoPaterna, '');
+  add(`${base}.mae.pai`, completo.avoMaterno, '');
+  add(`${base}.mae.mae`, completo.avoMaterna, '');
+
+  // Nível 4 em diante: tudo que o pai/mãe selecionado já tinha registrado
+  // na própria árvore dele (trisavós, tataravós...), reaproveitado aqui.
+  parseAncestraisArray(completo).forEach(a => {
+    if (a.caminho && a.nome) {
+      add(`${base}.${a.caminho}`, a.nome, a.anilha, a.especie, a.raca);
+    }
+  });
+
+  return out;
+}
+
+async function buscarAveOuAncestralPorNome(nome) {
+  let completo = await DB.getAvePorNome(nome);
+  if (!completo) completo = await DB.getAncestralPorNome(nome);
+  return completo;
+}
+
 async function herdarAncestrais(paiNome, maeNome) {
   const ancestrais = {
     pai: paiNome || '',
@@ -767,36 +817,30 @@ async function herdarAncestrais(paiNome, maeNome) {
     avoPaterno: '',
     avoPaterna: '',
     avoMaterno: '',
-    avoMaterna: ''
+    avoMaterna: '',
+    ancestraisProfundos: [] // bisavós em diante, herdados do pai e/ou da mãe
   };
   
   if (paiNome) {
-    // Primeiro verifica no plantel
-    let paiCompleto = await DB.getAvePorNome(paiNome);
-    // Se não encontrar no plantel, verifica nos ancestrais
-    if (!paiCompleto) {
-      paiCompleto = await DB.getAncestralPorNome(paiNome);
-    }
+    const paiCompleto = await buscarAveOuAncestralPorNome(paiNome);
     if (paiCompleto) {
       ancestrais.anilhaPai = paiCompleto.anilha || '';
-      // Se for uma ave do plantel, busca os pais dela
       if (paiCompleto.pai) {
         ancestrais.avoPaterno = paiCompleto.pai || '';
         ancestrais.avoPaterna = paiCompleto.mae || '';
+        ancestrais.ancestraisProfundos.push(...extrairGeracoesProfundas('pai', paiCompleto));
       }
     }
   }
   
   if (maeNome) {
-    let maeCompleta = await DB.getAvePorNome(maeNome);
-    if (!maeCompleta) {
-      maeCompleta = await DB.getAncestralPorNome(maeNome);
-    }
+    const maeCompleta = await buscarAveOuAncestralPorNome(maeNome);
     if (maeCompleta) {
       ancestrais.anilhaMae = maeCompleta.anilha || '';
       if (maeCompleta.pai) {
         ancestrais.avoMaterno = maeCompleta.pai || '';
         ancestrais.avoMaterna = maeCompleta.mae || '';
+        ancestrais.ancestraisProfundos.push(...extrairGeracoesProfundas('mae', maeCompleta));
       }
     }
   }
@@ -1498,6 +1542,16 @@ async function salvarAve() {
       ancestraisExistentes = aveExistente.ancestrais;
     }
   }
+
+  // Mescla os ancestrais herdados (bisavós em diante) com os que já existiam.
+  // Sempre que o lado (pai. ou mae.) foi recalculado agora, ele substitui o que
+  // havia antes nesse lado — assim, se você trocar o Pai/Mãe, a linhagem antiga
+  // não fica "grudada" junto com a nova. Ancestrais manuais de um lado que não
+  // mudou continuam preservados.
+  let ancestraisFinais = ancestraisExistentes;
+  if (paiNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('pai.'));
+  if (maeNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('mae.'));
+  ancestraisFinais = ancestraisFinais.concat(ancestrais.ancestraisProfundos);
   
   const avoPaterno = ancestrais.avoPaterno || (aveExistente ? aveExistente.avoPaterno : '') || '';
   const avoPaterna = ancestrais.avoPaterna || (aveExistente ? aveExistente.avoPaterna : '') || '';
@@ -1527,7 +1581,7 @@ async function salvarAve() {
     avoMaterna: avoMaterna,
     filhote: document.getElementById('f-situacao').value === 'Filhote',
     historico: historicoAtual,
-    ancestrais: ancestraisExistentes
+    ancestrais: ancestraisFinais
   };
   
   const aves = await DB.getAll(DB.TABLES.AVES);

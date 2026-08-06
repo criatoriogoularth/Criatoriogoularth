@@ -1760,6 +1760,35 @@ async function renderModalLista() {
   }).join('');
 }
 
+function parseAncestraisDaAve(ave) {
+  let lista = ave.ancestrais;
+  if (typeof lista === 'string') {
+    try { lista = JSON.parse(lista); } catch(e) { lista = []; }
+  }
+  return Array.isArray(lista) ? lista : [];
+}
+
+// Herda toda a linhagem já conhecida da ave selecionada (pai, mãe, avós
+// e todos os ancestrais mais antigos que ela já tinha salvos) para dentro
+// da árvore atual, prefixando os caminhos com o nó em que ela foi encaixada.
+function herdarLinhagemNaArvore(basePath, ave) {
+  if (ave.pai) tree[basePath + '.pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '', sexo: 'M' };
+  if (ave.mae) tree[basePath + '.mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '', sexo: 'F' };
+  if (ave.avoPaterno) tree[basePath + '.pai.pai'] = { nome: ave.avoPaterno, anilha: '', sexo: 'M' };
+  if (ave.avoPaterna) tree[basePath + '.pai.mae'] = { nome: ave.avoPaterna, anilha: '', sexo: 'F' };
+  if (ave.avoMaterno) tree[basePath + '.mae.pai'] = { nome: ave.avoMaterno, anilha: '', sexo: 'M' };
+  if (ave.avoMaterna) tree[basePath + '.mae.mae'] = { nome: ave.avoMaterna, anilha: '', sexo: 'F' };
+
+  parseAncestraisDaAve(ave).forEach(a => {
+    if (a.caminho && a.nome) {
+      tree[basePath + '.' + a.caminho] = {
+        nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || (a.caminho.endsWith('pai') ? 'M' : 'F'),
+        especie: a.especie || '', raca: a.raca || ''
+      };
+    }
+  });
+}
+
 function selecionarAncestral(ave) {
   const caminhoExistente = Object.keys(tree).find(p => p !== modalPath && tree[p] && tree[p].nome === ave.nome);
   if (caminhoExistente) {
@@ -1769,6 +1798,7 @@ function selecionarAncestral(ave) {
   }
   
   tree[modalPath] = { nome: ave.nome, anilha: ave.anilha || '', sexo: modalSexo, id: ave.id, isAncestral: true };
+  herdarLinhagemNaArvore(modalPath, ave);
   treeModificada = true;
   fecharModal();
   renderTree();
