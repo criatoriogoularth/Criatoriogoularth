@@ -392,18 +392,35 @@
 // FUNÇÕES DE BANCO
 // ============================================================
 
+// Fonte única de verdade em memória — evita que duas funções busquem
+// cópias separadas do banco e uma sobrescreva a mudança da outra
+// quando salvam quase ao mesmo tempo (ex: digitar o nome enquanto
+// marca/desmarca uma aba).
+let personalizacaoAtual = {};
+
 async function getPersonalizacao() {
-  return (await DB.getConfig('site_personalizacao')) || {};
+  return personalizacaoAtual;
 }
 
 let _salvarPersonalizacaoTimeout = null;
+let _salvamentoEmAndamento = null;
+
 async function savePersonalizacao(data) {
-  await DB.setConfig('site_personalizacao', data);
+  personalizacaoAtual = data;
+  // Encadeia os salvamentos: se já houver um salvamento em andamento,
+  // espera ele terminar antes de mandar o próximo (evita 2 escritas
+  // concorrentes no banco pisando uma na outra).
+  const anterior = _salvamentoEmAndamento || Promise.resolve();
+  _salvamentoEmAndamento = anterior
+    .catch(() => {})
+    .then(() => DB.setConfig('site_personalizacao', personalizacaoAtual));
+  await _salvamentoEmAndamento;
 }
 
 function savePersonalizacaoDebounced(data) {
+  personalizacaoAtual = data;
   clearTimeout(_salvarPersonalizacaoTimeout);
-  _salvarPersonalizacaoTimeout = setTimeout(() => savePersonalizacao(data), 400);
+  _salvarPersonalizacaoTimeout = setTimeout(() => savePersonalizacao(personalizacaoAtual), 400);
 }
 
 // ============================================================
@@ -443,7 +460,8 @@ function aplicarTema(tema) {
 // ============================================================
 
 async function carregarPersonalizacao() {
-  const personalizacao = await getPersonalizacao();
+  personalizacaoAtual = (await DB.getConfig('site_personalizacao')) || {};
+  const personalizacao = personalizacaoAtual;
   
   // LOGO
   document.getElementById('logo-tamanho').value = personalizacao.logoTamanho || 76;
