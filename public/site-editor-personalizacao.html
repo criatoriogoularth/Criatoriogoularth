@@ -193,17 +193,51 @@
   margin-bottom: 4px;
   border: 1px solid var(--line);
 }
+.ave-selector-item {
+  transition: background .15s ease, border-color .15s ease;
+}
 .ave-selector-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 18px;
   height: 18px;
-  accent-color: var(--brass);
+  min-width: 18px;
+  border-radius: 5px;
+  border: 2px solid var(--line);
+  background: rgba(0,0,0,0.35);
   cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background .15s ease, border-color .15s ease;
+}
+.ave-selector-item input[type="checkbox"]:checked {
+  background: var(--brass);
+  border-color: var(--brass);
+}
+.ave-selector-item input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid var(--bg-elevated-2);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.ave-selector-item:has(input[type="checkbox"]:checked) {
+  background: rgba(199,151,63,0.1);
+  border-color: var(--brass-dim);
 }
 .ave-selector-item label {
   cursor: pointer;
   flex: 1;
   font-size: 13px;
   color: var(--text);
+  transition: color .15s ease;
+}
+.ave-selector-item:has(input[type="checkbox"]:checked) label {
+  color: var(--brass-soft);
 }
 </style>
 </head>

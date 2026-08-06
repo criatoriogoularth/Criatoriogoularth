@@ -167,7 +167,7 @@
   .field input,
   .field select,
   .field textarea,
-  input:not([type="color"]):not([type="file"]),
+  input:not([type="color"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
     background: rgba(0,0,0,0.35) !important;
@@ -186,7 +186,7 @@
   .field input:focus,
   .field select:focus,
   .field textarea:focus,
-  input:not([type="color"]):not([type="file"]):focus,
+  input:not([type="color"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]):focus,
   select:focus,
   textarea:focus {
     border-color: var(--brass) !important;
