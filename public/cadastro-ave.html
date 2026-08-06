@@ -466,7 +466,7 @@
           <legend>Identificação</legend>
           <div class="field-grid">
             <div class="field field-full"><label>Nome <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Ex: AGATHA CAN"></div>
-            <div class="field"><label>Data de Nascimento</label><input type="date" id="f-data-nasc"></div>
+            <div class="field"><label>Data de Nascimento</label><input type="text" id="f-data-nasc" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10"></div>
             <div class="field"><label>Sexo <span class="req">*</span></label>
               <select id="f-sexo">
                 <option value="Indefinido">Indefinido</option>
@@ -971,6 +971,64 @@ function renderizarArvoreCompleta(ave) {
    CARREGAR DADOS DE EDIÇÃO
    ============================================================ */
 
+function normalizarDataISO(data) {
+  if (!data) return '';
+  const s = String(data).trim();
+
+  // Já está em ISO (com ou sem hora): "AAAA-MM-DD..." -> pega só os 10 primeiros
+  if (/^\d{4}-\d{1,2}-\d{1,2}/.test(s)) {
+    const [ano, mes, dia] = s.slice(0, 10).split('-');
+    return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  }
+
+  // Formato brasileiro "DD/MM/AAAA" (ou com hífen "DD-MM-AAAA"), comum em importação
+  const brMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (brMatch) {
+    const [, dia, mes, ano] = brMatch;
+    return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  }
+
+  // Timestamp numérico ou qualquer outro formato reconhecível pelo Date()
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  return ''; // não deu pra reconhecer — melhor vazio do que quebrar o input
+}
+
+function isoParaBR(iso) {
+  const s = normalizarDataISO(iso);
+  if (!s) return '';
+  const [ano, mes, dia] = s.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function brParaISO(br) {
+  if (!br) return '';
+  const m = String(br).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null; // formato incompleto/inválido
+  const [, dia, mes, ano] = m;
+  const d = parseInt(dia, 10), mo = parseInt(mes, 10), y = parseInt(ano, 10);
+  const dataObj = new Date(y, mo - 1, d);
+  // Confere se a data existe de verdade (rejeita 31/02, 30/02 etc.)
+  if (dataObj.getFullYear() !== y || dataObj.getMonth() !== mo - 1 || dataObj.getDate() !== d) return null;
+  return `${ano}-${mes}-${dia}`;
+}
+
+function aplicarMascaraData(input) {
+  input.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 4) v = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+    else if (v.length > 2) v = `${v.slice(0,2)}/${v.slice(2)}`;
+    this.value = v;
+  });
+}
+aplicarMascaraData(document.getElementById('f-data-nasc'));
+
 async function carregarDadosEdicao() {
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get('id');
@@ -981,7 +1039,7 @@ async function carregarDadosEdicao() {
       document.getElementById('page-lede').textContent = 'Editando os dados de ' + ave.nome;
       document.getElementById('edit-id').value = ave.id;
       document.getElementById('f-nome').value = ave.nome || '';
-      document.getElementById('f-data-nasc').value = ave.dataNasc || '';
+      document.getElementById('f-data-nasc').value = isoParaBR(ave.dataNasc);
       document.getElementById('f-sexo').value = ave.sexo || 'Indefinido';
       document.getElementById('f-situacao').value = ave.situacao || 'Plantel';
       document.getElementById('f-tipo-ave').value = ave.tipo || 'Canto';
@@ -1521,9 +1579,6 @@ async function salvarAve() {
   const anilha = document.getElementById('f-anilha').value.trim();
   if (!anilha) { alert('O campo Anilha é obrigatório!'); document.getElementById('f-anilha').focus(); return; }
   
-  // ===== CORREÇÃO: PEGAR A DATA DE NASCIMENTO CORRETAMENTE =====
-  const dataNasc = document.getElementById('f-data-nasc').value;
-  
   const paiNome = document.getElementById('f-pai').value.trim();
   const maeNome = document.getElementById('f-mae').value.trim();
   
@@ -1532,6 +1587,21 @@ async function salvarAve() {
   let aveExistente = null;
   if (id) {
     aveExistente = await DB.getById(DB.TABLES.AVES, parseInt(id));
+  }
+  
+  // ===== CORREÇÃO: PEGAR A DATA DE NASCIMENTO CORRETAMENTE (campo em formato DD/MM/AAAA) =====
+  const dataNascDigitada = document.getElementById('f-data-nasc').value.trim();
+  let dataNasc;
+  if (!dataNascDigitada) {
+    dataNasc = aveExistente ? normalizarDataISO(aveExistente.dataNasc) : '';
+  } else {
+    const convertida = brParaISO(dataNascDigitada);
+    if (convertida === null) {
+      alert('Data de nascimento inválida. Use o formato DD/MM/AAAA.');
+      document.getElementById('f-data-nasc').focus();
+      return;
+    }
+    dataNasc = convertida;
   }
   
   let ancestraisExistentes = [];
