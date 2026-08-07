@@ -208,13 +208,21 @@ body {
   cursor: pointer;
   font-family: 'Manrope', sans-serif;
   transition: .15s ease;
-  margin-left: auto;
   align-self: flex-end;
 }
 
 .plantel-filters .btn-limpar:hover {
   border-color: var(--brass-dim);
   color: var(--text);
+}
+
+.total-aves-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .aves-grid {
@@ -323,6 +331,81 @@ body {
   background: rgba(199,151,63,0.2);
 }
 
+/* Visualização em lista (tabela) */
+.table-wrapper {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-wrapper th {
+  background: rgba(0,0,0,0.25);
+  color: var(--brass-soft);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table-wrapper td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table-wrapper tr:last-child td {
+  border-bottom: none;
+}
+
+.table-wrapper tr:hover td {
+  background: rgba(199,151,63,0.04);
+}
+
+.sexo-badge {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.anilha-mono {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brass-soft);
+  font-size: 12px;
+}
+
+.table-wrapper .btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  border-radius: 6px;
+  border: 1px solid var(--brass-dim);
+  background: rgba(199,151,63,0.12);
+  color: var(--brass-soft);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: .15s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.table-wrapper .btn:hover {
+  background: rgba(199,151,63,0.2);
+}
+
 .empty-plantel {
   text-align: center;
   padding: 40px;
@@ -390,6 +473,14 @@ body {
   }
   .plantel-filters .btn-limpar {
     margin-left: 0;
+    align-self: stretch;
+  }
+  .table-wrapper {
+    font-size: 12px;
+  }
+  .table-wrapper th,
+  .table-wrapper td {
+    padding: 6px 8px;
   }
 }
 </style>
@@ -438,9 +529,11 @@ body {
       <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
     </div>
 
-    <div id="total-aves" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">0 aves</div>
+    <div class="total-aves-bar">
+      <span id="total-aves">0 aves</span>
+    </div>
 
-    <div class="aves-grid" id="aves-grid">
+    <div id="aves-container">
       <!-- Preenchido pelo JavaScript -->
     </div>
   </main>
@@ -463,8 +556,15 @@ body {
 
   <script src="db-api.js"></script>
   <script>
+    let viewMode = 'blocos';
+
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarViewMode() {
+      const personalizacao = await getPersonalizacao();
+      viewMode = personalizacao.plantelView || 'blocos';
     }
 
     async function carregarLogo() {
@@ -515,38 +615,28 @@ body {
       }
     }
 
-    async function aplicarFiltros() {
-      const especie = document.getElementById('filtro-especie').value;
-      const sexo = document.getElementById('filtro-sexo').value;
+    function getSexoClass(sexo) {
+      if (sexo === 'M') return 'sexo-macho';
+      if (sexo === 'F') return 'sexo-femea';
+      return 'sexo-indefinido';
+    }
 
-      let aves = await getSiteAves();
-      
-      if (especie) {
-        aves = aves.filter(a => a.especie === especie);
-      }
-      if (sexo) {
-        aves = aves.filter(a => a.sexo === sexo);
-      }
-      
-      aves.sort((a, b) => a.nome.localeCompare(b.nome));
-      
-      document.getElementById('total-aves').textContent = aves.length + ' aves';
-      
-      const grid = document.getElementById('aves-grid');
-      
-      if (aves.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-plantel">
-            <div class="icon">🐦</div>
-            <p>Nenhuma ave encontrada com os filtros selecionados.</p>
-          </div>
-        `;
-        return;
-      }
-      
-      grid.innerHTML = aves.map(a => {
-        const sexoClass = a.sexo === 'M' ? 'sexo-macho' : a.sexo === 'F' ? 'sexo-femea' : 'sexo-indefinido';
-        const sexoLabel = a.sexo === 'M' ? '♂ Macho' : a.sexo === 'F' ? '♀ Fêmea' : '⚪ Indefinido';
+    function getSexoLabelCurto(sexo) {
+      if (sexo === 'M') return '♂ Macho';
+      if (sexo === 'F') return '♀ Fêmea';
+      return '⚪ Indefinido';
+    }
+
+    function getSexoLabelTabela(sexo) {
+      if (sexo === 'M') return 'Macho';
+      if (sexo === 'F') return 'Fêmea';
+      return 'Indefinido';
+    }
+
+    function renderBlocos(aves) {
+      return aves.map(a => {
+        const sexoClass = getSexoClass(a.sexo);
+        const sexoLabel = getSexoLabelCurto(a.sexo);
         
         return `
         <div class="ave-card">
@@ -570,6 +660,83 @@ body {
       `}).join('');
     }
 
+    function renderLista(aves) {
+      const linhas = aves.map(a => `
+        <tr>
+          <td><span class="sexo-badge ${getSexoClass(a.sexo)}">${getSexoLabelTabela(a.sexo)}</span></td>
+          <td><strong>${a.nome}</strong></td>
+          <td><span class="anilha-mono">${a.anilha || '-'}</span></td>
+          <td>${a.especie || '-'}</td>
+          <td>${a.raca || '-'}</td>
+          <td>${formatarData(a.dataNasc)}</td>
+          <td>${a.pai || '-'}</td>
+          <td>${a.mae || '-'}</td>
+          <td>${a.status || '-'}</td>
+          <td><a href="site-certificado.html?id=${a.id}" target="_blank" class="btn">📄 Ver Certificado</a></td>
+        </tr>
+      `).join('');
+
+      return `
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Sexo</th>
+                <th>Nome</th>
+                <th>Anilha</th>
+                <th>Espécie</th>
+                <th>Raça</th>
+                <th>Nascimento</th>
+                <th>Pai</th>
+                <th>Mãe</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${linhas}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function aplicarFiltros() {
+      const especie = document.getElementById('filtro-especie').value;
+      const sexo = document.getElementById('filtro-sexo').value;
+
+      let aves = await getSiteAves();
+      
+      if (especie) {
+        aves = aves.filter(a => a.especie === especie);
+      }
+      if (sexo) {
+        aves = aves.filter(a => a.sexo === sexo);
+      }
+      
+      aves.sort((a, b) => a.nome.localeCompare(b.nome));
+      
+      document.getElementById('total-aves').textContent = aves.length + ' aves';
+      
+      const container = document.getElementById('aves-container');
+      
+      if (aves.length === 0) {
+        container.innerHTML = `
+          <div class="empty-plantel">
+            <div class="icon">🐦</div>
+            <p>Nenhuma ave encontrada com os filtros selecionados.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      if (viewMode === 'lista') {
+        container.innerHTML = renderLista(aves);
+      } else {
+        container.innerHTML = `<div class="aves-grid">${renderBlocos(aves)}</div>`;
+      }
+    }
+
     function formatarData(data) {
       if (!data) return '-';
       const partes = String(data).slice(0, 10).split('-');
@@ -585,9 +752,14 @@ body {
       aplicarFiltros();
     }
 
-    carregarLogo();
-    carregarFiltros();
-    aplicarFiltros();
+    async function iniciar() {
+      await carregarLogo();
+      await carregarViewMode();
+      await carregarFiltros();
+      await aplicarFiltros();
+    }
+
+    iniciar();
   </script>
   <script src="site-buttons.js"></script>
 </body>

@@ -328,6 +328,19 @@
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Selecione o tema que será aplicado em todo o site.</div>
       </div>
 
+      <!-- VISUALIZAÇÃO DO PLANTEL -->
+      <div class="editor-card">
+        <h3>🐦 Visualização do Plantel</h3>
+        <div class="toggle-container">
+          <span class="toggle-label" id="plantel-view-label-blocos">▦ Blocos</span>
+          <div class="toggle-switch" id="plantel-view-toggle" onclick="togglePlantelView()">
+            <div class="slider"></div>
+          </div>
+          <span class="toggle-label" id="plantel-view-label-lista">☰ Lista</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Define como a página pública do Plantel mostra as aves. Use "Lista" quando o plantel estiver com muitos pássaros.</div>
+      </div>
+
       <!-- ===== VISIBILIDADE DAS ABAS ===== -->
       <div class="editor-card">
         <h3>📑 Visibilidade das Abas do Site</h3>
@@ -537,6 +550,22 @@ async function carregarPersonalizacao() {
   
   aplicarTema(tema);
   
+  // VISUALIZAÇÃO DO PLANTEL
+  const plantelView = personalizacao.plantelView || 'blocos';
+  const plantelToggle = document.getElementById('plantel-view-toggle');
+  const plantelLabelBlocos = document.getElementById('plantel-view-label-blocos');
+  const plantelLabelLista = document.getElementById('plantel-view-label-lista');
+  
+  if (plantelView === 'lista') {
+    plantelToggle.classList.add('active');
+    plantelLabelBlocos.style.color = 'var(--text-muted)';
+    plantelLabelLista.style.color = 'var(--brass-soft)';
+  } else {
+    plantelToggle.classList.remove('active');
+    plantelLabelBlocos.style.color = 'var(--brass-soft)';
+    plantelLabelLista.style.color = 'var(--text-muted)';
+  }
+  
   // VISIBILIDADE
   carregarVisibilidade();
 }
@@ -716,6 +745,35 @@ async function toggleTema() {
   await savePersonalizacao(personalizacao);
   
   atualizarSidebar();
+}
+
+// ============================================================
+// VISUALIZAÇÃO DO PLANTEL
+// ============================================================
+
+async function togglePlantelView() {
+  const toggle = document.getElementById('plantel-view-toggle');
+  const isLista = toggle.classList.contains('active');
+  const labelBlocos = document.getElementById('plantel-view-label-blocos');
+  const labelLista = document.getElementById('plantel-view-label-lista');
+
+  let novaView;
+
+  if (isLista) {
+    toggle.classList.remove('active');
+    labelLista.style.color = 'var(--text-muted)';
+    labelBlocos.style.color = 'var(--brass-soft)';
+    novaView = 'blocos';
+  } else {
+    toggle.classList.add('active');
+    labelBlocos.style.color = 'var(--text-muted)';
+    labelLista.style.color = 'var(--brass-soft)';
+    novaView = 'lista';
+  }
+
+  const personalizacao = await getPersonalizacao();
+  personalizacao.plantelView = novaView;
+  await savePersonalizacao(personalizacao);
 }
 
 // ============================================================
