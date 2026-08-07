@@ -659,35 +659,8 @@ body {
       if (e.key === 'Escape') fecharModalEspecie();
     });
 
-    // ===== CARREGAR VISIBILIDADE DO MENU =====
-    async function carregarVisibilidadeMenu() {
-      const personalizacao = await getPersonalizacao();
-      const vis = personalizacao.visibilidade || {};
-      
-      const links = document.querySelectorAll('.nav-links > a, .nav-links > .dropdown');
-      const mapa = {
-        'Home': 'home',
-        'O Criatório': 'criatorio',
-        'Notícias': 'noticias',
-        'Plantel': 'plantel',
-        'Adultos': 'adultos',
-        'Filhotes': 'filhotes',
-        'Fotos': 'fotos',
-        'Vídeos': 'videos',
-        'Crachás': 'crachas',
-        'Contato': 'contato'
-      };
-      
-      links.forEach(el => {
-        const texto = el.textContent.trim();
-        const chave = mapa[texto];
-        if (chave && vis[chave] === false) {
-          el.style.display = 'none';
-        } else {
-          el.style.display = '';
-        }
-      });
-    }
+    // A visibilidade das abas do menu agora é aplicada de forma centralizada
+    // em site-buttons.js (mesma lógica em todas as páginas do site).
 
     // ===== CARREGAR HOME =====
     async function carregarHome() {
@@ -790,7 +763,6 @@ body {
     }
 
     // ===== INICIALIZAR =====
-    carregarVisibilidadeMenu();
     carregarHome();
   </script>
   <script src="site-buttons.js"></script>
