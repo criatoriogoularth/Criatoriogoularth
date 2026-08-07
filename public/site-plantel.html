@@ -331,6 +331,93 @@ body {
   background: rgba(199,151,63,0.2);
 }
 
+/* Seções por espécie na visualização em lista */
+.especie-section {
+  margin-bottom: 30px;
+}
+
+.especie-section .especie-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  color: var(--brass-soft);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--brass-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.especie-section .especie-title .count {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-family: 'Manrope', sans-serif;
+}
+
+.sexo-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sexo-column {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sexo-column-header {
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sexo-column-header.sexo-macho {
+  color: #5a8ab0;
+  background: rgba(70, 130, 200, 0.1);
+}
+
+.sexo-column-header.sexo-femea {
+  color: #e2a898;
+  background: rgba(200, 100, 130, 0.1);
+}
+
+.sexo-column-header.sexo-indefinido {
+  color: var(--brass-soft);
+  background: rgba(199, 151, 63, 0.1);
+}
+
+.ave-lista-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.ave-lista-item:last-child {
+  border-bottom: none;
+}
+
+.ave-lista-item .nome {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+.ave-lista-item .anilha {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brass-soft);
+  font-size: 11px;
+}
+
+.ave-lista-item .btn {
+  margin-top: 6px;
+  display: inline-block;
+}
+
 /* Visualização em lista (tabela) */
 .table-wrapper {
   background: var(--bg-elevated-2);
@@ -660,13 +747,16 @@ body {
       `}).join('');
     }
 
-    function renderLista(aves) {
+    function renderColunaSexo(sexo, aves) {
+      if (aves.length === 0) return '';
+
+      const classe = getSexoClass(sexo);
+      const titulo = sexo === 'M' ? '♂ Machos' : sexo === 'F' ? '♀ Fêmeas' : '⚪ Indefinidos';
+
       const linhas = aves.map(a => `
         <tr>
-          <td><span class="sexo-badge ${getSexoClass(a.sexo)}">${getSexoLabelTabela(a.sexo)}</span></td>
           <td><strong>${a.nome}</strong></td>
           <td><span class="anilha-mono">${a.anilha || '-'}</span></td>
-          <td>${a.especie || '-'}</td>
           <td>${a.raca || '-'}</td>
           <td>${formatarData(a.dataNasc)}</td>
           <td>${a.pai || '-'}</td>
@@ -677,28 +767,62 @@ body {
       `).join('');
 
       return `
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Sexo</th>
-                <th>Nome</th>
-                <th>Anilha</th>
-                <th>Espécie</th>
-                <th>Raça</th>
-                <th>Nascimento</th>
-                <th>Pai</th>
-                <th>Mãe</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${linhas}
-            </tbody>
-          </table>
+        <div class="sexo-column">
+          <div class="sexo-column-header ${classe}">${titulo} (${aves.length})</div>
+          <div class="table-wrapper" style="border:none;border-radius:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Anilha</th>
+                  <th>Raça</th>
+                  <th>Nascimento</th>
+                  <th>Pai</th>
+                  <th>Mãe</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${linhas}
+              </tbody>
+            </table>
+          </div>
         </div>
       `;
+    }
+
+    function renderLista(aves) {
+      const grupos = {};
+      aves.forEach(ave => {
+        const especie = ave.especie || 'Sem espécie';
+        if (!grupos[especie]) grupos[especie] = [];
+        grupos[especie].push(ave);
+      });
+
+      const especiesOrdenadas = Object.keys(grupos).sort((a, b) => a.localeCompare(b));
+
+      return especiesOrdenadas.map(especie => {
+        const lista = grupos[especie];
+
+        const machos = lista.filter(a => a.sexo === 'M').sort((a, b) => a.nome.localeCompare(b.nome));
+        const femeas = lista.filter(a => a.sexo === 'F').sort((a, b) => a.nome.localeCompare(b.nome));
+        const indefinidos = lista.filter(a => a.sexo !== 'M' && a.sexo !== 'F').sort((a, b) => a.nome.localeCompare(b.nome));
+
+        return `
+          <div class="especie-section">
+            <div class="especie-title">
+              🐦 ${especie}
+              <span class="count">${lista.length} ave${lista.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="sexo-columns">
+              ${renderColunaSexo('M', machos)}
+              ${renderColunaSexo('F', femeas)}
+              ${renderColunaSexo('Indefinido', indefinidos)}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     async function aplicarFiltros() {
