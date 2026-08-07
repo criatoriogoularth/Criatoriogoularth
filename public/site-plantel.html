@@ -738,7 +738,6 @@ body {
             ${a.dataNasc ? `<div><strong>Nascimento:</strong> ${formatarData(a.dataNasc)}</div>` : ''}
             ${a.pai ? `<div><strong>Pai:</strong> ${a.pai}</div>` : ''}
             ${a.mae ? `<div><strong>Mãe:</strong> ${a.mae}</div>` : ''}
-            ${a.status ? `<div><strong>Status:</strong> ${a.status}</div>` : ''}
           </div>
           <div class="footer">
             <a href="site-certificado.html?id=${a.id}" target="_blank" class="btn btn-primary">📄 Ver Certificado</a>
@@ -761,7 +760,6 @@ body {
           <td>${formatarData(a.dataNasc)}</td>
           <td>${a.pai || '-'}</td>
           <td>${a.mae || '-'}</td>
-          <td>${a.status || '-'}</td>
           <td><a href="site-certificado.html?id=${a.id}" target="_blank" class="btn">📄 Ver Certificado</a></td>
         </tr>
       `).join('');
@@ -779,7 +777,6 @@ body {
                   <th>Nascimento</th>
                   <th>Pai</th>
                   <th>Mãe</th>
-                  <th>Status</th>
                   <th>Ações</th>
                 </tr>
               </thead>
