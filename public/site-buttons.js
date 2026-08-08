@@ -42,10 +42,11 @@
         }
     });
 
-    // ---- Visibilidade das abas do menu ----
+    // ---- Visibilidade e ordem das abas do menu ----
     const vis = personalizacao.visibilidade || {};
+    const navContainer = document.querySelector('.nav-links');
     const links = document.querySelectorAll('.nav-links > a, .nav-links > .dropdown');
-    if (links.length > 0) {
+    if (navContainer && links.length > 0) {
         const mapa = {
             'Home': 'home',
             'O Criatório': 'criatorio',
@@ -59,14 +60,39 @@
             'Contato': 'contato'
         };
 
+        // Pega só o texto do link direto (ex: "Plantel"), nunca o do
+        // submenu de espécies dentro do dropdown — usar textContent do
+        // wrapper inteiro pegaria também os nomes das espécies já
+        // carregadas ali dentro, e o texto não bateria mais com o mapa.
+        function textoDoItem(el) {
+            const link = el.tagName === 'A' ? el : el.querySelector(':scope > a');
+            return link ? link.textContent.trim() : '';
+        }
+
+        // mapa reverso (chave -> elemento) — usado tanto pra visibilidade
+        // quanto pra reordenar os itens do menu
+        const elementoPorChave = {};
         links.forEach(el => {
-            const texto = el.textContent.trim();
-            const chave = mapa[texto];
+            const chave = mapa[textoDoItem(el)];
+            if (chave) elementoPorChave[chave] = el;
+
             if (chave && vis[chave] === false) {
                 el.style.display = 'none';
             } else {
                 el.style.display = '';
             }
         });
+
+        // Reordena os itens do menu conforme site_personalizacao.ordemMenu
+        // (definido em site-editor-personalizacao.html, aba "Abas do Menu").
+        // appendChild em um elemento já existente no DOM apenas o move —
+        // fazendo isso em sequência, na ordem desejada, o menu inteiro fica
+        // reorganizado sem precisar recriar nenhum elemento.
+        if (Array.isArray(personalizacao.ordemMenu)) {
+            personalizacao.ordemMenu.forEach(chave => {
+                const el = elementoPorChave[chave];
+                if (el) navContainer.appendChild(el);
+            });
+        }
     }
 })();

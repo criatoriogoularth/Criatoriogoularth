@@ -239,6 +239,41 @@
 .ave-selector-item:has(input[type="checkbox"]:checked) label {
   color: var(--brass-soft);
 }
+
+/* ===== LISTA ARRASTÁVEL DE ABAS (reordenar menu) ===== */
+.aba-item {
+  cursor: grab;
+  user-select: none;
+}
+.aba-item:active {
+  cursor: grabbing;
+}
+.aba-item.dragging {
+  opacity: 0.4;
+}
+.aba-item.drag-over {
+  border-color: var(--brass);
+  background: rgba(199,151,63,0.12);
+}
+.aba-item .handle {
+  color: var(--text-muted);
+  font-size: 15px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+}
+.aba-item .icone {
+  flex-shrink: 0;
+}
+.aba-item .aba-reordenar {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.aba-item .aba-reordenar button {
+  padding: 2px 6px;
+  font-size: 10px;
+  line-height: 1.4;
+}
 </style>
 </head>
 <body>
@@ -341,53 +376,12 @@
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Define como a página pública do Plantel mostra as aves. Use "Lista" quando o plantel estiver com muitos pássaros.</div>
       </div>
 
-      <!-- ===== VISIBILIDADE DAS ABAS ===== -->
+      <!-- ===== VISIBILIDADE E ORDEM DAS ABAS ===== -->
       <div class="editor-card">
-        <h3>📑 Visibilidade das Abas do Site</h3>
-        <p style="color:var(--text-muted);margin-bottom:12px;">Marque as abas que aparecerão no menu do site. Desmarque as que ainda não têm conteúdo.</p>
+        <h3>📑 Abas do Menu do Site</h3>
+        <p style="color:var(--text-muted);margin-bottom:12px;">Marque as abas que aparecerão no menu e arraste (☰) — ou use ▲▼ — para definir a ordem. A ordem escolhida aqui é aplicada em todas as páginas do site.</p>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-home" checked onchange="atualizarVisibilidade()">
-            <label for="vis-home">🏠 Home</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-criatorio" checked onchange="atualizarVisibilidade()">
-            <label for="vis-criatorio">🏷️ Criatório</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-noticias" checked onchange="atualizarVisibilidade()">
-            <label for="vis-noticias">📰 Notícias</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-plantel" checked onchange="atualizarVisibilidade()">
-            <label for="vis-plantel">🐦 Plantel</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-adultos" checked onchange="atualizarVisibilidade()">
-            <label for="vis-adultos">🐤 Adultos</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-filhotes" checked onchange="atualizarVisibilidade()">
-            <label for="vis-filhotes">🐣 Filhotes</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-fotos" checked onchange="atualizarVisibilidade()">
-            <label for="vis-fotos">📸 Fotos</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-videos" checked onchange="atualizarVisibilidade()">
-            <label for="vis-videos">🎬 Vídeos</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-crachas" checked onchange="atualizarVisibilidade()">
-            <label for="vis-crachas">🏷️ Crachás</label>
-          </div>
-          <div class="ave-selector-item">
-            <input type="checkbox" id="vis-contato" checked onchange="atualizarVisibilidade()">
-            <label for="vis-contato">📧 Contato</label>
-          </div>
-        </div>
+        <div id="abas-lista"></div>
 
         <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
           💡 As abas desmarcadas serão ocultadas do menu de navegação em todas as páginas do site.
@@ -777,83 +771,179 @@ async function togglePlantelView() {
 }
 
 // ============================================================
-// VISIBILIDADE DAS ABAS - CORRIGIDO
+// VISIBILIDADE E ORDEM DAS ABAS
 // ============================================================
+// personalizacao.visibilidade[chave] -> true/false (mostrar ou não)
+// personalizacao.ordemMenu -> array de chaves na ordem escolhida.
+// Essa mesma ordem é aplicada pelo site-buttons.js em todas as
+// páginas públicas do site.
+
+const ABAS_PADRAO = [
+  { chave: 'home', icone: '🏠', label: 'Home' },
+  { chave: 'criatorio', icone: '🏷️', label: 'Criatório' },
+  { chave: 'noticias', icone: '📰', label: 'Notícias' },
+  { chave: 'plantel', icone: '🐦', label: 'Plantel' },
+  { chave: 'adultos', icone: '🐤', label: 'Adultos' },
+  { chave: 'filhotes', icone: '🐣', label: 'Filhotes' },
+  { chave: 'fotos', icone: '📸', label: 'Fotos' },
+  { chave: 'videos', icone: '🎬', label: 'Vídeos' },
+  { chave: 'crachas', icone: '🏷️', label: 'Crachás' },
+  { chave: 'contato', icone: '📧', label: 'Contato' }
+];
+
+// Monta a ordem atual: começa do que já foi salvo, tira chaves que não
+// existem mais e completa no final com qualquer aba nova que ainda não
+// tinha sido salva (ex: se no futuro entrar uma aba nova no sistema).
+function ordemAtualDasAbas(personalizacao) {
+  const salva = Array.isArray(personalizacao.ordemMenu) ? personalizacao.ordemMenu : [];
+  const chavesValidas = new Set(ABAS_PADRAO.map(a => a.chave));
+  const ordem = salva.filter(c => chavesValidas.has(c));
+  ABAS_PADRAO.forEach(a => {
+    if (!ordem.includes(a.chave)) ordem.push(a.chave);
+  });
+  return ordem;
+}
+
+let _abaArrastando = null;
+
+function renderizarListaAbas(personalizacao) {
+  const vis = personalizacao.visibilidade || {};
+  const ordem = ordemAtualDasAbas(personalizacao);
+  const porChave = Object.fromEntries(ABAS_PADRAO.map(a => [a.chave, a]));
+  const container = document.getElementById('abas-lista');
+  if (!container) return;
+
+  container.innerHTML = ordem.map(chave => {
+    const aba = porChave[chave];
+    const checked = vis[chave] !== undefined ? vis[chave] : true;
+    return `
+      <div class="ave-selector-item aba-item" draggable="true" data-chave="${chave}">
+        <span class="handle">☰</span>
+        <input type="checkbox" id="vis-${chave}" ${checked ? 'checked' : ''} onchange="atualizarVisibilidade()">
+        <label for="vis-${chave}"><span class="icone">${aba.icone}</span> ${aba.label}</label>
+        <div class="aba-reordenar">
+          <button type="button" class="btn btn-ghost" onclick="moverAba('${chave}', -1)" title="Mover para cima">▲</button>
+          <button type="button" class="btn btn-ghost" onclick="moverAba('${chave}', 1)" title="Mover para baixo">▼</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.aba-item').forEach(item => {
+    item.addEventListener('dragstart', () => {
+      _abaArrastando = item.dataset.chave;
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      container.querySelectorAll('.aba-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (item.dataset.chave === _abaArrastando) return;
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const chaveDestino = item.dataset.chave;
+      if (!_abaArrastando || _abaArrastando === chaveDestino) return;
+      await reordenarAbas(_abaArrastando, chaveDestino);
+    });
+  });
+}
+
+async function reordenarAbas(chaveOrigem, chaveDestino) {
+  const personalizacao = await getPersonalizacao();
+  const ordem = ordemAtualDasAbas(personalizacao);
+  const origemIdx = ordem.indexOf(chaveOrigem);
+  const destinoIdx = ordem.indexOf(chaveDestino);
+  if (origemIdx === -1 || destinoIdx === -1) return;
+
+  ordem.splice(origemIdx, 1);
+  ordem.splice(destinoIdx, 0, chaveOrigem);
+
+  personalizacao.ordemMenu = ordem;
+  await savePersonalizacao(personalizacao);
+  renderizarListaAbas(personalizacao);
+}
+
+async function moverAba(chave, direcao) {
+  const personalizacao = await getPersonalizacao();
+  const ordem = ordemAtualDasAbas(personalizacao);
+  const idx = ordem.indexOf(chave);
+  const novoIdx = idx + direcao;
+  if (novoIdx < 0 || novoIdx >= ordem.length) return;
+
+  [ordem[idx], ordem[novoIdx]] = [ordem[novoIdx], ordem[idx]];
+  personalizacao.ordemMenu = ordem;
+  await savePersonalizacao(personalizacao);
+  renderizarListaAbas(personalizacao);
+}
 
 async function atualizarVisibilidade() {
-  // Carregar a personalização atual do banco
   const personalizacao = await getPersonalizacao();
-  
-  // Se não existir visibilidade salva, cria um objeto vazio
   if (!personalizacao.visibilidade) {
     personalizacao.visibilidade = {};
   }
-  
-  // Atualizar apenas as abas principais que existem no formulário
-  const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
-  abas.forEach(aba => {
-    const el = document.getElementById(`vis-${aba}`);
+
+  ABAS_PADRAO.forEach(({ chave }) => {
+    const el = document.getElementById(`vis-${chave}`);
     if (el) {
-      personalizacao.visibilidade[aba] = el.checked;
+      personalizacao.visibilidade[chave] = el.checked;
     }
   });
-  
-  // Atualizar subtabs de Fotos
+
+  // Subtabs de Fotos
   const elFotosCriacao = document.getElementById('vis-fotos-criacao');
   if (elFotosCriacao) {
     personalizacao.visibilidade.fotosCriacao = elFotosCriacao.checked;
   }
-  
+
   const elFotosTorneios = document.getElementById('vis-fotos-torneios');
   if (elFotosTorneios) {
     personalizacao.visibilidade.fotosTorneios = elFotosTorneios.checked;
   }
-  
-  // Atualizar subtabs de Vídeos
+
+  // Subtabs de Vídeos
   const elVideosCriacao = document.getElementById('vis-videos-criacao');
   if (elVideosCriacao) {
     personalizacao.visibilidade.videosCriacao = elVideosCriacao.checked;
   }
-  
+
   const elVideosTorneios = document.getElementById('vis-videos-torneios');
   if (elVideosTorneios) {
     personalizacao.visibilidade.videosTorneios = elVideosTorneios.checked;
   }
-  
-  // Salvar no banco
+
   await savePersonalizacao(personalizacao);
 }
 
 async function carregarVisibilidade() {
   const personalizacao = await getPersonalizacao();
+
+  // Abas principais + ordem (lista arrastável)
+  renderizarListaAbas(personalizacao);
+
+  // Subtabs continuam como campos fixos (não fazem parte do menu principal)
   const vis = personalizacao.visibilidade || {};
-  
-  // Abas principais
-  const abas = ['home', 'criatorio', 'noticias', 'plantel', 'adultos', 'filhotes', 'fotos', 'videos', 'crachas', 'contato'];
-  abas.forEach(aba => {
-    const el = document.getElementById(`vis-${aba}`);
-    if (el) {
-      el.checked = vis[aba] !== undefined ? vis[aba] : true;
-    }
-  });
-  
-  // Subtabs - Fotos
+
   const elFotosCriacao = document.getElementById('vis-fotos-criacao');
   if (elFotosCriacao) {
     elFotosCriacao.checked = vis.fotosCriacao !== undefined ? vis.fotosCriacao : true;
   }
-  
+
   const elFotosTorneios = document.getElementById('vis-fotos-torneios');
   if (elFotosTorneios) {
     elFotosTorneios.checked = vis.fotosTorneios !== undefined ? vis.fotosTorneios : true;
   }
-  
-  // Subtabs - Vídeos
+
   const elVideosCriacao = document.getElementById('vis-videos-criacao');
   if (elVideosCriacao) {
     elVideosCriacao.checked = vis.videosCriacao !== undefined ? vis.videosCriacao : true;
   }
-  
+
   const elVideosTorneios = document.getElementById('vis-videos-torneios');
   if (elVideosTorneios) {
     elVideosTorneios.checked = vis.videosTorneios !== undefined ? vis.videosTorneios : true;
