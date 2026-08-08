@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Editar Tema do Site</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.editor-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--brass-soft);
+  margin-bottom: 6px;
+}
+.editor-card .desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ---- cores ---- */
+.cores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.cor-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.cor-field input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+.cor-field .cor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cor-field .cor-label {
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: 600;
+}
+.cor-field .cor-hex {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ---- fontes ---- */
+.fontes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.fonte-card {
+  background: rgba(0,0,0,0.15);
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.fonte-card:hover {
+  border-color: var(--brass-dim);
+}
+.fonte-card.selecionada {
+  border-color: var(--brass);
+  background: rgba(199,151,63,0.08);
+}
+.fonte-card .fonte-nome {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fonte-card .fonte-titulo-preview {
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.fonte-card .fonte-texto-preview {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---- pré-visualização ---- */
+.preview-tema {
+  border-radius: 12px;
+  padding: 28px 24px;
+  border: 1px solid;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.preview-tema .preview-titulo {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.preview-tema .preview-sub {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.preview-tema .preview-btn {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: default;
+}
+.preview-tema .preview-card {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 12px;
+}
+
+.botoes-acao {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1>🎨 Cores e Fonte do Site</h1>
+          <div class="lede">Personalize a identidade visual do site público — as mudanças valem para todas as páginas.</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-primary" onclick="salvarTema()">💾 Salvar Tema</button>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <h3>🖌️ Cores</h3>
+        <div class="desc">Escolha as 6 cores principais — as demais variações (tons mais claros/transparentes usados em bordas e destaques) são calculadas automaticamente a partir delas.</div>
+        <div class="cores-grid" id="cores-grid"></div>
+      </div>
+
+      <div class="editor-card">
+        <h3>🔤 Fonte</h3>
+        <div class="desc">Escolha uma combinação de fontes para títulos e textos do site.</div>
+        <div class="fontes-grid" id="fontes-grid"></div>
+      </div>
+
+      <div class="editor-card">
+        <h3>👁️ Pré-visualização</h3>
+        <div class="desc">Assim ficará, com as escolhas atuais (ainda não salvas).</div>
+        <div class="preview-tema" id="preview-tema">
+          <div class="preview-titulo" id="preview-titulo">Criatório Goularth</div>
+          <div class="preview-sub" id="preview-sub">Excelência na criação de aves — canários, coleiros e trinca-ferro.</div>
+          <a class="preview-btn" id="preview-btn">📩 Reservar</a>
+          <div class="preview-card" id="preview-card">Card de exemplo — assim ficam os blocos de conteúdo do site.</div>
+        </div>
+      </div>
+
+      <div class="botoes-acao">
+        <button class="btn btn-primary" onclick="salvarTema()">💾 Salvar Tema</button>
+        <button class="btn btn-ghost" onclick="restaurarPadrao()">↩️ Restaurar Padrão</button>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+renderSidebar('admin-site');
+
+// ============================================================
+// DEFINIÇÕES
+// ============================================================
+
+// Cores padrão (as mesmas do style-site.css)
+const CORES_PADRAO = {
+  bg: '#0d1a16',
+  bgElevated: '#132621',
+  brass: '#c7973f',
+  text: '#ece6d6',
+  textMuted: '#9aa89e',
+  sageSoft: '#8fc3a8'
+};
+
+const CAMPOS_COR = [
+  { chave: 'bg', label: 'Fundo principal' },
+  { chave: 'bgElevated', label: 'Fundo dos cards' },
+  { chave: 'brass', label: 'Cor de destaque (dourado)' },
+  { chave: 'text', label: 'Texto principal' },
+  { chave: 'textMuted', label: 'Texto secundário' },
+  { chave: 'sageSoft', label: 'Cor de sucesso/positivo' }
+];
+
+const FONTES_DISPONIVEIS = {
+  padrao: {
+    label: 'Padrão',
+    titulo: "'Fraunces', serif",
+    texto: "'Manrope', sans-serif",
+    googleFontsUrl: null
+  },
+  elegante: {
+    label: 'Elegante',
+    titulo: "'Playfair Display', serif",
+    texto: "'Lato', sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Lato:wght@400;500;600;700&display=swap'
+  },
+  moderno: {
+    label: 'Moderno',
+    titulo: "'Poppins', sans-serif",
+    texto: "'Inter', sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap'
+  }
+};
+
+// ============================================================
+// FUNÇÕES DE COR (derivar tons a partir das 6 cores escolhidas)
+// ============================================================
+
+function hexParaRgb(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.substring(0, 2), 16),
+    g: parseInt(h.substring(2, 4), 16),
+    b: parseInt(h.substring(4, 6), 16)
+  };
+}
+
+function clarear(hex, fator) {
+  const { r, g, b } = hexParaRgb(hex);
+  const mix = (canal) => Math.round(canal + (255 - canal) * fator);
+  const toHex = (n) => n.toString(16).padStart(2, '0');
+  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+}
+
+function hexParaRgba(hex, alpha) {
+  const { r, g, b } = hexParaRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function calcularCoresDerivadas(cores) {
+  return {
+    ...cores,
+    bgElevated2: clarear(cores.bgElevated, 0.06),
+    brassSoft: clarear(cores.brass, 0.45),
+    brassDim: hexParaRgba(cores.brass, 0.28),
+    line: hexParaRgba(cores.brass, 0.22)
+  };
+}
+
+// ============================================================
+// ESTADO EM MEMÓRIA
+// ============================================================
+
+let coresAtuais = { ...CORES_PADRAO };
+let fonteAtual = 'padrao';
+
+// ============================================================
+// BANCO
+// ============================================================
+
+async function getPersonalizacao() {
+  return (await DB.getConfig('site_personalizacao')) || {};
+}
+
+async function salvarPersonalizacaoParcial(campos) {
+  const personalizacao = await getPersonalizacao();
+  Object.assign(personalizacao, campos);
+  await DB.setConfig('site_personalizacao', personalizacao);
+  return personalizacao;
+}
+
+// ============================================================
+// RENDERIZAR CAMPOS DE COR
+// ============================================================
+
+function renderizarCores() {
+  const grid = document.getElementById('cores-grid');
+  grid.innerHTML = CAMPOS_COR.map(({ chave, label }) => `
+    <div class="cor-field">
+      <input type="color" id="cor-${chave}" value="${coresAtuais[chave]}" oninput="onCorAlterada('${chave}', this.value)">
+      <div class="cor-info">
+        <span class="cor-label">${label}</span>
+        <span class="cor-hex" id="cor-hex-${chave}">${coresAtuais[chave]}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function onCorAlterada(chave, valor) {
+  coresAtuais[chave] = valor;
+  document.getElementById(`cor-hex-${chave}`).textContent = valor;
+  atualizarPreview();
+}
+
+// ============================================================
+// RENDERIZAR SELETOR DE FONTE
+// ============================================================
+
+function renderizarFontes() {
+  const grid = document.getElementById('fontes-grid');
+  grid.innerHTML = Object.entries(FONTES_DISPONIVEIS).map(([chave, f]) => `
+    <div class="fonte-card ${chave === fonteAtual ? 'selecionada' : ''}" id="fonte-card-${chave}" onclick="selecionarFonte('${chave}')">
+      <div class="fonte-nome">${f.label} ${chave === fonteAtual ? '✓' : ''}</div>
+      <div class="fonte-titulo-preview" style="font-family:${f.titulo};">Título de exemplo</div>
+      <div class="fonte-texto-preview" style="font-family:${f.texto};">Texto corrido de exemplo, assim fica a leitura no site.</div>
+    </div>
+  `).join('');
+}
+
+function carregarGoogleFont(chave) {
+  const fonte = FONTES_DISPONIVEIS[chave];
+  if (!fonte.googleFontsUrl) return;
+  if (document.querySelector(`link[href="${fonte.googleFontsUrl}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = fonte.googleFontsUrl;
+  document.head.appendChild(link);
+}
+
+function selecionarFonte(chave) {
+  fonteAtual = chave;
+  carregarGoogleFont(chave);
+  renderizarFontes();
+  atualizarPreview();
+}
+
+// ============================================================
+// PRÉ-VISUALIZAÇÃO
+// ============================================================
+
+function atualizarPreview() {
+  const d = calcularCoresDerivadas(coresAtuais);
+  const fonte = FONTES_DISPONIVEIS[fonteAtual];
+
+  const box = document.getElementById('preview-tema');
+  box.style.background = d.bg;
+  box.style.borderColor = d.line;
+  box.style.color = d.text;
+
+  const titulo = document.getElementById('preview-titulo');
+  titulo.style.color = d.brassSoft;
+  titulo.style.fontFamily = fonte.titulo;
+
+  const sub = document.getElementById('preview-sub');
+  sub.style.color = d.textMuted;
+  sub.style.fontFamily = fonte.texto;
+
+  const btn = document.getElementById('preview-btn');
+  btn.style.background = d.sageSoft;
+  btn.style.color = d.bg;
+  btn.style.fontFamily = fonte.texto;
+
+  const card = document.getElementById('preview-card');
+  card.style.background = d.bgElevated2;
+  card.style.borderColor = d.line;
+  card.style.color = d.textMuted;
+  card.style.fontFamily = fonte.texto;
+}
+
+// ============================================================
+// CARREGAR / SALVAR / RESTAURAR
+// ============================================================
+
+async function carregarTema() {
+  const personalizacao = await getPersonalizacao();
+
+  coresAtuais = { ...CORES_PADRAO, ...(personalizacao.temaCores || {}) };
+  // remove campos derivados que porventura tenham vindo salvos, pra não
+  // conflitar com o recálculo automático
+  delete coresAtuais.bgElevated2;
+  delete coresAtuais.brassSoft;
+  delete coresAtuais.brassDim;
+  delete coresAtuais.line;
+
+  fonteAtual = personalizacao.temaFonte || 'padrao';
+  carregarGoogleFont(fonteAtual);
+
+  renderizarCores();
+  renderizarFontes();
+  atualizarPreview();
+}
+
+async function salvarTema() {
+  const derivadas = calcularCoresDerivadas(coresAtuais);
+  await salvarPersonalizacaoParcial({
+    temaCores: derivadas,
+    temaFonte: fonteAtual
+  });
+  alert('✅ Tema salvo! As páginas do site já vão carregar com as novas cores e fonte.');
+}
+
+async function restaurarPadrao() {
+  if (!confirm('Isso vai voltar as cores e a fonte para o padrão original. Continuar?')) return;
+  coresAtuais = { ...CORES_PADRAO };
+  fonteAtual = 'padrao';
+  renderizarCores();
+  renderizarFontes();
+  atualizarPreview();
+  await salvarPersonalizacaoParcial({ temaCores: null, temaFonte: null });
+  alert('✅ Tema restaurado para o padrão.');
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+
+carregarTema();
+</script>
+</body>
+</html>

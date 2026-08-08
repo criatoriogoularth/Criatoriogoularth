@@ -7,6 +7,69 @@
 // aba escondida em uma página voltava a aparecer em qualquer outra. Como este arquivo é
 // incluído em todas as páginas do site, a aplicação da visibilidade foi centralizada
 // aqui: agora funciona igual em todas as páginas, e existe um só lugar pra manter.
+//
+// Também aplica aqui o tema (cores e fonte) escolhido em site-editor-tema.html —
+// como style-site.css usa var(--bg), var(--brass), var(--font-titulo) etc, é só
+// injetar um <style> pequeno no <head> sobrescrevendo essas variáveis.
+
+// Pares de fonte disponíveis no editor de tema. Cada um carrega seu próprio
+// Google Fonts só quando é o escolhido — a fonte padrão (Fraunces + Manrope)
+// já vem no <link> fixo de cada página, então não precisa recarregar nada.
+const FONTES_DISPONIVEIS = {
+  padrao: {
+    titulo: "'Fraunces', serif",
+    texto: "'Manrope', sans-serif",
+    googleFontsUrl: null
+  },
+  elegante: {
+    titulo: "'Playfair Display', serif",
+    texto: "'Lato', sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Lato:wght@400;500;600;700&display=swap'
+  },
+  moderno: {
+    titulo: "'Poppins', sans-serif",
+    texto: "'Inter', sans-serif",
+    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap'
+  }
+};
+window.FONTES_DISPONIVEIS = FONTES_DISPONIVEIS;
+
+function aplicarTemaPersonalizado(personalizacao) {
+  const cores = personalizacao.temaCores;
+  const fonteChave = personalizacao.temaFonte || 'padrao';
+  const fonte = FONTES_DISPONIVEIS[fonteChave] || FONTES_DISPONIVEIS.padrao;
+
+  if (fonte.googleFontsUrl && !document.querySelector(`link[href="${fonte.googleFontsUrl}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = fonte.googleFontsUrl;
+    document.head.appendChild(link);
+  }
+
+  const linhas = [`--font-titulo: ${fonte.titulo};`, `--font-texto: ${fonte.texto};`];
+
+  if (cores) {
+    if (cores.bg) linhas.push(`--bg: ${cores.bg};`);
+    if (cores.bgElevated) linhas.push(`--bg-elevated: ${cores.bgElevated};`);
+    if (cores.bgElevated2) linhas.push(`--bg-elevated-2: ${cores.bgElevated2};`);
+    if (cores.brass) linhas.push(`--brass: ${cores.brass};`);
+    if (cores.brassSoft) linhas.push(`--brass-soft: ${cores.brassSoft};`);
+    if (cores.brassDim) linhas.push(`--brass-dim: ${cores.brassDim};`);
+    if (cores.line) linhas.push(`--line: ${cores.line};`);
+    if (cores.text) linhas.push(`--text: ${cores.text};`);
+    if (cores.textMuted) linhas.push(`--text-muted: ${cores.textMuted};`);
+    if (cores.sageSoft) linhas.push(`--sage-soft: ${cores.sageSoft};`);
+  }
+
+  let styleTag = document.getElementById('tema-personalizado');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'tema-personalizado';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `:root {\n  ${linhas.join('\n  ')}\n}`;
+}
+
 (async function () {
     async function getConfig(chave) {
         try {
@@ -20,6 +83,8 @@
         getConfig('site_conteudo'),
         getConfig('site_personalizacao')
     ]);
+
+    aplicarTemaPersonalizado(personalizacao);
 
     // ---- Botões de WhatsApp ----
     const whatsappBtns = document.querySelectorAll('.btn-whatsapp, .btn-whatsapp-site, a[href*="wa.me"], a[href*="whatsapp"]');
