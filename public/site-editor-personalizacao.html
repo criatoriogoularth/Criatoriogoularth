@@ -376,6 +376,19 @@
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Define como a página pública do Plantel mostra as aves. Use "Lista" quando o plantel estiver com muitos pássaros.</div>
       </div>
 
+      <!-- LAYOUT DO MENU -->
+      <div class="editor-card">
+        <h3>📐 Layout do Menu do Site</h3>
+        <div class="toggle-container">
+          <span class="toggle-label" id="layout-label-topo">▬ Topo</span>
+          <div class="toggle-switch" id="layout-menu-toggle" onclick="toggleLayoutMenu()">
+            <div class="slider"></div>
+          </div>
+          <span class="toggle-label" id="layout-label-lateral">▮ Lateral</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">"Topo" é o menu horizontal atual. "Lateral" fixa o menu numa coluna à esquerda, estilo blog — em telas de celular ele volta a aparecer no topo automaticamente.</div>
+      </div>
+
       <!-- ===== VISIBILIDADE E ORDEM DAS ABAS ===== -->
       <div class="editor-card">
         <h3>📑 Abas do Menu do Site</h3>
@@ -559,7 +572,23 @@ async function carregarPersonalizacao() {
     plantelLabelBlocos.style.color = 'var(--brass-soft)';
     plantelLabelLista.style.color = 'var(--text-muted)';
   }
-  
+
+  // LAYOUT DO MENU
+  const layoutMenu = personalizacao.layoutMenu || 'topo';
+  const layoutToggle = document.getElementById('layout-menu-toggle');
+  const layoutLabelTopo = document.getElementById('layout-label-topo');
+  const layoutLabelLateral = document.getElementById('layout-label-lateral');
+
+  if (layoutMenu === 'lateral') {
+    layoutToggle.classList.add('active');
+    layoutLabelTopo.style.color = 'var(--text-muted)';
+    layoutLabelLateral.style.color = 'var(--brass-soft)';
+  } else {
+    layoutToggle.classList.remove('active');
+    layoutLabelTopo.style.color = 'var(--brass-soft)';
+    layoutLabelLateral.style.color = 'var(--text-muted)';
+  }
+
   // VISIBILIDADE
   carregarVisibilidade();
 }
@@ -767,6 +796,35 @@ async function togglePlantelView() {
 
   const personalizacao = await getPersonalizacao();
   personalizacao.plantelView = novaView;
+  await savePersonalizacao(personalizacao);
+}
+
+// ============================================================
+// LAYOUT DO MENU (topo / lateral)
+// ============================================================
+
+async function toggleLayoutMenu() {
+  const toggle = document.getElementById('layout-menu-toggle');
+  const isLateral = toggle.classList.contains('active');
+  const labelTopo = document.getElementById('layout-label-topo');
+  const labelLateral = document.getElementById('layout-label-lateral');
+
+  let novoLayout;
+
+  if (isLateral) {
+    toggle.classList.remove('active');
+    labelLateral.style.color = 'var(--text-muted)';
+    labelTopo.style.color = 'var(--brass-soft)';
+    novoLayout = 'topo';
+  } else {
+    toggle.classList.add('active');
+    labelTopo.style.color = 'var(--text-muted)';
+    labelLateral.style.color = 'var(--brass-soft)';
+    novoLayout = 'lateral';
+  }
+
+  const personalizacao = await getPersonalizacao();
+  personalizacao.layoutMenu = novoLayout;
   await savePersonalizacao(personalizacao);
 }
 

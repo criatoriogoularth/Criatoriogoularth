@@ -160,4 +160,9 @@ function aplicarTemaPersonalizado(personalizacao) {
             });
         }
     }
+
+    // ---- Layout do menu: topo (padrão) ou lateral ----
+    if ((personalizacao.layoutMenu || 'topo') === 'lateral') {
+        document.body.classList.add('layout-lateral');
+    }
 })();

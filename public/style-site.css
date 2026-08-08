@@ -287,3 +287,130 @@ body {
     justify-content: center;
   }
 }
+
+/* ============================================================
+   LAYOUT LATERAL (menu estilo blog) — alternativa ao menu de topo
+   ============================================================
+   Ativado via <body class="layout-lateral">, aplicado pelo
+   site-buttons.js com base em site_personalizacao.layoutMenu.
+   Reaproveita os mesmos elementos (.site-header, .site-nav,
+   .nav-links, .site-main, .site-footer) só reorganizando via CSS
+   Grid — nenhum HTML precisa mudar entre os dois modos.
+   ============================================================ */
+
+body.layout-lateral {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "sidebar main"
+    "sidebar footer";
+  min-height: 100vh;
+}
+
+body.layout-lateral .site-header {
+  grid-area: sidebar;
+  border-bottom: none;
+  border-right: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+body.layout-lateral .site-nav {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 24px 18px;
+  gap: 24px;
+  border-bottom: none;
+}
+
+body.layout-lateral .nav-links {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+body.layout-lateral .nav-links > a,
+body.layout-lateral .nav-links > .dropdown > a {
+  width: 100%;
+}
+
+body.layout-lateral .nav-buttons {
+  margin-top: auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+body.layout-lateral .btn-login-site {
+  justify-content: center;
+}
+
+/* O dropdown do Plantel, de flutuante (posicionado por cima do
+   conteúdo) passa a "abrir" encaixado dentro da própria coluna,
+   já que na lateral não há espaço horizontal pra um submenu flutuar. */
+body.layout-lateral .dropdown-content {
+  position: static;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  background: rgba(0,0,0,0.15);
+  margin: 4px 0 4px 10px;
+  padding: 2px 0;
+}
+
+body.layout-lateral .sub-dropdown-content {
+  position: static;
+  box-shadow: none;
+  border: none;
+  background: transparent;
+  padding-left: 14px;
+}
+
+body.layout-lateral .site-main {
+  grid-area: main;
+}
+
+body.layout-lateral .site-footer {
+  grid-area: footer;
+}
+
+/* Em telas estreitas, o layout lateral volta a empilhar como o modo
+   topo — menu lateral fixo não é uma boa experiência no celular. */
+@media (max-width: 900px) {
+  body.layout-lateral {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "main"
+      "footer";
+  }
+  body.layout-lateral .site-header {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  body.layout-lateral .site-nav {
+    flex-direction: column;
+    height: auto;
+    padding: 8px 12px;
+  }
+  body.layout-lateral .nav-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  body.layout-lateral .nav-links > a,
+  body.layout-lateral .nav-links > .dropdown > a {
+    width: auto;
+  }
+  body.layout-lateral .nav-buttons {
+    margin-top: 0;
+    flex-direction: row;
+    justify-content: center;
+  }
+}
