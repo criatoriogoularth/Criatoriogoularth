@@ -19,7 +19,7 @@ const router = express.Router();
 // Chaves permitidas — evita que a rota vire um key-value store arbitrário
 const CHAVES_VALIDAS = new Set([
   'site_personalizacao', 'site_especies', 'site_noticias',
-  'site_fotos', 'site_videos', 'site_banner', 'site_conteudo',
+  'site_fotos', 'site_videos', 'site_banner', 'site_banners', 'site_conteudo',
   'especies_aves', 'dados_criatorio', 'cert_config'
 ]);
 
