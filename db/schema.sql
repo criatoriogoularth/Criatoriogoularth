@@ -124,12 +124,16 @@ CREATE TABLE IF NOT EXISTS site_visitas (
 CREATE INDEX IF NOT EXISTS idx_visitas_usuario_data ON site_visitas(usuario_id, data);
 
 -- ============================================================
--- COPAS / TORNEIOS DO SITE PÚBLICO (categorias + etapas + resultados)
+-- COPAS / TORNEIOS DO SITE PÚBLICO (categorias + links de etapa)
 -- ============================================================
--- Cada linha é UMA ETAPA de UMA CATEGORIA (ex: categoria = "Copa ABCO
--- Livre Adulto 2026", etapa = "1ª Etapa - 18/04/2026"). Os resultados
--- (posição, ave, anilha, tempo, pontos) ficam em JSONB porque é uma
--- lista de tamanho variável — mesmo padrão já usado em aves.ancestrais.
+-- Cada linha é UM LINK dentro de UMA CATEGORIA (ex: categoria = "Copa
+-- ABCO Livre Adulto 2026", etapa = "1ª Etapa - 18/04/2026"). O
+-- resultado em si é uma imagem ou PDF pronto que o admin sobe
+-- (arquivo_url + arquivo_tipo) — mesmo padrão de site_banners e
+-- site_especies. Não existe mais tabela de posição/ave/anilha/tempo/
+-- pontos editável linha a linha; a coluna "resultados" abaixo é
+-- legado (não é mais lida nem escrita pelo sistema) e fica só pra não
+-- quebrar quem já tinha dados antigos nela.
 CREATE TABLE IF NOT EXISTS site_torneios (
   id SERIAL PRIMARY KEY,
   usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
@@ -138,7 +142,9 @@ CREATE TABLE IF NOT EXISTS site_torneios (
   data DATE,
   visivel BOOLEAN NOT NULL DEFAULT true,
   ordem INTEGER NOT NULL DEFAULT 0,
-  resultados JSONB NOT NULL DEFAULT '[]',
+  arquivo_url TEXT,
+  arquivo_tipo VARCHAR(20), -- 'imagem' ou 'pdf'
+  resultados JSONB NOT NULL DEFAULT '[]', -- legado, não usado mais
   criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
   atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
 );

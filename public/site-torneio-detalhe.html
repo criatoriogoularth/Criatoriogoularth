@@ -77,63 +77,39 @@
   color: var(--text-muted);
 }
 
-.table-wrapper {
+/* ---- exibição do arquivo (imagem ou PDF) ---- */
+.arquivo-wrapper {
   background: var(--bg-elevated-2);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
-  overflow-x: auto;
+  padding: 12px;
+  text-align: center;
 }
 
-.table-wrapper table {
+.arquivo-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+}
+
+.arquivo-wrapper .pdf-frame {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
+  height: 80vh;
+  border: none;
+  border-radius: 8px;
 }
 
-.table-wrapper th {
-  background: rgba(0,0,0,0.25);
+.arquivo-wrapper .pdf-fallback {
+  padding: 30px 20px;
+  color: var(--text-muted);
+}
+
+.arquivo-wrapper .pdf-fallback a {
   color: var(--brass-soft);
   font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  padding: 10px 14px;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.table-wrapper td {
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--line);
-  color: var(--text);
-  vertical-align: middle;
-}
-
-.table-wrapper tr:last-child td {
-  border-bottom: none;
-}
-
-.table-wrapper tr:hover td {
-  background: rgba(199,151,63,0.04);
-}
-
-.table-wrapper tr:nth-child(1) td:first-child,
-.table-wrapper tr:nth-child(2) td:first-child,
-.table-wrapper tr:nth-child(3) td:first-child {
-  font-weight: 700;
-  color: var(--brass-soft);
-}
-
-.pos-cell {
-  font-family: var(--font-texto);
-  font-weight: 700;
-}
-
-.anilha-cell {
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--brass-soft);
-  font-size: 12px;
 }
 
 .empty-etapa {
@@ -164,12 +140,8 @@
   .nav-buttons {
     justify-content: center;
   }
-  .table-wrapper {
-    font-size: 12px;
-  }
-  .table-wrapper th,
-  .table-wrapper td {
-    padding: 7px 10px;
+  .arquivo-wrapper .pdf-frame {
+    height: 65vh;
   }
 }
 </style>
@@ -257,7 +229,7 @@
     }
 
     function formatarData(data) {
-      if (!data) return 'Data não informada';
+      if (!data) return '';
       const partes = String(data).slice(0, 10).split('-');
       if (partes.length === 3) {
         const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -304,41 +276,27 @@
 
       document.title = `Criatório Goularth — ${etapa.etapa}`;
 
-      const resultados = Array.isArray(etapa.resultados) ? etapa.resultados : [];
-
-      let tabelaHtml = '';
-      if (resultados.length === 0) {
-        tabelaHtml = `
+      let arquivoHtml = '';
+      if (!etapa.arquivoUrl) {
+        arquivoHtml = `
           <div class="empty-etapa">
             <div class="icon">📋</div>
-            <p>Os resultados desta etapa ainda não foram publicados.</p>
+            <p>O resultado desta etapa ainda não foi publicado.</p>
+          </div>
+        `;
+      } else if (etapa.arquivoTipo === 'pdf') {
+        arquivoHtml = `
+          <div class="arquivo-wrapper">
+            <iframe class="pdf-frame" src="${etapa.arquivoUrl}"></iframe>
+            <div class="pdf-fallback" style="font-size:12px;">
+              Não consegue ver o PDF? <a href="${etapa.arquivoUrl}" target="_blank" rel="noopener">Abrir em nova aba</a>
+            </div>
           </div>
         `;
       } else {
-        tabelaHtml = `
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Pos.</th>
-                  <th>Ave</th>
-                  <th>Anilha</th>
-                  <th>Tempo</th>
-                  <th>Pontos</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${resultados.map(r => `
-                  <tr>
-                    <td class="pos-cell">${r.pos || '-'}</td>
-                    <td><strong>${r.ave || '-'}</strong></td>
-                    <td class="anilha-cell">${r.anilha || '-'}</td>
-                    <td>${r.tempo || '-'}</td>
-                    <td>${r.pontos || '-'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
+        arquivoHtml = `
+          <div class="arquivo-wrapper">
+            <img src="${etapa.arquivoUrl}" alt="${etapa.etapa}" onerror="this.parentElement.innerHTML='<div class=\\'empty-etapa\\'><div class=\\'icon\\'>❌</div><p>Não foi possível carregar a imagem.</p></div>'">
           </div>
         `;
       }
@@ -347,9 +305,9 @@
         <div class="etapa-header">
           <div class="categoria">${etapa.categoria}</div>
           <h1>${etapa.etapa}</h1>
-          <div class="data">📅 ${formatarData(etapa.data)}</div>
+          ${etapa.data ? `<div class="data">📅 ${formatarData(etapa.data)}</div>` : ''}
         </div>
-        ${tabelaHtml}
+        ${arquivoHtml}
       `;
     }
 

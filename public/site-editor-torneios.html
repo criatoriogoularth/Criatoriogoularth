@@ -53,39 +53,46 @@
 .field textarea:focus {
   border-color: var(--brass) !important;
 }
-.field-row {
+.checkbox-field {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
-.field-row .field {
-  flex: 1;
-  min-width: 150px;
+.checkbox-field input { width: auto !important; }
+.checkbox-field label { font-size: 13px; color: var(--text); font-weight: 500; }
+.upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+.upload-area:hover {
+  border-color: var(--brass-dim);
+}
+.upload-area p {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.upload-area input[type="file"] {
+  display: none;
 }
 
-/* ---- categoria (grupo) ---- */
-.categoria-group {
+/* ---- lista de etapas, agrupada por categoria (arrastável) ---- */
+.categoria-grupo {
   margin-bottom: 22px;
 }
-.categoria-group .categoria-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--brass-dim);
+.categoria-grupo .categoria-nome {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  color: var(--brass-soft);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
   margin-bottom: 10px;
 }
-.categoria-group .categoria-header h4 {
-  font-family: 'Fraunces', serif;
-  font-size: 16px;
-  color: var(--text);
-}
-.categoria-group .categoria-header .count {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* ---- item de etapa (arrastável) ---- */
 .etapa-item {
   display: flex;
   align-items: center;
@@ -94,38 +101,52 @@
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 14px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   cursor: grab;
 }
 .etapa-item:active { cursor: grabbing; }
 .etapa-item.dragging { opacity: 0.4; }
 .etapa-item.drag-over { border-color: var(--brass); background: rgba(199,151,63,0.1); }
-.etapa-item.oculta { opacity: 0.5; }
 .etapa-item .handle { color: var(--text-muted); font-size: 15px; flex-shrink: 0; }
+.etapa-item .thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+.etapa-item .thumb.pdf-icon,
+.etapa-item .thumb.sem-arquivo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  opacity: 0.6;
+}
 .etapa-item .info { flex: 1; min-width: 0; }
 .etapa-item .info .nome {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13.5px;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .etapa-item .info .meta {
   font-size: 11px;
   color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
   margin-top: 2px;
 }
-.etapa-item .status-badge {
+.etapa-item .info .badge-oculto {
   font-size: 10px;
-  padding: 2px 10px;
+  padding: 1px 8px;
   border-radius: 10px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-.etapa-item .status-visivel {
-  background: rgba(92, 154, 124, 0.2);
-  color: var(--sage-soft);
-}
-.etapa-item .status-oculta {
-  background: rgba(192, 89, 74, 0.15);
+  background: rgba(192,89,74,0.2);
   color: #e2988a;
 }
 .etapa-item .actions {
@@ -142,58 +163,6 @@
   padding: 30px;
   color: var(--text-muted);
 }
-
-/* ---- tabela de resultados (dentro do modal) ---- */
-.resultados-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-}
-.resultados-table th {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--text-muted);
-  text-align: left;
-  padding: 4px 6px;
-}
-.resultados-table td {
-  padding: 3px 4px;
-}
-.resultados-table input {
-  width: 100%;
-  background: rgba(0,0,0,0.35) !important;
-  border: 1px solid var(--line) !important;
-  border-radius: 5px !important;
-  padding: 6px 8px !important;
-  color: var(--text) !important;
-  font-size: 12.5px !important;
-}
-.resultados-table .col-pos { width: 60px; }
-.resultados-table .col-tempo { width: 90px; }
-.resultados-table .col-pontos { width: 70px; }
-.resultados-table .col-acao { width: 34px; }
-.resultados-table .btn-remover-linha {
-  background: none;
-  border: none;
-  color: #e2988a;
-  cursor: pointer;
-  font-size: 15px;
-  padding: 2px 6px;
-}
-.btn-add-linha {
-  margin-top: 8px;
-  padding: 6px 14px;
-  font-size: 12px;
-}
-.toggle-visivel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-.toggle-visivel input { width: auto !important; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -206,18 +175,18 @@
       <div class="topbar">
         <div>
           <h1>🏆 Copas e Torneios</h1>
-          <div class="lede">Cadastre categorias (ex: "Copa ABCO Livre Adulto 2026") e etapas com tabela de resultados — aparecem no site público.</div>
+          <div class="lede">Cada etapa é um link que abre a imagem ou o PDF do resultado — sem tabela pra preencher, você só sobe o arquivo já pronto.</div>
         </div>
         <div>
           <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
-          <button class="btn btn-primary" onclick="abrirModalEtapa()">+ Nova Etapa</button>
+          <button class="btn btn-primary" onclick="abrirModalEtapa()">+ Adicionar Link</button>
         </div>
       </div>
 
       <div class="editor-card">
-        <h3>📋 Etapas cadastradas</h3>
-        <div class="desc">Agrupadas por categoria. Arraste (☰) para reordenar dentro da mesma categoria — essa ordem é a que aparece no site.</div>
-        <div id="torneios-list"></div>
+        <h3>📄 Links cadastrados</h3>
+        <div class="desc">Agrupados por categoria (ex: "Copa ABCO Livre Adulto 2026"). Arraste (☰) pra reordenar dentro da mesma categoria.</div>
+        <div id="etapas-list"></div>
       </div>
 
     </section>
@@ -228,36 +197,35 @@
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
 <script>
-renderSidebar('admin-site');
+renderSidebar('site-editor-torneios');
 
 // ============================================================
 // ESTADO
 // ============================================================
 
-let torneios = [];
-let _arrastando = null;
+let etapas = [];
+let _etapaArrastando = null;
 
 // ============================================================
 // CARREGAR / RENDERIZAR
 // ============================================================
 
-async function carregarTorneios() {
+async function carregarEtapas() {
   try {
-    torneios = await DB.getTorneios();
-  } catch (erro) {
-    torneios = [];
-    alert('❌ Não foi possível carregar as copas/torneios: ' + erro.message);
+    etapas = await DB.getTorneios();
+  } catch (e) {
+    etapas = [];
   }
-  renderizarLista();
+  renderizarEtapas();
 }
 
 function agruparPorCategoria(lista) {
   const grupos = {};
   lista.forEach(t => {
-    if (!grupos[t.categoria]) grupos[t.categoria] = [];
-    grupos[t.categoria].push(t);
+    const cat = t.categoria || 'Sem categoria';
+    if (!grupos[cat]) grupos[cat] = [];
+    grupos[cat].push(t);
   });
-  Object.values(grupos).forEach(arr => arr.sort((a, b) => (a.ordem || 0) - (b.ordem || 0)));
   return grupos;
 }
 
@@ -268,139 +236,109 @@ function formatarData(data) {
   return data;
 }
 
-function renderizarLista() {
-  const container = document.getElementById('torneios-list');
+function renderizarEtapas() {
+  const container = document.getElementById('etapas-list');
 
-  if (torneios.length === 0) {
-    container.innerHTML = '<div class="empty-list">Nenhuma copa/torneio cadastrado ainda.</div>';
+  if (etapas.length === 0) {
+    container.innerHTML = '<div class="empty-list">Nenhum link cadastrado ainda.</div>';
     return;
   }
 
-  const grupos = agruparPorCategoria(torneios);
+  const grupos = agruparPorCategoria(etapas);
 
   let html = '';
-  Object.entries(grupos).forEach(([categoria, etapas]) => {
+  Object.entries(grupos).forEach(([categoria, lista]) => {
     html += `
-      <div class="categoria-group">
-        <div class="categoria-header">
-          <h4>${categoria}</h4>
-          <span class="count">${etapas.length} etapa${etapas.length > 1 ? 's' : ''}</span>
-        </div>
-        <div class="etapas-container" data-categoria="${categoria.replace(/"/g, '&quot;')}">
-          ${etapas.map(t => `
-            <div class="etapa-item ${t.visivel === false ? 'oculta' : ''}" draggable="true" data-id="${t.id}">
+      <div class="categoria-grupo" data-categoria="${categoria}">
+        <div class="categoria-nome">${categoria}</div>
+        ${lista.map(t => {
+          const idx = etapas.indexOf(t);
+          let thumbHtml = '<div class="thumb sem-arquivo">📄</div>';
+          if (t.arquivoTipo === 'pdf') {
+            thumbHtml = '<div class="thumb pdf-icon">📕</div>';
+          } else if (t.arquivoUrl) {
+            thumbHtml = `<img src="${t.arquivoUrl}" class="thumb" onerror="this.outerHTML='<div class=&quot;thumb sem-arquivo&quot;>🖼️</div>'">`;
+          }
+          return `
+            <div class="etapa-item" draggable="true" data-idx="${idx}">
               <span class="handle">☰</span>
+              ${thumbHtml}
               <div class="info">
                 <div class="nome">${t.etapa}</div>
-                <div class="meta">${formatarData(t.data) || 'sem data'} · ${(t.resultados || []).length} resultado${(t.resultados || []).length !== 1 ? 's' : ''}</div>
+                <div class="meta">
+                  ${t.data ? `📅 ${formatarData(t.data)}` : ''}
+                  ${t.visivel === false ? '<span class="badge-oculto">Oculto</span>' : ''}
+                </div>
               </div>
-              <span class="status-badge ${t.visivel === false ? 'status-oculta' : 'status-visivel'}">${t.visivel === false ? '🔒 Oculta' : '✅ Visível'}</span>
               <div class="actions">
-                <button class="btn btn-ghost" onclick="abrirModalEtapa(${t.id})">✎ Editar</button>
-                <button class="btn btn-ghost" onclick="alternarVisibilidade(${t.id})">${t.visivel === false ? '👁️ Mostrar' : '🙈 Ocultar'}</button>
-                <button class="btn btn-danger" onclick="excluirEtapa(${t.id})">🗑️</button>
+                <button class="btn btn-ghost" onclick="abrirModalEtapa(${idx})">✎ Editar</button>
+                <button class="btn btn-danger" onclick="excluirEtapa(${idx})">🗑️</button>
               </div>
             </div>
-          `).join('')}
-        </div>
+          `;
+        }).join('')}
       </div>
     `;
   });
 
   container.innerHTML = html;
-  ativarDragDrop();
-}
 
-function ativarDragDrop() {
-  document.querySelectorAll('.etapas-container').forEach(cont => {
-    cont.querySelectorAll('.etapa-item').forEach(item => {
-      item.addEventListener('dragstart', () => {
-        _arrastando = { id: Number(item.dataset.id), categoria: cont.dataset.categoria };
-        item.classList.add('dragging');
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        cont.querySelectorAll('.etapa-item').forEach(el => el.classList.remove('drag-over'));
-      });
-      item.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        if (!_arrastando || _arrastando.categoria !== cont.dataset.categoria) return;
-        if (Number(item.dataset.id) === _arrastando.id) return;
-        item.classList.add('drag-over');
-      });
-      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
-      item.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        item.classList.remove('drag-over');
-        if (!_arrastando || _arrastando.categoria !== cont.dataset.categoria) return;
+  container.querySelectorAll('.etapa-item').forEach(item => {
+    item.addEventListener('dragstart', () => {
+      _etapaArrastando = Number(item.dataset.idx);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      container.querySelectorAll('.etapa-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const destinoIdx = Number(item.dataset.idx);
+      if (destinoIdx === _etapaArrastando) return;
+      // só permite arrastar dentro da mesma categoria
+      if (etapas[destinoIdx].categoria !== etapas[_etapaArrastando].categoria) return;
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const destinoIdx = Number(item.dataset.idx);
+      if (_etapaArrastando === null || _etapaArrastando === destinoIdx) return;
+      if (etapas[destinoIdx].categoria !== etapas[_etapaArrastando].categoria) return;
 
-        const destinoId = Number(item.dataset.id);
-        if (_arrastando.id === destinoId) return;
+      const [movido] = etapas.splice(_etapaArrastando, 1);
+      etapas.splice(destinoIdx, 0, movido);
 
-        const grupo = torneios.filter(t => t.categoria === cont.dataset.categoria).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
-        const origemIdx = grupo.findIndex(t => t.id === _arrastando.id);
-        const destinoIdx = grupo.findIndex(t => t.id === destinoId);
-        const [movido] = grupo.splice(origemIdx, 1);
-        grupo.splice(destinoIdx, 0, movido);
+      // recalcula "ordem" só dentro da categoria afetada
+      const categoria = movido.categoria;
+      let ordemAtual = 0;
+      const itensReordenados = etapas
+        .filter(t => t.categoria === categoria)
+        .map(t => ({ id: t.id, ordem: ordemAtual++ }));
 
-        const itens = grupo.map((t, idx) => ({ id: t.id, ordem: idx }));
-        grupo.forEach((t, idx) => { t.ordem = idx; });
-
-        try {
-          await DB.reordenarTorneios(itens);
-        } catch (erro) {
-          alert('❌ Não foi possível salvar a nova ordem: ' + erro.message);
-        }
-        renderizarLista();
-      });
+      try {
+        await DB.reordenarTorneios(itensReordenados);
+      } catch (erro) {
+        alert('❌ Não foi possível salvar a nova ordem: ' + erro.message);
+      }
+      carregarEtapas();
     });
   });
 }
 
 // ============================================================
-// AÇÕES RÁPIDAS
+// MODAL DE ADICIONAR/EDITAR
 // ============================================================
-
-async function alternarVisibilidade(id) {
-  const t = torneios.find(x => x.id === id);
-  if (!t) return;
-  const novoValor = t.visivel === false ? true : false;
-  try {
-    await DB.updateTorneio(id, { visivel: novoValor });
-    t.visivel = novoValor;
-    renderizarLista();
-  } catch (erro) {
-    alert('❌ Não foi possível alterar a visibilidade: ' + erro.message);
-  }
-}
-
-async function excluirEtapa(id) {
-  if (!confirm('Excluir esta etapa e todos os resultados dela? Essa ação não pode ser desfeita.')) return;
-  try {
-    await DB.deleteTorneio(id);
-    torneios = torneios.filter(t => t.id !== id);
-    renderizarLista();
-  } catch (erro) {
-    alert('❌ Não foi possível excluir: ' + erro.message);
-  }
-}
-
-// ============================================================
-// MODAL DE ADICIONAR/EDITAR ETAPA
-// ============================================================
-
-let _linhaResultadoSeq = 0;
 
 function categoriasExistentes() {
-  return [...new Set(torneios.map(t => t.categoria))].sort();
+  return [...new Set(etapas.map(t => t.categoria).filter(Boolean))];
 }
 
-function abrirModalEtapa(id) {
-  const editando = typeof id === 'number';
-  const t = editando ? torneios.find(x => x.id === id) : {
-    categoria: '', etapa: '', data: '', visivel: true, resultados: []
-  };
-  if (editando && !t) return;
+function abrirModalEtapa(idx) {
+  const editando = typeof idx === 'number';
+  const etapa = editando ? etapas[idx] : { categoria: '', etapa: '', data: '', visivel: true, arquivoUrl: '', arquivoTipo: 'imagem' };
 
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -412,142 +350,151 @@ function abrirModalEtapa(id) {
   const modal = document.createElement('div');
   modal.style.cssText = `
     background: var(--bg-elevated-2); border: 1px solid var(--brass-dim);
-    border-radius: 14px; max-width: 720px; width: 100%;
+    border-radius: 14px; max-width: 480px; width: 100%;
     padding: 24px; max-height: 90vh; overflow-y: auto;
   `;
 
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="font-family:'Fraunces',serif;color:var(--brass-soft);">${editando ? '✎ Editar Etapa' : '+ Nova Etapa'}</h3>
+      <h3 style="font-family:'Fraunces',serif;color:var(--brass-soft);">${editando ? '✎ Editar Link' : '+ Novo Link'}</h3>
       <button onclick="document.querySelectorAll('div[style*=&quot;position: fixed&quot;]').forEach(el => el.remove())" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
     </div>
 
-    <div class="field-row">
-      <div class="field">
-        <label>Categoria *</label>
-        <input type="text" id="etapa-categoria" list="categorias-lista" value="${t.categoria || ''}" placeholder="Ex: Copa ABCO Livre Adulto 2026">
-        <datalist id="categorias-lista">
-          ${categoriasExistentes().map(c => `<option value="${c}">`).join('')}
-        </datalist>
-      </div>
-      <div class="field">
-        <label>Nome da Etapa *</label>
-        <input type="text" id="etapa-nome" value="${t.etapa || ''}" placeholder="Ex: 1ª Etapa">
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Data</label>
-        <input type="date" id="etapa-data" value="${t.data ? String(t.data).slice(0, 10) : ''}">
-      </div>
-      <div class="field" style="justify-content:flex-end;">
-        <label class="toggle-visivel">
-          <input type="checkbox" id="etapa-visivel" ${t.visivel !== false ? 'checked' : ''}>
-          Visível no site público
-        </label>
-      </div>
+    <div class="field">
+      <label>Categoria *</label>
+      <input type="text" id="etapa-categoria" value="${etapa.categoria || ''}" placeholder="Ex: Copa ABCO Livre Adulto 2026" list="categorias-existentes">
+      <datalist id="categorias-existentes">
+        ${categoriasExistentes().map(c => `<option value="${c}">`).join('')}
+      </datalist>
     </div>
 
     <div class="field">
-      <label>Resultados</label>
-      <table class="resultados-table">
-        <thead>
-          <tr>
-            <th class="col-pos">Pos.</th>
-            <th>Ave</th>
-            <th>Anilha</th>
-            <th class="col-tempo">Tempo</th>
-            <th class="col-pontos">Pontos</th>
-            <th class="col-acao"></th>
-          </tr>
-        </thead>
-        <tbody id="resultados-tbody"></tbody>
-      </table>
-      <button type="button" class="btn btn-ghost btn-add-linha" onclick="adicionarLinhaResultado()">+ Adicionar linha</button>
+      <label>Nome do link *</label>
+      <input type="text" id="etapa-nome" value="${etapa.etapa || ''}" placeholder="Ex: 1ª Etapa Copa ABCO Livre Adulto 18/04/2026">
+    </div>
+
+    <div class="field">
+      <label>Data (opcional)</label>
+      <input type="date" id="etapa-data" value="${etapa.data ? String(etapa.data).slice(0,10) : ''}">
+    </div>
+
+    <div class="field">
+      <label>Arquivo do resultado (imagem ou PDF) *</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="upload-area" onclick="document.getElementById('etapa-file-input').click()" style="flex:1;">
+          <p>📤 Clique para subir imagem ou PDF</p>
+          <input type="file" id="etapa-file-input" accept="image/*,application/pdf" onchange="uploadArquivoEtapa(event)">
+        </div>
+      </div>
+      <div id="etapa-arquivo-preview" style="margin-top:8px;">
+        ${etapa.arquivoUrl
+          ? (etapa.arquivoTipo === 'pdf'
+              ? `<div style="font-size:12px;color:var(--brass-soft);">📕 PDF já enviado</div>`
+              : `<img src="${etapa.arquivoUrl}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);" onerror="this.style.display='none'">`)
+          : ''}
+      </div>
+    </div>
+    <input type="hidden" id="etapa-arquivo-url" value="${etapa.arquivoUrl || ''}">
+    <input type="hidden" id="etapa-arquivo-tipo" value="${etapa.arquivoTipo || 'imagem'}">
+
+    <div class="checkbox-field">
+      <input type="checkbox" id="etapa-visivel" ${etapa.visivel !== false ? 'checked' : ''}>
+      <label for="etapa-visivel">Visível no site</label>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
-      <button onclick="salvarModalEtapa(${editando ? id : 'null'})" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
+      <button onclick="salvarModalEtapa(${editando ? idx : 'null'})" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
     </div>
   `;
 
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-
-  const tbody = document.getElementById('resultados-tbody');
-  tbody.innerHTML = '';
-  const resultadosIniciais = Array.isArray(t.resultados) && t.resultados.length > 0
-    ? t.resultados
-    : [{ pos: '', ave: '', anilha: '', tempo: '', pontos: '' }];
-  resultadosIniciais.forEach(r => adicionarLinhaResultado(r));
 }
 
-function adicionarLinhaResultado(dados) {
-  const r = dados || { pos: '', ave: '', anilha: '', tempo: '', pontos: '' };
-  const linhaId = 'linha-' + (_linhaResultadoSeq++);
-  const tbody = document.getElementById('resultados-tbody');
-  if (!tbody) return;
+function uploadArquivoEtapa(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-  const tr = document.createElement('tr');
-  tr.id = linhaId;
-  tr.innerHTML = `
-    <td class="col-pos"><input type="text" class="res-pos" value="${r.pos || ''}" placeholder="1º"></td>
-    <td><input type="text" class="res-ave" value="${r.ave || ''}" placeholder="Nome da ave"></td>
-    <td><input type="text" class="res-anilha" value="${r.anilha || ''}" placeholder="II 0000 0000 0000"></td>
-    <td class="col-tempo"><input type="text" class="res-tempo" value="${r.tempo || ''}" placeholder="00:00.00"></td>
-    <td class="col-pontos"><input type="text" class="res-pontos" value="${r.pontos || ''}" placeholder="30"></td>
-    <td class="col-acao"><button type="button" class="btn-remover-linha" onclick="document.getElementById('${linhaId}').remove()">✕</button></td>
-  `;
-  tbody.appendChild(tr);
+  const ehImagem = file.type.startsWith('image/');
+  const ehPdf = file.type === 'application/pdf';
+
+  if (!ehImagem && !ehPdf) {
+    alert('Selecione uma imagem ou um arquivo PDF.');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('O arquivo excede 10MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    document.getElementById('etapa-arquivo-url').value = e.target.result;
+    document.getElementById('etapa-arquivo-tipo').value = ehPdf ? 'pdf' : 'imagem';
+
+    const preview = document.getElementById('etapa-arquivo-preview');
+    preview.innerHTML = ehPdf
+      ? `<div style="font-size:12px;color:var(--brass-soft);">📕 PDF selecionado: ${file.name}</div>`
+      : `<img src="${e.target.result}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
 }
 
-async function salvarModalEtapa(id) {
+async function salvarModalEtapa(idx) {
   const categoria = document.getElementById('etapa-categoria').value.trim();
-  const etapa = document.getElementById('etapa-nome').value.trim();
-  const data = document.getElementById('etapa-data').value || null;
+  const nomeEtapa = document.getElementById('etapa-nome').value.trim();
+  const data = document.getElementById('etapa-data').value;
   const visivel = document.getElementById('etapa-visivel').checked;
+  const arquivoUrl = document.getElementById('etapa-arquivo-url').value;
+  const arquivoTipo = document.getElementById('etapa-arquivo-tipo').value;
 
-  if (!categoria) { alert('Informe a categoria.'); return; }
-  if (!etapa) { alert('Informe o nome da etapa.'); return; }
+  if (!categoria) {
+    alert('Digite a categoria.');
+    return;
+  }
+  if (!nomeEtapa) {
+    alert('Digite o nome do link.');
+    return;
+  }
+  if (!arquivoUrl) {
+    alert('Suba a imagem ou o PDF do resultado.');
+    return;
+  }
 
-  const resultados = [];
-  document.querySelectorAll('#resultados-tbody tr').forEach(tr => {
-    const pos = tr.querySelector('.res-pos').value.trim();
-    const ave = tr.querySelector('.res-ave').value.trim();
-    const anilha = tr.querySelector('.res-anilha').value.trim();
-    const tempo = tr.querySelector('.res-tempo').value.trim();
-    const pontos = tr.querySelector('.res-pontos').value.trim();
-    if (pos || ave || anilha || tempo || pontos) {
-      resultados.push({ pos, ave, anilha, tempo, pontos });
-    }
-  });
-
-  const dados = { categoria, etapa, data, visivel, resultados };
+  const dados = { categoria, etapa: nomeEtapa, data: data || null, visivel, arquivoUrl, arquivoTipo };
 
   try {
-    if (id === null || id === undefined) {
-      const novo = await DB.addTorneio(dados);
-      torneios.push(novo);
+    if (idx === null || idx === undefined) {
+      await DB.addTorneio(dados);
     } else {
-      const atualizado = await DB.updateTorneio(id, dados);
-      const idx = torneios.findIndex(t => t.id === id);
-      if (idx !== -1) torneios[idx] = atualizado;
+      await DB.updateTorneio(etapas[idx].id, dados);
     }
   } catch (erro) {
     alert('❌ Não foi possível salvar: ' + erro.message);
     return;
   }
 
-  renderizarLista();
+  await carregarEtapas();
   document.querySelectorAll('div[style*="position: fixed"]').forEach(el => el.remove());
+}
+
+async function excluirEtapa(idx) {
+  if (!confirm('Remover este link e o arquivo associado?')) return;
+  try {
+    await DB.deleteTorneio(etapas[idx].id);
+  } catch (erro) {
+    alert('❌ Não foi possível excluir: ' + erro.message);
+    return;
+  }
+  await carregarEtapas();
 }
 
 // ============================================================
 // INICIALIZAR
 // ============================================================
 
-carregarTorneios();
+carregarEtapas();
 </script>
 </body>
 </html>
