@@ -33,6 +33,7 @@ async function renderSidebar(activePage) {
         { group: 'Criatório', items: [
             { id: 'cadastro-criador', href: 'cadastro-criador.html', icon: '🏷️', label: 'Dados do Criatório' },
             { id: 'admin-site', href: 'admin-site.html', icon: '🌐', label: 'Site do Criatório' },
+            { id: 'site-editor-torneios', href: 'site-editor-torneios.html', icon: '🏆', label: 'Copas e Torneios' },
             { id: 'admin-db', href: 'admin-db.html', icon: '🗄️', label: 'Backup & Dados' },
         ] },
     ];
