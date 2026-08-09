@@ -257,7 +257,11 @@ function renderizarBanners() {
 
       const [movido] = banners.splice(_bannerArrastando, 1);
       banners.splice(destinoIdx, 0, movido);
-      await saveBanners(banners);
+      try {
+        await saveBanners(banners);
+      } catch (erro) {
+        alert('❌ Não foi possível salvar a nova ordem: ' + erro.message);
+      }
       renderizarBanners();
     });
   });
@@ -365,6 +369,7 @@ async function salvarModalBanner(idx) {
   }
 
   const dados = { tamanho, imagemUrl, link };
+  const backup = banners.slice();
 
   if (idx === null || idx === undefined) {
     banners.push(dados);
@@ -372,16 +377,29 @@ async function salvarModalBanner(idx) {
     banners[idx] = dados;
   }
 
-  await saveBanners(banners);
-  renderizarBanners();
+  try {
+    await saveBanners(banners);
+  } catch (erro) {
+    banners = backup; // desfaz a mudança em memória já que não salvou
+    alert('❌ Não foi possível salvar o banner: ' + erro.message + '\n\nSe essa é a primeira vez usando os banners, confirme que o backend (routes/config.js) foi atualizado no servidor com a chave "site_banners".');
+    return;
+  }
 
+  renderizarBanners();
   document.querySelectorAll('div[style*="position: fixed"]').forEach(el => el.remove());
 }
 
 async function excluirBanner(idx) {
   if (!confirm('Remover este banner?')) return;
+  const backup = banners.slice();
   banners.splice(idx, 1);
-  await saveBanners(banners);
+  try {
+    await saveBanners(banners);
+  } catch (erro) {
+    banners = backup;
+    alert('❌ Não foi possível excluir o banner: ' + erro.message);
+    return;
+  }
   renderizarBanners();
 }
 

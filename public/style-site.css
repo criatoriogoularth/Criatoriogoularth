@@ -296,36 +296,51 @@ body {
    Reaproveita os mesmos elementos (.site-header, .site-nav,
    .nav-links, .site-main, .site-footer) só reorganizando via CSS
    Grid — nenhum HTML precisa mudar entre os dois modos.
+
+   CORREÇÃO: o banner grande da Home (.site-banner) vive dentro do
+   mesmo <header> do menu — jogar o header inteiro pra dentro da
+   coluna estreita da barra lateral espremia esse banner num
+   cantinho de 250px. Agora o header vira "invisível" (display:
+   contents) e cada filho vai pra sua própria área do grid: o menu
+   (.site-nav) na coluna lateral, e o banner (.site-banner, quando
+   existir) numa faixa própria no topo, ocupando a largura toda.
    ============================================================ */
 
 body.layout-lateral {
   display: grid;
   grid-template-columns: 250px 1fr;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
+    "banner-topo banner-topo"
     "sidebar main"
     "sidebar footer";
   min-height: 100vh;
 }
 
 body.layout-lateral .site-header {
-  grid-area: sidebar;
-  border-bottom: none;
-  border-right: 1px solid var(--line);
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
+  display: contents;
+}
+
+body.layout-lateral .site-banner {
+  grid-area: banner-topo;
 }
 
 body.layout-lateral .site-nav {
+  grid-area: sidebar;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--line);
+  border-bottom: none;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  height: 100%;
   padding: 24px 18px;
   gap: 24px;
-  border-bottom: none;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 body.layout-lateral .nav-links {
@@ -384,19 +399,18 @@ body.layout-lateral .site-footer {
   body.layout-lateral {
     grid-template-columns: 1fr;
     grid-template-areas:
+      "banner-topo"
       "sidebar"
       "main"
       "footer";
   }
-  body.layout-lateral .site-header {
+  body.layout-lateral .site-nav {
     position: static;
-    height: auto;
+    max-height: none;
+    overflow-y: visible;
     border-right: none;
     border-bottom: 1px solid var(--line);
-  }
-  body.layout-lateral .site-nav {
     flex-direction: column;
-    height: auto;
     padding: 8px 12px;
   }
   body.layout-lateral .nav-links {
