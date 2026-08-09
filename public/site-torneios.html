@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Copas e Torneios</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-site.css">
+<style>
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.site-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main h1 {
+  font-family: var(--font-titulo);
+  font-size: 32px;
+  color: var(--brass-soft);
+  margin-bottom: 4px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.categoria-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.categoria-card h3 {
+  font-family: var(--font-titulo);
+  font-size: 17px;
+  color: var(--brass-soft);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.categoria-card ul {
+  list-style: none;
+}
+
+.categoria-card li {
+  margin-bottom: 4px;
+}
+
+.categoria-card li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: .15s ease;
+}
+
+.categoria-card li a:hover {
+  background: rgba(199,151,63,0.08);
+  color: var(--text);
+}
+
+.categoria-card li a .data {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-texto);
+  flex-shrink: 0;
+}
+
+.empty-torneios {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-torneios .icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .categorias-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <a href="site-plantel.html">Plantel</a>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-torneios.html" class="active">Copas</a>
+        <a href="site-crachas.html">Crachás</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <h1>🏆 Copas e Torneios</h1>
+    <div class="subtitle">Classificações e resultados das etapas disputadas</div>
+
+    <div id="torneios-container">
+      <!-- Preenchido pelo JavaScript -->
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-torneios.html">Copas</a>
+      <a href="site-crachas.html">Crachás</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function formatarData(data) {
+      if (!data) return '';
+      const partes = String(data).slice(0, 10).split('-');
+      if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      return data;
+    }
+
+    function agruparPorCategoria(lista) {
+      const grupos = {};
+      lista.forEach(t => {
+        if (!grupos[t.categoria]) grupos[t.categoria] = [];
+        grupos[t.categoria].push(t);
+      });
+      return grupos;
+    }
+
+    async function renderizarTorneios() {
+      const container = document.getElementById('torneios-container');
+
+      let torneios = [];
+      try {
+        torneios = await DB.getTorneiosPublico();
+      } catch (e) {
+        torneios = [];
+      }
+
+      if (!torneios || torneios.length === 0) {
+        container.innerHTML = `
+          <div class="empty-torneios">
+            <div class="icon">🏆</div>
+            <p>Nenhuma copa ou torneio disponível no momento.</p>
+            <p style="font-size:12px;">Volte em breve para conferir os resultados.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const grupos = agruparPorCategoria(torneios);
+
+      let html = '<div class="categorias-grid">';
+      Object.entries(grupos).forEach(([categoria, etapas]) => {
+        html += `
+          <div class="categoria-card">
+            <h3>${categoria}</h3>
+            <ul>
+              ${etapas.map(t => `
+                <li>
+                  <a href="site-torneio-detalhe.html?id=${t.id}">
+                    📄 ${t.etapa}
+                    <span class="data">${formatarData(t.data)}</span>
+                  </a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    carregarLogo();
+    renderizarTorneios();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

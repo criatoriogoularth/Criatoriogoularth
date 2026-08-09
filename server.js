@@ -10,6 +10,7 @@ const reproducoesRoutes = require('./routes/reproducoes');
 const configRoutes = require('./routes/config');
 const ancestraisRoutes = require('./routes/ancestrais');
 const visitasRoutes = require('./routes/visitas');
+const torneiosRoutes = require('./routes/torneios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use('/api/reproducoes', reproducoesRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/ancestrais', ancestraisRoutes);
 app.use('/api/visitas', visitasRoutes);
+app.use('/api/torneios', torneiosRoutes);
 
 // ===== ARQUIVOS ESTÁTICOS =====
 app.use(express.static(path.join(__dirname, 'public')));

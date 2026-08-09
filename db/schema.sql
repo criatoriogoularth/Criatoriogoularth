@@ -122,3 +122,26 @@ CREATE TABLE IF NOT EXISTS site_visitas (
 );
 
 CREATE INDEX IF NOT EXISTS idx_visitas_usuario_data ON site_visitas(usuario_id, data);
+
+-- ============================================================
+-- COPAS / TORNEIOS DO SITE PÚBLICO (categorias + etapas + resultados)
+-- ============================================================
+-- Cada linha é UMA ETAPA de UMA CATEGORIA (ex: categoria = "Copa ABCO
+-- Livre Adulto 2026", etapa = "1ª Etapa - 18/04/2026"). Os resultados
+-- (posição, ave, anilha, tempo, pontos) ficam em JSONB porque é uma
+-- lista de tamanho variável — mesmo padrão já usado em aves.ancestrais.
+CREATE TABLE IF NOT EXISTS site_torneios (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  categoria VARCHAR(255) NOT NULL,
+  etapa VARCHAR(255) NOT NULL,
+  data DATE,
+  visivel BOOLEAN NOT NULL DEFAULT true,
+  ordem INTEGER NOT NULL DEFAULT 0,
+  resultados JSONB NOT NULL DEFAULT '[]',
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+  atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_torneios_usuario ON site_torneios(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_torneios_categoria ON site_torneios(categoria);

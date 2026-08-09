@@ -174,20 +174,50 @@ const DB = {
     return apiFetch(`/config/${chave}`, { method: 'PUT', body: JSON.stringify({ valor }) });
   },
 
-  // ---- VISITAS (contador do site público) ----
+  // ---- VISITAS ----
   async registrarVisita(pagina) {
-    // Falha silenciosa de propósito: um erro aqui (rede instável, etc)
-    // não pode travar ou atrasar o carregamento do site pro visitante.
     try {
       await fetch(`${API_BASE}/visitas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pagina })
       });
-    } catch (e) { /* ignorado */ }
+    } catch (e) {
+      // silencioso: contador de visitas nunca deve travar a navegação do site
+    }
   },
-  async getEstatisticasVisitas() {
+  async getVisitasStats() {
     return apiFetch('/visitas/stats');
+  },
+
+  // ---- TORNEIOS (Copas) ----
+  async getTorneiosPublico() {
+    const res = await fetch(`${API_BASE}/torneios/publico`);
+    if (!res.ok) return [];
+    return res.json();
+  },
+  async getTorneioPublico(id) {
+    const res = await fetch(`${API_BASE}/torneios/publico/${id}`);
+    if (!res.ok) return null;
+    return res.json();
+  },
+  async getTorneios() {
+    return apiFetch('/torneios');
+  },
+  async getTorneio(id) {
+    return apiFetch(`/torneios/${id}`);
+  },
+  async addTorneio(dados) {
+    return apiFetch('/torneios', { method: 'POST', body: JSON.stringify(dados) });
+  },
+  async updateTorneio(id, dados) {
+    return apiFetch(`/torneios/${id}`, { method: 'PUT', body: JSON.stringify(dados) });
+  },
+  async deleteTorneio(id) {
+    return apiFetch(`/torneios/${id}`, { method: 'DELETE' });
+  },
+  async reordenarTorneios(itens) {
+    return apiFetch('/torneios/reordenar/lote', { method: 'PUT', body: JSON.stringify({ itens }) });
   }
 };
 
