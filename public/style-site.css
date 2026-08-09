@@ -465,6 +465,42 @@ body.layout-lateral .site-footer {
   display: block;
 }
 
+/* ---- Widget de Copas/Torneios na coluna lateral ----
+   Estilo "menu lateral de blog": legenda (nome da categoria) em cima,
+   lista simples de links embaixo — sem caixa, sem borda, sem card.
+   Fica empilhado com os banners dentro da mesma .site-banner-coluna. */
+.site-torneios-widget h4 {
+  font-family: var(--font-titulo);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brass-soft);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+
+.site-torneios-widget ul {
+  list-style: none;
+}
+
+.site-torneios-widget li {
+  margin-bottom: 2px;
+}
+
+.site-torneios-widget li a {
+  display: block;
+  padding: 4px 2px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: .15s ease;
+}
+
+.site-torneios-widget li a:hover {
+  color: var(--brass-soft);
+  padding-left: 6px;
+}
+
 @media (max-width: 1100px) {
   .site-main.tem-banner {
     grid-template-columns: 1fr 240px;
@@ -485,5 +521,9 @@ body.layout-lateral .site-footer {
   .site-banner-coluna .banner-anuncio {
     max-width: 300px;
     flex: 1 1 220px;
+  }
+  .site-torneios-widget {
+    width: 100%;
+    flex: 1 1 100%;
   }
 }

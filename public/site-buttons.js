@@ -11,6 +11,14 @@
 // Também aplica aqui o tema (cores e fonte) escolhido em site-editor-tema.html —
 // como style-site.css usa var(--bg), var(--brass), var(--font-titulo) etc, é só
 // injetar um <style> pequeno no <head> sobrescrevendo essas variáveis.
+//
+// MUDANÇA: "Copas" deixou de ser uma aba/página própria no menu. Os links de
+// Copas e Torneios agora aparecem como um widget na coluna lateral de Home e
+// Criatório (mesmo estilo do menu lateral de blog: legenda + lista de links,
+// sem caixa), junto dos banners de anúncio. Por isso, em toda página do site,
+// qualquer link apontando pra "site-torneios.html" (o antigo menu/aba Copas)
+// é removido automaticamente daqui — não precisa mexer em cada página do site
+// uma por uma.
 
 // Pares de fonte disponíveis no editor de tema. Cada um carrega seu próprio
 // Google Fonts só quando é o escolhido — a fonte padrão (Fraunces + Manrope)
@@ -78,6 +86,12 @@ function aplicarTemaPersonalizado(personalizacao) {
             return {};
         }
     }
+
+    // ---- Remove a antiga aba/página "Copas" do menu e do rodapé ----
+    // Os links de Copas e Torneios agora vivem só como widget na coluna
+    // lateral de Home/Criatório (ver seção mais abaixo). Roda em toda
+    // página do site porque este arquivo é incluído em todas elas.
+    document.querySelectorAll('a[href="site-torneios.html"]').forEach(el => el.remove());
 
     const [conteudo, personalizacao] = await Promise.all([
         getConfig('site_conteudo'),
@@ -166,30 +180,72 @@ function aplicarTemaPersonalizado(personalizacao) {
         document.body.classList.add('layout-lateral');
     }
 
-    // ---- Coluna de banners de anúncio (só Home e Criatório) ----
-    // São as únicas páginas do site sem fotos/tabelas próprias — por
-    // isso servem de espaço pra anúncio, nos dois modos de menu.
+    // ---- Coluna lateral: links de Copas/Torneios + banners de anúncio ----
+    // (só Home e Criatório — são as únicas páginas do site sem fotos/tabelas
+    // próprias, por isso servem de espaço pra essa coluna, nos dois modos
+    // de menu).
+    //
+    // MUDANÇA: antes essa coluna só tinha banners de anúncio. Agora também
+    // recebe, no topo, os links de Copas e Torneios — no mesmo estilo de
+    // "menu lateral de blog" (legenda da categoria + lista de links, sem
+    // caixa), que é como o usuário já publicava isso no site antigo.
     const PAGINAS_COM_BANNER = ['site-home', 'site-criatorio'];
     const paginaAtual = (location.pathname.split('/').pop() || '').replace('.html', '');
     if (PAGINAS_COM_BANNER.includes(paginaAtual)) {
-        const banners = await getConfig('site_banners');
+        const [banners, torneios] = await Promise.all([
+            getConfig('site_banners'),
+            (async () => {
+                try {
+                    return (window.DB && DB.getTorneiosPublico) ? await DB.getTorneiosPublico() : [];
+                } catch (e) {
+                    return [];
+                }
+            })()
+        ]);
+
         const ativos = Array.isArray(banners) ? banners.filter(b => b && b.imagemUrl) : [];
+
+        // Agrupa os links por categoria, mantendo a ordem que já vem da
+        // API pública (categoria, ordem, data) — mesma lógica usada antes
+        // na página site-torneios.html.
+        const gruposTorneios = {};
+        (Array.isArray(torneios) ? torneios : []).forEach(t => {
+            const cat = t.categoria || 'Torneios';
+            if (!gruposTorneios[cat]) gruposTorneios[cat] = [];
+            gruposTorneios[cat].push(t);
+        });
+        const temTorneios = Object.keys(gruposTorneios).length > 0;
+
         const siteMain = document.querySelector('.site-main');
 
-        if (ativos.length > 0 && siteMain) {
+        if ((ativos.length > 0 || temTorneios) && siteMain) {
             // Move todo o conteúdo que já existia pra dentro de um wrapper,
-            // sobrando só ele + a coluna de banners como filhos diretos de
-            // .site-main — assim o grid de 2 colunas (conteúdo | banners)
+            // sobrando só ele + a coluna lateral como filhos diretos de
+            // .site-main — assim o grid de 2 colunas (conteúdo | lateral)
             // funciona sem precisar saber o que tem dentro da página.
-            const conteudo = document.createElement('div');
-            conteudo.className = 'site-main-conteudo';
+            const conteudoWrapper = document.createElement('div');
+            conteudoWrapper.className = 'site-main-conteudo';
             while (siteMain.firstChild) {
-                conteudo.appendChild(siteMain.firstChild);
+                conteudoWrapper.appendChild(siteMain.firstChild);
             }
 
             const coluna = document.createElement('aside');
             coluna.className = 'site-banner-coluna';
-            coluna.innerHTML = ativos.map(b => {
+
+            let html = '';
+
+            if (temTorneios) {
+                html += Object.entries(gruposTorneios).map(([categoria, lista]) => `
+                    <div class="site-torneios-widget">
+                        <h4>${categoria}</h4>
+                        <ul>
+                            ${lista.map(t => `<li><a href="site-torneio-detalhe.html?id=${t.id}">${t.etapa}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            }
+
+            html += ativos.map(b => {
                 const abre = b.link
                     ? `<a class="banner-anuncio" href="${b.link}" target="_blank" rel="noopener sponsored">`
                     : `<div class="banner-anuncio">`;
@@ -197,7 +253,9 @@ function aplicarTemaPersonalizado(personalizacao) {
                 return `${abre}<img src="${b.imagemUrl}" alt="Anúncio" loading="lazy">${fecha}`;
             }).join('');
 
-            siteMain.appendChild(conteudo);
+            coluna.innerHTML = html;
+
+            siteMain.appendChild(conteudoWrapper);
             siteMain.appendChild(coluna);
             siteMain.classList.add('tem-banner');
         }
