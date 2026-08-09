@@ -165,4 +165,41 @@ function aplicarTemaPersonalizado(personalizacao) {
     if ((personalizacao.layoutMenu || 'topo') === 'lateral') {
         document.body.classList.add('layout-lateral');
     }
+
+    // ---- Coluna de banners de anúncio (só Home e Criatório) ----
+    // São as únicas páginas do site sem fotos/tabelas próprias — por
+    // isso servem de espaço pra anúncio, nos dois modos de menu.
+    const PAGINAS_COM_BANNER = ['site-home', 'site-criatorio'];
+    const paginaAtual = (location.pathname.split('/').pop() || '').replace('.html', '');
+    if (PAGINAS_COM_BANNER.includes(paginaAtual)) {
+        const banners = await getConfig('site_banners');
+        const ativos = Array.isArray(banners) ? banners.filter(b => b && b.imagemUrl) : [];
+        const siteMain = document.querySelector('.site-main');
+
+        if (ativos.length > 0 && siteMain) {
+            // Move todo o conteúdo que já existia pra dentro de um wrapper,
+            // sobrando só ele + a coluna de banners como filhos diretos de
+            // .site-main — assim o grid de 2 colunas (conteúdo | banners)
+            // funciona sem precisar saber o que tem dentro da página.
+            const conteudo = document.createElement('div');
+            conteudo.className = 'site-main-conteudo';
+            while (siteMain.firstChild) {
+                conteudo.appendChild(siteMain.firstChild);
+            }
+
+            const coluna = document.createElement('aside');
+            coluna.className = 'site-banner-coluna';
+            coluna.innerHTML = ativos.map(b => {
+                const abre = b.link
+                    ? `<a class="banner-anuncio" href="${b.link}" target="_blank" rel="noopener sponsored">`
+                    : `<div class="banner-anuncio">`;
+                const fecha = b.link ? '</a>' : '</div>';
+                return `${abre}<img src="${b.imagemUrl}" alt="Anúncio" loading="lazy">${fecha}`;
+            }).join('');
+
+            siteMain.appendChild(conteudo);
+            siteMain.appendChild(coluna);
+            siteMain.classList.add('tem-banner');
+        }
+    }
 })();

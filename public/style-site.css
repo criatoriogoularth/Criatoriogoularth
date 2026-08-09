@@ -414,3 +414,62 @@ body.layout-lateral .site-footer {
     justify-content: center;
   }
 }
+
+/* ============================================================
+   COLUNA DE BANNERS — só em Home e Criatório, nos dois modos de
+   menu (topo ou lateral). Ativado via JS (site-buttons.js) quando
+   existe pelo menos um banner cadastrado em site_banners.
+   ============================================================ */
+
+.site-main.tem-banner {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 28px;
+  align-items: start;
+}
+
+.site-banner-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 20px;
+}
+
+.site-banner-coluna .banner-anuncio {
+  display: block;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated-2);
+  text-decoration: none;
+}
+
+.site-banner-coluna .banner-anuncio img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .site-main.tem-banner {
+    grid-template-columns: 1fr 240px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .site-main.tem-banner {
+    grid-template-columns: 1fr;
+  }
+  .site-banner-coluna {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .site-banner-coluna .banner-anuncio {
+    max-width: 300px;
+    flex: 1 1 220px;
+  }
+}

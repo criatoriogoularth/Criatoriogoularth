@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Banners de Anúncio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-card {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.editor-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--brass-soft);
+  margin-bottom: 6px;
+}
+.editor-card .desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.field input,
+.field select,
+.field textarea {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  outline: none !important;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--brass) !important;
+}
+.upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+.upload-area:hover {
+  border-color: var(--brass-dim);
+}
+.upload-area p {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.upload-area input[type="file"] {
+  display: none;
+}
+
+/* ---- lista de banners (arrastável, mesma lógica das abas do menu) ---- */
+.banner-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  cursor: grab;
+}
+.banner-item:active { cursor: grabbing; }
+.banner-item.dragging { opacity: 0.4; }
+.banner-item.drag-over { border-color: var(--brass); background: rgba(199,151,63,0.1); }
+.banner-item .handle { color: var(--text-muted); font-size: 15px; flex-shrink: 0; }
+.banner-item .thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+.banner-item .thumb.sem-imagem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  opacity: 0.4;
+}
+.banner-item .info { flex: 1; min-width: 0; }
+.banner-item .tamanho-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+}
+.banner-item .link-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.banner-item .actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.banner-item .actions .btn {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+.empty-list {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1>📢 Banners de Anúncio</h1>
+          <div class="lede">Aparecem numa coluna ao lado do conteúdo em Home e Criatório — as únicas páginas do site sem imagens próprias.</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-primary" onclick="abrirModalBanner()">+ Adicionar Banner</button>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <h3>🖼️ Banners cadastrados</h3>
+        <div class="desc">Arraste (☰) pra definir a ordem de exibição. Tamanhos disponíveis: 300×600, 300×250 e 728×90 — a imagem se ajusta automaticamente à largura da coluna.</div>
+        <div id="banners-list"></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script>
+renderSidebar('admin-site');
+
+const TAMANHOS_BANNER = {
+  '300x600': '300 × 600 px (arranha-céu)',
+  '300x250': '300 × 250 px (retângulo médio)',
+  '728x90': '728 × 90 px (topo/tira)'
+};
+
+// ============================================================
+// BANCO
+// ============================================================
+
+async function getBanners() {
+  const banners = await DB.getConfig('site_banners');
+  return Array.isArray(banners) ? banners : [];
+}
+
+async function saveBanners(banners) {
+  await DB.setConfig('site_banners', banners);
+}
+
+// ============================================================
+// ESTADO
+// ============================================================
+
+let banners = [];
+let _bannerArrastando = null;
+
+// ============================================================
+// CARREGAR / RENDERIZAR
+// ============================================================
+
+async function carregarBanners() {
+  banners = await getBanners();
+  renderizarBanners();
+}
+
+function renderizarBanners() {
+  const container = document.getElementById('banners-list');
+
+  if (banners.length === 0) {
+    container.innerHTML = '<div class="empty-list">Nenhum banner cadastrado ainda.</div>';
+    return;
+  }
+
+  container.innerHTML = banners.map((b, idx) => `
+    <div class="banner-item" draggable="true" data-idx="${idx}">
+      <span class="handle">☰</span>
+      ${b.imagemUrl
+        ? `<img src="${b.imagemUrl}" class="thumb" onerror="this.outerHTML='<div class=&quot;thumb sem-imagem&quot;>🖼️</div>'">`
+        : `<div class="thumb sem-imagem">🖼️</div>`}
+      <div class="info">
+        <span class="tamanho-badge">${TAMANHOS_BANNER[b.tamanho] || b.tamanho || '—'}</span>
+        <div class="link-info">${b.link ? '🔗 ' + b.link : 'sem link (só imagem)'}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="abrirModalBanner(${idx})">✎ Editar</button>
+        <button class="btn btn-danger" onclick="excluirBanner(${idx})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.banner-item').forEach(item => {
+    item.addEventListener('dragstart', () => {
+      _bannerArrastando = Number(item.dataset.idx);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      container.querySelectorAll('.banner-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (Number(item.dataset.idx) === _bannerArrastando) return;
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const destinoIdx = Number(item.dataset.idx);
+      if (_bannerArrastando === null || _bannerArrastando === destinoIdx) return;
+
+      const [movido] = banners.splice(_bannerArrastando, 1);
+      banners.splice(destinoIdx, 0, movido);
+      await saveBanners(banners);
+      renderizarBanners();
+    });
+  });
+}
+
+// ============================================================
+// MODAL DE ADICIONAR/EDITAR
+// ============================================================
+
+function abrirModalBanner(idx) {
+  const editando = typeof idx === 'number';
+  const banner = editando ? banners[idx] : { tamanho: '300x250', imagemUrl: '', link: '' };
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  `;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: var(--bg-elevated-2); border: 1px solid var(--brass-dim);
+    border-radius: 14px; max-width: 460px; width: 100%;
+    padding: 24px; max-height: 90vh; overflow-y: auto;
+  `;
+
+  modal.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="font-family:'Fraunces',serif;color:var(--brass-soft);">${editando ? '✎ Editar Banner' : '+ Novo Banner'}</h3>
+      <button onclick="document.querySelectorAll('div[style*=&quot;position: fixed&quot;]').forEach(el => el.remove())" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <div class="field">
+      <label>Tamanho *</label>
+      <select id="banner-tamanho">
+        ${Object.entries(TAMANHOS_BANNER).map(([valor, label]) =>
+          `<option value="${valor}" ${banner.tamanho === valor ? 'selected' : ''}>${label}</option>`
+        ).join('')}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Imagem *</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="banner-imagem" value="${banner.imagemUrl || ''}" placeholder="https://exemplo.com/banner.jpg" style="flex:1;min-width:150px;">
+        <div class="upload-area" onclick="document.getElementById('banner-file-input').click()">
+          <p>📤 Upload</p>
+          <input type="file" id="banner-file-input" accept="image/*" onchange="uploadImagemBanner(event)">
+        </div>
+      </div>
+      <div id="banner-imagem-preview" style="margin-top:8px;">
+        ${banner.imagemUrl ? `<img src="${banner.imagemUrl}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);" onerror="this.style.display='none'">` : ''}
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Link ao clicar (opcional)</label>
+      <input type="text" id="banner-link" value="${banner.link || ''}" placeholder="https://... (deixe em branco pra não ter link)">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+      <button onclick="salvarModalBanner(${editando ? idx : 'null'})" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
+function uploadImagemBanner(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('Selecione uma imagem válida.');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('A imagem excede 10MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const input = document.getElementById('banner-imagem');
+    const preview = document.getElementById('banner-imagem-preview');
+    if (input) {
+      input.value = e.target.result;
+      preview.innerHTML = `<img src="${e.target.result}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+async function salvarModalBanner(idx) {
+  const tamanho = document.getElementById('banner-tamanho').value;
+  const imagemUrl = document.getElementById('banner-imagem').value.trim();
+  const link = document.getElementById('banner-link').value.trim();
+
+  if (!imagemUrl) {
+    alert('Adicione uma imagem para o banner.');
+    return;
+  }
+
+  const dados = { tamanho, imagemUrl, link };
+
+  if (idx === null || idx === undefined) {
+    banners.push(dados);
+  } else {
+    banners[idx] = dados;
+  }
+
+  await saveBanners(banners);
+  renderizarBanners();
+
+  document.querySelectorAll('div[style*="position: fixed"]').forEach(el => el.remove());
+}
+
+async function excluirBanner(idx) {
+  if (!confirm('Remover este banner?')) return;
+  banners.splice(idx, 1);
+  await saveBanners(banners);
+  renderizarBanners();
+}
+
+// ============================================================
+// INICIALIZAR
+// ============================================================
+
+carregarBanners();
+</script>
+</body>
+</html>
