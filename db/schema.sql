@@ -105,3 +105,20 @@ CREATE TABLE IF NOT EXISTS ancestrais (
 CREATE INDEX IF NOT EXISTS idx_ancestrais_usuario ON ancestrais(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_ancestrais_nome ON ancestrais(nome);
 CREATE INDEX IF NOT EXISTS idx_ancestrais_anilha ON ancestrais(anilha);
+
+-- ============================================================
+-- CONTADOR DE VISITANTES DO SITE PÚBLICO
+-- ============================================================
+-- Uma linha por visita (contada 1x por sessão de navegador — ver
+-- site-buttons.js). "data" já vem separado de criado_em pra deixar
+-- a consulta "quantas visitas hoje / por dia" simples e rápida,
+-- sem precisar truncar timestamp toda hora.
+CREATE TABLE IF NOT EXISTS site_visitas (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  pagina VARCHAR(100),
+  data DATE NOT NULL DEFAULT CURRENT_DATE,
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_visitas_usuario_data ON site_visitas(usuario_id, data);

@@ -202,4 +202,13 @@ function aplicarTemaPersonalizado(personalizacao) {
             siteMain.classList.add('tem-banner');
         }
     }
+
+    // ---- Contador de visitantes ----
+    // Registra só 1x por sessão do navegador (sessionStorage some quando
+    // a aba/janela fecha) — assim "visita" conta pessoas, não cada
+    // página que a mesma pessoa navega dentro do site.
+    if (!sessionStorage.getItem('visita_registrada') && window.DB && DB.registrarVisita) {
+        sessionStorage.setItem('visita_registrada', '1');
+        DB.registrarVisita(paginaAtual);
+    }
 })();

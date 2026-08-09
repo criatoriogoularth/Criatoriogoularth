@@ -75,6 +75,12 @@
 
       <div id="sync-status" class="sync-status">Carregando…</div>
 
+      <div class="estatisticas" id="estatisticas-visitas" style="margin-top:16px;">
+        <div class="estatistica-item"><div class="numero" id="visitas-hoje">—</div><div class="label">👀 Visitas Hoje</div></div>
+        <div class="estatistica-item"><div class="numero" id="visitas-total">—</div><div class="label">👀 Visitas no Total</div></div>
+      </div>
+      <div id="visitas-grafico" style="display:flex;align-items:flex-end;gap:6px;height:60px;margin:10px 0 20px;"></div>
+
       <div class="admin-grid">
         <a href="cadastro-ave.html" class="admin-card"><div class="icon">🐦</div><h3>Cadastrar Ave</h3><p>Adicionar nova ave ao plantel</p></a>
         <a href="passaros.html" class="admin-card"><div class="icon">📋</div><h3>Lista de Aves</h3><p>Ver todas as aves cadastradas</p></a>
@@ -128,7 +134,43 @@ async function atualizarEstatisticas() {
   }
 }
 
+async function atualizarEstatisticasVisitas() {
+  try {
+    const stats = await DB.getEstatisticasVisitas();
+
+    document.getElementById('visitas-hoje').textContent = stats.hoje;
+    document.getElementById('visitas-total').textContent = stats.total;
+
+    // Mini gráfico dos últimos 7 dias, em barras simples (sem lib nenhuma)
+    const grafico = document.getElementById('visitas-grafico');
+    const dias = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const chave = d.toISOString().slice(0, 10);
+      const registro = stats.ultimos7.find(r => String(r.data).slice(0, 10) === chave);
+      dias.push({ chave, total: registro ? registro.total : 0 });
+    }
+    const maiorValor = Math.max(1, ...dias.map(d => d.total));
+
+    grafico.innerHTML = dias.map(d => {
+      const alturaPercent = Math.round((d.total / maiorValor) * 100);
+      const label = new Date(d.chave + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+      return `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;">
+          <div title="${d.total} visita(s)" style="width:100%;max-width:26px;background:linear-gradient(180deg,var(--brass-soft),var(--brass));border-radius:4px 4px 0 0;height:${Math.max(alturaPercent, 4)}%;"></div>
+          <span style="font-size:9px;color:var(--text-muted);text-transform:capitalize;">${label}</span>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    document.getElementById('visitas-hoje').textContent = '—';
+    document.getElementById('visitas-total').textContent = '—';
+  }
+}
+
 atualizarEstatisticas();
+atualizarEstatisticasVisitas();
 </script>
 </body>
 </html>

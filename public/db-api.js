@@ -172,6 +172,22 @@ const DB = {
   },
   async setConfig(chave, valor) {
     return apiFetch(`/config/${chave}`, { method: 'PUT', body: JSON.stringify({ valor }) });
+  },
+
+  // ---- VISITAS (contador do site público) ----
+  async registrarVisita(pagina) {
+    // Falha silenciosa de propósito: um erro aqui (rede instável, etc)
+    // não pode travar ou atrasar o carregamento do site pro visitante.
+    try {
+      await fetch(`${API_BASE}/visitas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pagina })
+      });
+    } catch (e) { /* ignorado */ }
+  },
+  async getEstatisticasVisitas() {
+    return apiFetch('/visitas/stats');
   }
 };
 
