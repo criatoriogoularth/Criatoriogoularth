@@ -89,6 +89,12 @@
         <a href="site-editor-banner.html" class="admin-card"><div class="icon">🖼️</div><h3>Banner do Site</h3><p>Imagem de cabeçalho</p></a>
         <a href="site-editor-tema.html" class="admin-card"><div class="icon">🎨</div><h3>Cores e Fonte</h3><p>Tema visual do site</p></a>
         <a href="site-editor-anuncios.html" class="admin-card"><div class="icon">📢</div><h3>Banners de Anúncio</h3><p>Home e Criatório</p></a>
+        <!-- CORREÇÃO: faltava o card de "Copas e Torneios" — a página
+             site-editor-torneios.html já existia e já funcionava (inclusive
+             já estava no menu lateral em sidebar.js), mas nunca tinha sido
+             adicionado o link aqui, então não tinha como chegar nela a
+             partir do painel admin-site. -->
+        <a href="site-editor-torneios.html" class="admin-card"><div class="icon">🏆</div><h3>Copas e Torneios</h3><p>Etapas e resultados</p></a>
         <a href="site-editar.html?pagina=home" class="admin-card"><div class="icon">📝</div><h3>Editar Home</h3><p>Conteúdo da página inicial</p></a>
         <a href="site-editar.html?pagina=criatorio" class="admin-card"><div class="icon">🏷️</div><h3>Editar Criatório</h3><p>História e genética</p></a>
         <a href="site-editar.html?pagina=contato" class="admin-card"><div class="icon">📧</div><h3>Editar Contato</h3><p>Informações de contato</p></a>
@@ -136,7 +142,12 @@ async function atualizarEstatisticas() {
 
 async function atualizarEstatisticasVisitas() {
   try {
-    const stats = await DB.getEstatisticasVisitas();
+    // CORREÇÃO: essa função se chamava DB.getEstatisticasVisitas() aqui,
+    // mas em db-api.js a função real é DB.getVisitasStats(). Como o nome
+    // não existia, a chamada sempre lançava erro e caía direto no catch
+    // abaixo — sem nenhum aviso visível — e por isso os números do
+    // contador de visitas ficavam travados em "—" pra sempre.
+    const stats = await DB.getVisitasStats();
 
     document.getElementById('visitas-hoje').textContent = stats.hoje;
     document.getElementById('visitas-total').textContent = stats.total;
