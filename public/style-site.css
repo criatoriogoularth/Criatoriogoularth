@@ -261,6 +261,19 @@ body {
   margin-bottom: 8px;
 }
 
+/* CORREÇÃO do "pisca": .nav-links e .site-footer .links começam
+   invisíveis (mas já ocupando o espaço — por isso visibility, não
+   display) até o site-buttons.js buscar site_personalizacao e aplicar
+   a visibilidade/ordem das abas certas. Sem isso, como esse script só
+   roda no fim da página e depende de uma chamada de rede (await), o
+   visitante via TODAS as abas por um instante e só depois via a
+   correta. site-buttons.js torna os dois visíveis de novo assim que
+   termina de aplicar o filtro. */
+.nav-links,
+.site-footer .links {
+  visibility: hidden;
+}
+
 .site-footer .links a {
   color: var(--text-muted);
   text-decoration: none;

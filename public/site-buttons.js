@@ -121,37 +121,46 @@ function aplicarTemaPersonalizado(personalizacao) {
         }
     });
 
-    // ---- Visibilidade e ordem das abas do menu ----
+    // ---- Visibilidade e ordem das abas do menu (topo) E do rodapé ----
+    //
+    // CORREÇÃO (bug do rodapé): antes só o menu de topo (.nav-links) era
+    // filtrado por site_personalizacao.visibilidade/ordemMenu — o rodapé
+    // (.site-footer .links) nunca era tocado, por isso sempre mostrava
+    // todas as abas, mesmo as escondidas. Como o mapa de nomes e a ordem
+    // são os mesmos, a mesma função é aplicada nos dois containers agora.
     const vis = personalizacao.visibilidade || {};
-    const navContainer = document.querySelector('.nav-links');
-    const links = document.querySelectorAll('.nav-links > a, .nav-links > .dropdown');
-    if (navContainer && links.length > 0) {
-        const mapa = {
-            'Home': 'home',
-            'O Criatório': 'criatorio',
-            'Notícias': 'noticias',
-            'Plantel': 'plantel',
-            'Adultos': 'adultos',
-            'Filhotes': 'filhotes',
-            'Fotos': 'fotos',
-            'Vídeos': 'videos',
-            'Crachás': 'crachas',
-            'Contato': 'contato'
-        };
 
-        // Pega só o texto do link direto (ex: "Plantel"), nunca o do
-        // submenu de espécies dentro do dropdown — usar textContent do
-        // wrapper inteiro pegaria também os nomes das espécies já
-        // carregadas ali dentro, e o texto não bateria mais com o mapa.
-        function textoDoItem(el) {
-            const link = el.tagName === 'A' ? el : el.querySelector(':scope > a');
-            return link ? link.textContent.trim() : '';
-        }
+    const mapa = {
+        'Home': 'home',
+        'O Criatório': 'criatorio',
+        'Notícias': 'noticias',
+        'Plantel': 'plantel',
+        'Adultos': 'adultos',
+        'Filhotes': 'filhotes',
+        'Fotos': 'fotos',
+        'Vídeos': 'videos',
+        'Crachás': 'crachas',
+        'Contato': 'contato'
+    };
 
-        // mapa reverso (chave -> elemento) — usado tanto pra visibilidade
-        // quanto pra reordenar os itens do menu
+    // Pega só o texto do link direto (ex: "Plantel"), nunca o do
+    // submenu de espécies dentro do dropdown — usar textContent do
+    // wrapper inteiro pegaria também os nomes das espécies já
+    // carregadas ali dentro, e o texto não bateria mais com o mapa.
+    function textoDoItem(el) {
+        const link = el.tagName === 'A' ? el : el.querySelector(':scope > a');
+        return link ? link.textContent.trim() : '';
+    }
+
+    // Aplica visibilidade + ordem num container de links (menu de topo
+    // OU rodapé). appendChild em um elemento já existente no DOM apenas
+    // o move — fazendo isso em sequência, na ordem desejada, o container
+    // inteiro fica reorganizado sem precisar recriar nenhum elemento.
+    function aplicarVisibilidadeEOrdem(container, itens) {
+        if (!container || itens.length === 0) return;
+
         const elementoPorChave = {};
-        links.forEach(el => {
+        itens.forEach(el => {
             const chave = mapa[textoDoItem(el)];
             if (chave) elementoPorChave[chave] = el;
 
@@ -162,18 +171,35 @@ function aplicarTemaPersonalizado(personalizacao) {
             }
         });
 
-        // Reordena os itens do menu conforme site_personalizacao.ordemMenu
-        // (definido em site-editor-personalizacao.html, aba "Abas do Menu").
-        // appendChild em um elemento já existente no DOM apenas o move —
-        // fazendo isso em sequência, na ordem desejada, o menu inteiro fica
-        // reorganizado sem precisar recriar nenhum elemento.
         if (Array.isArray(personalizacao.ordemMenu)) {
             personalizacao.ordemMenu.forEach(chave => {
                 const el = elementoPorChave[chave];
-                if (el) navContainer.appendChild(el);
+                if (el) container.appendChild(el);
             });
         }
     }
+
+    const navContainer = document.querySelector('.nav-links');
+    aplicarVisibilidadeEOrdem(
+        navContainer,
+        navContainer ? Array.from(navContainer.querySelectorAll(':scope > a, :scope > .dropdown')) : []
+    );
+
+    const footerContainer = document.querySelector('.site-footer .links');
+    aplicarVisibilidadeEOrdem(
+        footerContainer,
+        footerContainer ? Array.from(footerContainer.querySelectorAll(':scope > a')) : []
+    );
+
+    // ---- Revela o menu e o rodapé ----
+    // CORREÇÃO (bug do "pisca"): style-site.css agora esconde .nav-links e
+    // .site-footer .links por padrão (visibility:hidden) assim que a página
+    // carrega, pra ninguém ver TODAS as abas por um instante antes deste
+    // script terminar de buscar site_personalizacao (chamada de rede,
+    // pode demorar) e aplicar a filtragem acima. Só depois de aplicar é
+    // que eles voltam a ficar visíveis — já com o resultado final certo.
+    if (navContainer) navContainer.style.visibility = 'visible';
+    if (footerContainer) footerContainer.style.visibility = 'visible';
 
     // ---- Layout do menu: topo (padrão) ou lateral ----
     if ((personalizacao.layoutMenu || 'topo') === 'lateral') {
