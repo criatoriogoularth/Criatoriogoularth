@@ -322,6 +322,20 @@ async function getAvesPlantel() {
   return DB.getAll(DB.TABLES.AVES);
 }
 
+// Ave adulta = 18 meses (1 ano e meio) ou mais. Sem data de nascimento,
+// vale a situação: "Filhote" é filhote, o resto é adulto.
+function ehAdulta(ave) {
+  if (ave.dataNasc) {
+    const nasc = new Date(String(ave.dataNasc).slice(0, 10) + 'T00:00:00');
+    if (!isNaN(nasc)) {
+      const limite = new Date();
+      limite.setMonth(limite.getMonth() - 18);
+      return nasc <= limite;
+    }
+  }
+  return !(ave.filhote || ave.situacao === 'Filhote');
+}
+
 async function getFotos() {
   return (await DB.getConfig('site_fotos')) || [];
 }
@@ -671,13 +685,14 @@ function renderAdultos() {
 
 async function carregarAdultos() {
   const aves = todasAves;
+  const candidatos = aves.filter(a => ehAdulta(a) || (a.noSite && a.categoriaSite === 'adulto'));
   const container = document.getElementById('adultos-aves-list');
   const selecionadas = document.getElementById('adultos-selecionadas');
   if (!container) return;
   
   // Agrupar aves por espécie
   const especies = {};
-  aves.forEach(ave => {
+  candidatos.forEach(ave => {
     const esp = ave.especie || 'Sem espécie';
     if (!especies[esp]) especies[esp] = [];
     especies[esp].push(ave);
@@ -782,13 +797,14 @@ function renderFilhotes() {
 
 async function carregarFilhotes() {
   const aves = todasAves;
+  const candidatos = aves.filter(a => !ehAdulta(a) || (a.noSite && a.categoriaSite === 'filhote'));
   const container = document.getElementById('filhotes-aves-list');
   const selecionadas = document.getElementById('filhotes-selecionadas');
   if (!container) return;
   
   // Agrupar aves por espécie
   const especies = {};
-  aves.forEach(ave => {
+  candidatos.forEach(ave => {
     const esp = ave.especie || 'Sem espécie';
     if (!especies[esp]) especies[esp] = [];
     especies[esp].push(ave);
@@ -815,7 +831,7 @@ async function carregarFilhotes() {
       `;
     });
   });
-  container.innerHTML = html || '<div class="empty-list">Nenhuma ave cadastrada.</div>';
+  container.innerHTML = html || '<div class="empty-list">Nenhum filhote (ave com menos de 1 ano e meio) cadastrado.</div>';
   
   // Lista de filhotes selecionados
   const filhotesSite = aves.filter(a => a.noSite && a.categoriaSite === 'filhote');

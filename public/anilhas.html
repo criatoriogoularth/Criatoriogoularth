@@ -791,8 +791,13 @@ async function salvarAnilha(event) {
 
 async function excluirAnilha(id) {
   if (!confirm('Tem certeza que deseja excluir esta anilha?')) return;
-  await DB.delete(DB.TABLES.ANILHAS, id);
-  renderizarTabela();
+  try {
+    await DB.delete(DB.TABLES.ANILHAS, id);
+  } catch (e) {
+    alert('❌ Erro ao excluir: ' + e.message);
+    return;
+  }
+  await renderizarTabela();
 }
 
 // ============================================================

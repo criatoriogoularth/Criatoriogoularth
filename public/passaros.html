@@ -1028,9 +1028,14 @@ async function excluirPassaro(id) {
   }
   if (!confirm(`Tem certeza que deseja excluir "${ave.nome}" (${ave.anilha})?`)) return;
   if (!confirm(`⚠️ Esta ação é irreversível! Confirmar exclusão de "${ave.nome}"?`)) return;
-  await DB.delete(DB.TABLES.AVES, id);
-  renderizarFiltros();
-  renderizarPassaros();
+  try {
+    await DB.delete(DB.TABLES.AVES, id);
+  } catch (e) {
+    alert('❌ Erro ao excluir: ' + e.message);
+    return;
+  }
+  await renderizarFiltros();
+  await renderizarPassaros();
 }
 
 // ============================================================

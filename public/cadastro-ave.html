@@ -1104,10 +1104,16 @@ async function carregarDadosEdicao() {
 
 async function carregarAnilhasDisponiveis() {
   const container = document.getElementById('anilhas-disponiveis');
-  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  const todasAnilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  const todasAves = await DB.getAll(DB.TABLES.AVES);
+  const emUso = new Set(todasAves.map(a => a.anilha).filter(Boolean));
+  // Só aparece no estoque a anilha disponível, ativa e que nenhuma ave usa
+  const anilhas = todasAnilhas.filter(a =>
+    a.disponivel === 'Sim' && a.ativo === 'Sim' && !emUso.has(a.numero)
+  );
   
   if (anilhas.length === 0) {
-    container.innerHTML = '<div class="empty-note" style="padding:12px;font-size:12px;">Nenhuma anilha cadastrada. Cadastre uma acima.</div>';
+    container.innerHTML = '<div class="empty-note" style="padding:12px;font-size:12px;">Nenhuma anilha disponível no estoque. Cadastre uma acima.</div>';
     return;
   }
   
@@ -1662,12 +1668,23 @@ async function salvarAve() {
     let resultado;
     if (id) {
       resultado = await DB.update(DB.TABLES.AVES, parseInt(id), dados);
+      // Se trocou a anilha da ave, a antiga volta para o estoque
+      if (aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
+        const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
+        if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
+      }
       alert('✅ Ave atualizada com sucesso!');
     } else {
       resultado = await DB.add(DB.TABLES.AVES, dados);
       alert('✅ Ave cadastrada com sucesso!');
     }
     
+    // Anilha usada deixa de estar disponível no estoque
+    const anilhaObj = await DB.getAnilhaPorNumero(anilha);
+    if (anilhaObj && anilhaObj.disponivel !== 'Não') {
+      await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
+    }
+
     // ===== NOVO: Salvar ancestrais criados na árvore na tabela de ancestrais =====
     await salvarAncestraisDaArvore(dados.ancestrais, nome, dados.especie);
     

@@ -85,6 +85,10 @@
   background: rgba(185,116,98,0.12);
   border-color: var(--rose);
 }
+.tree-node.filled.indefinido {
+  background: rgba(154,168,158,0.12);
+  border-color: var(--text-muted);
+}
 .tree-node.root {
   border-color: var(--brass);
   border-width: 3px;
@@ -1262,7 +1266,7 @@ function renderizarCertificado() {
     : CONFIG.corAvatarFundo;
   const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
   let linhasHtml = `
-    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : ave.sexo === 'F' ? 'Fêmea' : 'Indefinido'}</div>
     <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${ave.especie}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
@@ -1369,8 +1373,8 @@ async function renderListaAves() {
     return;
   }
   document.getElementById('lista-aves').innerHTML = lista.map(a => `
-    <div class="bird-card${a.sexo === 'F' ? ' female' : ''}">
-      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : '♂'}</div>
+    <div class="bird-card${a.sexo === 'F' ? ' female' : (a.sexo === 'M' ? '' : ' indefinido')}">
+      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : a.sexo === 'M' ? '♂' : '⚪'}</div>
       <div class="bird-info">
         <div class="name">${a.nome} <span class="band-tag">${a.anilha}</span></div>
         <div class="meta">${a.especie || 'Não identificada'} · ${a.situacao}</div>
@@ -1869,7 +1873,7 @@ function renderTree() {
     let cls = 'tree-node';
     if (isRoot) cls += ' root';
     if (isFilled) cls += ' filled'; else cls += ' empty';
-    cls += ' ' + (sexo === 'M' ? 'male' : 'female');
+    cls += ' ' + (sexo === 'M' ? 'male' : (sexo === 'F' ? 'female' : 'indefinido'));
     let content = '';
     let removeBtn = '';
     if (isFilled) {
