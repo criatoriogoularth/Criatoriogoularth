@@ -92,7 +92,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
             gap: 8px;
-            background: rgba(0,0,0,0.1);
+            background: rgba(var(--shade),0.1);
             border-radius: 8px;
             padding: 16px;
             overflow-x: auto;
@@ -123,7 +123,7 @@
             font-size: 11px;
             text-align: center;
             border: 1px solid var(--line);
-            background: rgba(0,0,0,0.1);
+            background: rgba(var(--shade),0.1);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -138,7 +138,7 @@
         .tree-node-preview.female {
             background: rgba(185,116,98,0.08);
             border-color: rgba(185,116,98,0.3);
-            color: #e2a898;
+            color: var(--rose-text);
         }
 
         .tree-node-preview.empty {
@@ -162,7 +162,7 @@
         }
 
         .import-summary .stat {
-            background: rgba(0,0,0,0.1);
+            background: rgba(var(--shade),0.1);
             padding: 10px 14px;
             border-radius: 8px;
             text-align: center;
@@ -181,7 +181,7 @@
         }
 
         .field-group {
-            background: rgba(0,0,0,0.05);
+            background: rgba(var(--shade),0.05);
             border-radius: 8px;
             padding: 14px 16px;
             margin-bottom: 10px;
@@ -221,7 +221,7 @@
             padding: 12px 32px;
             border-radius: 8px;
             background: linear-gradient(135deg, var(--brass-soft), var(--brass));
-            color: #20170a;
+            color: var(--on-brass);
             border: none;
             font-family: 'Manrope', sans-serif;
             font-weight: 700;
@@ -258,7 +258,7 @@
             display: block;
             background: rgba(192, 89, 74, 0.15);
             border: 1px solid rgba(192, 89, 74, 0.3);
-            color: #e2988a;
+            color: var(--danger-text);
         }
 
         .progress-bar {
@@ -874,9 +874,9 @@ function mostrarPrevia(dados) {
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                     <input type="text" id="edit-ave-nome" value="${(ave.dados.nome || '').replace(/"/g, '&quot;')}" placeholder="Nome"
-                        style="background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--brass-soft);font-weight:700;font-size:14px;min-width:140px;">
+                        style="background:var(--input-bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--brass-soft);font-weight:700;font-size:14px;min-width:140px;">
                     <input type="text" id="edit-ave-anilha" value="${(ave.dados.anilha || '').replace(/"/g, '&quot;')}" placeholder="Anilha"
-                        style="background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;min-width:140px;">
+                        style="background:var(--input-bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;min-width:140px;">
                 </div>
                 <span style="font-size:12px;padding:4px 14px;border-radius:12px;background:${existe ? 'rgba(199,151,63,0.15)' : 'rgba(92,154,124,0.15)'};color:${existe ? 'var(--brass-soft)' : 'var(--sage-soft)'};">
                     ${existe ? '🔄 Ave existente (atualizar)' : '🆕 Nova ave'}
@@ -926,11 +926,11 @@ function mostrarPrevia(dados) {
                         ${nos.map(n => `
                             <div class="tree-node-preview editable" style="padding:6px;display:flex;flex-direction:column;gap:3px;">
                                 <input type="text" id="edit-anc-nome-${n.caminho}" value="${(n.nome || '').replace(/"/g, '&quot;')}" placeholder="Nome (${n.sexo === 'M' ? '♂' : '♀'})"
-                                    style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text);font-size:10px;">
+                                    style="width:100%;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text);font-size:10px;">
                                 <input type="text" id="edit-anc-anilha-${n.caminho}" value="${(n.anilha || '').replace(/"/g, '&quot;')}" placeholder="Anilha"
-                                    style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--brass-soft);font-family:'JetBrains Mono',monospace;font-size:9px;">
+                                    style="width:100%;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--brass-soft);font-family:'JetBrains Mono',monospace;font-size:9px;">
                                 <input type="text" id="edit-anc-nota-${n.caminho}" value="${(n.nota || '').replace(/"/g, '&quot;')}" placeholder="Nota/observação"
-                                    style="width:100%;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text-muted);font-size:9px;">
+                                    style="width:100%;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--text-muted);font-size:9px;">
                             </div>
                         `).join('')}
                     </div>`;
@@ -938,17 +938,17 @@ function mostrarPrevia(dados) {
                 <div class="tree-col">
                     <div class="col-label">Dados</div>
                     <div style="display:flex;flex-direction:column;gap:4px;">
-                        <select id="edit-ave-sexo" style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                        <select id="edit-ave-sexo" style="font-size:10px;padding:4px;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;color:var(--text);">
                             <option value="Indefinido" ${ave.dados.sexo === 'Indefinido' || !ave.dados.sexo ? 'selected' : ''}>⚪ Indefinido</option>
                             <option value="M" ${ave.dados.sexo === 'M' ? 'selected' : ''}>♂ Macho</option>
                             <option value="F" ${ave.dados.sexo === 'F' ? 'selected' : ''}>♀ Fêmea</option>
                         </select>
                         <input type="text" id="edit-ave-especie" value="${(ave.dados.especie || '').replace(/"/g, '&quot;')}" placeholder="Espécie"
-                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                            style="font-size:10px;padding:4px;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;color:var(--text);">
                         <input type="text" id="edit-ave-raca" value="${(ave.dados.raca || '').replace(/"/g, '&quot;')}" placeholder="Raça"
-                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                            style="font-size:10px;padding:4px;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;color:var(--text);">
                         <input type="date" id="edit-ave-datanasc" value="${ave.dados.dataNasc || ''}"
-                            style="font-size:10px;padding:4px;background:rgba(0,0,0,0.3);border:1px solid var(--line);border-radius:4px;color:var(--text);">
+                            style="font-size:10px;padding:4px;background:var(--input-bg);border:1px solid var(--line);border-radius:4px;color:var(--text);">
                     </div>
                 </div>
             </div>
@@ -961,11 +961,11 @@ function mostrarPrevia(dados) {
         html += `
             <div style="margin:16px 0;">
                 <h4 style="color:var(--brass-soft);margin-bottom:8px;">🔄 Campos a serem atualizados:</h4>
-                <div style="background:rgba(0,0,0,0.08);border-radius:8px;padding:10px;">
+                <div style="background:rgba(var(--shade),0.08);border-radius:8px;padding:10px;">
                     ${atualizacoes.map(up => `
                         <div style="display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid var(--line);">
                             <span style="color:var(--text-muted);min-width:100px;">${up.campo}</span>
-                            <span style="color:#e2988a;">${up.de}</span>
+                            <span style="color:var(--danger-text);">${up.de}</span>
                             <span style="color:var(--text-muted);">→</span>
                             <span style="color:var(--sage-soft);font-weight:600;">${up.para}</span>
                         </div>
@@ -984,7 +984,7 @@ function mostrarPrevia(dados) {
     // === DADOS DO CRIATÓRIO ===
     if (dados.criatorio.nome) {
         html += `
-            <div style="margin-top:12px;padding:10px 14px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:11px;color:var(--text-muted);">
+            <div style="margin-top:12px;padding:10px 14px;background:rgba(var(--shade),0.05);border-radius:8px;font-size:11px;color:var(--text-muted);">
                 <strong>🏷️ Criatório:</strong> ${dados.criatorio.nome}
                 ${dados.criatorio.responsavel ? ` · Responsável: ${dados.criatorio.responsavel}` : ''}
                 ${dados.criatorio.registros ? ` · ${dados.criatorio.registros}` : ''}

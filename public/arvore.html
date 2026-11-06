@@ -54,21 +54,21 @@
   padding: 8px 12px;
   text-align: center;
   border: 2px solid;
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   z-index: 2;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(var(--shade),0.3);
   min-width: 100px;
   min-height: 50px;
   transition: all 0.2s ease;
 }
 .tree-node.empty {
   border: 2px solid var(--brass-dim);
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   color: var(--text-muted);
   cursor: pointer;
   min-height: 50px;
@@ -146,7 +146,7 @@
 .tree-node.filled:not(.root):hover .node-remove {
   opacity: 1;
 }
-.node-remove:hover { color: #e2988a; }
+.node-remove:hover { color: var(--danger-text); }
 
 .tree-footer {
   display: flex;
@@ -199,7 +199,7 @@
   gap: 14px;
 }
 .config-panel .config-group {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border-radius: 8px;
   padding: 12px;
 }
@@ -229,7 +229,7 @@
 .config-panel .config-group input[type="text"],
 .config-panel .config-group select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 4px 8px;
@@ -306,7 +306,7 @@
   max-width: 297mm;
   aspect-ratio: 297 / 210;
   margin: 0 auto;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(var(--shade),0.3);
   font-family: 'Manrope', sans-serif;
   display: flex;
   flex-direction: column;
@@ -456,8 +456,8 @@
   color: #9aa89e;
   font-style: italic;
   background: #0d1a16;
-  border-color: rgba(0,0,0,0.08);
-  border-left-color: rgba(0,0,0,0.15);
+  border-color: rgba(var(--shade),0.08);
+  border-left-color: rgba(var(--shade),0.15);
   font-weight: 400;
 }
 .cert-pill-anilha {
@@ -577,7 +577,7 @@
 }
 
 .modal-novo-form {
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   border-radius: 8px;
   padding: 12px;
   margin: 8px 0;
@@ -619,7 +619,7 @@
 .modal-novo-form .form-grid input,
 .modal-novo-form .form-grid select {
   width: 100%;
-  background: rgba(0,0,0,0.3);
+  background: var(--input-bg);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 6px 10px;
@@ -642,7 +642,7 @@
   border-radius: 6px;
   background: var(--brass);
   border: none;
-  color: #20170a;
+  color: var(--on-brass);
   font-weight: 700;
   cursor: pointer;
   font-family: 'Manrope', sans-serif;
@@ -760,7 +760,7 @@
             <label>👤 Ave Raiz</label>
             <div style="display:flex;flex-direction:column;gap:4px;">
               <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Fundo</span><input type="color" id="cor-avatar-fundo" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
-              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Texto</span><input type="color" id="cor-avatar-texto" value="#20170a" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Texto</span><input type="color" id="cor-avatar-texto" value="var(--on-brass)" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
               <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Borda Raiz</span><input type="color" id="cor-borda-raiz" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
             </div>
           </div>
@@ -946,7 +946,7 @@ let CONFIG = {
   corMachoFundo: '#1a2e28', corMachoTexto: '#ece6d6',
   corFemeaFundo: '#2e1a1a', corFemeaTexto: '#ece6d6',
   corRaizFundo: '#132621', corRaizOpacidade: 100, corRaizTexto: '#e4c583',
-  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: '#20170a',
+  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: 'var(--on-brass)',
   corBordaRaiz: '#c7973f', corRodapeTexto: '#4a5347', corRodapeLinha: '#c7973f',
   corRodapeFundo: 'rgba(199,151,63,0.06)', larguraRaiz: 86, alturaRaiz: 180,
   tamNome: 15, tamInfo: 10.5, tamAvatar: 46, negritoNome: 'bold',
@@ -987,7 +987,7 @@ function carregarConfiguracoesNoPainel() {
   document.getElementById('cor-raiz-texto').value = CONFIG.corRaizTexto || '#e4c583';
   document.getElementById('cor-borda-nos').value = CONFIG.corBordaNos || '#c7973f';
   document.getElementById('cor-avatar-fundo').value = CONFIG.corAvatarFundo || '#c7973f';
-  document.getElementById('cor-avatar-texto').value = CONFIG.corAvatarTexto || '#20170a';
+  document.getElementById('cor-avatar-texto').value = CONFIG.corAvatarTexto || 'var(--on-brass)';
   document.getElementById('cor-borda-raiz').value = CONFIG.corBordaRaiz || '#c7973f';
   document.getElementById('cor-rodape-texto').value = CONFIG.corRodapeTexto || '#4a5347';
   document.getElementById('cor-rodape-linha').value = CONFIG.corRodapeLinha || '#c7973f';

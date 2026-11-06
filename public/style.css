@@ -18,6 +18,10 @@
     --danger:#c0594a;
     --radius:14px;
     --shade:0,0,0;
+    --input-bg:rgba(0,0,0,0.35);
+    --option-bg:#1a2e28;
+    --rose-text:#e2a898;
+    --info-text:#5a8ab0;
     --danger-text:#e2988a;
     --on-brass:#20170a;
     --btn-from:var(--brass-soft);
@@ -42,6 +46,10 @@
     --danger:#b3402f;
     --danger-text:#a3392b;
     --shade:70,60,40;
+    --input-bg:#ffffff;
+    --option-bg:#ffffff;
+    --rose-text:#9a4a38;
+    --info-text:#2f5f86;
     --on-brass:#ffffff;
     --btn-from:#b8862c;
     --btn-to:#96691a;
@@ -200,7 +208,7 @@
   input:not([type="color"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 8px !important;
     padding: 9px 11px !important;
@@ -244,7 +252,7 @@
   .anilhas-toolbar .filters select,
   .repro-toolbar .filters select,
   .passaros-toolbar .filters select {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
     border-radius: 8px !important;
@@ -268,7 +276,7 @@
   
   /* Corrige o select de situação no passaros.html */
   .situacao-select {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 4px !important;
     color: var(--text) !important;
@@ -287,7 +295,7 @@
   
   /* Corrige o modal-select-search */
   .modal-search {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 8px !important;
     padding: 9px 12px !important;
@@ -305,7 +313,7 @@
   /* Corrige o novo-anilha-row */
   .nova-anilha-row select,
   .nova-anilha-row input {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 6px !important;
     padding: 6px 10px !important;
@@ -654,7 +662,7 @@
     background:rgba(199,151,63,0.14);color:var(--brass-soft);border:1px solid var(--brass-dim);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .fan-node.female{background:rgba(185,116,98,0.14);color:#e2a898;border-color:rgba(185,116,98,0.3);}
+  .fan-node.female{background:rgba(185,116,98,0.14);color:var(--rose-text);border-color:rgba(185,116,98,0.3);}
   .fan-node.sm{font-size:10.5px;padding:6px;}
   .fan-node.xs{font-size:9.5px;padding:5px 4px;font-weight:600;}
 
@@ -683,7 +691,7 @@
   
   /* ===== CORREÇÃO PARA O LOGIN ===== */
   .login-card .field input {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -696,7 +704,7 @@
   /* ===== CORREÇÃO PARA O MODAL DE ESPÉCIES ===== */
   .modal-box .field input,
   .modal-box .field select {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -718,7 +726,7 @@
   #f-situacao,
   #f-tipo-ave,
   #f-manejo {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -735,7 +743,7 @@
   /* ===== CORREÇÃO PARA FILTROS ===== */
   .filters select,
   .filters input {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -749,7 +757,7 @@
   .config-panel .config-group select,
   .config-panel .config-group input[type="text"],
   .config-panel .config-group input[type="number"] {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -762,7 +770,7 @@
   /* ===== CORREÇÃO PARA O ESPECIES-TOOLBAR ===== */
   .especies-toolbar input,
   .especies-toolbar select {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -779,7 +787,7 @@
   /* ===== CORREÇÃO PARA O REPRODUCAO ===== */
   .repro-toolbar .filters select,
   .repro-toolbar .filters input {
-    background: rgba(var(--shade),0.35) !important;
+    background: var(--input-bg) !important;
     color: var(--text) !important;
     border: 1px solid var(--line) !important;
   }
@@ -850,3 +858,5 @@ a:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important;transition:none !important;}
 }
+
+.field-grid>.field{min-width:0;}

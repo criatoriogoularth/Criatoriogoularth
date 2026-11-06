@@ -27,7 +27,7 @@
 
 .repro-toolbar .filters input,
 .repro-toolbar .filters select {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
@@ -48,7 +48,7 @@
 }
 
 .repro-toolbar .filters select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -159,7 +159,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--brass-soft);
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   padding: 1px 8px;
   border-radius: 10px;
 }
@@ -214,7 +214,7 @@
 .modal-box .field input,
 .modal-box .field select,
 .modal-box .field textarea {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 8px 10px !important;
@@ -233,7 +233,7 @@
 }
 
 .modal-box .field select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -277,7 +277,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--line);
@@ -317,7 +317,7 @@
 
 /* ===== FILHOTES NA REPRODUÇÃO ===== */
 .filhotes-container {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
@@ -328,7 +328,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 6px;
   padding: 8px 10px;
   margin-bottom: 6px;
@@ -363,12 +363,12 @@
 }
 
 .filhote-row .btn-remover-filhote:hover {
-  color: #e2988a;
+  color: var(--danger-text);
 }
 
 .filhote-row select,
 .filhote-row input {
-  background: rgba(0,0,0,0.25) !important;
+  background: rgba(var(--shade),0.25) !important;
   border: 1px solid var(--line) !important;
   border-radius: 4px !important;
   padding: 4px 8px !important;
@@ -380,7 +380,7 @@
 }
 
 .filhote-row select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -782,7 +782,7 @@ async function renderizarCards() {
         <div class="filhote-item">
           <div class="info">
             <span>${f.nome || 'Sem nome'}</span>
-            <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? '#5a8ab0' : '#e2a898'};">
+            <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? 'var(--info-text)' : 'var(--rose-text)'};">
               ${f.sexo === 'M' ? '♂' : '♀'}
             </span>
           </div>

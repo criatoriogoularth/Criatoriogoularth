@@ -93,7 +93,7 @@ async function renderSidebar(activePage) {
                        cursor:pointer;font-size:10px;transition:.15s ease;">☀️</button>
             <button onclick="fazerLogout()"
                 style="background:transparent;border:1px solid var(--danger);border-radius:6px;padding:4px 10px;
-                       color:#e2988a;cursor:pointer;font-size:10px;transition:.15s ease;">🚪 Sair</button>
+                       color:var(--danger-text);cursor:pointer;font-size:10px;transition:.15s ease;">🚪 Sair</button>
         </div>
     `;
 

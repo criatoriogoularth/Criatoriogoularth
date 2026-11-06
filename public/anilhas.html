@@ -26,7 +26,7 @@
 
 .anilhas-toolbar .filters input,
 .anilhas-toolbar .filters select {
-  background: rgba(0,0,0,0.18);
+  background: rgba(var(--shade),0.18);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 12px;
@@ -57,7 +57,7 @@
 }
 
 .table-wrap th {
-  background: rgba(0,0,0,0.25);
+  background: rgba(var(--shade),0.25);
   color: var(--text-muted);
   font-weight: 600;
   font-size: 11px;
@@ -92,15 +92,15 @@
 }
 
 .badge-ativo { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
-.badge-inativo { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
+.badge-inativo { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
 .badge-disponivel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
-.badge-indisponivel { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
+.badge-indisponivel { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
 .badge-aberta { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
-.badge-comercial { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+.badge-comercial { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
 .badge-fob { background: rgba(199, 151, 63, 0.20); color: var(--brass-soft); }
 .badge-ibama { background: rgba(92, 154, 124, 0.20); color: var(--sage-soft); }
-.badge-marcacao { background: rgba(200, 100, 130, 0.20); color: #e2a898; }
-.badge-sispass { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+.badge-marcacao { background: rgba(200, 100, 130, 0.20); color: var(--rose-text); }
+.badge-sispass { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
 
 .color-dot {
   display: inline-block;
@@ -146,7 +146,7 @@
 .modal-box .field input,
 .modal-box .field select,
 .modal-box .field textarea {
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 8px 10px;
@@ -223,7 +223,7 @@
 .btn-lote {
   background: rgba(70, 130, 200, 0.15);
   border: 1px solid rgba(70, 130, 200, 0.3);
-  color: #5a8ab0;
+  color: var(--info-text);
   padding: 10px 20px;
   border-radius: 9px;
   cursor: pointer;
@@ -275,7 +275,7 @@
 }
 
 .modal-box .lote-preview {
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px 12px;
@@ -304,7 +304,7 @@
 }
 
 .modal-box.lote-modal form::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border-radius: 4px;
 }
 
@@ -843,13 +843,13 @@ function atualizarPreviewLote() {
   // Tipos que NÃO permitem lote (Sispass e IBAMA)
   const tiposBloqueados = ['Sispass', 'IBAMA'];
   if (tiposBloqueados.includes(tipo)) {
-    previewEl.innerHTML = `<span style="color:#e2988a;">⚠️ O tipo "${tipo}" não permite cadastro em lote. Cadastre uma por vez.</span>`;
+    previewEl.innerHTML = `<span style="color:var(--danger-text);">⚠️ O tipo "${tipo}" não permite cadastro em lote. Cadastre uma por vez.</span>`;
     infoEl.innerHTML = 'Total: <strong>0</strong> anilhas';
     return;
   }
   
   if (inicio > fim) {
-    previewEl.innerHTML = '<span style="color:#e2988a;">⚠️ Número inicial não pode ser maior que o final.</span>';
+    previewEl.innerHTML = '<span style="color:var(--danger-text);">⚠️ Número inicial não pode ser maior que o final.</span>';
     infoEl.innerHTML = 'Total: <strong>0</strong> anilhas';
     return;
   }

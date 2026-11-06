@@ -540,3 +540,90 @@ body.layout-lateral .site-footer {
     flex: 1 1 100%;
   }
 }
+
+
+/* ============================================================
+   Refinamentos de UX do site público
+   ============================================================ */
+
+/* Se a API demorar ou falhar, o menu NÃO pode ficar invisível para sempre:
+   depois de 3s ele aparece de qualquer jeito. */
+@keyframes mostrar-menu { to { visibility: visible; } }
+.nav-links,
+.site-footer .links { animation: mostrar-menu 0s 3s forwards; }
+
+/* Submenu também abre por teclado */
+.dropdown:focus-within .dropdown-content,
+.dropdown.open .dropdown-content { display: block; }
+.sub-dropdown:focus-within .sub-dropdown-content,
+.sub-dropdown.open .sub-dropdown-content { display: block; }
+
+/* Acessibilidade: foco visível */
+.site-nav a:focus-visible,
+.btn-login-site:focus-visible,
+.site-footer a:focus-visible,
+.nav-toggle:focus-visible {
+  outline: 2px solid var(--brass-soft);
+  outline-offset: 2px;
+}
+
+/* Botão do menu (só aparece no celular) */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Cartões: leve elevação ao passar o mouse */
+.ave-card, .species-card, .noticia-card, .categoria-card {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+@media (hover: hover) {
+  .ave-card:hover, .species-card:hover, .noticia-card:hover, .categoria-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--brass);
+    box-shadow: 0 14px 30px -16px rgba(0,0,0,.55);
+  }
+}
+
+html { scroll-behavior: smooth; }
+img { max-width: 100%; }
+
+@media (max-width: 768px) {
+  .site-nav { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; text-align: left; }
+  .site-nav .logo { justify-content: flex-start; }
+  .nav-toggle { display: inline-flex; }
+  .site-nav .nav-links,
+  .site-nav .nav-buttons { display: none; width: 100%; }
+  .site-nav.aberto .nav-links { display: flex; flex-direction: column; gap: 2px; }
+  .site-nav.aberto .nav-buttons { display: flex; justify-content: stretch; }
+  .site-nav.aberto .btn-login-site { width: 100%; justify-content: center; }
+  .site-nav.aberto .nav-links { align-items: stretch; text-align: left; }
+  .site-nav.aberto .nav-links > a,
+  .site-nav.aberto .nav-links > .dropdown > a { display: block; width: 100%; text-align: left; padding: 12px 14px; font-size: 14px; }
+  .dropdown { display: block; }
+  .dropdown-content,
+  .sub-dropdown-content {
+    position: static; display: none; box-shadow: none; border: 0;
+    border-left: 2px solid var(--brass-dim); border-radius: 0;
+    margin: 2px 0 6px 14px; background: transparent; min-width: 0;
+  }
+  .dropdown:hover .dropdown-content,
+  .sub-dropdown:hover .sub-dropdown-content { display: none; }
+  .dropdown.open > .dropdown-content,
+  .sub-dropdown.open > .sub-dropdown-content { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation-duration: 0s !important; }
+}
