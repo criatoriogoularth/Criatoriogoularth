@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .passaros-toolbar {
@@ -25,7 +26,7 @@
 }
 .passaros-toolbar .filters input,
 .passaros-toolbar .filters select {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 12px;
@@ -40,7 +41,7 @@
   border-color: var(--brass);
 }
 .passaros-toolbar .filters select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 .passaros-toolbar .filters select {
@@ -89,7 +90,7 @@
   color: var(--brass-soft);
 }
 .situacao-filters .situacao-btn .count {
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   padding: 0 6px;
   border-radius: 10px;
   font-size: 10px;
@@ -132,11 +133,11 @@
 }
 .sexo-macho {
   background: rgba(70, 130, 200, 0.15);
-  color: #5a8ab0;
+  color: var(--info-text);
 }
 .sexo-femea {
   background: rgba(200, 100, 130, 0.15);
-  color: #e2a898;
+  color: var(--rose-text);
 }
 .sexo-indefinido {
   background: rgba(199, 151, 63, 0.15);
@@ -184,10 +185,10 @@
 }
 .status-badge.plantel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
 .status-badge.filhote { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
-.status-badge.quarentena { background: rgba(192, 89, 74, 0.2); color: #e2988a; }
-.status-badge.pareamento { background: rgba(70, 130, 200, 0.15); color: #5a8ab0; }
+.status-badge.quarentena { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
+.status-badge.pareamento { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
 .status-badge.fuga { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
-.status-badge.obito { background: rgba(0, 0, 0, 0.3); color: #666; }
+.status-badge.obito { background: var(--input-bg); color: #666; }
 .status-badge.saida { background: rgba(192, 89, 74, 0.15); color: #c0594a; }
 .status-badge.disponivel { background: rgba(92, 154, 124, 0.15); color: var(--sage-soft); }
 
@@ -198,7 +199,7 @@
 }
 
 .situacao-select-wrapper select {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 4px !important;
   color: var(--text) !important;
@@ -217,7 +218,7 @@
 }
 
 .situacao-select-wrapper select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -291,7 +292,7 @@
 .modal-box .field input,
 .modal-box .field select,
 .modal-box .field textarea {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 8px 10px !important;
@@ -310,7 +311,7 @@
 }
 
 .modal-box .field select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -334,7 +335,7 @@
   border-radius: 8px;
   padding: 12px 16px;
   margin-top: 12px;
-  color: #e2988a;
+  color: var(--danger-text);
   font-size: 13px;
 }
 
@@ -397,7 +398,7 @@
   opacity: 0.6;
 }
 .modal-box .import-preview-content {
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 6px;
   padding: 12px;
   font-size: 12px;
@@ -1028,9 +1029,14 @@ async function excluirPassaro(id) {
   }
   if (!confirm(`Tem certeza que deseja excluir "${ave.nome}" (${ave.anilha})?`)) return;
   if (!confirm(`⚠️ Esta ação é irreversível! Confirmar exclusão de "${ave.nome}"?`)) return;
-  await DB.delete(DB.TABLES.AVES, id);
-  renderizarFiltros();
-  renderizarPassaros();
+  try {
+    await DB.delete(DB.TABLES.AVES, id);
+  } catch (e) {
+    alert('❌ Erro ao excluir: ' + e.message);
+    return;
+  }
+  await renderizarFiltros();
+  await renderizarPassaros();
 }
 
 // ============================================================

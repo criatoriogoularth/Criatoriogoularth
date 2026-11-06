@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .repro-toolbar {
@@ -26,7 +27,7 @@
 
 .repro-toolbar .filters input,
 .repro-toolbar .filters select {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
@@ -47,7 +48,7 @@
 }
 
 .repro-toolbar .filters select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -158,7 +159,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--brass-soft);
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   padding: 1px 8px;
   border-radius: 10px;
 }
@@ -213,7 +214,7 @@
 .modal-box .field input,
 .modal-box .field select,
 .modal-box .field textarea {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 8px 10px !important;
@@ -232,7 +233,7 @@
 }
 
 .modal-box .field select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -276,7 +277,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--line);
@@ -316,7 +317,7 @@
 
 /* ===== FILHOTES NA REPRODUÇÃO ===== */
 .filhotes-container {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
@@ -327,7 +328,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 6px;
   padding: 8px 10px;
   margin-bottom: 6px;
@@ -362,12 +363,12 @@
 }
 
 .filhote-row .btn-remover-filhote:hover {
-  color: #e2988a;
+  color: var(--danger-text);
 }
 
 .filhote-row select,
 .filhote-row input {
-  background: rgba(0,0,0,0.25) !important;
+  background: rgba(var(--shade),0.25) !important;
   border: 1px solid var(--line) !important;
   border-radius: 4px !important;
   padding: 4px 8px !important;
@@ -379,7 +380,7 @@
 }
 
 .filhote-row select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -781,7 +782,7 @@ async function renderizarCards() {
         <div class="filhote-item">
           <div class="info">
             <span>${f.nome || 'Sem nome'}</span>
-            <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? '#5a8ab0' : '#e2a898'};">
+            <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? 'var(--info-text)' : 'var(--rose-text)'};">
               ${f.sexo === 'M' ? '♂' : '♀'}
             </span>
           </div>
@@ -1165,7 +1166,7 @@ function selecionarAveConfirm(id, nome, anilha) {
 // FUNÇÃO PARA HERDAR ANCESTRAIS
 // ============================================================
 
-async function herdarAncestrais(aveId) {
+async function herdarAncestrais(aveId, base) {
   const ave = await DB.getById(DB.TABLES.AVES, aveId);
   if (!ave) return {};
   
@@ -1181,6 +1182,33 @@ async function herdarAncestrais(aveId) {
     avoMaterna: ave.avoMaterna || ''
   };
   
+  // Linhagem mais profunda (bisavós até tataravós, máx. 5 gerações) já com o
+  // caminho relativo ao FILHOTE: base = 'pai' (macho) ou 'mae' (fêmea).
+  const NOMES_GER = { 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
+  const profundos = [];
+  const addProfundo = (rel, nome, anilha, extra) => {
+    if (!base || !nome) return;
+    const caminho = base + '.' + rel;
+    const g = caminho.split('.').length;
+    if (g < 3 || g > 5) return;
+    if (profundos.some(p => p.caminho === caminho)) return;
+    profundos.push({
+      geracao: g, nomeGeracao: NOMES_GER[g] || ('G' + g), caminho,
+      sexo: caminho.endsWith('pai') ? 'M' : 'F', nome, anilha: anilha || '',
+      especie: (extra && extra.especie) || '', raca: (extra && extra.raca) || '', nota: ''
+    });
+  };
+  // avós do pai/mãe = bisavós do filhote
+  addProfundo('pai.pai', ave.avoPaterno); addProfundo('pai.mae', ave.avoPaterna);
+  addProfundo('mae.pai', ave.avoMaterno); addProfundo('mae.mae', ave.avoMaterna);
+  // tudo o que o pai/mãe já tinha na árvore dele(a)
+  let listaAnc = ave.ancestrais;
+  if (typeof listaAnc === 'string') { try { listaAnc = JSON.parse(listaAnc); } catch (e) { listaAnc = []; } }
+  (Array.isArray(listaAnc) ? listaAnc : []).forEach(a => {
+    if (a && a.caminho && a.nome) addProfundo(a.caminho, a.nome, a.anilha, a);
+  });
+  ancestrais.profundos = profundos;
+
   // Tentar buscar avós completos se o pai existir
   if (ave.pai) {
     const paiCompleto = await DB.getAvePorNome(ave.pai);
@@ -1290,8 +1318,8 @@ async function salvarReproducao(event) {
     const filhotesCriados = [];
     
     // Buscar ancestrais completos do pai e da mãe
-    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId) : {};
-    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId) : {};
+    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId, 'pai') : {};
+    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId, 'mae') : {};
     
     for (const f of filhotes) {
       if (f.anilha) {
@@ -1330,6 +1358,8 @@ async function salvarReproducao(event) {
         bisavoPaterna: ancestraisPai.avoPaterna || '',
         bisavoMaterno: ancestraisMae.avoMaterno || '',
         bisavoMaterna: ancestraisMae.avoMaterna || '',
+        // Árvore profunda (bisavós até tataravós) — é isto que aparece no certificado
+        ancestrais: [...(ancestraisPai.profundos || []), ...(ancestraisMae.profundos || [])],
         // Outros campos
         manejo: 'Mantenedor',
         historico: [{

@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .login-wrap {
@@ -23,7 +24,7 @@
     border: 1px solid var(--line);
     border-radius: 18px;
     padding: 36px 32px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 40px rgba(var(--shade),0.3);
 }
 .login-card .mark {
     display: flex;
@@ -50,7 +51,7 @@
 .login-card .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
 .login-card .field label { font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
 .login-card .field input {
-    background: rgba(0,0,0,0.35) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--line) !important;
     border-radius: 8px !important;
     padding: 10px 12px !important;
@@ -68,7 +69,7 @@
     padding: 12px;
     border-radius: 8px;
     background: linear-gradient(135deg, var(--brass-soft), var(--brass));
-    color: #20170a;
+    color: var(--on-brass);
     border: none;
     font-family: 'Manrope', sans-serif;
     font-weight: 700;
@@ -80,7 +81,7 @@
 .login-card .btn-login:hover { filter: brightness(1.08); }
 .login-card .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
 .login-card .erro {
-    color: #e2988a;
+    color: var(--danger-text);
     font-size: 13px;
     text-align: center;
     margin-top: 10px;

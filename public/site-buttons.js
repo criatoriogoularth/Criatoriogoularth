@@ -296,3 +296,52 @@ function aplicarTemaPersonalizado(personalizacao) {
         DB.registrarVisita(paginaAtual);
     }
 })();
+
+
+// ---- Menu responsivo (celular) e submenus por toque ----
+// Roda sozinho, mesmo que a API falhe: o menu nunca fica inacessível.
+(function () {
+    function iniciar() {
+        const nav = document.querySelector('.site-nav');
+        if (!nav || nav.querySelector('.nav-toggle')) return;
+        const links = nav.querySelector('.nav-links');
+        if (!links) return;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nav-toggle';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Abrir menu');
+        btn.innerHTML = '☰ Menu';
+        nav.insertBefore(btn, links);
+
+        btn.addEventListener('click', function () {
+            const aberto = nav.classList.toggle('aberto');
+            btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+            btn.innerHTML = aberto ? '✕ Fechar' : '☰ Menu';
+        });
+
+        // No celular não existe "hover": o primeiro toque abre o submenu,
+        // o segundo toque (já aberto) segue o link normalmente.
+        nav.addEventListener('click', function (e) {
+            if (window.innerWidth > 768) return;
+            const alvo = e.target.closest('.dropdown > a, .sub-dropdown > a');
+            if (!alvo) return;
+            const pai = alvo.parentElement;
+            if (!pai.classList.contains('open')) {
+                e.preventDefault();
+                pai.classList.add('open');
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                nav.classList.remove('aberto');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.innerHTML = '☰ Menu';
+            }
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+    else iniciar();
+})();

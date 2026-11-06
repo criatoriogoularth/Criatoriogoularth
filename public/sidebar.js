@@ -63,7 +63,9 @@ async function renderSidebar(activePage) {
         groupsHtml += `</div>`;
     });
 
-    const temaAtual = personalizacao.tema || 'escuro';
+    // o servidor é a fonte da verdade (vale em qualquer aparelho); sem ele, usa o salvo no navegador
+    const temaAtual = personalizacao.tema || localStorage.getItem('tema') || 'escuro';
+    aplicarTema(temaAtual);
 
     const usuarioStr = localStorage.getItem('usuario');
     const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
@@ -91,7 +93,7 @@ async function renderSidebar(activePage) {
                        cursor:pointer;font-size:10px;transition:.15s ease;">☀️</button>
             <button onclick="fazerLogout()"
                 style="background:transparent;border:1px solid var(--danger);border-radius:6px;padding:4px 10px;
-                       color:#e2988a;cursor:pointer;font-size:10px;transition:.15s ease;">🚪 Sair</button>
+                       color:var(--danger-text);cursor:pointer;font-size:10px;transition:.15s ease;">🚪 Sair</button>
         </div>
     `;
 
@@ -113,31 +115,29 @@ async function renderSidebar(activePage) {
     }
 }
 
-async function setTheme(tema) {
+function aplicarTema(tema) {
     const root = document.documentElement;
-    const personalizacao = (await DB.getConfig('site_personalizacao')) || {};
-    personalizacao.tema = tema;
-    await DB.setConfig('site_personalizacao', personalizacao);
+    // limpa valores inline antigos, para o CSS (data-theme) mandar
+    ['--bg', '--bg-elevated', '--bg-elevated-2', '--text', '--text-muted', '--line']
+        .forEach(v => root.style.removeProperty(v));
+    if (tema === 'claro') root.setAttribute('data-theme', 'claro');
+    else root.removeAttribute('data-theme');
+    try { localStorage.setItem('tema', tema === 'claro' ? 'claro' : 'escuro'); } catch (e) {}
+}
 
-    if (tema === 'claro') {
-        root.style.setProperty('--bg', '#f5f0e8');
-        root.style.setProperty('--bg-elevated', '#ede8df');
-        root.style.setProperty('--bg-elevated-2', '#e5dfd4');
-        root.style.setProperty('--text', '#23291f');
-        root.style.setProperty('--text-muted', '#5a6355');
-        root.style.setProperty('--line', 'rgba(199,151,63,0.3)');
-    } else {
-        root.style.setProperty('--bg', '#0d1a16');
-        root.style.setProperty('--bg-elevated', '#132621');
-        root.style.setProperty('--bg-elevated-2', '#17302a');
-        root.style.setProperty('--text', '#ece6d6');
-        root.style.setProperty('--text-muted', '#9aa89e');
-        root.style.setProperty('--line', 'rgba(199,151,63,0.22)');
-    }
+async function setTheme(tema) {
+    aplicarTema(tema); // troca na hora, sem esperar o servidor
 
     const path = window.location.pathname.split('/').pop();
-    const activePage = path.replace('.html', '');
-    renderSidebar(activePage);
+    renderSidebar(path.replace('.html', ''));
+
+    try {
+        const personalizacao = (await DB.getConfig('site_personalizacao')) || {};
+        personalizacao.tema = tema;
+        await DB.setConfig('site_personalizacao', personalizacao);
+    } catch (e) {
+        console.warn('Não foi possível salvar o tema no servidor:', e);
+    }
 }
 
 function fazerLogout() {
@@ -152,5 +152,12 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) sidebar.classList.toggle('open');
 }
+
+document.addEventListener('click', function (e) {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar || !sidebar.classList.contains('open')) return;
+    if (sidebar.contains(e.target) || e.target.closest('.burger')) return;
+    sidebar.classList.remove('open');
+});
 
 console.log('✅ sidebar.js (API) carregado');

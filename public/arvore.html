@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -53,21 +54,21 @@
   padding: 8px 12px;
   text-align: center;
   border: 2px solid;
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   z-index: 2;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(var(--shade),0.3);
   min-width: 100px;
   min-height: 50px;
   transition: all 0.2s ease;
 }
 .tree-node.empty {
   border: 2px solid var(--brass-dim);
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   color: var(--text-muted);
   cursor: pointer;
   min-height: 50px;
@@ -84,6 +85,10 @@
 .tree-node.filled.female {
   background: rgba(185,116,98,0.12);
   border-color: var(--rose);
+}
+.tree-node.filled.indefinido {
+  background: rgba(154,168,158,0.12);
+  border-color: var(--text-muted);
 }
 .tree-node.root {
   border-color: var(--brass);
@@ -141,7 +146,7 @@
 .tree-node.filled:not(.root):hover .node-remove {
   opacity: 1;
 }
-.node-remove:hover { color: #e2988a; }
+.node-remove:hover { color: var(--danger-text); }
 
 .tree-footer {
   display: flex;
@@ -194,7 +199,7 @@
   gap: 14px;
 }
 .config-panel .config-group {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border-radius: 8px;
   padding: 12px;
 }
@@ -224,7 +229,7 @@
 .config-panel .config-group input[type="text"],
 .config-panel .config-group select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 4px 8px;
@@ -301,7 +306,7 @@
   max-width: 297mm;
   aspect-ratio: 297 / 210;
   margin: 0 auto;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(var(--shade),0.3);
   font-family: 'Manrope', sans-serif;
   display: flex;
   flex-direction: column;
@@ -451,8 +456,8 @@
   color: #9aa89e;
   font-style: italic;
   background: #0d1a16;
-  border-color: rgba(0,0,0,0.08);
-  border-left-color: rgba(0,0,0,0.15);
+  border-color: rgba(var(--shade),0.08);
+  border-left-color: rgba(var(--shade),0.15);
   font-weight: 400;
 }
 .cert-pill-anilha {
@@ -572,7 +577,7 @@
 }
 
 .modal-novo-form {
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   border-radius: 8px;
   padding: 12px;
   margin: 8px 0;
@@ -614,7 +619,7 @@
 .modal-novo-form .form-grid input,
 .modal-novo-form .form-grid select {
   width: 100%;
-  background: rgba(0,0,0,0.3);
+  background: var(--input-bg);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 6px 10px;
@@ -637,7 +642,7 @@
   border-radius: 6px;
   background: var(--brass);
   border: none;
-  color: #20170a;
+  color: var(--on-brass);
   font-weight: 700;
   cursor: pointer;
   font-family: 'Manrope', sans-serif;
@@ -755,7 +760,7 @@
             <label>👤 Ave Raiz</label>
             <div style="display:flex;flex-direction:column;gap:4px;">
               <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Fundo</span><input type="color" id="cor-avatar-fundo" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
-              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Texto</span><input type="color" id="cor-avatar-texto" value="#20170a" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Avatar Texto</span><input type="color" id="cor-avatar-texto" value="var(--on-brass)" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
               <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-muted);width:60px;">Borda Raiz</span><input type="color" id="cor-borda-raiz" value="#c7973f" onchange="aplicarConfiguracoes()" style="flex:1;"></div>
             </div>
           </div>
@@ -803,6 +808,9 @@
         </div>
         <div class="field" style="max-width:340px;margin-bottom:16px;">
           <input type="text" id="busca-ave-lista" placeholder="Pesquisar ave..." oninput="renderListaAves()">
+        </div>
+        <div style="margin-bottom:16px;">
+          <button class="btn btn-ghost" onclick="reconstruirLinhagens()" title="Completa bisavós, trisavós e tataravós que faltam, usando a linhagem do pai e da mãe cadastrados">🔧 Reconstruir linhagens (completar até 5 gerações)</button>
         </div>
         <div id="lista-aves"></div>
       </div>
@@ -941,7 +949,7 @@ let CONFIG = {
   corMachoFundo: '#1a2e28', corMachoTexto: '#ece6d6',
   corFemeaFundo: '#2e1a1a', corFemeaTexto: '#ece6d6',
   corRaizFundo: '#132621', corRaizOpacidade: 100, corRaizTexto: '#e4c583',
-  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: '#20170a',
+  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: 'var(--on-brass)',
   corBordaRaiz: '#c7973f', corRodapeTexto: '#4a5347', corRodapeLinha: '#c7973f',
   corRodapeFundo: 'rgba(199,151,63,0.06)', larguraRaiz: 86, alturaRaiz: 180,
   tamNome: 15, tamInfo: 10.5, tamAvatar: 46, negritoNome: 'bold',
@@ -982,7 +990,7 @@ function carregarConfiguracoesNoPainel() {
   document.getElementById('cor-raiz-texto').value = CONFIG.corRaizTexto || '#e4c583';
   document.getElementById('cor-borda-nos').value = CONFIG.corBordaNos || '#c7973f';
   document.getElementById('cor-avatar-fundo').value = CONFIG.corAvatarFundo || '#c7973f';
-  document.getElementById('cor-avatar-texto').value = CONFIG.corAvatarTexto || '#20170a';
+  document.getElementById('cor-avatar-texto').value = CONFIG.corAvatarTexto || 'var(--on-brass)';
   document.getElementById('cor-borda-raiz').value = CONFIG.corBordaRaiz || '#c7973f';
   document.getElementById('cor-rodape-texto').value = CONFIG.corRodapeTexto || '#4a5347';
   document.getElementById('cor-rodape-linha').value = CONFIG.corRodapeLinha || '#c7973f';
@@ -1262,7 +1270,7 @@ function renderizarCertificado() {
     : CONFIG.corAvatarFundo;
   const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
   let linhasHtml = `
-    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : ave.sexo === 'F' ? 'Fêmea' : 'Indefinido'}</div>
     <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${ave.especie}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
@@ -1359,6 +1367,69 @@ function setListaFiltro(f, btn) {
   renderListaAves();
 }
 
+
+// ============================================================
+// RECONSTRUIR LINHAGENS (repara aves que perderam bisavós/trisavós/tataravós)
+// Nunca apaga nem sobrescreve nada: só completa o que está faltando,
+// copiando a linhagem do pai/mãe (quando eles estão cadastrados).
+// ============================================================
+async function reconstruirLinhagens() {
+  if (!confirm('Vou completar a árvore das aves usando a linhagem do pai e da mãe cadastrados (até 5 gerações).\n\nNada existente será apagado ou sobrescrito. Continuar?')) return;
+  const brutas = await DB.getAll(DB.TABLES.AVES);
+  const aves = brutas.map(a => {
+    let l = a.ancestrais;
+    if (typeof l === 'string') { try { l = JSON.parse(l); } catch (e) { l = []; } }
+    return { ...a, ancestrais: Array.isArray(l) ? l.filter(x => x && x.caminho) : [], _mudou: false };
+  });
+  const porNome = new Map();
+  aves.forEach(a => { if (a.nome) porNome.set(a.nome.trim().toLowerCase(), a); });
+  const NOMES = { 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
+
+  for (let passada = 0; passada < 5; passada++) {
+    let algum = false;
+    aves.forEach(a => {
+      ['pai', 'mae'].forEach(lado => {
+        const nomeP = (a[lado] || '').trim().toLowerCase();
+        const P = nomeP ? porNome.get(nomeP) : null;
+        if (!P || P === a) return;
+        const tem = new Set(a.ancestrais.filter(x => x.nome).map(x => x.caminho));
+        const add = (rel, nome, anilha, extra) => {
+          if (!nome) return;
+          const caminho = lado + '.' + rel;
+          const g = caminho.split('.').length;
+          if (g < 3 || g > 5 || tem.has(caminho)) return;
+          a.ancestrais.push({ geracao: g, nomeGeracao: NOMES[g], caminho, sexo: caminho.endsWith('pai') ? 'M' : 'F',
+            nome, anilha: anilha || '', especie: (extra && extra.especie) || '', raca: (extra && extra.raca) || '', nota: '' });
+          tem.add(caminho); a._mudou = true; algum = true;
+        };
+        // avós do pai/mãe viram bisavós desta ave
+        add('pai.pai', P.avoPaterno); add('pai.mae', P.avoPaterna);
+        add('mae.pai', P.avoMaterno); add('mae.mae', P.avoMaterna);
+        P.ancestrais.forEach(x => { if (x.nome) add(x.caminho, x.nome, x.anilha, x); });
+        // avós da própria ave, se estiverem em branco
+        const campos = lado === 'pai' ? [['avoPaterno', 'pai'], ['avoPaterna', 'mae']] : [['avoMaterno', 'pai'], ['avoMaterna', 'mae']];
+        campos.forEach(([campo, qual]) => {
+          if (!a[campo] && P[qual]) { a[campo] = P[qual]; a._mudou = true; algum = true; }
+        });
+      });
+    });
+    if (!algum) break;
+  }
+
+  let n = 0;
+  for (const a of aves.filter(x => x._mudou)) {
+    try {
+      await DB.update(DB.TABLES.AVES, a.id, {
+        ancestrais: a.ancestrais, avoPaterno: a.avoPaterno || '', avoPaterna: a.avoPaterna || '',
+        avoMaterno: a.avoMaterno || '', avoMaterna: a.avoMaterna || ''
+      });
+      n++;
+    } catch (e) { console.warn('Falha ao atualizar', a.nome, e); }
+  }
+  alert(n ? `✅ Linhagem completada em ${n} ave(s).` : 'Nenhuma ave precisava de reparo (ou o pai/mãe não têm a linhagem cadastrada).');
+  renderListaAves();
+}
+
 async function renderListaAves() {
   const busca = document.getElementById('busca-ave-lista').value.toLowerCase();
   await carregarAvesDoBanco();
@@ -1369,8 +1440,8 @@ async function renderListaAves() {
     return;
   }
   document.getElementById('lista-aves').innerHTML = lista.map(a => `
-    <div class="bird-card${a.sexo === 'F' ? ' female' : ''}">
-      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : '♂'}</div>
+    <div class="bird-card${a.sexo === 'F' ? ' female' : (a.sexo === 'M' ? '' : ' indefinido')}">
+      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : a.sexo === 'M' ? '♂' : '⚪'}</div>
       <div class="bird-info">
         <div class="name">${a.nome} <span class="band-tag">${a.anilha}</span></div>
         <div class="meta">${a.especie || 'Não identificada'} · ${a.situacao}</div>
@@ -1420,7 +1491,7 @@ async function abrirGenealogia(id) {
     const ancestrais = ave.ancestrais || [];
     if (Array.isArray(ancestrais) && ancestrais.length > 0) {
       ancestrais.forEach(a => {
-        if (a.caminho && a.nome && !tree[a.caminho]) {
+        if (a.caminho && a.nome && dentroDoLimite(a.caminho) && !tree[a.caminho]) {
           tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || 'M' };
         }
       });
@@ -1458,6 +1529,7 @@ const NODE_SIZES = {
 const GEN_LABELS = { 0: 'Ave', 1: 'Pais', 2: 'Avós', 3: 'Bisavós', 4: 'Trisavós', 5: 'Tetravós' };
 const GAP_ROOT = 8, COL_GAP = 26, LEAF_GAP = 8, TOP_PAD = 30, SIDE_PAD = 20;
 const MAX_GENERATIONS = 5;
+function dentroDoLimite(caminho) { return !caminho || caminho.split('.').length <= MAX_GENERATIONS; }
 
 function getLabel(path) {
   const labels = {
@@ -1780,7 +1852,7 @@ function herdarLinhagemNaArvore(basePath, ave) {
   if (ave.avoMaterna) tree[basePath + '.mae.mae'] = { nome: ave.avoMaterna, anilha: '', sexo: 'F' };
 
   parseAncestraisDaAve(ave).forEach(a => {
-    if (a.caminho && a.nome) {
+    if (a.caminho && a.nome && dentroDoLimite(basePath + '.' + a.caminho)) {
       tree[basePath + '.' + a.caminho] = {
         nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || (a.caminho.endsWith('pai') ? 'M' : 'F'),
         especie: a.especie || '', raca: a.raca || ''
@@ -1869,7 +1941,7 @@ function renderTree() {
     let cls = 'tree-node';
     if (isRoot) cls += ' root';
     if (isFilled) cls += ' filled'; else cls += ' empty';
-    cls += ' ' + (sexo === 'M' ? 'male' : 'female');
+    cls += ' ' + (sexo === 'M' ? 'male' : (sexo === 'F' ? 'female' : 'indefinido'));
     let content = '';
     let removeBtn = '';
     if (isFilled) {
@@ -1914,7 +1986,7 @@ async function salvarArvore() {
   if (!treeModificada) { alert('A árvore não foi modificada.'); return; }
   
   const ancestrais = [];
-  const caminhosExistentes = Object.keys(tree).filter(p => p !== '');
+  const caminhosExistentes = Object.keys(tree).filter(p => p !== '' && dentroDoLimite(p));
   const camposPrincipais = ['pai', 'mae', 'pai.pai', 'pai.mae', 'mae.pai', 'mae.mae'];
   
   for (const caminho of caminhosExistentes) {

@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .editor-card {
@@ -40,7 +41,7 @@
 .field input,
 .field select,
 .field textarea {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 8px 10px !important;
@@ -67,7 +68,7 @@
   padding: 10px;
   text-align: center;
   cursor: pointer;
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   flex-shrink: 0;
 }
 .upload-area:hover {
@@ -97,7 +98,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 14px;
@@ -115,7 +116,7 @@
   object-fit: cover;
   border: 1px solid var(--line);
   flex-shrink: 0;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
 }
 .etapa-item .thumb.pdf-icon,
 .etapa-item .thumb.sem-arquivo {
@@ -147,7 +148,7 @@
   padding: 1px 8px;
   border-radius: 10px;
   background: rgba(192,89,74,0.2);
-  color: #e2988a;
+  color: var(--danger-text);
 }
 .etapa-item .actions {
   display: flex;

@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -58,7 +59,7 @@
   font-size: 13px;
 }
 .table-wrap th {
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   color: var(--text-muted);
   font-weight: 600;
   font-size: 11px;
@@ -82,7 +83,7 @@
 }
 .badge-disponivel { background: rgba(92,154,124,0.2); color: var(--sage-soft); }
 .badge-usada { background: rgba(199,151,63,0.15); color: var(--brass-soft); }
-.badge-esgotada { background: rgba(192,89,74,0.2); color: #e2988a; }
+.badge-esgotada { background: rgba(192,89,74,0.2); color: var(--danger-text); }
 .species-list {
   display: flex;
   flex-wrap: wrap;

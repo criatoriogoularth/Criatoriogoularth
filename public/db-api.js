@@ -31,7 +31,15 @@ async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  // GET nunca pode vir do cache do navegador (senão a lista antiga reaparece
+  // depois de excluir/editar e só some com F5).
+  const metodo = (options.method || 'GET').toUpperCase();
+  let url = `${API_BASE}${path}`;
+  if (metodo === 'GET') {
+    url += (url.includes('?') ? '&' : '?') + '_=' + Date.now();
+  }
+
+  const res = await fetch(url, { ...options, headers, cache: 'no-store' });
 
   if (res.status === 401) {
     localStorage.removeItem('token');

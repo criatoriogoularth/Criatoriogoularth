@@ -21,6 +21,10 @@ app.use(cors({ origin }));
 app.use(express.json({ limit: '10mb' }));
 
 // ===== API =====
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/aves', avesRoutes);
 app.use('/api/anilhas', anilhasRoutes);

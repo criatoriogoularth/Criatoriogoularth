@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .field-grid .field-full { grid-column: 1 / -1; }
@@ -59,7 +60,7 @@
   max-height: 150px;
   overflow-y: auto;
   padding: 8px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 8px;
   border: 1px solid var(--line);
 }
@@ -92,7 +93,7 @@
 .anilhas-list .anilha-item .tipo {
   font-size: 9px;
   color: var(--text-muted);
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   padding: 1px 6px;
   border-radius: 10px;
 }
@@ -105,7 +106,7 @@
 }
 .nova-anilha-row select,
 .nova-anilha-row input {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 6px 10px !important;
@@ -131,6 +132,7 @@
 }
 .ancestral-row input {
   flex: 1;
+  min-width: 0;
 }
 .ancestral-row .btn-buscar {
   padding: 4px 12px;
@@ -170,7 +172,7 @@
 }
 
 .historico-item {
-  background: rgba(0,0,0,0.15);
+  background: rgba(var(--shade),0.15);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 14px 16px;
@@ -270,7 +272,7 @@
 .modal-box .field input,
 .modal-box .field select,
 .modal-box .field textarea {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   padding: 8px 10px !important;
@@ -289,7 +291,7 @@
 }
 
 .modal-box .field select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 
@@ -313,7 +315,7 @@
   border-radius: 8px;
   padding: 12px 16px;
   margin-top: 12px;
-  color: #e2988a;
+  color: var(--danger-text);
   font-size: 13px;
 }
 
@@ -365,7 +367,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 6px;
-  background: rgba(0,0,0,0.05);
+  background: rgba(var(--shade),0.05);
   border-radius: 8px;
   padding: 12px;
   margin-top: 8px;
@@ -392,7 +394,7 @@
   font-size: 9px;
   text-align: center;
   border: 1px solid var(--line);
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   min-height: 18px;
   display: flex;
   flex-direction: column;
@@ -402,7 +404,7 @@
   line-height: 1.1;
 }
 .arvore-no.filled { background: rgba(199,151,63,0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
-.arvore-no.filled.female { background: rgba(185,116,98,0.06); border-color: rgba(185,116,98,0.3); color: #e2a898; }
+.arvore-no.filled.female { background: rgba(185,116,98,0.06); border-color: rgba(185,116,98,0.3); color: var(--rose-text); }
 .arvore-no.empty { color: var(--text-muted); opacity: 0.4; font-style: italic; font-size: 8px; }
 .arvore-no .anilha-tag {
   font-size: 6px;
@@ -776,6 +778,7 @@ function extrairGeracoesProfundas(base, completo) {
   const add = (caminho, nome, anilha, especie, raca) => {
     if (!nome) return;
     const geracao = caminho.split('.').length;
+    if (geracao > 5) return; // limite: 5 gerações (pais até tataravós)
     out.push({
       geracao,
       nomeGeracao: NOME_GERACAO[geracao] || `G${geracao}`,
@@ -918,6 +921,7 @@ function renderizarArvoreCompleta(ave) {
   // Agrupar por geração
   const porGeracao = {};
   ancestrais.forEach(n => {
+    if ((n.caminho || '').split('.').length > 5 || n.geracao > 5) return;
     if (!porGeracao[n.geracao]) porGeracao[n.geracao] = [];
     porGeracao[n.geracao].push(n);
   });
@@ -1104,10 +1108,16 @@ async function carregarDadosEdicao() {
 
 async function carregarAnilhasDisponiveis() {
   const container = document.getElementById('anilhas-disponiveis');
-  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  const todasAnilhas = await DB.getAll(DB.TABLES.ANILHAS);
+  const todasAves = await DB.getAll(DB.TABLES.AVES);
+  const emUso = new Set(todasAves.map(a => a.anilha).filter(Boolean));
+  // Só aparece no estoque a anilha disponível, ativa e que nenhuma ave usa
+  const anilhas = todasAnilhas.filter(a =>
+    a.disponivel === 'Sim' && a.ativo === 'Sim' && !emUso.has(a.numero)
+  );
   
   if (anilhas.length === 0) {
-    container.innerHTML = '<div class="empty-note" style="padding:12px;font-size:12px;">Nenhuma anilha cadastrada. Cadastre uma acima.</div>';
+    container.innerHTML = '<div class="empty-note" style="padding:12px;font-size:12px;">Nenhuma anilha disponível no estoque. Cadastre uma acima.</div>';
     return;
   }
   
@@ -1618,15 +1628,26 @@ async function salvarAve() {
   // havia antes nesse lado — assim, se você trocar o Pai/Mãe, a linhagem antiga
   // não fica "grudada" junto com a nova. Ancestrais manuais de um lado que não
   // mudou continuam preservados.
-  let ancestraisFinais = ancestraisExistentes;
-  if (paiNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('pai.'));
-  if (maeNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('mae.'));
-  ancestraisFinais = ancestraisFinais.concat(ancestrais.ancestraisProfundos);
-  
-  const avoPaterno = ancestrais.avoPaterno || (aveExistente ? aveExistente.avoPaterno : '') || '';
-  const avoPaterna = ancestrais.avoPaterna || (aveExistente ? aveExistente.avoPaterna : '') || '';
-  const avoMaterno = ancestrais.avoMaterno || (aveExistente ? aveExistente.avoMaterno : '') || '';
-  const avoMaterna = ancestrais.avoMaterna || (aveExistente ? aveExistente.avoMaterna : '') || '';
+  // Só descarta a linhagem antiga de um lado se o Pai/Mãe MUDOU de verdade.
+  // Se não mudou, o que já estava salvo (ex.: importado do PDF) é preservado e
+  // a linhagem herdada só COMPLETA o que estiver faltando.
+  const norm = v => (v || '').trim().toLowerCase();
+  const ladoMudou = (lado, nomeNovo) => !aveExistente || norm(aveExistente[lado]) !== norm(nomeNovo);
+  const paiMudou = ladoMudou('pai', paiNome);
+  const maeMudou = ladoMudou('mae', maeNome);
+
+  let ancestraisFinais = ancestraisExistentes.filter(a => a && a.caminho && (a.caminho.split('.').length <= 5));
+  if (paiMudou) ancestraisFinais = ancestraisFinais.filter(a => !a.caminho.startsWith('pai.'));
+  if (maeMudou) ancestraisFinais = ancestraisFinais.filter(a => !a.caminho.startsWith('mae.'));
+  const jaTem = new Set(ancestraisFinais.filter(a => a.nome).map(a => a.caminho));
+  ancestrais.ancestraisProfundos.forEach(a => {
+    if (a && a.caminho && !jaTem.has(a.caminho)) { ancestraisFinais.push(a); jaTem.add(a.caminho); }
+  });
+
+  const avoPaterno = ancestrais.avoPaterno || (!paiMudou && aveExistente ? aveExistente.avoPaterno : '') || '';
+  const avoPaterna = ancestrais.avoPaterna || (!paiMudou && aveExistente ? aveExistente.avoPaterna : '') || '';
+  const avoMaterno = ancestrais.avoMaterno || (!maeMudou && aveExistente ? aveExistente.avoMaterno : '') || '';
+  const avoMaterna = ancestrais.avoMaterna || (!maeMudou && aveExistente ? aveExistente.avoMaterna : '') || '';
   
   // ===== CORREÇÃO: USAR dataNasc NO LUGAR CERTO =====
   const dados = {
@@ -1662,12 +1683,23 @@ async function salvarAve() {
     let resultado;
     if (id) {
       resultado = await DB.update(DB.TABLES.AVES, parseInt(id), dados);
+      // Se trocou a anilha da ave, a antiga volta para o estoque
+      if (aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
+        const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
+        if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
+      }
       alert('✅ Ave atualizada com sucesso!');
     } else {
       resultado = await DB.add(DB.TABLES.AVES, dados);
       alert('✅ Ave cadastrada com sucesso!');
     }
     
+    // Anilha usada deixa de estar disponível no estoque
+    const anilhaObj = await DB.getAnilhaPorNumero(anilha);
+    if (anilhaObj && anilhaObj.disponivel !== 'Não') {
+      await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
+    }
+
     // ===== NOVO: Salvar ancestrais criados na árvore na tabela de ancestrais =====
     await salvarAncestraisDaArvore(dados.ancestrais, nome, dados.especie);
     

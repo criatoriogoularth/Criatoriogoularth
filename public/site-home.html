@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <title>Criatório Goularth — Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Criatório de aves com excelência genética: conheça nosso plantel, filhotes e adultos.">
+<meta name="theme-color" content="#0d1a16">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%90%A6%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style-site.css">
@@ -507,12 +512,17 @@
         
         bannerSection.innerHTML = bannerHtml;
       } else {
-        bannerSection.innerHTML = `
-          <div class="no-banner">
-            <div class="icon">🖼️</div>
-            <span>Configure um banner em administração</span>
-          </div>
-        `;
+        // Só quem está logado (administrador) vê o aviso; visitante não vê nada
+        if (localStorage.getItem('token')) {
+          bannerSection.innerHTML = `
+            <div class="no-banner">
+              <div class="icon">🖼️</div>
+              <span>Configure um banner em administração</span>
+            </div>
+          `;
+        } else {
+          bannerSection.style.display = 'none';
+        }
       }
 
       // ===== DROPDOWN PLANTEL =====
@@ -546,11 +556,17 @@
       const especiesSelecionadas = especiesDestaque.filter(esp => especiesInfo[esp]);
       
       if (especiesSelecionadas.length === 0) {
-        gridContainer.innerHTML = `
+        const ehAdmin = !!localStorage.getItem('token');
+        gridContainer.innerHTML = ehAdmin ? `
           <div style="text-align:center;padding:40px;color:var(--text-muted);">
             <div style="font-size:48px;margin-bottom:12px;opacity:0.4;">🐦</div>
             <p>Nenhuma espécie selecionada para destaque.</p>
             <p style="font-size:12px;">Selecione as espécies no editor da Home.</p>
+          </div>
+        ` : `
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">
+            <div style="font-size:48px;margin-bottom:12px;opacity:0.4;">🐦</div>
+            <p>Em breve, novidades por aqui.</p>
           </div>
         `;
         return;

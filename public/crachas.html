@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -28,7 +29,7 @@
 }
 .crachas-toolbar .filters input,
 .crachas-toolbar .filters select {
-  background: rgba(0,0,0,0.35) !important;
+  background: var(--input-bg) !important;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 12px;
@@ -43,7 +44,7 @@
   border-color: var(--brass);
 }
 .crachas-toolbar .filters select option {
-  background: #1a2e28 !important;
+  background: var(--option-bg) !important;
   color: var(--text) !important;
 }
 .crachas-toolbar .filters select {
@@ -104,7 +105,7 @@
   gap: 14px;
 }
 .config-panel .config-group {
-  background: rgba(0,0,0,0.1);
+  background: rgba(var(--shade),0.1);
   border-radius: 8px;
   padding: 12px;
 }
@@ -129,7 +130,7 @@
 .config-panel .config-group input[type="text"],
 .config-panel .config-group select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 4px 8px;
@@ -230,7 +231,7 @@
 
 /* ===== CONTROLE DAS CAIXAS ===== */
 .caixa-control {
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 4px;
   padding: 6px 8px;
   margin-bottom: 4px;
@@ -258,7 +259,7 @@
   text-transform: none;
 }
 .caixa-control .cabecalho .ordem select {
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 4px;
@@ -295,7 +296,7 @@
 .caixa-control .controles .campo input[type="number"],
 .caixa-control .controles .campo select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 3px;
@@ -311,7 +312,7 @@
 
 /* ===== NOME COMO CAIXA ===== */
 .nome-config-item {
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 4px;
   padding: 6px 8px;
   margin-bottom: 4px;
@@ -339,7 +340,7 @@
   text-transform: none;
 }
 .nome-config-item .cabecalho .ordem select {
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 4px;
@@ -376,7 +377,7 @@
 .nome-config-item .controles .campo input[type="number"],
 .nome-config-item .controles .campo select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 3px;
@@ -392,7 +393,7 @@
 
 /* ===== CONTROLE DO RODAPÉ EM 3 CAIXAS ===== */
 .rodape-config-item {
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 4px;
   padding: 6px 8px;
   margin-bottom: 4px;
@@ -436,7 +437,7 @@
 .rodape-config-item .controles .campo input[type="number"],
 .rodape-config-item .controles .campo select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
+  background: rgba(var(--shade),0.2);
   border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 3px;
@@ -458,7 +459,7 @@
   max-height: 400px;
   overflow-y: auto;
   padding: 8px;
-  background: rgba(0,0,0,0.05);
+  background: rgba(var(--shade),0.05);
   border-radius: 8px;
   border: 1px solid var(--line);
 }
@@ -467,7 +468,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(var(--shade),0.08);
   border-radius: 6px;
   border: 1px solid transparent;
   transition: .15s ease;
@@ -502,11 +503,11 @@
 }
 .sexo-macho {
   background: rgba(70, 130, 200, 0.15);
-  color: #5a8ab0;
+  color: var(--info-text);
 }
 .sexo-femea {
   background: rgba(200, 100, 130, 0.15);
-  color: #e2a898;
+  color: var(--rose-text);
 }
 .sexo-indefinido {
   background: rgba(199, 151, 63, 0.15);
@@ -612,7 +613,7 @@
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-size:10px;color:var(--text-muted);width:60px;">Transparência</span>
-                <input type="number" id="fundo-esq-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+                <input type="number" id="fundo-esq-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
               </div>
               <div class="file-upload-area" onclick="document.getElementById('fundo-esq-img-input').click()" style="padding:6px;">
                 <div class="icon">🖼️</div>
@@ -636,7 +637,7 @@
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-size:10px;color:var(--text-muted);width:60px;">Transparência</span>
-                <input type="number" id="fundo-dir-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+                <input type="number" id="fundo-dir-opacidade" value="100" min="0" max="100" onchange="aplicarConfig()" style="flex:1;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
               </div>
               <div class="file-upload-area" onclick="document.getElementById('fundo-dir-img-input').click()" style="padding:6px;">
                 <div class="icon">🖼️</div>
@@ -659,7 +660,7 @@
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-size:10px;color:var(--text-muted);width:60px;">Espessura</span>
-                <input type="number" id="cracha-borda-espessura" value="1" min="0" max="5" step="0.5" onchange="aplicarConfig()" style="flex:1;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
+                <input type="number" id="cracha-borda-espessura" value="1" min="0" max="5" step="0.5" onchange="aplicarConfig()" style="flex:1;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text);font-size:10px;">
               </div>
             </div>
           </div>
@@ -667,7 +668,7 @@
           <!-- DISTÂNCIA ENTRE CAIXAS -->
           <div class="config-group">
             <label>📏 Distância entre caixas</label>
-            <input type="number" id="espacamento-caixas" value="1.5" min="0" max="10" step="0.5" onchange="aplicarConfig()" style="width:100%;background:rgba(0,0,0,0.2);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--text);font-size:12px;">
+            <input type="number" id="espacamento-caixas" value="1.5" min="0" max="10" step="0.5" onchange="aplicarConfig()" style="width:100%;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--text);font-size:12px;">
             <span style="font-size:8px;color:var(--text-muted);">Valor em pixels (0 = sem espaçamento)</span>
           </div>
 
