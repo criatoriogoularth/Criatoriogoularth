@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Aviário — Crachás / Etiquetas</title>
+<title>Aviário — Crachás</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -646,7 +646,7 @@
 
       <div class="topbar">
         <div>
-          <h1>🏷️ Crachás / Etiquetas</h1>
+          <h1>🏷️ Crachás</h1>
           <div class="lede" id="lede-cracha">Gere etiquetas para gaiolas com informações da ave e árvore genealógica.</div>
         </div>
         <div>
@@ -660,11 +660,11 @@
         <span class="sc-modo-titulo">Modelo do crachá</span>
         <label class="sc-modo-op ativo" id="sc-modo-op-arvore">
           <input type="radio" name="sc-modo" value="arvore" checked onchange="trocarModoCracha('arvore')">
-          🌳 Com árvore genealógica <small>(modelo atual)</small>
+          🌳 Crachás com Árvore Genealógica
         </label>
         <label class="sc-modo-op" id="sc-modo-op-site">
           <input type="radio" name="sc-modo" value="site" onchange="trocarModoCracha('site')">
-          🏷️ Estilo Site Crachás <small>(sem árvore, cor por tipo)</small>
+          🏷️ Crachás sem Árvore Genealógica
         </label>
       </div>
 
@@ -2821,7 +2821,7 @@ const SC = (function () {
   function salvar(avisar) {
     salvarEstado();
     renderPreviaAtual();
-    if (avisar) alert('✅ Modelo Site Crachás salvo!');
+    if (avisar) alert('✅ Modelo de crachá sem árvore salvo!');
   }
   function fecharPainel() { const p = $('sc-config-panel'); if (p) p.classList.remove('open'); }
 
@@ -2831,7 +2831,7 @@ const SC = (function () {
            copiarLogoParaTodos, lerFolha, salvarCriador, salvar, renderPrevia, gerarPDF };
 })();
 
-/* ---- alternar entre "Com árvore" e "Estilo Site Crachás" ---- */
+/* ---- alternar entre Crachás com e sem Árvore Genealógica ---- */
 function trocarModoCracha(modo, silencioso) {
   modoCracha = (modo === 'site') ? 'site' : 'arvore';
   try { localStorage.setItem('cracha_modo', modoCracha); } catch (e) {}
@@ -2843,7 +2843,7 @@ function trocarModoCracha(modo, silencioso) {
   SC.fecharPainel();
   const lede = document.getElementById('lede-cracha');
   if (lede) lede.textContent = modoCracha === 'site'
-    ? 'Gere etiquetas para gaiolas no estilo Site Crachás — uma cor por tipo de ave (macho, fêmea, indefinido e filhote).'
+    ? 'Gere crachás para gaiolas sem árvore genealógica — uma cor por tipo de ave (macho, fêmea, indefinido e filhote).'
     : 'Gere etiquetas para gaiolas com informações da ave e árvore genealógica.';
   renderizarPrevia();
 }
