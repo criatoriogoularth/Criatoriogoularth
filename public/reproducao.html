@@ -553,7 +553,7 @@
 </div>
 
 <!-- ===== MODAL DE CADASTRO/EDIÇÃO ===== -->
-<div class="modal-overlay" id="modal-repro" onclick="if(event.target===this) fecharModalRepro()">
+<div class="modal-overlay" id="modal-repro">
   <div class="modal-box form-modal">
     <div class="modal-head">
       <div><span id="modal-title-repro">Nova Reprodução</span></div>
@@ -625,8 +625,8 @@
 
         <!-- CHOCO E PREVISÃO -->
         <div class="field campo-destaque">
-          <label>Início do Choco <span class="req">*</span></label>
-          <input type="date" id="f-inicio-choco" required>
+          <label>Início do Choco <span style="font-weight:400;opacity:.7">(deixe vazio se ainda está botando)</span></label>
+          <input type="date" id="f-inicio-choco">
         </div>
 
         <div class="field previsao-nascimento">
@@ -664,14 +664,28 @@
         </div>
 
         <!-- OVOS -->
-        <div class="field">
-          <label>Ovos Férteis</label>
-          <input type="number" id="f-ovos-ferteis" value="0" min="0">
+        <div class="field field-full" style="margin-bottom:-6px;">
+          <label style="font-size:13px;color:var(--brass-soft);">🥚 Ovos</label>
         </div>
 
         <div class="field">
-          <label>Ovos Indefinidos</label>
-          <input type="number" id="f-ovos-indefinidos" value="0" min="0">
+          <label>Botou o Primeiro Ovo</label>
+          <input type="date" id="f-primeiro-ovo">
+        </div>
+
+        <div class="field">
+          <label>Botou o Último Ovo</label>
+          <input type="date" id="f-ultimo-ovo">
+        </div>
+
+        <div class="field">
+          <label>Total de Ovos</label>
+          <input type="number" id="f-total-ovos" value="0" min="0" style="font-weight:700;color:var(--brass-soft) !important;">
+        </div>
+
+        <div class="field">
+          <label>Ovos Férteis</label>
+          <input type="number" id="f-ovos-ferteis" value="0" min="0">
         </div>
 
         <div class="field">
@@ -679,9 +693,8 @@
           <input type="number" id="f-ovos-inferteis" value="0" min="0">
         </div>
 
-        <div class="field">
-          <label>Total de Ovos</label>
-          <input type="number" id="f-total-ovos" value="0" min="0" readonly style="font-weight:700;color:var(--brass-soft) !important;">
+        <div class="field field-full" style="margin-top:-6px;">
+          <div style="font-size:11px;color:var(--text-muted);">Ainda botando ou sem saber quais são férteis? Preencha só o Total e complete depois. Se preencher Férteis e Inférteis, o Total soma sozinho.</div>
         </div>
 
         <!-- ===== FILHOTES ===== -->
@@ -719,7 +732,7 @@
 </div>
 
 <!-- ===== MODAL DE SELEÇÃO DE AVE ===== -->
-<div class="modal-overlay" id="modal-select-ave" onclick="if(event.target===this) fecharModalSelectAve()">
+<div class="modal-overlay" id="modal-select-ave">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-head">
       <div><span id="modal-select-title">Selecione uma Ave</span></div>
@@ -804,12 +817,14 @@ async function renderizarCards() {
       </div>
       <div class="card-body">
         ${item.machoNome ? `<span class="label">Macho:</span><span class="value">${item.machoNome}</span>` : ''}
+        ${item.primeiroOvo ? `<span class="label">1º Ovo:</span><span class="value">${formatarData(item.primeiroOvo)}</span>` : ''}
+        ${item.ultimoOvo ? `<span class="label">Último Ovo:</span><span class="value">${formatarData(item.ultimoOvo)}</span>` : ''}
         <span class="label">Início Choco:</span>
-        <span class="value">${formatarData(item.inicioChoco)}</span>
+        <span class="value">${item.inicioChoco ? formatarData(item.inicioChoco) : '<em style="opacity:.7">ainda não começou</em>'}</span>
         <span class="label">Previsão Nasc.:</span>
         <span class="value">${formatarData(item.previsaoNascimento) || '-'}</span>
         <span class="label">Total Ovos:</span>
-        <span class="value"><strong>${item.totalOvos}</strong> (${item.ovosFerteis || 0} férteis)</span>
+        <span class="value"><strong>${item.totalOvos || 0}</strong> (${item.ovosFerteis || 0} férteis, ${item.ovosInferteis || 0} inférteis)</span>
         <span class="label">Finalizada:</span>
         <span class="value">${item.finalizada === 'Sim' ? '✅ Sim' : '⏳ Não'}</span>
       </div>
@@ -832,6 +847,24 @@ function formatarData(data) {
     return `${partes[2]}/${partes[1]}/${partes[0]}`;
   }
   return data;
+}
+
+// ============================================================
+// TOTAL DE OVOS
+// ============================================================
+
+let totalOvosManual = false;
+function recalcularTotalOvos() {
+  if (totalOvosManual) {
+    // Total digitado: só sobe se férteis+inférteis passarem dele
+    const soma = (parseInt(document.getElementById('f-ovos-ferteis').value) || 0) + (parseInt(document.getElementById('f-ovos-inferteis').value) || 0);
+    const campo = document.getElementById('f-total-ovos');
+    if (soma > (parseInt(campo.value) || 0)) campo.value = soma;
+    return;
+  }
+  const fert = parseInt(document.getElementById('f-ovos-ferteis').value) || 0;
+  const infer = parseInt(document.getElementById('f-ovos-inferteis').value) || 0;
+  document.getElementById('f-total-ovos').value = fert + infer;
 }
 
 // ============================================================
@@ -916,10 +949,12 @@ async function abrirModalCadastro() {
   document.getElementById('f-dias-incubacao').value = '14';
   document.getElementById('f-dias-incubacao').disabled = true;
   document.getElementById('f-dias-incubacao').style.opacity = '0.6';
+  document.getElementById('f-primeiro-ovo').value = '';
+  document.getElementById('f-ultimo-ovo').value = '';
   document.getElementById('f-ovos-ferteis').value = 0;
-  document.getElementById('f-ovos-indefinidos').value = 0;
   document.getElementById('f-ovos-inferteis').value = 0;
   document.getElementById('f-total-ovos').value = 0;
+  totalOvosManual = false;
   document.querySelector('input[name="finalizada"][value="Não"]').checked = true;
   document.getElementById('f-observacao-repro').value = '';
   
@@ -979,10 +1014,14 @@ async function editarReproducao(id) {
     document.getElementById('f-dias-incubacao').style.opacity = '0.6';
   }
   
+  document.getElementById('f-primeiro-ovo').value = item.primeiroOvo || '';
+  document.getElementById('f-ultimo-ovo').value = item.ultimoOvo || '';
   document.getElementById('f-ovos-ferteis').value = item.ovosFerteis || 0;
-  document.getElementById('f-ovos-indefinidos').value = item.ovosIndefinidos || 0;
   document.getElementById('f-ovos-inferteis').value = item.ovosInferteis || 0;
   document.getElementById('f-total-ovos').value = item.totalOvos || 0;
+  // Se o total salvo é diferente de férteis+inférteis (ainda botando, ou registro antigo com
+  // "indefinidos"), mantém o total como está em vez de recalcular por cima.
+  totalOvosManual = (item.totalOvos || 0) !== ((item.ovosFerteis || 0) + (item.ovosInferteis || 0));
   document.querySelector(`input[name="finalizada"][value="${item.finalizada}"]`).checked = true;
   document.getElementById('f-observacao-repro').value = item.observacao || '';
   
@@ -1242,8 +1281,9 @@ async function salvarReproducao(event) {
     inicioChoco: document.getElementById('f-inicio-choco').value,
     previsaoNascimento: document.getElementById('f-previsao-nascimento').value,
     diasIncubacao: parseInt(document.getElementById('f-dias-incubacao').value) || 14,
+    primeiroOvo: document.getElementById('f-primeiro-ovo').value,
+    ultimoOvo: document.getElementById('f-ultimo-ovo').value,
     ovosFerteis: parseInt(document.getElementById('f-ovos-ferteis').value) || 0,
-    ovosIndefinidos: parseInt(document.getElementById('f-ovos-indefinidos').value) || 0,
     ovosInferteis: parseInt(document.getElementById('f-ovos-inferteis').value) || 0,
     totalOvos: parseInt(document.getElementById('f-total-ovos').value) || 0,
     finalizada: finalizada,
@@ -1251,8 +1291,16 @@ async function salvarReproducao(event) {
     filhotes: filhotes
   };
 
-  if (!dados.status || !dados.femeaId || !dados.cruza1 || !dados.inicioChoco) {
-    alert('Preencha os campos obrigatórios: Status, Fêmea, 1ª Dia da Cruza e Início do Choco.');
+  if (!dados.status || !dados.femeaId || !dados.cruza1) {
+    alert('Preencha os campos obrigatórios: Status, Fêmea e 1ª Dia da Cruza.');
+    return;
+  }
+  if (dados.ovosFerteis + dados.ovosInferteis > dados.totalOvos) {
+    alert('Ovos férteis + inférteis (' + (dados.ovosFerteis + dados.ovosInferteis) + ') não pode passar do Total de Ovos (' + dados.totalOvos + ').');
+    return;
+  }
+  if (dados.primeiroOvo && dados.ultimoOvo && dados.ultimoOvo < dados.primeiroOvo) {
+    alert('A data do último ovo não pode ser antes da data do primeiro ovo.');
     return;
   }
 
@@ -1308,7 +1356,7 @@ async function salvarReproducao(event) {
         anilha: f.anilha || '',
         sexo: f.sexo || 'Indefinido',
         especie: especieFemea || 'Não identificada',
-        dataNasc: dados.previsaoNascimento || dados.inicioChoco,
+        dataNasc: dados.previsaoNascimento || dados.inicioChoco || dados.ultimoOvo || dados.primeiroOvo || '',
         situacao: 'Filhote',
         filhote: true,
         // Pai e Mãe (diretos)
@@ -1336,7 +1384,7 @@ async function salvarReproducao(event) {
         historico: [{
           motivo: 'Nascimento',
           descricao: `Filhote nascido da reprodução de ${dados.femeaNome}${dados.machoNome ? ' com ' + dados.machoNome : ''}`,
-          data: dados.previsaoNascimento || dados.inicioChoco,
+          data: dados.previsaoNascimento || dados.inicioChoco || dados.ultimoOvo || dados.primeiroOvo || '',
           detalhes: `Reprodução ID: ${reproSalva.id}`
         }]
       };
@@ -1379,14 +1427,13 @@ async function excluirReproducao(id) {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  const camposOvos = ['f-ovos-ferteis', 'f-ovos-indefinidos', 'f-ovos-inferteis'];
-  camposOvos.forEach(id => {
-    document.getElementById(id).addEventListener('input', function() {
-      const fert = parseInt(document.getElementById('f-ovos-ferteis').value) || 0;
-      const indef = parseInt(document.getElementById('f-ovos-indefinidos').value) || 0;
-      const infer = parseInt(document.getElementById('f-ovos-inferteis').value) || 0;
-      document.getElementById('f-total-ovos').value = fert + indef + infer;
-    });
+  ['f-ovos-ferteis', 'f-ovos-inferteis'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalcularTotalOvos);
+  });
+  document.getElementById('f-total-ovos').addEventListener('input', function() {
+    // digitou o total na mão -> respeita; apagou -> volta a somar sozinho
+    totalOvosManual = this.value !== '';
+    if (!totalOvosManual) recalcularTotalOvos();
   });
 
   document.getElementById('f-inicio-choco').addEventListener('change', function() {
@@ -1416,11 +1463,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 renderizarCards();
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    fecharModalRepro();
-    fecharModalSelectAve();
-  }
+// O formulário NÃO fecha com clique fora nem com Esc (para não perder o que foi digitado).
+// Só fecha pelo ✕, por "Voltar" ou ao Salvar. Também impede que apertar Enter num campo
+// salve a reprodução sem querer: só o botão "Salvar" salva.
+document.getElementById('form-repro').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault();
 });
 </script>
 </body>
