@@ -431,6 +431,24 @@
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
 }
+
+  /* ===== Aba Fotos e Documentos ===== */
+  .midia-ajuda{font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5}
+  .midia-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+  .midia-foto{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(0,0,0,.2)}
+  .midia-foto img{display:block;width:100%;height:110px;object-fit:cover}
+  .midia-foto .capa-tag{position:absolute;top:6px;left:6px;background:var(--brass,#c7973f);color:#111;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .midia-foto .acoes{display:flex;border-top:1px solid var(--line)}
+  .midia-foto .acoes button{flex:1;border:none;background:transparent;color:var(--text-muted);font-size:12px;padding:8px 4px;cursor:pointer}
+  .midia-foto .acoes button:hover{background:rgba(255,255,255,.06);color:var(--text)}
+  .midia-foto .acoes button.rm{color:#e2988a}
+  .midia-upload{display:inline-block;cursor:pointer}
+  .midia-doc{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .midia-doc img{height:84px;border-radius:8px;border:1px solid var(--line);background:#fff}
+  .midia-doc .pdf{font-size:13px;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
+  .midia-status{font-size:12px;margin-top:6px}
+  .midia-status.ok{color:#8fc4a6}.midia-status.aviso{color:#e0bd7c}
+  .midia-contagem{font-size:11.5px;color:var(--text-muted);margin-left:8px}
 </style>
 </head>
 <body>
@@ -455,6 +473,7 @@
 
       <div class="tabstrip" id="ave-tabs">
         <button class="active" data-sub="ave-dados" onclick="goSubtab('ave-dados', this)">Ave</button>
+        <button data-sub="ave-midia" onclick="goSubtab('ave-midia', this)">📷 Fotos e Documentos</button>
         <button data-sub="ave-historico" onclick="goSubtab('ave-historico', this)">📜 Histórico</button>
         <button data-sub="ave-comp" onclick="goSubtab('ave-comp', this)">Comportamento</button>
         <button data-sub="ave-entrada" onclick="goSubtab('ave-entrada', this)">Registro Entrada</button>
@@ -633,6 +652,63 @@
         </div>
       </div>
 
+      <!-- ABA FOTOS E DOCUMENTOS -->
+      <div class="subpage" id="ave-midia">
+        <div class="midia-ajuda" style="margin-bottom:14px;">
+          Tudo o que você anexar aqui aparece nos botões de <b>Ações</b> da ave no site
+          (Plantel, Filhotes e Adultos) — desde que a ave esteja publicada no site. Depois de anexar, clique em <b>Salvar Ave</b>.
+        </div>
+
+        <fieldset>
+          <legend>📷 Fotos da ave</legend>
+          <div class="midia-ajuda">Escolha fotos da galeria ou tire na hora (pode marcar várias de uma vez). A <b>primeira foto é a capa</b> que aparece no site. Máximo de 6.</div>
+          <div class="midia-grid" id="fotos-grid"></div>
+          <label class="btn btn-primary midia-upload">＋ Adicionar fotos
+            <input type="file" id="f-fotos-input" accept="image/*" multiple hidden>
+          </label>
+          <span class="midia-contagem" id="fotos-contagem"></span>
+        </fieldset>
+
+        <fieldset>
+          <legend>🎥 Vídeo</legend>
+          <div class="field field-full">
+            <label>Link do vídeo no YouTube</label>
+            <input type="url" id="f-video" placeholder="Cole aqui o link. Ex: https://youtu.be/abc123XYZ00" autocomplete="off">
+          </div>
+          <div class="midia-status" id="video-status"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>🧬 Genotipagem C.I.G. (Código de Identidade Genética)</legend>
+          <div class="field">
+            <label>Número do C.I.G.</label>
+            <input type="text" id="f-cig-numero" placeholder="Digite o código, se tiver" autocomplete="off">
+          </div>
+          <div class="midia-doc">
+            <label class="btn btn-primary midia-upload">📎 Anexar foto ou PDF do C.I.G.
+              <input type="file" id="f-cig-input" accept="image/*,application/pdf" hidden>
+            </label>
+            <div id="cig-preview"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>⚥ Sexagem — laudo com o sexo da ave</legend>
+          <div class="midia-ajuda">O sexo (Macho/Fêmea) continua sendo o campo <b>Sexo</b> na aba “Ave”. Aqui você anexa o <b>laudo do exame</b> para o visitante conferir.</div>
+          <div class="midia-doc">
+            <label class="btn btn-primary midia-upload">📎 Anexar foto ou PDF do laudo
+              <input type="file" id="f-sexagem-input" accept="image/*,application/pdf" hidden>
+            </label>
+            <div id="sexagem-preview"></div>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="voltarLista()">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarAve()">Salvar Ave</button>
+        </div>
+      </div>
+
       <!-- ABA HISTÓRICO -->
       <div class="subpage" id="ave-historico">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
@@ -718,6 +794,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="voltar.js"></script>
 <script>renderSidebar('cadastro-ave');</script>
 <script>
 /* ============================================================
@@ -726,6 +803,124 @@
 
 let selectAveTarget = null;
 let historicoAtual = [];
+
+/* ============================================================
+   FOTOS, VÍDEO, C.I.G. E LAUDO DE SEXAGEM
+   ============================================================ */
+const MAX_FOTOS = 6;
+let midia = { fotos: [], cigArquivo: '', sexagemArquivo: '' };
+
+// Reduz a imagem no próprio aparelho antes de enviar (foto de celular tem 5-10 MB).
+function imagemRedimensionada(arquivo, maxLado, qualidade) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(arquivo);
+    const img = new Image();
+    img.onload = () => {
+      let { width: w, height: h } = img;
+      const f = Math.min(1, maxLado / Math.max(w, h));
+      w = Math.round(w * f); h = Math.round(h * f);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); // PNG com fundo transparente vira fundo branco
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', qualidade));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não consegui abrir a imagem "' + arquivo.name + '". Tente outra foto (JPG ou PNG).')); };
+    img.src = url;
+  });
+}
+
+function lerComoDataURL(arquivo) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Não consegui ler o arquivo.'));
+    r.readAsDataURL(arquivo);
+  });
+}
+
+// Documento (CIG / laudo): imagem é reduzida; PDF vai como está (até 3 MB).
+async function prepararDocumento(arquivo) {
+  if (arquivo.type === 'application/pdf' || /\.pdf$/i.test(arquivo.name)) {
+    if (arquivo.size > 3 * 1024 * 1024) throw new Error('O PDF é muito grande (' + (arquivo.size / 1048576).toFixed(1) + ' MB). O máximo é 3 MB — tire uma foto do documento ou comprima o PDF.');
+    return lerComoDataURL(arquivo);
+  }
+  if (!/^image\//.test(arquivo.type)) throw new Error('Envie uma imagem (JPG/PNG) ou um PDF.');
+  return imagemRedimensionada(arquivo, 1600, 0.85);
+}
+
+function renderFotos() {
+  const grid = document.getElementById('fotos-grid');
+  grid.innerHTML = midia.fotos.map((src, i) => `
+    <div class="midia-foto">
+      ${i === 0 ? '<span class="capa-tag">CAPA</span>' : ''}
+      <img src="${src}" alt="Foto ${i + 1}">
+      <div class="acoes">
+        ${i > 0 ? `<button type="button" onclick="fotoComoCapa(${i})">★ Capa</button>` : ''}
+        <button type="button" class="rm" onclick="removerFoto(${i})">✕ Remover</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('fotos-contagem').textContent = midia.fotos.length + ' de ' + MAX_FOTOS + ' fotos';
+}
+function fotoComoCapa(i) { const [f] = midia.fotos.splice(i, 1); midia.fotos.unshift(f); renderFotos(); }
+function removerFoto(i) { midia.fotos.splice(i, 1); renderFotos(); }
+
+function renderDocumento(campo, elId) {
+  const el = document.getElementById(elId);
+  const v = midia[campo];
+  if (!v) { el.innerHTML = '<span class="midia-ajuda" style="margin:0">Nenhum arquivo anexado.</span>'; return; }
+  const ehPdf = v.startsWith('data:application/pdf');
+  el.innerHTML = (ehPdf ? '<div class="pdf">📄 PDF anexado</div>' : `<img src="${v}" alt="Documento anexado">`) +
+    ` <button type="button" class="btn btn-ghost" onclick="removerDocumento('${campo}','${elId}')">✕ Remover</button>`;
+}
+function removerDocumento(campo, elId) { midia[campo] = ''; renderDocumento(campo, elId); }
+
+function atualizarStatusVideo() {
+  const v = document.getElementById('f-video').value.trim();
+  const el = document.getElementById('video-status');
+  if (!v) { el.textContent = ''; el.className = 'midia-status'; return; }
+  if (!/^https?:\/\//i.test(v)) { el.textContent = '⚠ Cole o link completo, começando com https://'; el.className = 'midia-status aviso'; return; }
+  const yt = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i.test(v);
+  el.textContent = yt ? '✅ Link do YouTube reconhecido — o vídeo vai tocar dentro do site.' : '✅ Link aceito — no site vai aparecer um botão para assistir.';
+  el.className = 'midia-status ok';
+}
+
+function carregarMidia(ave) {
+  midia.fotos = Array.isArray(ave && ave.fotos) ? ave.fotos.slice() : [];
+  midia.cigArquivo = (ave && ave.cigArquivo) || '';
+  midia.sexagemArquivo = (ave && ave.sexagemArquivo) || '';
+  document.getElementById('f-video').value = (ave && ave.videoUrl) || '';
+  document.getElementById('f-cig-numero').value = (ave && ave.cigNumero) || '';
+  renderFotos(); renderDocumento('cigArquivo', 'cig-preview'); renderDocumento('sexagemArquivo', 'sexagem-preview');
+  atualizarStatusVideo();
+}
+
+function iniciarMidia() {
+  document.getElementById('f-video').addEventListener('input', atualizarStatusVideo);
+
+  document.getElementById('f-fotos-input').addEventListener('change', async (e) => {
+    const arquivos = Array.from(e.target.files || []);
+    e.target.value = ''; // permite escolher a mesma foto de novo
+    const vagas = MAX_FOTOS - midia.fotos.length;
+    if (arquivos.length > vagas) alert('Cada ave pode ter até ' + MAX_FOTOS + ' fotos. Vou usar só as ' + Math.max(vagas, 0) + ' primeiras.');
+    for (const a of arquivos.slice(0, Math.max(vagas, 0))) {
+      try { midia.fotos.push(await imagemRedimensionada(a, 1100, 0.8)); renderFotos(); }
+      catch (err) { alert(err.message); }
+    }
+  });
+
+  [['f-cig-input', 'cigArquivo', 'cig-preview'], ['f-sexagem-input', 'sexagemArquivo', 'sexagem-preview']].forEach(([inputId, campo, prevId]) => {
+    document.getElementById(inputId).addEventListener('change', async (e) => {
+      const a = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!a) return;
+      try { midia[campo] = await prepararDocumento(a); renderDocumento(campo, prevId); }
+      catch (err) { alert(err.message); }
+    });
+  });
+}
 
 /* ============================================================
    FUNÇÃO PARA POPULAR SELECT DE ESPÉCIES
@@ -778,7 +973,6 @@ function extrairGeracoesProfundas(base, completo) {
   const add = (caminho, nome, anilha, especie, raca) => {
     if (!nome) return;
     const geracao = caminho.split('.').length;
-    if (geracao > 5) return; // limite: 5 gerações (pais até tataravós)
     out.push({
       geracao,
       nomeGeracao: NOME_GERACAO[geracao] || `G${geracao}`,
@@ -896,7 +1090,7 @@ function goSubtab(id, btn) {
 }
 
 function voltarLista() {
-  location.href = 'passaros.html';
+  voltar('passaros.html');
 }
 
 /* ============================================================
@@ -921,7 +1115,6 @@ function renderizarArvoreCompleta(ave) {
   // Agrupar por geração
   const porGeracao = {};
   ancestrais.forEach(n => {
-    if ((n.caminho || '').split('.').length > 5 || n.geracao > 5) return;
     if (!porGeracao[n.geracao]) porGeracao[n.geracao] = [];
     porGeracao[n.geracao].push(n);
   });
@@ -1064,6 +1257,7 @@ async function carregarDadosEdicao() {
       // Carregar histórico
       historicoAtual = ave.historico || [];
       renderizarHistorico();
+      carregarMidia(ave);
       
       // CARREGAR ÁRVORE COMPLETA
       renderizarArvoreCompleta(ave);
@@ -1075,6 +1269,7 @@ async function carregarDadosEdicao() {
     await popularSelectEspecie();
     historicoAtual = [];
     renderizarHistorico();
+    carregarMidia(null);
     document.getElementById('arvore-completa-container').innerHTML = `
       <div style="text-align:center;padding:20px;color:var(--text-muted);grid-column:1/-1;">
         Nenhum ancestral adicional cadastrado.
@@ -1628,26 +1823,15 @@ async function salvarAve() {
   // havia antes nesse lado — assim, se você trocar o Pai/Mãe, a linhagem antiga
   // não fica "grudada" junto com a nova. Ancestrais manuais de um lado que não
   // mudou continuam preservados.
-  // Só descarta a linhagem antiga de um lado se o Pai/Mãe MUDOU de verdade.
-  // Se não mudou, o que já estava salvo (ex.: importado do PDF) é preservado e
-  // a linhagem herdada só COMPLETA o que estiver faltando.
-  const norm = v => (v || '').trim().toLowerCase();
-  const ladoMudou = (lado, nomeNovo) => !aveExistente || norm(aveExistente[lado]) !== norm(nomeNovo);
-  const paiMudou = ladoMudou('pai', paiNome);
-  const maeMudou = ladoMudou('mae', maeNome);
-
-  let ancestraisFinais = ancestraisExistentes.filter(a => a && a.caminho && (a.caminho.split('.').length <= 5));
-  if (paiMudou) ancestraisFinais = ancestraisFinais.filter(a => !a.caminho.startsWith('pai.'));
-  if (maeMudou) ancestraisFinais = ancestraisFinais.filter(a => !a.caminho.startsWith('mae.'));
-  const jaTem = new Set(ancestraisFinais.filter(a => a.nome).map(a => a.caminho));
-  ancestrais.ancestraisProfundos.forEach(a => {
-    if (a && a.caminho && !jaTem.has(a.caminho)) { ancestraisFinais.push(a); jaTem.add(a.caminho); }
-  });
-
-  const avoPaterno = ancestrais.avoPaterno || (!paiMudou && aveExistente ? aveExistente.avoPaterno : '') || '';
-  const avoPaterna = ancestrais.avoPaterna || (!paiMudou && aveExistente ? aveExistente.avoPaterna : '') || '';
-  const avoMaterno = ancestrais.avoMaterno || (!maeMudou && aveExistente ? aveExistente.avoMaterno : '') || '';
-  const avoMaterna = ancestrais.avoMaterna || (!maeMudou && aveExistente ? aveExistente.avoMaterna : '') || '';
+  let ancestraisFinais = ancestraisExistentes;
+  if (paiNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('pai.'));
+  if (maeNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('mae.'));
+  ancestraisFinais = ancestraisFinais.concat(ancestrais.ancestraisProfundos);
+  
+  const avoPaterno = ancestrais.avoPaterno || (aveExistente ? aveExistente.avoPaterno : '') || '';
+  const avoPaterna = ancestrais.avoPaterna || (aveExistente ? aveExistente.avoPaterna : '') || '';
+  const avoMaterno = ancestrais.avoMaterno || (aveExistente ? aveExistente.avoMaterno : '') || '';
+  const avoMaterna = ancestrais.avoMaterna || (aveExistente ? aveExistente.avoMaterna : '') || '';
   
   // ===== CORREÇÃO: USAR dataNasc NO LUGAR CERTO =====
   const dados = {
@@ -1675,6 +1859,19 @@ async function salvarAve() {
     ancestrais: ancestraisFinais
   };
   
+  const videoUrl = document.getElementById('f-video').value.trim();
+  if (videoUrl && !/^https?:\/\//i.test(videoUrl)) {
+    alert('O link do vídeo precisa começar com https:// — cole o endereço completo do YouTube.');
+    goSubtab('ave-midia', document.querySelector('#ave-tabs [data-sub="ave-midia"]'));
+    document.getElementById('f-video').focus();
+    return;
+  }
+  dados.fotos = midia.fotos;
+  dados.videoUrl = videoUrl;
+  dados.cigNumero = document.getElementById('f-cig-numero').value.trim();
+  dados.cigArquivo = midia.cigArquivo;
+  dados.sexagemArquivo = midia.sexagemArquivo;
+
   const aves = await DB.getAll(DB.TABLES.AVES);
   const anilhaEmUso = aves.some(a => a.anilha === anilha && a.id !== parseInt(id));
   if (anilhaEmUso) { alert('Esta anilha já está sendo usada por outra ave!'); return; }
@@ -1713,6 +1910,7 @@ async function salvarAve() {
    INICIALIZAÇÃO
    ============================================================ */
 
+iniciarMidia();
 carregarDadosEdicao();
 
 document.addEventListener('keydown', function(e) {

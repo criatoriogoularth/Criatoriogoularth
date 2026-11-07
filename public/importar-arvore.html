@@ -588,7 +588,6 @@ async function lerArvoreDoPDF(file) {
     const arvoreCompleta = [];
     colunas.forEach((coluna, idx) => {
         const g = idx + 1;
-        if (g > 5) return; // limite: 5 gerações (pais até tataravós)
         const nSlots = Math.pow(2, g);
         const minY = Math.min(...coluna.map(i => i.yTop));
         const maxY = Math.max(...coluna.map(i => i.yTop));

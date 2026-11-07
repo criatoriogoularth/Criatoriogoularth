@@ -1166,7 +1166,7 @@ function selecionarAveConfirm(id, nome, anilha) {
 // FUNÇÃO PARA HERDAR ANCESTRAIS
 // ============================================================
 
-async function herdarAncestrais(aveId, base) {
+async function herdarAncestrais(aveId) {
   const ave = await DB.getById(DB.TABLES.AVES, aveId);
   if (!ave) return {};
   
@@ -1182,33 +1182,6 @@ async function herdarAncestrais(aveId, base) {
     avoMaterna: ave.avoMaterna || ''
   };
   
-  // Linhagem mais profunda (bisavós até tataravós, máx. 5 gerações) já com o
-  // caminho relativo ao FILHOTE: base = 'pai' (macho) ou 'mae' (fêmea).
-  const NOMES_GER = { 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
-  const profundos = [];
-  const addProfundo = (rel, nome, anilha, extra) => {
-    if (!base || !nome) return;
-    const caminho = base + '.' + rel;
-    const g = caminho.split('.').length;
-    if (g < 3 || g > 5) return;
-    if (profundos.some(p => p.caminho === caminho)) return;
-    profundos.push({
-      geracao: g, nomeGeracao: NOMES_GER[g] || ('G' + g), caminho,
-      sexo: caminho.endsWith('pai') ? 'M' : 'F', nome, anilha: anilha || '',
-      especie: (extra && extra.especie) || '', raca: (extra && extra.raca) || '', nota: ''
-    });
-  };
-  // avós do pai/mãe = bisavós do filhote
-  addProfundo('pai.pai', ave.avoPaterno); addProfundo('pai.mae', ave.avoPaterna);
-  addProfundo('mae.pai', ave.avoMaterno); addProfundo('mae.mae', ave.avoMaterna);
-  // tudo o que o pai/mãe já tinha na árvore dele(a)
-  let listaAnc = ave.ancestrais;
-  if (typeof listaAnc === 'string') { try { listaAnc = JSON.parse(listaAnc); } catch (e) { listaAnc = []; } }
-  (Array.isArray(listaAnc) ? listaAnc : []).forEach(a => {
-    if (a && a.caminho && a.nome) addProfundo(a.caminho, a.nome, a.anilha, a);
-  });
-  ancestrais.profundos = profundos;
-
   // Tentar buscar avós completos se o pai existir
   if (ave.pai) {
     const paiCompleto = await DB.getAvePorNome(ave.pai);
@@ -1318,8 +1291,8 @@ async function salvarReproducao(event) {
     const filhotesCriados = [];
     
     // Buscar ancestrais completos do pai e da mãe
-    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId, 'pai') : {};
-    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId, 'mae') : {};
+    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId) : {};
+    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId) : {};
     
     for (const f of filhotes) {
       if (f.anilha) {
@@ -1358,8 +1331,6 @@ async function salvarReproducao(event) {
         bisavoPaterna: ancestraisPai.avoPaterna || '',
         bisavoMaterno: ancestraisMae.avoMaterno || '',
         bisavoMaterna: ancestraisMae.avoMaterna || '',
-        // Árvore profunda (bisavós até tataravós) — é isto que aparece no certificado
-        ancestrais: [...(ancestraisPai.profundos || []), ...(ancestraisMae.profundos || [])],
         // Outros campos
         manejo: 'Mantenedor',
         historico: [{

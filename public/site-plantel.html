@@ -509,6 +509,8 @@
   </footer>
 
   <script src="db-api.js"></script>
+  <script src="voltar.js"></script>
+  <script src="site-ave-midia.js"></script>
   <script>
     let viewMode = 'blocos';
 
@@ -594,6 +596,7 @@
         
         return `
         <div class="ave-card">
+          ${AveMidia.capa(a)}
           <div class="header">
             <span class="nome">${a.nome}</span>
             <span class="sexo ${sexoClass}">${sexoLabel}</span>
@@ -607,7 +610,8 @@
             ${a.mae ? `<div><strong>Mãe:</strong> ${a.mae}</div>` : ''}
           </div>
           <div class="footer">
-            <a href="site-certificado.html?id=${a.id}" target="_blank" class="btn btn-primary">📄 Ver Certificado</a>
+            ${AveMidia.botoes(a)}
+            <a href="site-certificado.html?id=${a.id}" class="btn btn-primary">📄 Ver Certificado</a>
           </div>
         </div>
       `}).join('');
@@ -621,13 +625,13 @@
 
       const linhas = aves.map(a => `
         <tr>
-          <td><strong>${a.nome}</strong></td>
+          <td><span class="am-nome">${AveMidia.miniatura(a)}<strong>${a.nome}</strong></span></td>
           <td><span class="anilha-mono">${a.anilha || '-'}</span></td>
           <td>${a.raca || '-'}</td>
           <td>${formatarData(a.dataNasc)}</td>
           <td>${a.pai || '-'}</td>
           <td>${a.mae || '-'}</td>
-          <td><a href="site-certificado.html?id=${a.id}" target="_blank" class="btn">📄 Ver Certificado</a></td>
+          <td><div class="am-acoes">${AveMidia.botoes(a)}<a href="site-certificado.html?id=${a.id}" class="btn">📄 Ver Certificado</a></div></td>
         </tr>
       `).join('');
 

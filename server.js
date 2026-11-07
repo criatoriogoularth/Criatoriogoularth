@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 const origin = process.env.FRONTEND_ORIGIN || true;
 app.use(cors({ origin }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '30mb' }));
 
 // ===== API =====
 app.use('/api', (req, res, next) => {

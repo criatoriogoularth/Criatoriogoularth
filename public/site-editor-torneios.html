@@ -179,7 +179,7 @@
           <div class="lede">Cada etapa é um link que abre a imagem ou o PDF do resultado — sem tabela pra preencher, você só sobe o arquivo já pronto.</div>
         </div>
         <div>
-          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-ghost" onclick="voltar('admin-site.html')">← Voltar</button>
           <button class="btn btn-primary" onclick="abrirModalEtapa()">+ Adicionar Link</button>
         </div>
       </div>
@@ -197,6 +197,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="voltar.js"></script>
 <script>
 renderSidebar('site-editor-torneios');
 

@@ -44,6 +44,11 @@ CREATE TABLE IF NOT EXISTS aves (
   status_site VARCHAR(50) DEFAULT 'Disponível',
   ancestrais JSONB NOT NULL DEFAULT '[]',
   historico JSONB NOT NULL DEFAULT '[]',
+  fotos JSONB NOT NULL DEFAULT '[]',
+  video_url VARCHAR(500),
+  cig_numero VARCHAR(100),
+  cig_arquivo TEXT,
+  sexagem_arquivo TEXT,
   criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
   atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
 );

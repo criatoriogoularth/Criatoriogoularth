@@ -179,7 +179,7 @@
     <!-- MUDANÇA: "Copas" deixou de ser uma página própria — os links de
          etapa agora vêm do widget na coluna lateral de Home/Criatório,
          então o "voltar" natural passou a ser a Home. -->
-    <div class="breadcrumb"><a href="site-home.html">← Voltar para a Home</a></div>
+    <div class="breadcrumb"><a href="site-home.html" onclick="return voltar('site-home.html')">← Voltar</a></div>
     <div id="etapa-content">
       <!-- Preenchido pelo JavaScript -->
     </div>
@@ -202,6 +202,7 @@
   </footer>
 
   <script src="db-api.js"></script>
+<script src="voltar.js"></script>
   <script>
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};

@@ -809,9 +809,6 @@
         <div class="field" style="max-width:340px;margin-bottom:16px;">
           <input type="text" id="busca-ave-lista" placeholder="Pesquisar ave..." oninput="renderListaAves()">
         </div>
-        <div style="margin-bottom:16px;">
-          <button class="btn btn-ghost" onclick="reconstruirLinhagens()" title="Completa bisavós, trisavós e tataravós que faltam, usando a linhagem do pai e da mãe cadastrados">🔧 Reconstruir linhagens (completar até 5 gerações)</button>
-        </div>
         <div id="lista-aves"></div>
       </div>
 
@@ -927,6 +924,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="voltar.js"></script>
 <script>
 // ============================================================
 // CONFIGURAÇÕES DO CERTIFICADO
@@ -1367,69 +1365,6 @@ function setListaFiltro(f, btn) {
   renderListaAves();
 }
 
-
-// ============================================================
-// RECONSTRUIR LINHAGENS (repara aves que perderam bisavós/trisavós/tataravós)
-// Nunca apaga nem sobrescreve nada: só completa o que está faltando,
-// copiando a linhagem do pai/mãe (quando eles estão cadastrados).
-// ============================================================
-async function reconstruirLinhagens() {
-  if (!confirm('Vou completar a árvore das aves usando a linhagem do pai e da mãe cadastrados (até 5 gerações).\n\nNada existente será apagado ou sobrescrito. Continuar?')) return;
-  const brutas = await DB.getAll(DB.TABLES.AVES);
-  const aves = brutas.map(a => {
-    let l = a.ancestrais;
-    if (typeof l === 'string') { try { l = JSON.parse(l); } catch (e) { l = []; } }
-    return { ...a, ancestrais: Array.isArray(l) ? l.filter(x => x && x.caminho) : [], _mudou: false };
-  });
-  const porNome = new Map();
-  aves.forEach(a => { if (a.nome) porNome.set(a.nome.trim().toLowerCase(), a); });
-  const NOMES = { 3: 'Bisavós', 4: 'Trisavós', 5: 'Tataravós' };
-
-  for (let passada = 0; passada < 5; passada++) {
-    let algum = false;
-    aves.forEach(a => {
-      ['pai', 'mae'].forEach(lado => {
-        const nomeP = (a[lado] || '').trim().toLowerCase();
-        const P = nomeP ? porNome.get(nomeP) : null;
-        if (!P || P === a) return;
-        const tem = new Set(a.ancestrais.filter(x => x.nome).map(x => x.caminho));
-        const add = (rel, nome, anilha, extra) => {
-          if (!nome) return;
-          const caminho = lado + '.' + rel;
-          const g = caminho.split('.').length;
-          if (g < 3 || g > 5 || tem.has(caminho)) return;
-          a.ancestrais.push({ geracao: g, nomeGeracao: NOMES[g], caminho, sexo: caminho.endsWith('pai') ? 'M' : 'F',
-            nome, anilha: anilha || '', especie: (extra && extra.especie) || '', raca: (extra && extra.raca) || '', nota: '' });
-          tem.add(caminho); a._mudou = true; algum = true;
-        };
-        // avós do pai/mãe viram bisavós desta ave
-        add('pai.pai', P.avoPaterno); add('pai.mae', P.avoPaterna);
-        add('mae.pai', P.avoMaterno); add('mae.mae', P.avoMaterna);
-        P.ancestrais.forEach(x => { if (x.nome) add(x.caminho, x.nome, x.anilha, x); });
-        // avós da própria ave, se estiverem em branco
-        const campos = lado === 'pai' ? [['avoPaterno', 'pai'], ['avoPaterna', 'mae']] : [['avoMaterno', 'pai'], ['avoMaterna', 'mae']];
-        campos.forEach(([campo, qual]) => {
-          if (!a[campo] && P[qual]) { a[campo] = P[qual]; a._mudou = true; algum = true; }
-        });
-      });
-    });
-    if (!algum) break;
-  }
-
-  let n = 0;
-  for (const a of aves.filter(x => x._mudou)) {
-    try {
-      await DB.update(DB.TABLES.AVES, a.id, {
-        ancestrais: a.ancestrais, avoPaterno: a.avoPaterno || '', avoPaterna: a.avoPaterna || '',
-        avoMaterno: a.avoMaterno || '', avoMaterna: a.avoMaterna || ''
-      });
-      n++;
-    } catch (e) { console.warn('Falha ao atualizar', a.nome, e); }
-  }
-  alert(n ? `✅ Linhagem completada em ${n} ave(s).` : 'Nenhuma ave precisava de reparo (ou o pai/mãe não têm a linhagem cadastrada).');
-  renderListaAves();
-}
-
 async function renderListaAves() {
   const busca = document.getElementById('busca-ave-lista').value.toLowerCase();
   await carregarAvesDoBanco();
@@ -1450,7 +1385,11 @@ async function renderListaAves() {
     </div>`).join('');
 }
 
+// Aberta já com ?id= (veio de "Ver Árvore" na lista de pássaros): Voltar volta para a tela anterior.
+const ABRIU_COM_ID = new URLSearchParams(window.location.search).has('id');
+
 function voltarLista() {
+  if (ABRIU_COM_ID) { voltar('passaros.html'); return; }
   document.getElementById('view-lista').style.display = 'block';
   document.getElementById('view-form').style.display = 'none';
   document.getElementById('view-certificado').style.display = 'none';
@@ -1491,7 +1430,7 @@ async function abrirGenealogia(id) {
     const ancestrais = ave.ancestrais || [];
     if (Array.isArray(ancestrais) && ancestrais.length > 0) {
       ancestrais.forEach(a => {
-        if (a.caminho && a.nome && dentroDoLimite(a.caminho) && !tree[a.caminho]) {
+        if (a.caminho && a.nome && !tree[a.caminho]) {
           tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || 'M' };
         }
       });
@@ -1529,7 +1468,6 @@ const NODE_SIZES = {
 const GEN_LABELS = { 0: 'Ave', 1: 'Pais', 2: 'Avós', 3: 'Bisavós', 4: 'Trisavós', 5: 'Tetravós' };
 const GAP_ROOT = 8, COL_GAP = 26, LEAF_GAP = 8, TOP_PAD = 30, SIDE_PAD = 20;
 const MAX_GENERATIONS = 5;
-function dentroDoLimite(caminho) { return !caminho || caminho.split('.').length <= MAX_GENERATIONS; }
 
 function getLabel(path) {
   const labels = {
@@ -1852,7 +1790,7 @@ function herdarLinhagemNaArvore(basePath, ave) {
   if (ave.avoMaterna) tree[basePath + '.mae.mae'] = { nome: ave.avoMaterna, anilha: '', sexo: 'F' };
 
   parseAncestraisDaAve(ave).forEach(a => {
-    if (a.caminho && a.nome && dentroDoLimite(basePath + '.' + a.caminho)) {
+    if (a.caminho && a.nome) {
       tree[basePath + '.' + a.caminho] = {
         nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || (a.caminho.endsWith('pai') ? 'M' : 'F'),
         especie: a.especie || '', raca: a.raca || ''
@@ -1986,7 +1924,7 @@ async function salvarArvore() {
   if (!treeModificada) { alert('A árvore não foi modificada.'); return; }
   
   const ancestrais = [];
-  const caminhosExistentes = Object.keys(tree).filter(p => p !== '' && dentroDoLimite(p));
+  const caminhosExistentes = Object.keys(tree).filter(p => p !== '');
   const camposPrincipais = ['pai', 'mae', 'pai.pai', 'pai.mae', 'mae.pai', 'mae.mae'];
   
   for (const caminho of caminhosExistentes) {

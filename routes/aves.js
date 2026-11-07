@@ -10,11 +10,63 @@ const CAMPOS = [
   'nome', 'anilha', 'sexo', 'especie', 'raca', 'data_nasc', 'situacao', 'tipo',
   'manejo', 'gaiola', 'mutacao', 'pai', 'anilha_pai', 'mae', 'anilha_mae',
   'avo_paterno', 'avo_paterna', 'avo_materno', 'avo_materna', 'filhote',
-  'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico'
+  'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico',
+  'fotos', 'video_url', 'cig_numero', 'cig_arquivo', 'sexagem_arquivo'
 ];
 
+const MAX_FOTOS = 6;
+
+// Colunas pesadas (imagens em base64): NÃO vão nas listagens, só na ficha da ave.
+const COLS_LEVES = `id, usuario_id, nome, anilha, sexo, especie, raca, data_nasc, situacao, tipo, manejo, gaiola,
+  mutacao, pai, anilha_pai, mae, anilha_mae, avo_paterno, avo_paterna, avo_materno, avo_materna, filhote, no_site,
+  categoria_site, status_site, ancestrais, historico, video_url, cig_numero, criado_em, atualizado_em,
+  (jsonb_array_length(COALESCE(fotos, '[]'::jsonb)) > 0) AS tem_fotos,
+  (cig_arquivo IS NOT NULL AND cig_arquivo <> '') AS tem_cig_arquivo,
+  (sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '') AS tem_sexagem_arquivo`;
+
+// Cria as colunas novas sozinho na primeira vez (não precisa rodar nada no banco).
+const colunasProntas = pool.query(`
+  ALTER TABLE aves
+    ADD COLUMN IF NOT EXISTS fotos JSONB NOT NULL DEFAULT '[]',
+    ADD COLUMN IF NOT EXISTS video_url VARCHAR(500),
+    ADD COLUMN IF NOT EXISTS cig_numero VARCHAR(100),
+    ADD COLUMN IF NOT EXISTS cig_arquivo TEXT,
+    ADD COLUMN IF NOT EXISTS sexagem_arquivo TEXT
+`).catch((e) => console.error('Falha ao criar colunas de mídia das aves:', e.message));
+
+router.use((req, res, next) => { colunasProntas.then(() => next()); });
+
+// data:image/jpeg;base64,... -> { mime, bin } (ou null)
+function decodificarDataUrl(du) {
+  if (typeof du !== 'string') return null;
+  const m = /^data:([a-z]+\/[a-z0-9.+-]+);base64,(.+)$/is.exec(du);
+  if (!m) return null;
+  return { mime: m[1].toLowerCase(), bin: Buffer.from(m[2], 'base64') };
+}
+
+function arquivoOk(du, max = 6000000) {
+  if (typeof du !== 'string' || du.length > max * 1.4) return false;
+  const d = decodificarDataUrl(du);
+  return !!d && ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(d.mime);
+}
+
+// Valida o que veio de mídia no corpo; devolve mensagem de erro ou null.
+function validarMidia(body) {
+  const v = body.video_url;
+  if (typeof v === 'string' && v.trim() !== '' && !/^https?:\/\//i.test(v.trim())) {
+    return 'O link do vídeo precisa começar com http:// ou https://';
+  }
+  for (const c of ['cig_arquivo', 'sexagem_arquivo']) {
+    const x = body[c];
+    if (typeof x === 'string' && x.trim() !== '' && !arquivoOk(x)) {
+      return 'Arquivo inválido ou grande demais. Use imagem (JPG/PNG) ou PDF de até 4 MB.';
+    }
+  }
+  return null;
+}
+
 // Colunas JSONB que guardam um ARRAY
-const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico']);
+const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico', 'fotos']);
 const CAMPOS_BOOLEAN = new Set(['filhote', 'no_site']);
 const CAMPOS_DATE = new Set(['data_nasc']);
 const CAMPOS_NUMERIC = new Set([]); // se tiver algum campo numérico no futuro
@@ -46,6 +98,15 @@ function prepararValor(campo, valor) {
       return false; // boolean vazio → false
     }
     return null; // outros campos string vazia → null
+  }
+
+  // 1b. FOTOS: só imagens válidas, no máximo MAX_FOTOS
+  if (campo === 'fotos') {
+    let lista = valor;
+    if (typeof lista === 'string') { try { lista = JSON.parse(lista); } catch { lista = []; } }
+    if (!Array.isArray(lista)) lista = [];
+    const ok = lista.filter((f) => arquivoOk(f, 3000000) && !f.startsWith('data:application/pdf')).slice(0, MAX_FOTOS);
+    return JSON.stringify(ok);
   }
 
   // 2. TRATA CAMPOS JSON (arrays)
@@ -112,7 +173,7 @@ function linhaParaAve(row) {
 
 router.get('/', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
-    'SELECT * FROM aves WHERE usuario_id = $1 ORDER BY id',
+    `SELECT ${COLS_LEVES} FROM aves WHERE usuario_id = $1 ORDER BY id`,
     [req.user.id]
   );
   res.json(rows.map(linhaParaAve));
@@ -137,6 +198,9 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   if (!body.anilha || (typeof body.anilha === 'string' && body.anilha.trim() === '')) {
     return res.status(400).json({ error: 'Anilha é obrigatória.' });
   }
+
+  const erroMidia = validarMidia(body);
+  if (erroMidia) return res.status(400).json({ error: erroMidia });
 
   // Impede duplicar anilha
   const dup = await pool.query(
@@ -164,6 +228,9 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
 
 router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
+
+  const erroMidia = validarMidia(body);
+  if (erroMidia) return res.status(400).json({ error: erroMidia });
 
   // Verifica duplicidade se estiver mudando a anilha
   if (body.anilha && typeof body.anilha === 'string' && body.anilha.trim() !== '') {
@@ -212,10 +279,58 @@ router.get('/publico/site', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, mae,
-            categoria_site AS "categoria", status_site AS "status"
+            categoria_site AS "categoria", status_site AS "status",
+            cig_numero AS "cigNumero",
+            (jsonb_array_length(COALESCE(fotos, '[]'::jsonb)) > 0) AS "temFoto",
+            (video_url IS NOT NULL AND video_url <> '') AS "temVideo",
+            ((cig_numero IS NOT NULL AND cig_numero <> '') OR (cig_arquivo IS NOT NULL AND cig_arquivo <> '')) AS "temCig",
+            (sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '') AS "temSexagem",
+            EXTRACT(EPOCH FROM atualizado_em)::bigint AS "v"
      FROM aves WHERE no_site = true ORDER BY especie, nome`
   );
-  res.json(rows);
+  res.json(rows.map((r) => ({ ...r, v: Number(r.v) })));
+}));
+
+// Dados de mídia de UMA ave (foto, vídeo, CIG, laudo) — usado pela janelinha do site.
+router.get('/publico/midia/:id', asyncHandler(async (req, res) => {
+  if (!/^\d{1,9}$/.test(req.params.id)) return res.status(404).json({ error: 'Ave não encontrada.' });
+  const { rows } = await pool.query(
+    `SELECT id, nome, anilha, sexo, fotos, video_url, cig_numero, cig_arquivo, sexagem_arquivo,
+            EXTRACT(EPOCH FROM atualizado_em)::bigint AS v
+     FROM aves WHERE id = $1 AND no_site = true`,
+    [req.params.id]
+  );
+  const a = rows[0];
+  if (!a) return res.status(404).json({ error: 'Ave não encontrada.' });
+  const tipo = (du) => { const d = decodificarDataUrl(du); return d ? (d.mime === 'application/pdf' ? 'pdf' : 'imagem') : null; };
+  res.json({
+    id: a.id, nome: a.nome, anilha: a.anilha, sexo: a.sexo,
+    numFotos: Array.isArray(a.fotos) ? a.fotos.length : 0,
+    videoUrl: a.video_url,
+    cigNumero: a.cig_numero,
+    cigTipo: a.cig_arquivo ? tipo(a.cig_arquivo) : null,
+    sexagemTipo: a.sexagem_arquivo ? tipo(a.sexagem_arquivo) : null,
+    v: Number(a.v)
+  });
+}));
+
+// Entrega o arquivo em si (foto/CIG/laudo) como imagem/PDF de verdade: /publico/arquivo/ID/foto/0
+router.get('/publico/arquivo/:id/:tipo/:i?', asyncHandler(async (req, res) => {
+  const naoAchou = () => res.status(404).json({ error: 'Arquivo não encontrado.' });
+  if (!/^\d{1,9}$/.test(req.params.id)) return naoAchou();
+  const col = { foto: 'fotos', cig: 'cig_arquivo', sexagem: 'sexagem_arquivo' }[req.params.tipo];
+  if (!col) return naoAchou();
+  const { rows } = await pool.query(`SELECT ${col} AS c FROM aves WHERE id = $1 AND no_site = true`, [req.params.id]);
+  if (!rows[0] || !rows[0].c) return naoAchou();
+  let du = rows[0].c;
+  if (req.params.tipo === 'foto') {
+    const i = /^\d+$/.test(req.params.i || '') ? parseInt(req.params.i, 10) : 0;
+    du = Array.isArray(du) ? du[i] : null;
+  }
+  const d = decodificarDataUrl(du);
+  if (!d) return naoAchou();
+  res.set({ 'Content-Type': d.mime, 'Cache-Control': 'public, max-age=86400', 'X-Content-Type-Options': 'nosniff' });
+  res.send(d.bin);
 }));
 
 router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {

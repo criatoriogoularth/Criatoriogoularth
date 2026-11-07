@@ -562,7 +562,7 @@ body {
       <!-- Preenchido pelo JavaScript -->
     </div>
     <nav class="site-nav">
-      <a href="site-home.html">← Voltar ao Site</a>
+      <a href="site-plantel.html" onclick="return voltar('site-plantel.html')">← Voltar</a>
     </nav>
   </header>
 
@@ -610,11 +610,12 @@ body {
     </div>
     
     <div style="text-align:center;">
-      <a href="site-plantel.html" class="btn-voltar">← Voltar</a>
+      <a href="site-plantel.html" class="btn-voltar" onclick="return voltar('site-plantel.html')">← Voltar</a>
     </div>
   </div>
 
   <script src="db-api.js"></script>
+<script src="voltar.js"></script>
   <script>
     // ===== ZOOM =====
     let currentZoom = 1;
@@ -893,7 +894,7 @@ body {
 
       if (Array.isArray(ave.ancestrais)) {
         ave.ancestrais.forEach(a => {
-          if (a && a.caminho && a.nome && a.caminho.split('.').length <= 5 && !tree[a.caminho]) {
+          if (a && a.caminho && a.nome && !tree[a.caminho]) {
             tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
           }
         });
