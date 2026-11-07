@@ -894,8 +894,9 @@ body {
 
       if (Array.isArray(ave.ancestrais)) {
         ave.ancestrais.forEach(a => {
-          if (a && a.caminho && a.nome && !tree[a.caminho]) {
-            tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
+          const nomeNo = a ? (a.nome || a.anilha || '') : '';
+          if (a && a.caminho && nomeNo && !tree[a.caminho]) {
+            tree[a.caminho] = { nome: nomeNo, anilha: a.anilha || '' };
           }
         });
       }

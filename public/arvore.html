@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -85,10 +84,6 @@
 .tree-node.filled.female {
   background: rgba(185,116,98,0.12);
   border-color: var(--rose);
-}
-.tree-node.filled.indefinido {
-  background: rgba(154,168,158,0.12);
-  border-color: var(--text-muted);
 }
 .tree-node.root {
   border-color: var(--brass);
@@ -1268,7 +1263,7 @@ function renderizarCertificado() {
     : CONFIG.corAvatarFundo;
   const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatarPorSexo}dd, ${corAvatarPorSexo} 60%, ${corAvatarPorSexo}aa)`;
   let linhasHtml = `
-    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : ave.sexo === 'F' ? 'Fêmea' : 'Indefinido'}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${ave.sexo === 'M' ? 'Macho' : 'Fêmea'}</div>
     <div class="subject-line mono" style="color:${CONFIG.corRaizTexto};"><b>Anilha:</b> ${ave.anilha}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${ave.especie}</div>
     <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Nasc.:</b> ${formatarData(ave.dataNasc)}</div>
@@ -1375,8 +1370,8 @@ async function renderListaAves() {
     return;
   }
   document.getElementById('lista-aves').innerHTML = lista.map(a => `
-    <div class="bird-card${a.sexo === 'F' ? ' female' : (a.sexo === 'M' ? '' : ' indefinido')}">
-      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : a.sexo === 'M' ? '♂' : '⚪'}</div>
+    <div class="bird-card${a.sexo === 'F' ? ' female' : ''}">
+      <div class="bird-avatar">${a.sexo === 'F' ? '♀' : '♂'}</div>
       <div class="bird-info">
         <div class="name">${a.nome} <span class="band-tag">${a.anilha}</span></div>
         <div class="meta">${a.especie || 'Não identificada'} · ${a.situacao}</div>
@@ -1430,8 +1425,10 @@ async function abrirGenealogia(id) {
     const ancestrais = ave.ancestrais || [];
     if (Array.isArray(ancestrais) && ancestrais.length > 0) {
       ancestrais.forEach(a => {
-        if (a.caminho && a.nome && !tree[a.caminho]) {
-          tree[a.caminho] = { nome: a.nome, anilha: a.anilha || '', sexo: a.sexo || 'M' };
+        // Nó só com anilha (sem nome) também é ancestral real: usa a anilha como nome para não sumir da árvore
+        const nomeNo = a.nome || a.anilha || '';
+        if (a.caminho && nomeNo && !tree[a.caminho]) {
+          tree[a.caminho] = { nome: nomeNo, anilha: a.anilha || '', sexo: a.sexo || (a.caminho.endsWith('pai') ? 'M' : 'F') };
         }
       });
     }
@@ -1829,7 +1826,10 @@ function renderTree() {
   
   function layout(path, depth) {
     const isFilled = tree[path] !== undefined;
-    const canExpand = isFilled && depth < MAX_GENERATIONS;
+    // Expande também quando há ancestrais salvos mais abaixo, mesmo que este nó esteja vazio
+    const prefixo = path ? path + '.' : '';
+    const temDescendente = Object.keys(tree).some(k => k !== '' && k.startsWith(prefixo) && k !== path);
+    const canExpand = (isFilled || temDescendente) && depth < MAX_GENERATIONS;
     const size = NODE_SIZES[depth] || NODE_SIZES[5];
     if (!canExpand) {
       const y = cursorY + size.h / 2;
@@ -1879,7 +1879,7 @@ function renderTree() {
     let cls = 'tree-node';
     if (isRoot) cls += ' root';
     if (isFilled) cls += ' filled'; else cls += ' empty';
-    cls += ' ' + (sexo === 'M' ? 'male' : (sexo === 'F' ? 'female' : 'indefinido'));
+    cls += ' ' + (sexo === 'M' ? 'male' : 'female');
     let content = '';
     let removeBtn = '';
     if (isFilled) {

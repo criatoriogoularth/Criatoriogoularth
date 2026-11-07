@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .field-grid .field-full { grid-column: 1 / -1; }
@@ -1823,15 +1822,32 @@ async function salvarAve() {
   // havia antes nesse lado — assim, se você trocar o Pai/Mãe, a linhagem antiga
   // não fica "grudada" junto com a nova. Ancestrais manuais de um lado que não
   // mudou continuam preservados.
-  let ancestraisFinais = ancestraisExistentes;
-  if (paiNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('pai.'));
-  if (maeNome) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('mae.'));
-  ancestraisFinais = ancestraisFinais.concat(ancestrais.ancestraisProfundos);
+  // CORREÇÃO: só troca a linhagem de um lado (pai. / mae.) quando o Pai/Mãe MUDOU de verdade.
+  // Antes, qualquer salvamento apagava todos os bisavós/trisavós/tataravós importados do PDF
+  // (porque o pai/mãe do PDF não é uma ave cadastrada) e a árvore ficava só até os avós.
+  const paiAnterior = aveExistente ? (aveExistente.pai || '').trim() : '';
+  const maeAnterior = aveExistente ? (aveExistente.mae || '').trim() : '';
+  const mudouPai = !!paiNome && paiNome.toLowerCase() !== paiAnterior.toLowerCase();
+  const mudouMae = !!maeNome && maeNome.toLowerCase() !== maeAnterior.toLowerCase();
+
+  let ancestraisFinais = ancestraisExistentes.slice();
+  if (mudouPai) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('pai.'));
+  if (mudouMae) ancestraisFinais = ancestraisFinais.filter(a => !(a.caminho || '').startsWith('mae.'));
+  // Herdados do pai/mãe cadastrados só entram onde ainda não existe ninguém (nunca sobrescrevem o que já está salvo).
+  const caminhosJaSalvos = new Set(ancestraisFinais.map(a => a.caminho));
+  ancestraisFinais = ancestraisFinais.concat(
+    ancestrais.ancestraisProfundos.filter(a => !caminhosJaSalvos.has(a.caminho))
+  );
   
-  const avoPaterno = ancestrais.avoPaterno || (aveExistente ? aveExistente.avoPaterno : '') || '';
-  const avoPaterna = ancestrais.avoPaterna || (aveExistente ? aveExistente.avoPaterna : '') || '';
-  const avoMaterno = ancestrais.avoMaterno || (aveExistente ? aveExistente.avoMaterno : '') || '';
-  const avoMaterna = ancestrais.avoMaterna || (aveExistente ? aveExistente.avoMaterna : '') || '';
+  const existenteOuHerdado = (campo, mudou) => {
+    const herdado = ancestrais[campo] || '';
+    const atual = aveExistente ? (aveExistente[campo] || '') : '';
+    return mudou ? herdado : (atual || herdado);
+  };
+  const avoPaterno = existenteOuHerdado('avoPaterno', mudouPai);
+  const avoPaterna = existenteOuHerdado('avoPaterna', mudouPai);
+  const avoMaterno = existenteOuHerdado('avoMaterno', mudouMae);
+  const avoMaterna = existenteOuHerdado('avoMaterna', mudouMae);
   
   // ===== CORREÇÃO: USAR dataNasc NO LUGAR CERTO =====
   const dados = {
