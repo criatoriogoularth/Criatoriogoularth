@@ -21,6 +21,7 @@ async function renderSidebar(activePage) {
         { group: 'Visão geral', items: [
             { id: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Painel' },
             { id: 'arvore', href: 'arvore.html', icon: '🌳', label: 'Árvore Genealógica' },
+            { id: 'simulador-arvore', href: 'simulador-arvore.html', icon: '🧪', label: 'Simulação de Árvore' },
         ] },
         { group: 'Plantel', items: [
             { id: 'passaros', href: 'passaros.html', icon: '🐦', label: 'Pássaros' },

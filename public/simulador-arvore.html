@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Simulação de Árvore</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+.tree-container {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 30px 20px;
+  overflow: auto;
+  min-height: 600px;
+  width: 100%;
+  position: relative;
+}
+.genealogy-tree {
+  position: relative;
+  padding: 20px;
+  min-width: 100%;
+  min-height: 500px;
+}
+.tree-viewport {
+  position: relative;
+  min-height: 500px;
+}
+.tree-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+.tree-lines path {
+  stroke-width: 2px;
+  fill: none;
+}
+.tree-lines path.male { stroke: #3a6a9a; }
+.tree-lines path.female { stroke: #9a5a6a; }
+
+.tree-node {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 2px solid;
+  background: rgba(var(--shade),0.15);
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(var(--shade),0.3);
+  min-width: 100px;
+  min-height: 50px;
+  transition: all 0.2s ease;
+}
+.tree-node.empty {
+  border: 2px solid var(--brass-dim);
+  background: rgba(var(--shade),0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  min-height: 50px;
+}
+.tree-node.empty:hover {
+  border-color: var(--brass);
+  color: var(--brass-soft);
+  background: rgba(199,151,63,0.1);
+}
+.tree-node.filled {
+  background: rgba(199,151,63,0.12);
+  border-color: var(--brass);
+}
+.tree-node.filled.female {
+  background: rgba(185,116,98,0.12);
+  border-color: var(--rose);
+}
+.tree-node.root {
+  border-color: var(--brass);
+  border-width: 3px;
+  background: var(--bg-elevated);
+  min-width: 140px;
+  min-height: 60px;
+}
+.tree-node .node-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree-node .node-band {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.tree-node .node-ref {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tree-node .node-plus {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--brass-soft);
+}
+.gen-label {
+  position: absolute;
+  top: -18px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: .8;
+  letter-spacing: 0.05em;
+}
+.node-remove {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.tree-node.filled:not(.root):hover .node-remove {
+  opacity: 1;
+}
+.node-remove:hover { color: var(--danger-text); }
+
+.tree-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.tree-footer .btn { padding: 8px 20px; font-size: 12px; }
+.modal-item.male-item { border-left: 3px solid #3a6a9a; }
+.modal-item.female-item { border-left: 3px solid #9a5a6a; }
+
+.btn-config {
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  padding: 8px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-config:hover {
+  background: rgba(199,151,63,0.2);
+  border-color: var(--brass);
+}
+
+.config-panel {
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  display: none;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.config-panel.open {
+  display: block;
+}
+.config-panel .config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.config-panel .config-group {
+  background: rgba(var(--shade),0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+.config-panel .config-group label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.config-panel .config-group input[type="color"] {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.config-panel .config-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+.config-panel .config-group input[type="number"],
+.config-panel .config-group input[type="text"],
+.config-panel .config-group select {
+  width: 100%;
+  background: rgba(var(--shade),0.2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  outline: none;
+}
+.config-panel .config-group input[type="number"]:focus,
+.config-panel .config-group input[type="text"]:focus,
+.config-panel .config-group select:focus {
+  border-color: var(--brass);
+}
+.config-panel .config-group .range-value {
+  font-size: 11px;
+  color: var(--brass-soft);
+  font-weight: 700;
+  text-align: right;
+}
+.config-panel .config-group .radio-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+.config-panel .config-group .radio-group label {
+  font-size: 11px;
+  color: var(--text);
+  text-transform: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.config-panel .config-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  justify-content: flex-end;
+}
+.config-panel .file-upload-area {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: .15s ease;
+}
+.config-panel .file-upload-area:hover {
+  border-color: var(--brass);
+}
+.config-panel .file-upload-area .icon {
+  font-size: 20px;
+}
+.config-panel .file-upload-area p {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 2px 0;
+}
+.config-panel .file-upload-area .aviso {
+  font-size: 9px;
+  color: var(--danger);
+  opacity: 0.7;
+}
+
+.cert-wrap {
+  background: var(--parchment);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 297mm;
+  aspect-ratio: 297 / 210;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(var(--shade),0.3);
+  font-family: 'Manrope', sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.cert-bg-color {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.cert-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+.cert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 8px 20px;
+  border-bottom: 2px solid var(--brass);
+  background: rgba(199,151,63,0.08);
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.cert-header-left {
+  display: flex;
+  flex-direction: column;
+}
+.cert-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.cert-criador {
+  font-weight: 700;
+  font-size: 13px;
+  margin-top: 1px;
+}
+.cert-responsavel {
+  font-size: 10px;
+  margin-top: 1px;
+}
+.cert-registros {
+  font-size: 9px;
+  margin-top: 1px;
+}
+.cert-contato {
+  font-size: 9px;
+  margin-top: 1px;
+}
+.cert-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+}
+.cert-subject-panel {
+  flex: 0 0 86px;
+  height: 180px;
+  min-height: 180px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(199,151,63,0.06);
+  border: 2px solid var(--brass);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 0.15s ease;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+}
+.cert-columns {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+  position: relative;
+  z-index: 1;
+}
+.cert-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+.cert-col:not(:last-child) {
+  border-right: 1px dashed rgba(199,151,63,0.3);
+  padding-right: 6px;
+}
+.cert-pill {
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid rgba(58,106,154,0.25);
+  border-left: 3px solid #3a6a9a;
+  background: #1a2e28;
+  color: #ece6d6;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 0 4px;
+  width: 100%;
+  min-height: 12px;
+  transition: all 0.15s ease;
+}
+.cert-pill.wrap {
+  white-space: normal;
+  word-break: break-word;
+  text-overflow: clip;
+  line-height: 1.1;
+  padding: 0 4px;
+}
+.cert-pill.female {
+  background: #2e1a1a;
+  border-color: rgba(185,116,98,0.25);
+  border-left-color: #9a5a6a;
+  color: #ece6d6;
+}
+.cert-pill.indefinido {
+  color: #9aa89e;
+  font-style: italic;
+  background: #0d1a16;
+  border-color: rgba(var(--shade),0.08);
+  border-left-color: rgba(var(--shade),0.15);
+  font-weight: 400;
+}
+.cert-pill-anilha {
+  font-family: 'JetBrains Mono', monospace;
+  color: #e4c583 !important;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+.subject-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.subject-name {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+.subject-line {
+  font-size: 10.5px;
+  text-align: left;
+  margin-bottom: 1px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+}
+.subject-line b {
+  font-weight: 600;
+  color: inherit;
+}
+.subject-line .mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+}
+.cert-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 20px;
+  border-top: 2px solid var(--brass);
+  font-size: 10px;
+  background: rgba(199,151,63,0.06);
+  position: relative;
+  z-index: 1;
+}
+.cert-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.cert-col[data-depth="1"] .cert-pill-anilha { font-size: 9px; opacity: 0.85; }
+.cert-col[data-depth="2"] .cert-pill-anilha { font-size: 8px; opacity: 0.8; }
+.cert-col[data-depth="3"] .cert-pill-anilha { font-size: 7px; opacity: 0.75; }
+.cert-col[data-depth="4"] .cert-pill-anilha { font-size: 6.5px; opacity: 0.7; }
+.cert-col[data-depth="5"] .cert-pill-anilha { font-size: 6px; opacity: 0.65; }
+
+@media print {
+  .cert-actions, .topbar .btn, .burger, .sidebar, .tree-footer,
+  .config-panel, .btn-config {
+    display: none !important;
+  }
+  .cert-wrap {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+  }
+  .shell {
+    display: block !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+}
+@media (max-width: 768px) {
+  .cert-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+  .tree-container { padding: 15px 10px; min-height: 400px; }
+  .tree-node { min-width: 70px; min-height: 40px; padding: 4px 8px; }
+  .tree-node .node-name { font-size: 10px; }
+  .config-panel .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-novo-form {
+  background: rgba(var(--shade),0.15);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid var(--brass-dim);
+  display: none;
+}
+.modal-novo-form .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.modal-novo-form .form-header span {
+  font-size: 12px;
+  color: var(--brass-soft);
+  font-weight: 600;
+}
+.modal-novo-form .form-header button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal-novo-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.modal-novo-form .form-grid .full-width {
+  grid-column: 1 / -1;
+}
+.modal-novo-form .form-grid label {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 2px;
+}
+.modal-novo-form .form-grid input,
+.modal-novo-form .form-grid select {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.modal-novo-form .form-grid input:focus,
+.modal-novo-form .form-grid select:focus {
+  border-color: var(--brass);
+}
+.modal-novo-form .form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.modal-novo-form .form-actions .btn-novo {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--brass);
+  border: none;
+  color: var(--on-brass);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+}
+.modal-novo-form .form-actions .btn-novo:hover {
+  filter: brightness(1.08);
+}
+.modal-novo-form .form-actions .btn-cancel {
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+}
+.modal-novo-form .form-actions .btn-cancel:hover {
+  border-color: var(--brass-dim);
+  color: var(--text);
+}
+.modal-novo-form .form-hint {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.btn-novo-ancestral {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(199,151,63,0.12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  transition: .15s ease;
+}
+.btn-novo-ancestral:hover {
+  background: rgba(199,151,63,0.2);
+}
+</style>
+<style>
+/* ===== Simulação de Árvore ===== */
+.sim-painel{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.sim-card{background:var(--bg-elevated,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:12px;padding:14px}
+.sim-card h3{margin:0 0 10px;font-size:14px;color:var(--brass-soft)}
+.sim-card label{display:block;font-size:11.5px;color:var(--text-muted);margin:8px 0 4px}
+.sim-card input[type=text],.sim-card select{width:100%;box-sizing:border-box;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--text);font-size:14px;font-family:inherit}
+.sim-card.macho{border-left:3px solid #3a6a9a}.sim-card.femea{border-left:3px solid #9a5a6a}
+.sim-ave-info{font-size:12px;color:var(--text-muted);margin-top:6px;min-height:16px}
+.sim-opcoes{grid-column:1 / -1;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+.sim-opcoes .grupo{min-width:150px;flex:1 1 150px}
+.sim-opcoes .check{display:flex;gap:8px;align-items:center;font-size:13px;margin:0;color:var(--text);flex:0 0 auto}
+.sim-opcoes .check input{width:auto}
+.sim-aviso{border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.5;border:1px solid var(--line)}
+.sim-aviso.ok{background:rgba(92,154,124,.12);border-color:rgba(92,154,124,.4)}
+.sim-aviso.alerta{background:rgba(224,118,58,.12);border-color:rgba(224,118,58,.5)}
+.sim-aviso ul{margin:6px 0 0 18px;padding:0}
+.sim-vazio{text-align:center;color:var(--text-muted);padding:50px 10px;border:1px dashed var(--line);border-radius:12px}
+.sim-vazio .icon{font-size:40px;margin-bottom:8px}
+#preview-box{width:100%;position:relative;overflow:hidden;border-radius:10px}
+#cert-escala{transform-origin:top left;position:absolute;top:0;left:0}
+#cert-wrap{width:1123px;height:794px;max-width:none !important;aspect-ratio:auto !important;margin:0 !important;box-shadow:none}
+.sim-marca{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-20deg);font-family:'Fraunces',serif;font-weight:700;letter-spacing:.08em;color:rgba(190,60,40,.13);font-size:170px;line-height:1;white-space:nowrap;pointer-events:none;z-index:5;user-select:none}
+.sim-acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+@media (max-width:760px){.sim-painel{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active" id="page-simulador">
+
+      <div class="topbar">
+        <div>
+          <h1>🧪 Simulação de Árvore</h1>
+          <div class="lede">Escolha o macho e a fêmea para ver como ficaria a árvore genealógica do filhote — sem cadastrar nada. Depois é só baixar a imagem para postar.</div>
+        </div>
+      </div>
+
+      <div class="sim-painel">
+        <div class="sim-card macho">
+          <h3>♂ Macho (pai)</h3>
+          <label for="busca-macho">Buscar por nome ou anilha</label>
+          <input type="text" id="busca-macho" placeholder="Digite para filtrar..." autocomplete="off">
+          <label for="sel-macho">Ave</label>
+          <select id="sel-macho"></select>
+          <div class="sim-ave-info" id="info-macho"></div>
+        </div>
+        <div class="sim-card femea">
+          <h3>♀ Fêmea (mãe)</h3>
+          <label for="busca-femea">Buscar por nome ou anilha</label>
+          <input type="text" id="busca-femea" placeholder="Digite para filtrar..." autocomplete="off">
+          <label for="sel-femea">Ave</label>
+          <select id="sel-femea"></select>
+          <div class="sim-ave-info" id="info-femea"></div>
+        </div>
+
+        <div class="sim-card sim-opcoes">
+          <div class="grupo">
+            <label for="f-nome-filhote">Nome do filhote (opcional)</label>
+            <input type="text" id="f-nome-filhote" placeholder="Filhote simulado" autocomplete="off">
+          </div>
+          <div class="grupo">
+            <label for="f-sexo-filhote">Sexo do filhote</label>
+            <select id="f-sexo-filhote">
+              <option value="I">A definir</option>
+              <option value="M">Macho</option>
+              <option value="F">Fêmea</option>
+            </select>
+          </div>
+          <div class="grupo">
+            <label for="f-geracoes">Gerações</label>
+            <select id="f-geracoes">
+              <option value="3">3 (até bisavós)</option>
+              <option value="4">4 (até trisavós)</option>
+              <option value="5" selected>5 (completa)</option>
+            </select>
+          </div>
+          <div class="grupo">
+            <label for="f-formato">Formato da imagem</label>
+            <select id="f-formato">
+              <option value="a4">Paisagem (A4)</option>
+              <option value="quadrado">Quadrado 1:1 (feed)</option>
+              <option value="retrato">Retrato 4:5 (feed)</option>
+            </select>
+          </div>
+          <label class="check"><input type="checkbox" id="f-destacar"> Destacar ancestrais em comum</label>
+          <label class="check"><input type="checkbox" id="f-anilhas" checked> Mostrar anilhas</label>
+        </div>
+      </div>
+
+      <div id="sim-resultado" style="display:none;">
+        <div id="sim-aviso"></div>
+        <div id="preview-box">
+          <div id="cert-escala">
+            <div class="cert-wrap" id="cert-wrap">
+              <div class="cert-bg-color" id="cert-bg-color" style="background:#f3ecda;"></div>
+              <img class="cert-bg-image" id="cert-bg-image" style="display:none;" alt="Fundo">
+              <div class="cert-header" id="cert-header">
+                <div class="cert-header-left">
+                  <div class="cert-title" id="cert-title">SIMULAÇÃO DE CRUZAMENTO</div>
+                  <div class="cert-criador" id="cert-criador">Criatório Goularth</div>
+                  <div class="cert-responsavel" id="cert-responsavel">Responsável: Fabio Alves Goulart</div>
+                  <div class="cert-registros" id="cert-registros">CTF 3348370 / FOB II.889</div>
+                  <div class="cert-contato" id="cert-contato">criatorio.goularth@gmail.com · (11) 9 4149-3657</div>
+                </div>
+              </div>
+              <div class="cert-body">
+                <div class="cert-subject-panel" id="cert-subject-panel"></div>
+                <div class="cert-columns" id="cert-columns"></div>
+              </div>
+              <div class="cert-footer" id="cert-footer">
+                <span id="cert-footer-text">Simulação de cruzamento — não é um certificado oficial</span>
+              </div>
+              <div class="sim-marca" id="sim-marca">SIMULAÇÃO</div>
+            </div>
+          </div>
+        </div>
+        <div class="sim-acoes">
+          <button class="btn btn-primary" id="btn-png" onclick="baixarImagem()">🖼️ Baixar imagem para postar</button>
+          <button class="btn btn-ghost" id="btn-compartilhar" onclick="compartilharImagem()" style="display:none;">📤 Compartilhar</button>
+          <button class="btn btn-ghost" id="btn-pdf" onclick="baixarPDF()">📄 Baixar PDF</button>
+        </div>
+      </div>
+
+      <div class="sim-vazio" id="sim-vazio">
+        <div class="icon">🧪</div>
+        <div>Selecione o <b>macho</b> e a <b>fêmea</b> acima para ver a árvore do filhote.</div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script src="voltar.js"></script>
+<script>
+const CERT_CONFIG = {
+  1: { minPill: 18, maxPill: 32, minFont: 8, maxFont: 14, colWidth: 1.8 },
+  2: { minPill: 16, maxPill: 28, minFont: 7, maxFont: 12, colWidth: 1.5 },
+  3: { minPill: 14, maxPill: 24, minFont: 6, maxFont: 10, colWidth: 1.3 },
+  4: { minPill: 12, maxPill: 20, minFont: 5, maxFont: 8.5, colWidth: 1.1 },
+  5: { minPill: 10, maxPill: 17, minFont: 4.5, maxFont: 7.5, colWidth: 0.95 }
+};
+
+const CERT_MAX_GEN = 5;
+
+let CONFIG = {
+  bgColor: '#f3ecda', bgImage: null, bgOpacidade: 100, bgBrilho: 100,
+  corTitulo: '#c7973f', corCriador: '#23291f', corResponsavel: '#4a5347',
+  corRegistros: '#4a5347', corContato: '#4a5347', corLinhaHeader: '#c7973f',
+  corMachoFundo: '#1a2e28', corMachoTexto: '#ece6d6',
+  corFemeaFundo: '#2e1a1a', corFemeaTexto: '#ece6d6',
+  corRaizFundo: '#132621', corRaizOpacidade: 100, corRaizTexto: '#e4c583',
+  corBordaNos: '#c7973f', corAvatarFundo: '#c7973f', corAvatarTexto: 'var(--on-brass)',
+  corBordaRaiz: '#c7973f', corRodapeTexto: '#4a5347', corRodapeLinha: '#c7973f',
+  corRodapeFundo: 'rgba(199,151,63,0.06)', larguraRaiz: 86, alturaRaiz: 180,
+  tamNome: 15, tamInfo: 10.5, tamAvatar: 46, negritoNome: 'bold',
+  fonteCertificado: "'Manrope', sans-serif"
+};
+
+
+function hexAlpha(pct) {
+  const v = Math.round((Math.max(0, Math.min(100, pct)) / 100) * 255);
+  return v.toString(16).padStart(2, '0');
+}
+
+function geracaoPaths(depth) {
+  let paths = [''];
+  for (let i = 0; i < depth; i++) {
+    const next = [];
+    paths.forEach(p => {
+      next.push(p ? p + '.pai' : 'pai');
+      next.push(p ? p + '.mae' : 'mae');
+    });
+    paths = next;
+  }
+  return paths;
+}
+
+function ajustarPilulasCertificado() {
+  const cols = document.querySelectorAll('#cert-columns .cert-col');
+  const container = document.getElementById('cert-columns');
+  if (!container || cols.length === 0) return;
+  const alturaDisponivel = container.clientHeight || 400;
+  cols.forEach(col => {
+    const depth = parseInt(col.dataset.depth, 10);
+    const count = parseInt(col.dataset.count, 10);
+    const config = CERT_CONFIG[depth] || CERT_CONFIG[5];
+    if (!count) return;
+    const espacamento = 2;
+    const alturaPilula = Math.max(config.minPill, Math.min(config.maxPill, (alturaDisponivel / count) - espacamento));
+    const proporcao = (alturaPilula - config.minPill) / (config.maxPill - config.minPill);
+    const tamanhoFonte = Math.max(config.minFont, Math.min(config.maxFont, config.minFont + (config.maxFont - config.minFont) * proporcao));
+    col.querySelectorAll('.cert-pill').forEach(pilula => {
+      pilula.style.height = alturaPilula + 'px';
+      pilula.style.fontSize = tamanhoFonte + 'px';
+      pilula.style.lineHeight = alturaPilula + 'px';
+      pilula.style.padding = '0 6px';
+      const isFemale = pilula.classList.contains('female');
+      const isIndefinido = pilula.classList.contains('indefinido');
+      if (!isIndefinido) {
+        if (isFemale) {
+          pilula.style.background = CONFIG.corFemeaFundo;
+          pilula.style.color = CONFIG.corFemeaTexto;
+          pilula.style.borderColor = CONFIG.corFemeaFundo + '66';
+          pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+        } else {
+          pilula.style.background = CONFIG.corMachoFundo;
+          pilula.style.color = CONFIG.corMachoTexto;
+          pilula.style.borderColor = CONFIG.corMachoFundo + '66';
+          pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+        }
+        pilula.style.border = `1px solid ${CONFIG.corBordaNos}66`;
+        if (isFemale) {
+          pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+        } else {
+          pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+        }
+      }
+      if (depth <= 2) {
+        pilula.style.whiteSpace = 'normal';
+        pilula.style.wordBreak = 'break-word';
+        pilula.style.lineHeight = '1.2';
+      } else {
+        pilula.style.whiteSpace = 'nowrap';
+      }
+    });
+  });
+}
+
+function aplicarAoCertificado() {
+  const certWrap = document.getElementById('cert-wrap');
+  if (!certWrap) return;
+  const bgColor = document.getElementById('cert-bg-color');
+  const bgImage = document.getElementById('cert-bg-image');
+  if (CONFIG.bgImage) {
+    bgColor.style.background = 'transparent';
+    bgImage.src = CONFIG.bgImage;
+    bgImage.style.display = 'block';
+    bgImage.style.opacity = (CONFIG.bgOpacidade || 100) / 100;
+    bgImage.style.filter = `brightness(${(CONFIG.bgBrilho || 100) / 100})`;
+  } else {
+    bgColor.style.background = CONFIG.bgColor;
+    bgImage.style.display = 'none';
+    bgImage.style.opacity = 1;
+    bgImage.style.filter = 'none';
+  }
+  certWrap.style.fontFamily = CONFIG.fonteCertificado;
+  const header = document.getElementById('cert-header');
+  if (header) {
+    header.style.borderBottomColor = CONFIG.corLinhaHeader;
+    header.style.background = CONFIG.corLinhaHeader + '11';
+  }
+  document.getElementById('cert-title').style.color = CONFIG.corTitulo;
+  document.getElementById('cert-criador').style.color = CONFIG.corCriador;
+  document.getElementById('cert-responsavel').style.color = CONFIG.corResponsavel;
+  document.getElementById('cert-registros').style.color = CONFIG.corRegistros;
+  document.getElementById('cert-contato').style.color = CONFIG.corContato;
+  const footer = document.getElementById('cert-footer');
+  if (footer) {
+    footer.style.borderTopColor = CONFIG.corRodapeLinha;
+    footer.style.background = CONFIG.corRodapeFundo;
+  }
+  document.getElementById('cert-footer-text').style.color = CONFIG.corRodapeTexto;
+  const painel = document.querySelector('.cert-subject-panel');
+  if (painel) {
+    painel.style.flex = `0 0 ${CONFIG.larguraRaiz}px`;
+    painel.style.height = `${CONFIG.alturaRaiz}px`;
+    painel.style.minHeight = `${CONFIG.alturaRaiz}px`;
+    painel.style.borderColor = CONFIG.corBordaRaiz;
+    painel.style.background = CONFIG.corRaizFundo + hexAlpha(CONFIG.corRaizOpacidade ?? 100);
+    painel.style.color = CONFIG.corRaizTexto;
+  }
+  const avatar = document.querySelector('.subject-avatar');
+  if (avatar) {
+    avatar.style.width = CONFIG.tamAvatar + 'px';
+    avatar.style.height = CONFIG.tamAvatar + 'px';
+    avatar.style.fontSize = Math.round(CONFIG.tamAvatar * 0.4) + 'px';
+    avatar.style.color = CONFIG.corAvatarTexto;
+  }
+  const nome = document.querySelector('.subject-name');
+  if (nome) {
+    nome.style.fontSize = CONFIG.tamNome + 'px';
+    nome.style.fontWeight = CONFIG.negritoNome;
+    nome.style.color = CONFIG.corRaizTexto;
+  }
+  const linhas = document.querySelectorAll('.subject-line');
+  linhas.forEach(line => {
+    line.style.fontSize = CONFIG.tamInfo + 'px';
+    line.style.color = CONFIG.corRaizTexto;
+  });
+  document.querySelectorAll('.cert-pill:not(.indefinido)').forEach(pilula => {
+    const isFemale = pilula.classList.contains('female');
+    if (isFemale) {
+      pilula.style.background = CONFIG.corFemeaFundo;
+      pilula.style.color = CONFIG.corFemeaTexto;
+      pilula.style.borderColor = CONFIG.corFemeaFundo + '66';
+      pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+    } else {
+      pilula.style.background = CONFIG.corMachoFundo;
+      pilula.style.color = CONFIG.corMachoTexto;
+      pilula.style.borderColor = CONFIG.corMachoFundo + '66';
+      pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+    }
+    pilula.style.border = `1px solid ${CONFIG.corBordaNos}66`;
+    if (isFemale) {
+      pilula.style.borderLeftColor = CONFIG.corFemeaFundo;
+    } else {
+      pilula.style.borderLeftColor = CONFIG.corMachoFundo;
+    }
+  });
+  document.querySelectorAll('.cert-pill-anilha').forEach(el => {
+    el.style.color = CONFIG.corRaizTexto + ' !important';
+  });
+  ajustarPilulasCertificado();
+}
+
+async function carregarConfiguracoesSalvas() {
+  try {
+    const salvo = await DB.getConfig('cert_config');
+    if (salvo) CONFIG = { ...CONFIG, ...salvo };
+  } catch(e) {}
+}
+
+
+// ============================================================
+// SIMULAÇÃO DE ÁRVORE
+// ============================================================
+const FORMATOS = {
+  a4:       { w: 1123, h: 794,  nome: 'paisagem' },
+  quadrado: { w: 1080, h: 1080, nome: 'quadrado' },
+  retrato:  { w: 1080, h: 1350, nome: 'retrato' }
+};
+
+let AVES_TODAS = [];
+let tree = {};
+let simulacao = null;   // { macho, femea, nome, sexo, comuns }
+let geracoesMostradas = 5;
+
+const $ = (id) => document.getElementById(id);
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function norm(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
+
+// ---------- seleção das aves ----------
+function rotuloAve(a) {
+  return `${a.nome}${a.anilha ? ' — ' + a.anilha : ''}${a.especie ? ' (' + a.especie + ')' : ''}`;
+}
+
+function popularSelect(sexo) {
+  const sel = $('sel-' + (sexo === 'M' ? 'macho' : 'femea'));
+  const busca = norm($('busca-' + (sexo === 'M' ? 'macho' : 'femea')).value);
+  const atual = sel.value;
+  const lista = AVES_TODAS
+    .filter(a => a.sexo === sexo)
+    .filter(a => !busca || norm(a.nome).includes(busca) || norm(a.anilha).includes(busca) || String(a.id) === atual)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  sel.innerHTML = `<option value="">${sexo === 'M' ? 'Selecione o macho...' : 'Selecione a fêmea...'}</option>` +
+    lista.map(a => `<option value="${a.id}">${esc(rotuloAve(a))}</option>`).join('');
+  sel.value = lista.some(a => String(a.id) === atual) ? atual : '';
+}
+
+function infoAve(a) {
+  if (!a) return '';
+  const partes = [];
+  if (a.pai || a.mae) partes.push(`Pais: ${esc(a.pai || '?')} × ${esc(a.mae || '?')}`);
+  else partes.push('Sem pais cadastrados (a árvore vai começar nesta ave)');
+  return partes.join(' · ');
+}
+
+// ---------- montagem da árvore do filhote ----------
+function parseAncestraisDaAve(ave) {
+  let lista = ave.ancestrais;
+  if (typeof lista === 'string') { try { lista = JSON.parse(lista); } catch (e) { lista = []; } }
+  return Array.isArray(lista) ? lista : [];
+}
+
+// Copia toda a linhagem já cadastrada da ave escolhida para dentro da árvore do filhote,
+// encaixando-a como "pai" ou "mãe" (mesma lógica da tela Árvore Genealógica).
+function herdarLinhagemNaArvore(basePath, ave) {
+  if (ave.pai) tree[basePath + '.pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
+  if (ave.mae) tree[basePath + '.mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
+  if (ave.avoPaterno) tree[basePath + '.pai.pai'] = { nome: ave.avoPaterno, anilha: '' };
+  if (ave.avoPaterna) tree[basePath + '.pai.mae'] = { nome: ave.avoPaterna, anilha: '' };
+  if (ave.avoMaterno) tree[basePath + '.mae.pai'] = { nome: ave.avoMaterno, anilha: '' };
+  if (ave.avoMaterna) tree[basePath + '.mae.mae'] = { nome: ave.avoMaterna, anilha: '' };
+  parseAncestraisDaAve(ave).forEach(a => {
+    if (a.caminho && a.nome) tree[basePath + '.' + a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
+  });
+}
+
+function montarArvore(macho, femea) {
+  tree = {};
+  tree['pai'] = { nome: macho.nome, anilha: macho.anilha || '' };
+  tree['mae'] = { nome: femea.nome, anilha: femea.anilha || '' };
+  herdarLinhagemNaArvore('pai', macho);
+  herdarLinhagemNaArvore('mae', femea);
+}
+
+// ---------- parentesco / ancestrais em comum ----------
+const NOMES_REL = { pai: 'pai', mae: 'mãe' };
+function rotuloCaminho(path) {
+  const p = path.split('.');
+  let t = NOMES_REL[p[p.length - 1]];
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  for (let i = p.length - 2; i >= 0; i--) t += p[i] === 'pai' ? ' do pai' : ' da mãe';
+  return t;
+}
+
+function mesmaAve(a, b) {
+  if (a.anilha && b.anilha && norm(a.anilha) === norm(b.anilha)) return true;
+  return norm(a.nome) !== '' && norm(a.nome) === norm(b.nome);
+}
+
+function ancestraisEmComum() {
+  const ladoPai = [], ladoMae = [];
+  Object.keys(tree).forEach(path => {
+    const prof = path.split('.').length;
+    if (prof > geracoesMostradas) return;
+    const e = { path, prof, nome: tree[path].nome, anilha: tree[path].anilha };
+    (path.startsWith('pai') ? ladoPai : ladoMae).push(e);
+  });
+  const grupos = [];
+  ladoPai.forEach(a => {
+    ladoMae.forEach(b => {
+      if (!mesmaAve(a, b)) return;
+      let g = grupos.find(x => mesmaAve(x, a));
+      if (!g) { g = { nome: a.nome, anilha: a.anilha || b.anilha, caminhos: new Set(), menorSoma: 99 }; grupos.push(g); }
+      g.caminhos.add(a.path); g.caminhos.add(b.path);
+      g.menorSoma = Math.min(g.menorSoma, a.prof + b.prof);
+      g.posPai = (g.posPai || []).concat(a.path);
+      g.posMae = (g.posMae || []).concat(b.path);
+    });
+  });
+  return grupos;
+}
+
+function mostrarAviso(comuns) {
+  const el = $('sim-aviso');
+  const especieM = simulacao.macho.especie, especieF = simulacao.femea.especie;
+  let html = '';
+  if (especieM && especieF && norm(especieM) !== norm(especieF)) {
+    html += `<div class="sim-aviso alerta">⚠️ <b>Espécies diferentes:</b> o macho é ${esc(especieM)} e a fêmea é ${esc(especieF)}.</div>`;
+  }
+  if (!comuns.length) {
+    html += `<div class="sim-aviso ok">✅ <b>Nenhum ancestral em comum</b> encontrado nas ${geracoesMostradas} gerações mostradas. <span style="opacity:.75">(Considera só os ancestrais que estão cadastrados.)</span></div>`;
+  } else {
+    const menor = Math.min(...comuns.map(c => c.menorSoma));
+    const nivel = menor <= 4 ? 'parentesco <b>muito próximo</b>' : menor <= 6 ? 'parentesco <b>próximo</b>' : 'parentesco <b>distante</b>';
+    const itens = comuns.sort((a, b) => a.menorSoma - b.menorSoma).map(c => {
+      const pP = [...new Set(c.posPai)].map(rotuloCaminho).join(', ');
+      const pM = [...new Set(c.posMae)].map(rotuloCaminho).join(', ');
+      return `<li><b>${esc(c.nome)}</b>${c.anilha ? ' (' + esc(c.anilha) + ')' : ''} — lado do pai: ${esc(pP)} · lado da mãe: ${esc(pM)}</li>`;
+    }).join('');
+    html += `<div class="sim-aviso alerta">⚠️ <b>${comuns.length} ancestral(is) em comum</b> — ${nivel}.<ul>${itens}</ul>
+      <div style="opacity:.75;margin-top:6px;">Considera só os ancestrais que estão cadastrados.</div></div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ---------- ajustes finos depois de aplicar as cores do certificado ----------
+// (borda laranja nos ancestrais em comum, anilha legível no fundo claro, ícone do sexo legível)
+const _aplicarOriginal = aplicarAoCertificado;
+aplicarAoCertificado = function () {
+  _aplicarOriginal();
+  document.querySelectorAll('#cert-wrap .cert-pill.comum').forEach(p => {
+    p.style.border = '3px solid #e0763a';
+  });
+  document.querySelectorAll('#cert-wrap .cert-pill-anilha').forEach(el => {
+    el.style.setProperty('color', CONFIG.corResponsavel, 'important');
+  });
+  const av = document.querySelector('#cert-wrap .subject-avatar');
+  if (av && simulacao && simulacao.sexo !== 'I') {
+    av.style.color = simulacao.sexo === 'M' ? CONFIG.corMachoTexto : CONFIG.corFemeaTexto;
+  }
+};
+
+// ---------- certificado ----------
+function renderizarSimulacao() {
+  const nome = (simulacao.nome || 'Filhote simulado');
+  const sexo = simulacao.sexo;
+  const corAvatar = sexo === 'M' ? CONFIG.corMachoFundo : sexo === 'F' ? CONFIG.corFemeaFundo : CONFIG.corAvatarFundo;
+  const avatarBg = `radial-gradient(circle at 35% 30%, ${corAvatar}dd, ${corAvatar} 60%, ${corAvatar}aa)`;
+  const classeAvatar = sexo === 'M' ? '' : (sexo === 'F' ? ' female' : ' indefinido');
+  const ehMesma = norm(simulacao.macho.especie) === norm(simulacao.femea.especie);
+  const especie = ehMesma ? (simulacao.femea.especie || '—') : 'A confirmar';
+  const racaTxt = ehMesma && simulacao.femea.raca ? `<div class="subject-line" style="color:${CONFIG.corRaizTexto};">${esc(simulacao.femea.raca)}</div>` : '';
+
+  $('cert-subject-panel').innerHTML = `
+    <div class="subject-avatar${classeAvatar}" style="background:${avatarBg};color:${CONFIG.corAvatarTexto};">${sexo === 'M' ? '♂' : sexo === 'F' ? '♀' : '⚪'}</div>
+    <div class="subject-name" style="color:${CONFIG.corRaizTexto};">${esc(nome)}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Sexo:</b> ${sexo === 'M' ? 'Macho' : sexo === 'F' ? 'Fêmea' : 'A definir'}</div>
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Espécie:</b> ${esc(especie)}</div>
+    ${racaTxt}
+    <div class="subject-line" style="color:${CONFIG.corRaizTexto};"><b>Simulação</b></div>
+  `;
+
+  const destacar = $('f-destacar').checked;
+  const mostrarAnilhas = $('f-anilhas').checked;
+  const nomesComuns = destacar ? simulacao.comuns : [];
+
+  let htmlColunas = '';
+  for (let prof = 1; prof <= geracoesMostradas; prof++) {
+    const caminhos = geracaoPaths(prof);
+    const cfg = CERT_CONFIG[prof] || CERT_CONFIG[5];
+    htmlColunas += `<div class="cert-col" data-depth="${prof}" data-count="${caminhos.length}" style="flex: ${cfg.colWidth || 1} 1 0; min-width: 60px;">`;
+    caminhos.forEach(caminho => {
+      const no = tree[caminho];
+      const nomeNo = no && no.nome ? no.nome : null;
+      const anilha = no && no.anilha ? no.anilha : null;
+      const sx = caminho.endsWith('pai') ? 'M' : 'F';
+      const wrap = prof <= 2 ? ' wrap' : '';
+      const ehComum = nomeNo && nomesComuns.some(c => mesmaAve(c, { nome: nomeNo, anilha: anilha || '' }));
+      const classe = 'cert-pill' + wrap + (sx === 'F' ? ' female' : '') + (nomeNo ? '' : ' indefinido') + (ehComum ? ' comum' : '');
+      if (!nomeNo) {
+        htmlColunas += `<div class="${classe}" title="Indefinido">Indefinido</div>`;
+      } else {
+        htmlColunas += `
+          <div class="cert-pill-wrapper">
+            <div class="${classe}" title="${esc(nomeNo)}" style="width:100%;">${esc(nomeNo)}</div>
+            ${anilha && mostrarAnilhas ? `<div class="cert-pill-anilha" style="color:${CONFIG.corRaizTexto} !important;">${esc(anilha)}</div>` : ''}
+          </div>`;
+      }
+    });
+    htmlColunas += `</div>`;
+  }
+  $('cert-columns').innerHTML = htmlColunas;
+
+  $('cert-footer-text').textContent = 'Simulação de cruzamento — não é um certificado oficial' +
+    (destacar && simulacao.comuns.length ? '  ·  contorno laranja = ancestral em comum' : '');
+
+  requestAnimationFrame(() => { aplicarAoCertificado(); ajustarPilulasCertificado(); escalarPreview(); });
+}
+
+function aplicarFormato() {
+  const f = FORMATOS[$('f-formato').value] || FORMATOS.a4;
+  const w = $('cert-wrap');
+  w.style.width = f.w + 'px';
+  w.style.height = f.h + 'px';
+  $('sim-marca').style.fontSize = Math.round(f.w * 0.15) + 'px';
+}
+
+// O certificado tem tamanho fixo (igual em qualquer aparelho); na tela ele só é reduzido para caber.
+function escalarPreview() {
+  const box = $('preview-box');
+  const w = $('cert-wrap');
+  if (!box || !w) return;
+  const k = Math.min(1, box.clientWidth / w.offsetWidth);
+  $('cert-escala').style.transform = `scale(${k})`;
+  box.style.height = Math.ceil(w.offsetHeight * k) + 'px';
+}
+
+function simular() {
+  const idM = parseInt($('sel-macho').value, 10), idF = parseInt($('sel-femea').value, 10);
+  const macho = AVES_TODAS.find(a => a.id === idM), femea = AVES_TODAS.find(a => a.id === idF);
+  $('info-macho').innerHTML = infoAve(macho);
+  $('info-femea').innerHTML = infoAve(femea);
+
+  if (!macho || !femea) {
+    $('sim-resultado').style.display = 'none';
+    $('sim-vazio').style.display = 'block';
+    simulacao = null;
+    return;
+  }
+  geracoesMostradas = parseInt($('f-geracoes').value, 10) || 5;
+  montarArvore(macho, femea);
+  simulacao = {
+    macho, femea,
+    nome: $('f-nome-filhote').value.trim(),
+    sexo: $('f-sexo-filhote').value,
+    comuns: []
+  };
+  simulacao.comuns = ancestraisEmComum();
+
+  $('sim-vazio').style.display = 'none';
+  $('sim-resultado').style.display = 'block';
+  aplicarFormato();
+  mostrarAviso(simulacao.comuns);
+  renderizarSimulacao();
+}
+
+// ---------- exportar ----------
+function nomeArquivo(ext) {
+  const limpa = s => norm(s).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return `simulacao_${limpa(simulacao.macho.nome)}_x_${limpa(simulacao.femea.nome)}.${ext}`;
+}
+
+async function gerarCanvas(escala) {
+  aplicarAoCertificado();
+  await new Promise(r => setTimeout(r, 250));
+  const el = $('cert-wrap');
+  const W = el.offsetWidth, H = el.offsetHeight;
+  return html2canvas(el, {
+    scale: escala, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false,
+    width: W, height: H, windowWidth: W, windowHeight: H,
+    onclone: function (doc, clone) {
+      // no clone o certificado volta ao tamanho real (sem a redução da pré-visualização)
+      const esc = doc.getElementById('cert-escala');
+      if (esc) { esc.style.transform = 'none'; esc.style.width = W + 'px'; esc.style.height = H + 'px'; }
+      const box = doc.getElementById('preview-box');
+      if (box) { box.style.height = H + 'px'; box.style.overflow = 'visible'; }
+      clone.style.overflow = 'visible';
+      const painel = clone.querySelector('.cert-subject-panel');
+      if (painel) {
+        painel.style.background = CONFIG.corRaizFundo + hexAlpha(CONFIG.corRaizOpacidade ?? 100);
+        painel.style.borderColor = CONFIG.corBordaRaiz;
+        painel.style.color = CONFIG.corRaizTexto;
+      }
+      clone.querySelectorAll('.cert-pill:not(.indefinido)').forEach(p => {
+        const fem = p.classList.contains('female');
+        p.style.background = fem ? CONFIG.corFemeaFundo : CONFIG.corMachoFundo;
+        p.style.color = fem ? CONFIG.corFemeaTexto : CONFIG.corMachoTexto;
+      });
+    }
+  });
+}
+
+async function comBotaoOcupado(idBtn, textoOcupado, fn) {
+  const btn = $(idBtn); const original = btn.textContent;
+  btn.textContent = textoOcupado; btn.disabled = true;
+  try { await fn(); }
+  catch (e) { console.error(e); alert('❌ Não foi possível gerar agora. Tente novamente.'); }
+  finally { btn.textContent = original; btn.disabled = false; }
+}
+
+function baixarImagem() {
+  if (!simulacao) return;
+  return comBotaoOcupado('btn-png', '⏳ Gerando imagem...', async () => {
+    const canvas = await gerarCanvas(2);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nomeArquivo('png');
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  });
+}
+
+function compartilharImagem() {
+  if (!simulacao) return;
+  return comBotaoOcupado('btn-compartilhar', '⏳ Preparando...', async () => {
+    const canvas = await gerarCanvas(2);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const arquivo = new File([blob], nomeArquivo('png'), { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+      try { await navigator.share({ files: [arquivo], title: 'Simulação de cruzamento' }); }
+      catch (e) { /* cancelou */ }
+    } else {
+      alert('Seu aparelho não permite compartilhar direto. Use "Baixar imagem para postar".');
+    }
+  });
+}
+
+function baixarPDF() {
+  if (!simulacao) return;
+  return comBotaoOcupado('btn-pdf', '⏳ Gerando PDF...', async () => {
+    const canvas = await gerarCanvas(3);
+    const { jsPDF } = window.jspdf;
+    const paisagem = canvas.width >= canvas.height;
+    const pdf = new jsPDF(paisagem ? 'landscape' : 'portrait', 'mm', 'a4');
+    const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
+    const r = Math.min(pw / canvas.width, ph / canvas.height);
+    const fw = canvas.width * r, fh = canvas.height * r;
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', (pw - fw) / 2, (ph - fh) / 2, fw, fh);
+    pdf.save(nomeArquivo('pdf'));
+  });
+}
+
+// ---------- início ----------
+async function iniciar() {
+  renderSidebar('simulador-arvore');
+  await carregarConfiguracoesSalvas();
+  try {
+    AVES_TODAS = await DB.getAll(DB.TABLES.AVES);
+  } catch (e) {
+    alert('Erro ao carregar as aves: ' + e.message);
+    AVES_TODAS = [];
+  }
+  popularSelect('M'); popularSelect('F');
+
+  $('busca-macho').addEventListener('input', () => popularSelect('M'));
+  $('busca-femea').addEventListener('input', () => popularSelect('F'));
+  ['sel-macho', 'sel-femea', 'f-sexo-filhote', 'f-geracoes', 'f-formato', 'f-destacar', 'f-anilhas'].forEach(id => $(id).addEventListener('change', simular));
+  $('f-nome-filhote').addEventListener('input', () => { if (simulacao) { simulacao.nome = $('f-nome-filhote').value.trim(); renderizarSimulacao(); } });
+  window.addEventListener('resize', () => { escalarPreview(); });
+
+  if (navigator.canShare) $('btn-compartilhar').style.display = '';
+}
+
+iniciar();
+</script>
+</body>
+</html>
