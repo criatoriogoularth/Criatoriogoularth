@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -570,6 +569,72 @@
     transform: scale(0.45);
   }
 }
+
+/* ============================================================
+   NOVO: seletor de modelo + cor da aba do nome por tipo + estilo "Site Crachás"
+   (tudo com prefixo sc- / nome-cores- para não misturar com o resto)
+   ============================================================ */
+.sc-modo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;}
+.sc-modo .sc-modo-titulo{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin-right:4px;}
+.sc-modo .sc-modo-op{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:9px;border:1.5px solid var(--line);cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);transition:.15s ease;}
+.sc-modo .sc-modo-op:hover{border-color:var(--brass-dim);}
+.sc-modo .sc-modo-op.ativo{border-color:var(--brass);color:var(--brass-soft);background:rgba(199,151,63,.12);}
+.sc-modo .sc-modo-op input{accent-color:var(--brass);}
+.sc-modo .sc-modo-op small{font-weight:500;color:var(--text-muted);}
+
+.nome-cores-box{margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(var(--shade),0.06);}
+.nome-cores-box .nome-cores-titulo{font-size:12px;font-weight:700;color:var(--brass-soft);margin-bottom:8px;}
+.nome-cores-box .nome-cores-dica{font-size:10px;color:var(--text-muted);margin-bottom:8px;line-height:1.4;}
+.nome-cores-linha{display:grid;grid-template-columns:130px repeat(3,minmax(70px,1fr));gap:8px;align-items:end;margin-bottom:8px;}
+.nome-cores-linha:last-child{margin-bottom:0;}
+.nome-cores-chip{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:5px;border:1px solid transparent;font-size:12px;font-weight:800;font-family:'Fraunces',serif;text-align:center;}
+.nome-cores-linha .campo label{font-size:9px;color:var(--text-muted);display:block;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;}
+.nome-cores-linha .campo input[type="color"]{width:100%;height:26px;border:1px solid var(--line);border-radius:5px;background:transparent;cursor:pointer;padding:1px;}
+@media (max-width:768px){.nome-cores-linha{grid-template-columns:1fr 1fr 1fr;}.nome-cores-linha .nome-cores-chip{grid-column:1/-1;}}
+
+.sc-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.sc-tab{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9px;border:1.5px solid var(--line);background:transparent;color:var(--text-muted);cursor:pointer;font-weight:700;font-size:13px;font-family:'Manrope',sans-serif;}
+.sc-tab.ativa{border-color:var(--brass);color:var(--brass-soft);background:rgba(199,151,63,.12);}
+.sc-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.35);flex-shrink:0;}
+.sc-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:700;margin:0 0 8px;}
+.sc-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.sc-preset{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:20px;border:1.5px solid var(--line);cursor:pointer;font-size:12px;font-weight:600;color:var(--text);}
+.sc-preset:hover{border-color:var(--brass-dim);}
+.sc-preset.ativo{border-color:var(--brass);background:rgba(199,151,63,.12);}
+.sc-preset .sw{width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.3);flex-shrink:0;}
+.sc-layout{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start;}
+@media (max-width:1100px){.sc-layout{grid-template-columns:1fr;}}
+.sc-preview-side{position:sticky;top:0;}
+.sc-preview-box{background:rgba(var(--shade),0.12);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px;overflow-x:auto;}
+.sc-label{font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;}
+.sc-grupo{background:rgba(var(--shade),0.1);border-radius:8px;padding:12px;margin-bottom:10px;}
+.sc-grupo .sc-titulo{font-size:12px;font-weight:700;color:var(--brass-soft);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.sc-grupo .sc-titulo label{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:12px;text-transform:none;letter-spacing:0;color:var(--brass-soft);cursor:pointer;}
+.sc-grupo .sc-titulo input[type=checkbox]{width:15px;height:15px;accent-color:var(--brass);cursor:pointer;}
+.sc-linha{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;}
+@media (max-width:640px){.sc-linha{grid-template-columns:1fr 1fr 1fr;}}
+.sc-campo label{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);display:block;margin-bottom:3px;}
+.sc-campo input[type=color]{width:100%;height:26px;border:1px solid var(--line);border-radius:5px;background:transparent;cursor:pointer;padding:1px;}
+.sc-campo input[type=number],.sc-campo input[type=text],.sc-campo select{width:100%;background:rgba(var(--shade),0.2);border:1px solid var(--line);border-radius:5px;padding:4px 6px;color:var(--text);font-size:11px;font-family:'Manrope',sans-serif;outline:none;}
+.sc-campo select option{background:var(--option-bg);color:var(--text);}
+.sc-upload{border:1.5px dashed var(--line);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:11px;color:var(--text-muted);}
+.sc-upload:hover{border-color:var(--brass);}
+.sc-ajuda{font-size:10.5px;color:var(--text-muted);margin-top:6px;line-height:1.5;}
+.sc-btn-mini{padding:4px 10px;font-size:11px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Manrope',sans-serif;}
+.sc-btn-mini:hover{border-color:var(--brass);color:var(--brass-soft);}
+.preview-crachas.sc-site-prev{gap:10px;}
+.sc-nota{font-size:11px;color:var(--text-muted);width:100%;}
+
+/* ---- o crachá em si (estilo Site Crachás) ---- */
+.sc-badge{width:90mm;height:58mm;box-sizing:border-box;border-radius:2.5mm;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(0,0,0,.35);font-family:'Manrope','Segoe UI',system-ui,Arial,sans-serif;position:relative;flex-shrink:0;}
+.sc-badge.sc-pdf{box-shadow:none;}
+.sc-badge .sc-logo-flut{position:absolute;z-index:5;}
+.sc-badge .sc-miolo{flex:1;display:flex;flex-direction:column;padding:2.4mm 3mm;min-height:0;box-sizing:border-box;}
+.sc-caixa{border-radius:4px;text-align:center;padding:1mm 2mm;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%;box-sizing:border-box;line-height:1.25;}
+.sc-caixa.sc-nome{font-family:'Fraunces',Georgia,'Times New Roman',serif;}
+.sc-dupla{display:flex;gap:1mm;width:100%;}
+.sc-dupla > div{flex:1;min-width:0;}
+.sc-logo{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-weight:700;border:2px solid #c7973f;color:#c7973f;flex-shrink:0;overflow:hidden;background:rgba(199,151,63,.1);background-size:cover;background-position:center;}
 </style>
 </head>
 <body>
@@ -582,12 +647,25 @@
       <div class="topbar">
         <div>
           <h1>🏷️ Crachás / Etiquetas</h1>
-          <div class="lede">Gere etiquetas para gaiolas com informações da ave e árvore genealógica.</div>
+          <div class="lede" id="lede-cracha">Gere etiquetas para gaiolas com informações da ave e árvore genealógica.</div>
         </div>
         <div>
           <button class="btn-config" onclick="toggleConfig()">⚙️ Configurar</button>
           <button class="btn btn-primary" onclick="gerarPDF()">📄 Gerar PDF</button>
         </div>
+      </div>
+
+      <!-- MODELO DO CRACHÁ: com árvore (atual) ou estilo Site Crachás -->
+      <div class="sc-modo" id="sc-modo">
+        <span class="sc-modo-titulo">Modelo do crachá</span>
+        <label class="sc-modo-op ativo" id="sc-modo-op-arvore">
+          <input type="radio" name="sc-modo" value="arvore" checked onchange="trocarModoCracha('arvore')">
+          🌳 Com árvore genealógica <small>(modelo atual)</small>
+        </label>
+        <label class="sc-modo-op" id="sc-modo-op-site">
+          <input type="radio" name="sc-modo" value="site" onchange="trocarModoCracha('site')">
+          🏷️ Estilo Site Crachás <small>(sem árvore, cor por tipo)</small>
+        </label>
       </div>
 
       <!-- PAINEL DE CONFIGURAÇÃO -->
@@ -746,9 +824,9 @@
                 </div>
               </div>
               <div class="controles">
-                <div class="campo"><label>Fundo</label><input type="color" id="nome-bg" value="#2f5a9e" onchange="aplicarConfig()"></div>
-                <div class="campo"><label>Texto</label><input type="color" id="nome-texto" value="#ffffff" onchange="aplicarConfig()"></div>
-                <div class="campo"><label>Borda</label><input type="color" id="nome-borda" value="#1a3a6a" onchange="aplicarConfig()"></div>
+                <div class="campo" style="display:none;"><label>Fundo</label><input type="color" id="nome-bg" value="#2f5a9e" onchange="aplicarConfig()"></div>
+                <div class="campo" style="display:none;"><label>Texto</label><input type="color" id="nome-texto" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo" style="display:none;"><label>Borda</label><input type="color" id="nome-borda" value="#1a3a6a" onchange="aplicarConfig()"></div>
                 <div class="campo"><label>Fonte</label><input type="number" id="nome-font" value="14" min="8" max="28" onchange="aplicarConfig()"></div>
                 <div class="campo"><label>Altura</label><input type="number" id="nome-altura" value="0" min="0" max="30" onchange="aplicarConfig()" placeholder="0=auto"></div>
                 <div class="campo"><label>Exibir</label>
@@ -757,6 +835,36 @@
                     <option value="nao">❌ Não</option>
                   </select>
                 </div>
+              </div>
+            </div>
+
+            <!-- COR DA ABA DO NOME POR TIPO DE AVE -->
+            <div class="nome-cores-box" id="nome-cores-box">
+              <div class="nome-cores-titulo">🎨 Cor da aba do nome — por tipo de ave</div>
+              <div class="nome-cores-dica">Cada tipo sai com a sua cor para não gerar tudo igual. Padrão: macho azul, fêmea rosa, indefinido e filhote verde claro. Fonte, altura, ordem e “exibir” continuam no quadro “1. Nome da Ave”.</div>
+              <div class="nome-cores-linha">
+                <span class="nome-cores-chip" id="nc-chip-M">♂ Macho</span>
+                <div class="campo"><label>Fundo</label><input type="color" id="nc-M-bg" value="#2f5a9e" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="nc-M-texto" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="nc-M-borda" value="#1a3a6a" onchange="aplicarConfig()"></div>
+              </div>
+              <div class="nome-cores-linha">
+                <span class="nome-cores-chip" id="nc-chip-F">♀ Fêmea</span>
+                <div class="campo"><label>Fundo</label><input type="color" id="nc-F-bg" value="#e0719b" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="nc-F-texto" value="#ffffff" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="nc-F-borda" value="#b04a73" onchange="aplicarConfig()"></div>
+              </div>
+              <div class="nome-cores-linha">
+                <span class="nome-cores-chip" id="nc-chip-I">⚪ Indefinido</span>
+                <div class="campo"><label>Fundo</label><input type="color" id="nc-I-bg" value="#a9dca0" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="nc-I-texto" value="#1f4a2a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="nc-I-borda" value="#6fae7c" onchange="aplicarConfig()"></div>
+              </div>
+              <div class="nome-cores-linha">
+                <span class="nome-cores-chip" id="nc-chip-K">🐣 Filhote</span>
+                <div class="campo"><label>Fundo</label><input type="color" id="nc-K-bg" value="#a9dca0" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Texto</label><input type="color" id="nc-K-texto" value="#1f4a2a" onchange="aplicarConfig()"></div>
+                <div class="campo"><label>Borda</label><input type="color" id="nc-K-borda" value="#6fae7c" onchange="aplicarConfig()"></div>
               </div>
             </div>
 
@@ -954,6 +1062,51 @@
         </div>
       </div>
 
+      <!-- PAINEL DO MODELO "ESTILO SITE CRACHÁS" -->
+      <div class="config-panel" id="sc-config-panel">
+        <div class="sc-sub">Tipo de ave que você está configurando</div>
+        <div class="sc-tabs" id="sc-tabs"></div>
+
+        <div class="sc-sub">Modelos prontos (ponto de partida — depois é só ajustar as cores)</div>
+        <div class="sc-presets" id="sc-presets"></div>
+
+        <div class="sc-layout">
+          <div id="sc-grupos"></div>
+          <div class="sc-preview-side">
+            <div class="sc-preview-box">
+              <span class="sc-label" id="sc-prev-label">Prévia ao vivo</span>
+              <div id="sc-preview-mini"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc-grupo" style="margin-top:6px;">
+          <div class="sc-titulo">👤 Rodapé do crachá (vale para todos os tipos)</div>
+          <div class="sc-linha" style="grid-template-columns:repeat(3,1fr);">
+            <div class="sc-campo"><label>Nome do criador</label><input type="text" id="sc-cr-nome" placeholder="Ex: Criatório Goularth" onchange="SC.salvarCriador()"></div>
+            <div class="sc-campo"><label>Registro (SISPASS / FOB)</label><input type="text" id="sc-cr-registro" placeholder="Ex: 000000 / FOB 000" onchange="SC.salvarCriador()"></div>
+            <div class="sc-campo"><label>Telefone</label><input type="text" id="sc-cr-telefone" placeholder="Ex: (00) 00000-0000" onchange="SC.salvarCriador()"></div>
+          </div>
+          <div class="sc-ajuda">São os mesmos dados do campo “Proprietário” do modelo com árvore — mudou aqui, muda lá também.</div>
+        </div>
+
+        <div class="sc-grupo">
+          <div class="sc-titulo">📐 Tamanho do crachá e da folha A4 (vale para todos os tipos)</div>
+          <div class="sc-linha" style="grid-template-columns:repeat(4,1fr);">
+            <div class="sc-campo"><label>Largura (mm)</label><input type="number" id="sc-folha-largura" value="90" min="30" max="190" step="1" onchange="SC.lerFolha()"></div>
+            <div class="sc-campo"><label>Altura (mm)</label><input type="number" id="sc-folha-altura" value="58" min="25" max="140" step="1" onchange="SC.lerFolha()"></div>
+            <div class="sc-campo"><label>Espaço entre eles (mm)</label><input type="number" id="sc-folha-espaco" value="2" min="0" max="15" step="0.5" onchange="SC.lerFolha()"></div>
+            <div class="sc-campo"><label>Margem da folha (mm)</label><input type="number" id="sc-folha-margem" value="8" min="0" max="20" step="1" onchange="SC.lerFolha()"></div>
+          </div>
+          <div class="sc-ajuda" id="sc-folha-info"></div>
+        </div>
+
+        <div class="config-actions">
+          <button class="btn btn-ghost" onclick="SC.toggleConfig()">← Fechar</button>
+          <button class="btn btn-primary" onclick="SC.salvar(true)">💾 Salvar</button>
+        </div>
+      </div>
+
       <!-- LISTA DE AVES -->
       <div class="crachas-toolbar">
         <div class="filters">
@@ -965,6 +1118,8 @@
             <option value="">Todos os sexos</option>
             <option value="M">Machos</option>
             <option value="F">Fêmeas</option>
+            <option value="I">Indefinidos</option>
+            <option value="K">Filhotes</option>
           </select>
         </div>
         <div class="actions">
@@ -1008,6 +1163,74 @@ renderSidebar('crachas');
 
 let avesSelecionadas = new Set();
 let crachaConfig = {};
+let modoCracha = 'arvore';   // 'arvore' (modelo atual) | 'site' (estilo Site Crachás)
+
+// Tipos de ave para colorir o crachá
+const TIPOS_CRACHA = [
+  { id: 'M', nome: 'Macho',      icone: '♂' },
+  { id: 'F', nome: 'Fêmea',      icone: '♀' },
+  { id: 'I', nome: 'Indefinido', icone: '⚪' },
+  { id: 'K', nome: 'Filhote',    icone: '🐣' }
+];
+// Padrão: macho azul, fêmea rosa, indefinido e filhote verde claro
+const NOME_CORES_PADRAO = {
+  M: { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a' },
+  F: { bg: '#e0719b', texto: '#ffffff', borda: '#b04a73' },
+  I: { bg: '#a9dca0', texto: '#1f4a2a', borda: '#6fae7c' },
+  K: { bg: '#a9dca0', texto: '#1f4a2a', borda: '#6fae7c' }
+};
+
+function tipoCracha(ave) {
+  const sit = String((ave && ave.situacao) || '').toLowerCase();
+  if (sit === 'filhote' || (ave && (ave.filhote === true || ave.filhote === 1 || ave.filhote === '1'))) return 'K';
+  if (ave && ave.sexo === 'M') return 'M';
+  if (ave && ave.sexo === 'F') return 'F';
+  return 'I';
+}
+
+// Garante as 4 cores do nome. Config antiga (só 'nome') mantém a cor antiga para os machos.
+function garantirNomeCores(config) {
+  const nc = config.nomeCores = config.nomeCores || {};
+  TIPOS_CRACHA.forEach(t => {
+    if (!nc[t.id]) {
+      nc[t.id] = Object.assign({}, NOME_CORES_PADRAO[t.id]);
+      if (t.id === 'M' && config.nome && config.nome.bg) {
+        nc.M = { bg: config.nome.bg, texto: config.nome.texto || '#ffffff', borda: config.nome.borda || '#1a3a6a' };
+      }
+    }
+  });
+  return config;
+}
+function lerNomeCores() {
+  const out = {};
+  TIPOS_CRACHA.forEach(t => {
+    out[t.id] = {
+      bg: document.getElementById('nc-' + t.id + '-bg').value,
+      texto: document.getElementById('nc-' + t.id + '-texto').value,
+      borda: document.getElementById('nc-' + t.id + '-borda').value
+    };
+  });
+  return out;
+}
+function preencherNomeCores(nc) {
+  nc = nc || {};
+  TIPOS_CRACHA.forEach(t => {
+    const c = nc[t.id] || NOME_CORES_PADRAO[t.id];
+    document.getElementById('nc-' + t.id + '-bg').value = c.bg;
+    document.getElementById('nc-' + t.id + '-texto').value = c.texto;
+    document.getElementById('nc-' + t.id + '-borda').value = c.borda;
+  });
+  atualizarChipsNomeCores();
+}
+function atualizarChipsNomeCores() {
+  TIPOS_CRACHA.forEach(t => {
+    const chip = document.getElementById('nc-chip-' + t.id);
+    if (!chip) return;
+    chip.style.background = document.getElementById('nc-' + t.id + '-bg').value;
+    chip.style.color = document.getElementById('nc-' + t.id + '-texto').value;
+    chip.style.borderColor = document.getElementById('nc-' + t.id + '-borda').value;
+  });
+}
 
 // ============================================================
 // CONFIGURAÇÕES DO CRAChÁ
@@ -1025,6 +1248,7 @@ function getConfig() {
       }
       config.fundoEsqImg = crachaConfig?.fundoEsqImg || '';
       config.fundoDirImg = crachaConfig?.fundoDirImg || '';
+      garantirNomeCores(config);
       return config;
     }
   } catch (e) {}
@@ -1051,6 +1275,7 @@ function getConfig() {
     rodapeRegistro: { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' },
     rodapeTelefone: { bg: '#f5f5f5', texto: '#1a1a1a', borda: '#cccccc', font: 7, altura: 0, visivel: 'sim' },
     nome: { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 },
+    nomeCores: JSON.parse(JSON.stringify(NOME_CORES_PADRAO)),
     c2: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 },
     c3: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 },
     c4: { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 },
@@ -1117,6 +1342,7 @@ function salvarConfig() {
       altura: parseInt(document.getElementById('rodape-telefone-altura').value) || 0,
       visivel: document.getElementById('rodape-telefone-visivel').value
     },
+    nomeCores: lerNomeCores(),
     nome: {
       bg: document.getElementById('nome-bg').value,
       texto: document.getElementById('nome-texto').value,
@@ -1235,6 +1461,8 @@ function carregarConfig() {
   document.getElementById('nome-visivel').value = nome.visivel;
   document.getElementById('nome-ordem').value = nome.ordem;
   
+  preencherNomeCores(crachaConfig.nomeCores);
+  
   const c2 = crachaConfig.c2 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 };
   const c3 = crachaConfig.c3 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 };
   const c4 = crachaConfig.c4 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 };
@@ -1291,6 +1519,7 @@ function carregarConfig() {
 }
 
 function toggleConfig() {
+  if (modoCracha === 'site') { SC.toggleConfig(); return; }
   const panel = document.getElementById('config-panel');
   panel.classList.toggle('open');
   if (panel.classList.contains('open')) {
@@ -1343,6 +1572,7 @@ function aplicarConfig() {
       altura: parseInt(document.getElementById('rodape-telefone-altura').value) || 0,
       visivel: document.getElementById('rodape-telefone-visivel').value
     },
+    nomeCores: lerNomeCores(),
     nome: {
       bg: document.getElementById('nome-bg').value,
       texto: document.getElementById('nome-texto').value,
@@ -1389,6 +1619,7 @@ function aplicarConfig() {
       ordem: parseInt(document.getElementById('c5-ordem').value) || 5
     }
   };
+  atualizarChipsNomeCores();
   atualizarPreviewMini();
   renderizarPrevia();
 }
@@ -1574,7 +1805,9 @@ async function renderizarLista() {
     aves = aves.filter(a => a.especie === filtroEspecie);
   }
   if (filtroSexo) {
-    aves = aves.filter(a => a.sexo === filtroSexo);
+    aves = aves.filter(a => filtroSexo === 'K' ? tipoCracha(a) === 'K'
+      : filtroSexo === 'I' ? (a.sexo !== 'M' && a.sexo !== 'F')
+      : a.sexo === filtroSexo);
   }
   
   document.getElementById('total-aves-disponiveis').textContent = aves.length + ' aves';
@@ -1726,7 +1959,9 @@ function gerarCrachaHTML(ave, config, todasAves) {
   const especieRaca = ave.especie ? (ave.raca ? `${ave.especie} · ${ave.raca}` : ave.especie) : (ave.raca || '-');
   
   // Configurações das caixas
-  const nomeCfg = config.nome || { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 };
+  const nomeBase = config.nome || { bg: '#2f5a9e', texto: '#ffffff', borda: '#1a3a6a', font: 14, altura: 0, visivel: 'sim', ordem: 1 };
+  const nomeCoresAve = (garantirNomeCores(config).nomeCores)[tipoCracha(ave)];
+  const nomeCfg = Object.assign({}, nomeBase, { bg: nomeCoresAve.bg, texto: nomeCoresAve.texto, borda: nomeCoresAve.borda });
   const c2Cfg = config.c2 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 };
   const c3Cfg = config.c3 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 9, altura: 0, visivel: 'sim', ordem: 3 };
   const c4Cfg = config.c4 || { bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 4 };
@@ -1908,6 +2143,7 @@ function gerarCrachaHTML(ave, config, todasAves) {
 // ============================================================
 
 async function atualizarPreviewMini() {
+  if (modoCracha === 'site') return;
   const container = document.getElementById('preview-mini');
   const aves = await DB.getAll(DB.TABLES.AVES);
   
@@ -1949,6 +2185,9 @@ async function renderizarPrevia() {
     return;
   }
   
+  if (modoCracha === 'site') { SC.renderPrevia(container, selecionadas, aves); return; }
+  container.classList.remove('sc-site-prev');
+  
   const config = crachaConfig;
   const todasAves = aves;
   const mostrar = selecionadas.slice(0, 6);
@@ -1969,6 +2208,23 @@ async function gerarPDF() {
   
   if (selecionadas.length === 0) {
     alert('Selecione pelo menos uma ave!');
+    return;
+  }
+
+  if (modoCracha === 'site') {
+    const b = document.querySelector('.topbar .btn-primary');
+    const t = b.textContent;
+    b.textContent = '⏳ Gerando PDF...';
+    b.disabled = true;
+    try {
+      const r = await SC.gerarPDF(selecionadas, aves);
+      alert(`✅ Pronto! ${r.qtd} crachás em ${r.paginas} página(s)`);
+    } catch (erro) {
+      console.error('ERRO:', erro);
+      alert('Erro ao gerar: ' + erro.message);
+    }
+    b.textContent = t;
+    b.disabled = false;
     return;
   }
 
@@ -2061,5 +2317,542 @@ if (typeof renderSidebar === 'function') {
   renderSidebar('crachas');
 }
 </script>
+
+<script>
+/* ============================================================
+   MODELO "ESTILO SITE CRACHÁS" dentro do sistema
+   Mesmo visual do site-crachas.html (uma configuração por tipo de ave:
+   Macho / Fêmea / Indefinido / Filhote), mas as aves vêm do cadastro do
+   sistema em vez de serem digitadas. Config guardada neste navegador
+   (localStorage 'cracha_site_v1'), igual o modelo com árvore faz.
+   ============================================================ */
+const SC = (function () {
+  'use strict';
+
+  const CHAVE = 'cracha_site_v1';
+  let sexoEditando = 'M';
+  let avesCache = [];
+
+  const esc = v => (v === null || v === undefined) ? '' :
+    String(v).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  const $ = id => document.getElementById(id);
+
+  /* ---------- configuração visual (uma por tipo) ---------- */
+  function caixaPadrao(over) {
+    return Object.assign({ bg: '#ffffff', texto: '#1a1a1a', borda: '#dddddd', font: 8, altura: 0, visivel: 'sim', ordem: 2 }, over || {});
+  }
+  function configPadrao(p) {
+    return {
+      fundoCor: p.fundo, fundoOpacidade: 100, fundoImg: '',
+      bordaCor: p.borda, bordaEspessura: p.bordaEspessura || 1,
+      espacamentoCaixas: 1.3,
+      logoUrl: '', logoIniciais: '', logoFormato: 'circulo', logoTamanho: 60, logoPosicao: 'baixo', logoAlinhamento: 'centro', logoVisivel: 'nao',
+      logoBordaCor: '#c7973f', logoBordaEspessura: 2, logoRaio: 6,
+      logoModoPosicao: 'fluxo', logoCanto: 'topo-direita', logoMargem: 2,
+      nome: caixaPadrao({ bg: p.nomeBg, texto: p.nomeTexto, borda: p.nomeBorda, font: 13.5, ordem: 1 }),
+      c2: caixaPadrao({ bg: p.caixaBg, texto: p.caixaTexto, borda: p.caixaBorda, font: 7.5, ordem: 2 }),
+      c3: caixaPadrao({ bg: p.caixaBg, texto: p.caixaTexto, borda: p.caixaBorda, font: 8.5, ordem: 3 }),
+      c4: caixaPadrao({ bg: p.caixaBg, texto: p.caixaTexto, borda: p.caixaBorda, font: 7.5, ordem: 4 }),
+      c5: caixaPadrao({ bg: p.caixaBg, texto: p.caixaTexto, borda: p.caixaBorda, font: 7, ordem: 5 }),
+      rodapeNome: caixaPadrao({ bg: p.rodapeBg, texto: p.rodapeTexto, borda: p.rodapeBorda, font: 6.3 }),
+      rodapeRegistro: caixaPadrao({ bg: p.rodapeBg, texto: p.rodapeTexto, borda: p.rodapeBorda, font: 6.3 }),
+      rodapeTelefone: caixaPadrao({ bg: p.rodapeBg, texto: p.rodapeTexto, borda: p.rodapeBorda, font: 6.3 })
+    };
+  }
+
+  const PRESETS = [
+    { id: 'azul', nome: 'Azul', sw: '#2f5a9e',
+      paleta: { fundo: '#ffffff', borda: '#2f5a9e', bordaEspessura: 1, nomeBg: '#2f5a9e', nomeTexto: '#ffffff', nomeBorda: '#1a3a6a', caixaBg: '#eaf1fb', caixaTexto: '#1f3f73', caixaBorda: '#bcd0ec', rodapeBg: '#2f5a9e', rodapeTexto: '#ffffff', rodapeBorda: '#1a3a6a' } },
+    { id: 'rosa', nome: 'Rosa', sw: '#e0719b',
+      paleta: { fundo: '#fff5f9', borda: '#e0719b', bordaEspessura: 1, nomeBg: '#e0719b', nomeTexto: '#ffffff', nomeBorda: '#b04a73', caixaBg: '#fde8f0', caixaTexto: '#7a2c4a', caixaBorda: '#f2bfd3', rodapeBg: '#e0719b', rodapeTexto: '#ffffff', rodapeBorda: '#b04a73' } },
+    { id: 'verde-claro', nome: 'Verde Claro', sw: '#a9dca0',
+      paleta: { fundo: '#f6fff4', borda: '#6fae7c', bordaEspessura: 1, nomeBg: '#a9dca0', nomeTexto: '#1f4a2a', nomeBorda: '#6fae7c', caixaBg: '#ffffff', caixaTexto: '#1f4a2a', caixaBorda: '#cfe8cb', rodapeBg: '#d9f0d4', rodapeTexto: '#1f4a2a', rodapeBorda: '#8cc79a' } },
+    { id: 'azul-real', nome: 'Azul Real', sw: '#1d3a6e',
+      paleta: { fundo: '#ffffff', borda: '#1d3a6e', bordaEspessura: 1, nomeBg: '#1d3a6e', nomeTexto: '#f3d9a0', nomeBorda: '#14285a', caixaBg: '#eef2f8', caixaTexto: '#1d3a6e', caixaBorda: '#c9d3e6', rodapeBg: '#1d3a6e', rodapeTexto: '#f3d9a0', rodapeBorda: '#14285a' } },
+    { id: 'verde-aviario', nome: 'Verde Aviário', sw: '#234134',
+      paleta: { fundo: '#fbf8f0', borda: '#234134', bordaEspessura: 1, nomeBg: '#234134', nomeTexto: '#e0bd7c', nomeBorda: '#16281f', caixaBg: '#ffffff', caixaTexto: '#234134', caixaBorda: '#cddccf', rodapeBg: '#234134', rodapeTexto: '#e0bd7c', rodapeBorda: '#16281f' } },
+    { id: 'minimalista', nome: 'Minimalista Cinza', sw: '#2b2b2b',
+      paleta: { fundo: '#ffffff', borda: '#2b2b2b', bordaEspessura: 0.75, nomeBg: '#f5f5f5', nomeTexto: '#111111', nomeBorda: '#2b2b2b', caixaBg: '#ffffff', caixaTexto: '#333333', caixaBorda: '#dddddd', rodapeBg: '#ffffff', rodapeTexto: '#333333', rodapeBorda: '#c7973f' } },
+    { id: 'moderno-petroleo', nome: 'Moderno Petróleo', sw: '#0f3d3e',
+      paleta: { fundo: '#ffffff', borda: '#0f3d3e', bordaEspessura: 1, nomeBg: '#0f3d3e', nomeTexto: '#bfe9e6', nomeBorda: '#082626', caixaBg: '#eafaf9', caixaTexto: '#0f3d3e', caixaBorda: '#bfe9e6', rodapeBg: '#0f3d3e', rodapeTexto: '#bfe9e6', rodapeBorda: '#082626' } },
+    { id: 'retro-kraft', nome: 'Retrô Kraft', sw: '#7a5c3e',
+      paleta: { fundo: '#e9dcc2', borda: '#7a5c3e', bordaEspessura: 1.5, nomeBg: '#e9dcc2', nomeTexto: '#4a3521', nomeBorda: '#7a5c3e', caixaBg: '#f2e9d6', caixaTexto: '#4a3521', caixaBorda: '#a88a5e', rodapeBg: '#e9dcc2', rodapeTexto: '#4a3521', rodapeBorda: '#7a5c3e' } },
+    { id: 'industrial', nome: 'Industrial Grafite', sw: '#20232b',
+      paleta: { fundo: '#20232b', borda: '#4fd1c5', bordaEspessura: 1, nomeBg: '#20232b', nomeTexto: '#f1ece0', nomeBorda: '#4fd1c5', caixaBg: '#262b34', caixaTexto: '#d7d7d7', caixaBorda: '#3a4048', rodapeBg: '#123634', rodapeTexto: '#8fe4da', rodapeBorda: '#4fd1c5' } },
+    { id: 'rose-elegante', nome: 'Rosé Elegante', sw: '#d98a92',
+      paleta: { fundo: '#fff9f7', borda: '#d98a92', bordaEspessura: 1, nomeBg: '#f4c6c9', nomeTexto: '#7a2e37', nomeBorda: '#d98a92', caixaBg: '#fff2f2', caixaTexto: '#5a3336', caixaBorda: '#eecdd0', rodapeBg: '#faeaea', rodapeTexto: '#7a2e37', rodapeBorda: '#eecdd0' } },
+    { id: 'bordo-classico', nome: 'Bordô Clássico', sw: '#5c1a2b',
+      paleta: { fundo: '#faf3e8', borda: '#5c1a2b', bordaEspessura: 1, nomeBg: '#5c1a2b', nomeTexto: '#e9c98f', nomeBorda: '#3d0f1c', caixaBg: '#fff9ef', caixaTexto: '#4a2a33', caixaBorda: '#dccb9f', rodapeBg: '#5c1a2b', rodapeTexto: '#e9c98f', rodapeBorda: '#3d0f1c' } }
+  ];
+  const preset = id => PRESETS.find(p => p.id === id);
+
+  // Configuração inicial: macho azul, fêmea rosa, indefinido e filhote verde claro
+  const PADRAO_PRESET = { M: 'azul', F: 'rosa', I: 'verde-claro', K: 'verde-claro' };
+  let configs = {};
+  let presetAtivo = Object.assign({}, PADRAO_PRESET);
+  Object.keys(PADRAO_PRESET).forEach(t => { configs[t] = configPadrao(preset(PADRAO_PRESET[t]).paleta); });
+  let folha = { largura: 90, altura: 58, espaco: 2, margem: 8 };
+
+  /* ---------- persistência ---------- */
+  function salvarEstado() {
+    try { localStorage.setItem(CHAVE, JSON.stringify({ versao: 1, configs, presetAtivo, folha })); }
+    catch (e) { console.warn('Não foi possível salvar o modelo Site Crachás:', e); }
+  }
+  function carregarEstado() {
+    try {
+      const bruto = localStorage.getItem(CHAVE);
+      if (!bruto) return;
+      const p = JSON.parse(bruto);
+      if (p.configs) Object.keys(configs).forEach(t => {
+        if (p.configs[t]) configs[t] = Object.assign(configPadrao(preset(PADRAO_PRESET[t]).paleta), p.configs[t]);
+      });
+      if (p.presetAtivo) presetAtivo = Object.assign(presetAtivo, p.presetAtivo);
+      if (p.folha) folha = Object.assign(folha, p.folha);
+    } catch (e) { console.warn('Não foi possível ler o modelo Site Crachás salvo:', e); }
+  }
+
+  /* ---------- dados da ave do sistema -> crachá ---------- */
+  function criadorAtual() {
+    const c = (typeof crachaConfig === 'object' && crachaConfig && crachaConfig.propNome !== undefined) ? crachaConfig : getConfig();
+    return { nome: c.propNome || '', registro: c.propRegistro || '', telefone: c.propContato || '' };
+  }
+  function sexoTxt(a) {
+    if (a.sexo === 'M') return 'Macho';
+    if (a.sexo === 'F') return 'Fêmea';
+    return tipoCracha(a) === 'K' ? 'Filhote' : 'Indefinido';
+  }
+  function paiMae(a) {
+    let pai = a.pai, mae = a.mae;
+    try {
+      if ((!pai || !mae) && window.Genealogia) {
+        const t = Genealogia.montar(a, avesCache, { maxGen: 1 });
+        pai = pai || (t.pai && t.pai.nome);
+        mae = mae || (t.mae && t.mae.nome);
+      }
+    } catch (e) { /* segue com o que tem */ }
+    const lim = s => { s = String(s == null ? '' : s).trim(); return (s === '-' || s === '—') ? '' : s; };
+    return { pai: lim(pai), mae: lim(mae) };
+  }
+  const hexToRgba = (hex, pct) => {
+    const h = (hex || '#ffffff').replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16) || 255, g = parseInt(h.substring(2, 4), 16) || 255, b = parseInt(h.substring(4, 6), 16) || 255;
+    return `rgba(${r},${g},${b},${(pct === undefined ? 100 : pct) / 100})`;
+  };
+
+  /* ---------- HTML do crachá ---------- */
+  function caixaHtml(conteudo, cfg, extra) {
+    if (cfg.visivel !== 'sim' || !conteudo) return '';
+    const altura = cfg.altura ? `${cfg.altura}px` : 'auto';
+    return `<div class="sc-caixa ${extra || ''}" style="background:${cfg.bg};color:${cfg.texto};border:1px solid ${cfg.borda};font-size:${cfg.font}pt;height:${altura};">${conteudo}</div>`;
+  }
+
+  function construirBadge(ave, cfg, pdf) {
+    const criador = criadorAtual();
+    const pm = paiMae(ave);
+    const especieMutacao = [ave.especie, ave.raca].filter(Boolean).join(' · ');
+    const dataSexo = (cfg.c4.visivel === 'sim') ? `<div class="sc-dupla">
+      ${caixaHtml(formatarData(ave.dataNasc) || '—', cfg.c4)}
+      ${caixaHtml(sexoTxt(ave), cfg.c4)}
+    </div>` : '';
+    const paiMaeHtml = (cfg.c5.visivel === 'sim') ? `<div class="sc-dupla">
+      ${caixaHtml(pm.pai ? 'Pai: ' + esc(pm.pai) : '—', cfg.c5)}
+      ${caixaHtml(pm.mae ? 'Mãe: ' + esc(pm.mae) : '—', cfg.c5)}
+    </div>` : '';
+    const rodapeVisivel = [cfg.rodapeNome, cfg.rodapeRegistro, cfg.rodapeTelefone].some(x => x.visivel === 'sim');
+    const rodape = rodapeVisivel ? `<div class="sc-dupla" style="margin-top:auto;">
+      ${caixaHtml(esc(criador.nome) || 'Criador', cfg.rodapeNome)}
+      ${caixaHtml(esc(criador.registro) || 'Registro', cfg.rodapeRegistro)}
+      ${caixaHtml(esc(criador.telefone) || 'Telefone', cfg.rodapeTelefone)}
+    </div>` : '';
+
+    const caixas = [
+      { ordem: cfg.nome.ordem, html: caixaHtml(esc(ave.nome) || '—', cfg.nome, 'sc-nome') },
+      { ordem: cfg.c2.ordem, html: caixaHtml(esc(especieMutacao) || '—', cfg.c2) },
+      { ordem: cfg.c3.ordem, html: caixaHtml('Nº ' + (esc(ave.anilha) || '—'), cfg.c3) },
+      { ordem: cfg.c4.ordem, html: dataSexo },
+      { ordem: cfg.c5.ordem, html: paiMaeHtml }
+    ].filter(c => c.html);
+    caixas.sort((a, b) => a.ordem - b.ordem);
+    let itens = caixas.map(c => c.html);
+
+    const mostrarLogo = cfg.logoVisivel === 'sim' && (cfg.logoUrl || cfg.logoIniciais);
+    const bordaLogo = (cfg.logoBordaEspessura || 0) > 0 ? `border:${cfg.logoBordaEspessura}px solid ${cfg.logoBordaCor || '#c7973f'};` : 'border:none;';
+    const raioLogo = cfg.logoFormato === 'quadrado' ? `${cfg.logoRaio || 0}px` : '50%';
+    let logoStyle, logoInner;
+    if (cfg.logoUrl) {
+      logoStyle = `background-image:url(${cfg.logoUrl});`; logoInner = '';
+    } else {
+      const f = Math.max(10, Math.round((cfg.logoTamanho || 60) * 0.36));
+      logoStyle = `background:${cfg.nome.bg};`;
+      logoInner = `<span style="color:${cfg.nome.texto};font-size:${f}px;font-weight:800;letter-spacing:.03em;">${esc((cfg.logoIniciais || '').toUpperCase().slice(0, 3))}</span>`;
+    }
+    const logoDiv = extra => `<div class="sc-logo ${extra || ''}" style="width:${cfg.logoTamanho}px;height:${cfg.logoTamanho}px;border-radius:${raioLogo};${bordaLogo}${logoStyle}">${logoInner}</div>`;
+
+    let logoFlutuante = '';
+    if (mostrarLogo && cfg.logoModoPosicao === 'flutuante') {
+      const m = cfg.logoMargem || 0;
+      let pos;
+      switch (cfg.logoCanto) {
+        case 'topo-esquerda': pos = `top:${m}mm;left:${m}mm;`; break;
+        case 'baixo-esquerda': pos = `bottom:${m}mm;left:${m}mm;`; break;
+        case 'baixo-direita': pos = `bottom:${m}mm;right:${m}mm;`; break;
+        case 'centro': pos = 'top:50%;left:50%;transform:translate(-50%,-50%);'; break;
+        default: pos = `top:${m}mm;right:${m}mm;`;
+      }
+      logoFlutuante = `<div class="sc-logo sc-logo-flut" style="width:${cfg.logoTamanho}px;height:${cfg.logoTamanho}px;border-radius:${raioLogo};${bordaLogo}${logoStyle}${pos}">${logoInner}</div>`;
+    } else if (mostrarLogo && cfg.logoAlinhamento === 'centro') {
+      const idx = cfg.logoPosicao === 'topo' ? 0 : cfg.logoPosicao === 'baixo' ? itens.length : Math.floor(itens.length / 2);
+      itens.splice(idx, 0, `<div style="display:flex;justify-content:center;">${logoDiv()}</div>`);
+    } else if (mostrarLogo) {
+      const n = Math.max(1, Math.min(itens.length, Math.round(cfg.logoTamanho / 28)));
+      let lado, antes, depois;
+      if (cfg.logoPosicao === 'topo') { lado = itens.slice(0, n); antes = []; depois = itens.slice(n); }
+      else if (cfg.logoPosicao === 'baixo') { lado = itens.slice(-n); antes = itens.slice(0, itens.length - n); depois = []; }
+      else { const ini = Math.max(0, Math.floor((itens.length - n) / 2)); lado = itens.slice(ini, ini + n); antes = itens.slice(0, ini); depois = itens.slice(ini + n); }
+      const col = `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:${cfg.espacamentoCaixas}mm;">${lado.join('')}</div>`;
+      const linha = `<div style="display:flex;align-items:center;gap:3mm;">${cfg.logoAlinhamento === 'direita' ? col + logoDiv() : logoDiv() + col}</div>`;
+      itens = [...antes, linha, ...depois];
+    }
+
+    const fundo = cfg.fundoImg
+      ? `background-image:url(${cfg.fundoImg});background-size:cover;background-position:center;`
+      : `background:${hexToRgba(cfg.fundoCor, cfg.fundoOpacidade)};`;
+
+    return `<div class="sc-badge ${pdf ? 'sc-pdf' : ''}" style="width:${folha.largura}mm;height:${folha.altura}mm;border:${cfg.bordaEspessura}px solid ${cfg.bordaCor};${fundo}">
+      <div class="sc-miolo" style="gap:${cfg.espacamentoCaixas}mm;">${itens.join('')}${rodape}</div>
+      ${logoFlutuante}
+    </div>`;
+  }
+
+  const configDe = ave => configs[tipoCracha(ave)] || configs.I;
+
+  /* ---------- editor ---------- */
+  function montarTabs() {
+    $('sc-tabs').innerHTML = TIPOS_CRACHA.map(t => `
+      <button type="button" class="sc-tab ${t.id === sexoEditando ? 'ativa' : ''}" onclick="SC.tab('${t.id}')">
+        <span class="sc-dot" style="background:${configs[t.id].nome.bg}"></span>${t.icone} ${t.nome === 'Indefinido' ? 'Indefinidos' : t.nome + 's'}
+      </button>`).join('');
+  }
+  function montarPresets() {
+    $('sc-presets').innerHTML = PRESETS.map(p => `
+      <div class="sc-preset ${presetAtivo[sexoEditando] === p.id ? 'ativo' : ''}" onclick="SC.aplicarPreset('${p.id}')">
+        <div class="sw" style="background:${p.sw}"></div><span>${p.nome}</span>
+      </div>`).join('');
+  }
+  function linhaCaixa(chave, titulo, cfg, comOrdem) {
+    return `
+    <div class="sc-grupo">
+      <div class="sc-titulo"><label><input type="checkbox" id="sc-cx-${chave}-visivel" ${cfg.visivel === 'sim' ? 'checked' : ''} onchange="SC.ler()"> ${titulo}</label></div>
+      <div class="sc-linha">
+        <div class="sc-campo"><label>Fundo</label><input type="color" id="sc-cx-${chave}-bg" value="${cfg.bg}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Texto</label><input type="color" id="sc-cx-${chave}-texto" value="${cfg.texto}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Borda</label><input type="color" id="sc-cx-${chave}-borda" value="${cfg.borda}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Fonte (pt)</label><input type="number" id="sc-cx-${chave}-font" value="${cfg.font}" min="5" max="24" step="0.5" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Altura (0=auto)</label><input type="number" id="sc-cx-${chave}-altura" value="${cfg.altura}" min="0" max="30" onchange="SC.ler()"></div>
+        ${comOrdem ? `<div class="sc-campo"><label>Ordem</label><input type="number" id="sc-cx-${chave}-ordem" value="${cfg.ordem}" min="1" max="9" onchange="SC.ler()"></div>` : '<div></div>'}
+      </div>
+    </div>`;
+  }
+  function sel(id, valor, opcoes, extra) {
+    return `<select id="${id}" onchange="${extra || 'SC.ler()'}">${opcoes.map(o => `<option value="${o[0]}" ${valor === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>`;
+  }
+  function montarGrupos() {
+    const c = configs[sexoEditando];
+    $('sc-grupos').innerHTML = `
+    <div class="sc-grupo">
+      <div class="sc-titulo">🎨 Fundo &amp; borda do crachá</div>
+      <div class="sc-linha">
+        <div class="sc-campo"><label>Cor de fundo</label><input type="color" id="sc-cfg-fundo-cor" value="${c.fundoCor}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Opacidade (%)</label><input type="number" id="sc-cfg-fundo-opacidade" value="${c.fundoOpacidade}" min="0" max="100" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Cor da borda</label><input type="color" id="sc-cfg-borda-cor" value="${c.bordaCor}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Espessura</label><input type="number" id="sc-cfg-borda-espessura" value="${c.bordaEspessura}" min="0" max="5" step="0.25" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Espaço entre caixas</label><input type="number" id="sc-cfg-espacamento" value="${c.espacamentoCaixas}" min="0" max="6" step="0.25" onchange="SC.ler()"></div>
+        <div></div>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="sc-upload" onclick="document.getElementById('sc-input-fundo').click()">🖼️ Imagem de fundo (opcional)</div>
+        <input type="file" id="sc-input-fundo" accept="image/*" style="display:none;" onchange="SC.carregarFundo(event)">
+        ${c.fundoImg ? `<button type="button" class="sc-btn-mini" style="margin-top:6px;" onclick="SC.removerFundo()">🗑️ Remover imagem de fundo</button>` : ''}
+      </div>
+    </div>
+
+    <div class="sc-grupo">
+      <div class="sc-titulo">🖼️ Logo</div>
+      <div class="sc-upload" onclick="document.getElementById('sc-input-logo').click()">Clique para escolher uma imagem (será reduzida automaticamente)</div>
+      <input type="file" id="sc-input-logo" accept="image/*" style="display:none;" onchange="SC.carregarLogo(event)">
+      <div class="sc-campo" style="margin-top:8px;">
+        <label>Sem imagem? Gera um selo com as iniciais (até 3 letras)</label>
+        <input type="text" id="sc-cfg-logo-iniciais" maxlength="3" placeholder="Ex: CG" value="${esc(c.logoIniciais || '')}" oninput="SC.aoDigitarIniciais()">
+      </div>
+      <div class="sc-linha" style="margin-top:8px;">
+        <div class="sc-campo"><label>Formato</label>${sel('sc-cfg-logo-formato', c.logoFormato, [['circulo', 'Circular'], ['quadrado', 'Quadrado']], 'SC.ler(true)')}</div>
+        <div class="sc-campo"><label>Tamanho (px)</label><input type="number" id="sc-cfg-logo-tamanho" value="${c.logoTamanho}" min="16" max="160" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Posição</label>${sel('sc-cfg-logo-posicao', c.logoPosicao, [['topo', 'Topo'], ['meio', 'Meio'], ['baixo', 'Baixo']])}</div>
+        <div class="sc-campo"><label>Alinhamento</label>${sel('sc-cfg-logo-alinhamento', c.logoAlinhamento, [['esquerda', 'Esquerda'], ['centro', 'Centro'], ['direita', 'Direita']])}</div>
+        <div class="sc-campo"><label>Exibir</label>${sel('sc-cfg-logo-visivel', c.logoVisivel, [['nao', 'Não'], ['sim', 'Sim']])}</div>
+        <div>${c.logoUrl ? `<button type="button" class="sc-btn-mini" onclick="SC.removerLogo()">🗑️ Remover logo</button>` : ''}</div>
+      </div>
+      <div class="sc-linha" style="margin-top:8px;">
+        <div class="sc-campo"><label>Cor da borda do logo</label><input type="color" id="sc-cfg-logo-borda-cor" value="${c.logoBordaCor}" onchange="SC.ler()"></div>
+        <div class="sc-campo"><label>Espessura da borda</label><input type="number" id="sc-cfg-logo-borda-espessura" value="${c.logoBordaEspessura}" min="0" max="8" step="0.5" onchange="SC.ler()"></div>
+        ${c.logoFormato === 'quadrado' ? `<div class="sc-campo"><label>Cantos arredondados</label><input type="number" id="sc-cfg-logo-raio" value="${c.logoRaio}" min="0" max="60" onchange="SC.ler()"></div>` : '<div></div>'}
+        <div class="sc-campo"><label>Como posicionar</label>${sel('sc-cfg-logo-modo', c.logoModoPosicao, [['fluxo', 'Junto às caixas'], ['flutuante', 'Livre (flutuante)']], 'SC.ler(true)')}</div>
+        ${c.logoModoPosicao === 'flutuante' ? `
+          <div class="sc-campo"><label>Canto</label>${sel('sc-cfg-logo-canto', c.logoCanto, [['topo-esquerda', 'Superior esquerdo'], ['topo-direita', 'Superior direito'], ['baixo-esquerda', 'Inferior esquerdo'], ['baixo-direita', 'Inferior direito'], ['centro', 'Centro']])}</div>
+          <div class="sc-campo"><label>Margem (mm)</label><input type="number" id="sc-cfg-logo-margem" value="${c.logoMargem}" min="0" max="20" step="0.5" onchange="SC.ler()"></div>` : '<div></div><div></div>'}
+      </div>
+      <div style="margin-top:8px;"><button type="button" class="sc-btn-mini" onclick="SC.copiarLogoParaTodos()">📋 Usar este logo em todos os tipos</button></div>
+    </div>
+
+    ${linhaCaixa('nome', '1. Nome da ave (aba do nome)', c.nome, true)}
+    ${linhaCaixa('c2', '2. Espécie + Raça/Mutação', c.c2, true)}
+    ${linhaCaixa('c3', '3. Anilha', c.c3, true)}
+    ${linhaCaixa('c4', '4. Data de nascimento + Sexo', c.c4, true)}
+    ${linhaCaixa('c5', '5. Pai + Mãe', c.c5, true)}
+
+    <div class="sc-grupo">
+      <div class="sc-titulo">📌 Rodapé (nome do criador · registro · telefone)</div>
+      ${linhaCaixa('rodapeNome', 'Caixa: Nome do criador', c.rodapeNome, false)}
+      ${linhaCaixa('rodapeRegistro', 'Caixa: Registro', c.rodapeRegistro, false)}
+      ${linhaCaixa('rodapeTelefone', 'Caixa: Telefone', c.rodapeTelefone, false)}
+    </div>`;
+  }
+
+  function lerCaixa(chave) {
+    const g = id => $(`sc-cx-${chave}-${id}`);
+    return {
+      bg: g('bg').value, texto: g('texto').value, borda: g('borda').value,
+      font: parseFloat(g('font').value) || 8, altura: parseInt(g('altura').value) || 0,
+      visivel: g('visivel').checked ? 'sim' : 'nao',
+      ordem: g('ordem') ? (parseInt(g('ordem').value) || 1) : 1
+    };
+  }
+  function ler(remontar) {
+    const c = configs[sexoEditando];
+    c.fundoCor = $('sc-cfg-fundo-cor').value;
+    c.fundoOpacidade = parseInt($('sc-cfg-fundo-opacidade').value);
+    if (isNaN(c.fundoOpacidade)) c.fundoOpacidade = 100;
+    c.bordaCor = $('sc-cfg-borda-cor').value;
+    c.bordaEspessura = parseFloat($('sc-cfg-borda-espessura').value) || 0;
+    c.espacamentoCaixas = parseFloat($('sc-cfg-espacamento').value) || 0;
+    c.logoFormato = $('sc-cfg-logo-formato').value;
+    c.logoTamanho = parseInt($('sc-cfg-logo-tamanho').value) || 60;
+    c.logoPosicao = $('sc-cfg-logo-posicao').value;
+    c.logoAlinhamento = $('sc-cfg-logo-alinhamento').value;
+    c.logoVisivel = $('sc-cfg-logo-visivel').value;
+    c.logoIniciais = $('sc-cfg-logo-iniciais').value.trim();
+    c.logoBordaCor = $('sc-cfg-logo-borda-cor').value;
+    c.logoBordaEspessura = parseFloat($('sc-cfg-logo-borda-espessura').value) || 0;
+    if ($('sc-cfg-logo-raio')) c.logoRaio = parseInt($('sc-cfg-logo-raio').value) || 0;
+    c.logoModoPosicao = $('sc-cfg-logo-modo').value;
+    if ($('sc-cfg-logo-canto')) c.logoCanto = $('sc-cfg-logo-canto').value;
+    if ($('sc-cfg-logo-margem')) c.logoMargem = parseFloat($('sc-cfg-logo-margem').value) || 0;
+    ['nome', 'c2', 'c3', 'c4', 'c5', 'rodapeNome', 'rodapeRegistro', 'rodapeTelefone'].forEach(k => { c[k] = lerCaixa(k); });
+    presetAtivo[sexoEditando] = null;
+    if (remontar === true) montarGrupos();
+    montarTabs(); montarPresets();
+    atualizarMini(); renderPreviaAtual();
+    salvarEstado();
+  }
+  function aoDigitarIniciais() {
+    const v = $('sc-cfg-logo-visivel');
+    if ($('sc-cfg-logo-iniciais').value.trim() && v.value !== 'sim') v.value = 'sim';
+    ler();
+  }
+  function tab(t) {
+    sexoEditando = t;
+    montarTabs(); montarPresets(); montarGrupos(); atualizarMini();
+  }
+  function aplicarPreset(id) {
+    const p = preset(id); if (!p) return;
+    const atual = configs[sexoEditando];
+    const logo = {};
+    ['logoUrl', 'logoIniciais', 'logoFormato', 'logoTamanho', 'logoPosicao', 'logoAlinhamento', 'logoVisivel', 'logoBordaCor', 'logoBordaEspessura', 'logoRaio', 'logoModoPosicao', 'logoCanto', 'logoMargem']
+      .forEach(k => { logo[k] = atual[k]; });
+    configs[sexoEditando] = Object.assign(configPadrao(p.paleta), logo);
+    presetAtivo[sexoEditando] = id;
+    montarTabs(); montarPresets(); montarGrupos(); atualizarMini(); renderPreviaAtual();
+    salvarEstado();
+  }
+
+  /* ---------- imagens ---------- */
+  function redimensionar(dataUrl, max, qualidade, cb) {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > max || h > max) { if (w > h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(cv.toDataURL('image/jpeg', qualidade));
+    };
+    img.src = dataUrl;
+  }
+  function carregarLogo(ev) {
+    const f = ev.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => redimensionar(e.target.result, 150, 0.65, url => {
+      configs[sexoEditando].logoUrl = url; configs[sexoEditando].logoVisivel = 'sim';
+      montarGrupos(); atualizarMini(); renderPreviaAtual(); salvarEstado();
+    });
+    r.readAsDataURL(f); ev.target.value = '';
+  }
+  function removerLogo() {
+    configs[sexoEditando].logoUrl = '';
+    if (!configs[sexoEditando].logoIniciais) configs[sexoEditando].logoVisivel = 'nao';
+    montarGrupos(); atualizarMini(); renderPreviaAtual(); salvarEstado();
+  }
+  function carregarFundo(ev) {
+    const f = ev.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => redimensionar(e.target.result, 400, 0.55, url => {
+      configs[sexoEditando].fundoImg = url;
+      montarGrupos(); atualizarMini(); renderPreviaAtual(); salvarEstado();
+    });
+    r.readAsDataURL(f); ev.target.value = '';
+  }
+  function removerFundo() {
+    configs[sexoEditando].fundoImg = '';
+    montarGrupos(); atualizarMini(); renderPreviaAtual(); salvarEstado();
+  }
+  function copiarLogoParaTodos() {
+    const o = configs[sexoEditando];
+    const campos = ['logoUrl', 'logoIniciais', 'logoFormato', 'logoTamanho', 'logoPosicao', 'logoAlinhamento', 'logoVisivel', 'logoBordaCor', 'logoBordaEspessura', 'logoRaio', 'logoModoPosicao', 'logoCanto', 'logoMargem'];
+    Object.keys(configs).forEach(t => { if (t !== sexoEditando) campos.forEach(k => { configs[t][k] = o[k]; }); });
+    renderPreviaAtual(); salvarEstado();
+    alert('✅ Logo copiado para todos os tipos de ave.');
+  }
+
+  /* ---------- folha / criador ---------- */
+  function calcFolha() {
+    const util = (tot) => Math.max(0, tot - 2 * folha.margem);
+    const colunas = Math.max(1, Math.floor((util(210) + folha.espaco) / (folha.largura + folha.espaco)));
+    const linhas = Math.max(1, Math.floor((util(297) + folha.espaco) / (folha.altura + folha.espaco)));
+    return { colunas, linhas, total: colunas * linhas };
+  }
+  function atualizarInfoFolha() {
+    const { colunas, linhas, total } = calcFolha();
+    const el = $('sc-folha-info');
+    if (el) el.textContent = `Cabem ${total} crachás por folha A4 (${colunas} coluna${colunas === 1 ? '' : 's'} × ${linhas} linha${linhas === 1 ? '' : 's'}).`;
+  }
+  function lerFolha() {
+    folha.largura = parseFloat($('sc-folha-largura').value) || 90;
+    folha.altura = parseFloat($('sc-folha-altura').value) || 58;
+    folha.espaco = parseFloat($('sc-folha-espaco').value) || 0;
+    folha.margem = parseFloat($('sc-folha-margem').value) || 0;
+    atualizarInfoFolha(); atualizarMini(); renderPreviaAtual(); salvarEstado();
+  }
+  function salvarCriador() {
+    $('prop-nome').value = $('sc-cr-nome').value.trim();
+    $('prop-registro').value = $('sc-cr-registro').value.trim();
+    $('prop-contato').value = $('sc-cr-telefone').value.trim();
+    aplicarConfig(); // atualiza crachaConfig (e as prévias)
+    try {
+      const bruto = localStorage.getItem('cracha_config');
+      const o = bruto ? JSON.parse(bruto) : getConfig();
+      o.propNome = $('prop-nome').value; o.propRegistro = $('prop-registro').value; o.propContato = $('prop-contato').value;
+      localStorage.setItem('cracha_config', JSON.stringify(o));
+    } catch (e) { console.warn('Não foi possível salvar os dados do rodapé:', e); }
+  }
+
+  /* ---------- prévias ---------- */
+  const AVE_EXEMPLO = { nome: 'Exemplo', anilha: '0000', especie: 'Espécie', raca: 'Mutação', dataNasc: '2024-01-15', pai: 'Nome do pai', mae: 'Nome da mãe' };
+  function atualizarMini() {
+    const real = avesCache.find(a => tipoCracha(a) === sexoEditando);
+    const amostra = real || Object.assign({}, AVE_EXEMPLO, {
+      sexo: sexoEditando === 'M' || sexoEditando === 'F' ? sexoEditando : 'Indefinido',
+      situacao: sexoEditando === 'K' ? 'Filhote' : 'Plantel'
+    });
+    $('sc-prev-label').textContent = 'Prévia ao vivo' + (real ? ` (${real.nome})` : ' (ave de exemplo)');
+    $('sc-preview-mini').innerHTML = construirBadge(amostra, configs[sexoEditando], false);
+  }
+  function renderPrevia(container, selecionadas, todas) {
+    avesCache = todas || avesCache;
+    container.classList.add('sc-site-prev');
+    const mostrar = selecionadas.slice(0, 12);
+    container.innerHTML = mostrar.map(a => construirBadge(a, configDe(a), false)).join('') +
+      (selecionadas.length > mostrar.length ? `<div class="sc-nota">Mostrando ${mostrar.length} de ${selecionadas.length} crachás — o PDF sai com todos.</div>` : '');
+  }
+  function renderPreviaAtual() {
+    if (typeof modoCracha !== 'undefined' && modoCracha === 'site' && typeof renderizarPrevia === 'function') renderizarPrevia();
+  }
+
+  /* ---------- PDF ---------- */
+  async function gerarPDF(selecionadas, todas) {
+    avesCache = todas || avesCache;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('portrait', 'mm', 'a4');
+    const { colunas, total } = calcFolha();
+    const cont = document.createElement('div');
+    cont.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
+    document.body.appendChild(cont);
+    try {
+      for (let i = 0; i < selecionadas.length; i++) {
+        const ave = selecionadas[i];
+        cont.innerHTML = construirBadge(ave, configDe(ave), true);
+        await new Promise(r => setTimeout(r, 60));
+        const canvas = await html2canvas(cont.firstElementChild, { scale: 3, useCORS: true, backgroundColor: null, logging: false });
+        const pos = i % total;
+        if (i > 0 && pos === 0) pdf.addPage();
+        const col = pos % colunas, lin = Math.floor(pos / colunas);
+        const x = folha.margem + col * (folha.largura + folha.espaco);
+        const y = folha.margem + lin * (folha.altura + folha.espaco);
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, folha.largura, folha.altura);
+      }
+    } finally {
+      document.body.removeChild(cont);
+    }
+    pdf.save('crachas.pdf');
+    return { qtd: selecionadas.length, paginas: Math.ceil(selecionadas.length / total) };
+  }
+
+  /* ---------- abrir / fechar painel ---------- */
+  async function toggleConfig() {
+    const painel = $('sc-config-panel');
+    painel.classList.toggle('open');
+    if (!painel.classList.contains('open')) return;
+    try { avesCache = await DB.getAll(DB.TABLES.AVES); } catch (e) { avesCache = []; }
+    const c = criadorAtual();
+    $('sc-cr-nome').value = c.nome; $('sc-cr-registro').value = c.registro; $('sc-cr-telefone').value = c.telefone;
+    $('sc-folha-largura').value = folha.largura; $('sc-folha-altura').value = folha.altura;
+    $('sc-folha-espaco').value = folha.espaco; $('sc-folha-margem').value = folha.margem;
+    atualizarInfoFolha();
+    montarTabs(); montarPresets(); montarGrupos(); atualizarMini();
+  }
+  function salvar(avisar) {
+    salvarEstado();
+    renderPreviaAtual();
+    if (avisar) alert('✅ Modelo Site Crachás salvo!');
+  }
+  function fecharPainel() { const p = $('sc-config-panel'); if (p) p.classList.remove('open'); }
+
+  carregarEstado();
+
+  return { toggleConfig, fecharPainel, tab, aplicarPreset, ler, aoDigitarIniciais, carregarLogo, removerLogo, carregarFundo, removerFundo,
+           copiarLogoParaTodos, lerFolha, salvarCriador, salvar, renderPrevia, gerarPDF };
+})();
+
+/* ---- alternar entre "Com árvore" e "Estilo Site Crachás" ---- */
+function trocarModoCracha(modo, silencioso) {
+  modoCracha = (modo === 'site') ? 'site' : 'arvore';
+  try { localStorage.setItem('cracha_modo', modoCracha); } catch (e) {}
+  const radio = document.querySelector(`input[name="sc-modo"][value="${modoCracha}"]`);
+  if (radio) radio.checked = true;
+  document.getElementById('sc-modo-op-arvore').classList.toggle('ativo', modoCracha === 'arvore');
+  document.getElementById('sc-modo-op-site').classList.toggle('ativo', modoCracha === 'site');
+  document.getElementById('config-panel').classList.remove('open');
+  SC.fecharPainel();
+  const lede = document.getElementById('lede-cracha');
+  if (lede) lede.textContent = modoCracha === 'site'
+    ? 'Gere etiquetas para gaiolas no estilo Site Crachás — uma cor por tipo de ave (macho, fêmea, indefinido e filhote).'
+    : 'Gere etiquetas para gaiolas com informações da ave e árvore genealógica.';
+  renderizarPrevia();
+}
+(function () {
+  let salvo = 'arvore';
+  try { salvo = localStorage.getItem('cracha_modo') || 'arvore'; } catch (e) {}
+  if (salvo === 'site') trocarModoCracha('site', true);
+})();
+</script>
+
 </body>
 </html>
