@@ -850,6 +850,14 @@ body {
 
       const tree = {};
       tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
+      // A árvore (até a 5ª geração) já vem pronta do servidor — mesma lógica do painel.
+      const arvoreServidor = Array.isArray(ave.arvore) && ave.arvore.length > 0;
+      if (arvoreServidor) {
+        ave.arvore.forEach(n => {
+          if (n && n.caminho && n.nome) tree[n.caminho] = { nome: n.nome, anilha: n.anilha || '' };
+        });
+      } else {
+      // (reserva para servidor antigo, sem 'arvore')
       
       if (ave.pai && ave.pai !== ave.nome) {
         if (ave.paiEncontrado) {
@@ -899,6 +907,7 @@ body {
             tree[a.caminho] = { nome: nomeNo, anilha: a.anilha || '' };
           }
         });
+      }
       }
 
       function obterAncestral(caminho) {

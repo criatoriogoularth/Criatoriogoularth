@@ -3,6 +3,7 @@ const express = require('express');
 const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
+const Genealogia = require('../public/genealogia.js');
 
 const router = express.Router();
 
@@ -335,7 +336,7 @@ router.get('/publico/arquivo/:id/:tipo/:i?', asyncHandler(async (req, res) => {
 
 router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
   const aveRes = await pool.query(
-    `SELECT id, nome, anilha, sexo, especie, raca,
+    `SELECT id, usuario_id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, anilha_pai AS "anilhaPai",
             mae, anilha_mae AS "anilhaMae",
             avo_paterno AS "avoPaterno", avo_paterna AS "avoPaterna",
@@ -347,25 +348,31 @@ router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
   const ave = aveRes.rows[0];
   if (!ave) return res.status(404).json({ error: 'Certificado não disponível.' });
 
-  async function buscarPorNome(nome) {
-    if (!nome || nome === ave.nome) return null;
-    const r = await pool.query(
-      `SELECT nome, anilha, pai, anilha_pai AS "anilhaPai", mae, anilha_mae AS "anilhaMae"
-       FROM aves WHERE nome = $1 LIMIT 1`,
-      [nome]
-    );
-    return r.rows[0] || null;
-  }
-
-  // CORREÇÃO: pai e mãe eram buscados um depois do outro (await sequencial),
-  // dobrando o tempo de espera à toa — as duas buscas não dependem uma da
-  // outra, então rodam em paralelo agora.
-  const [paiEncontrado, maeEncontrada] = await Promise.all([
-    buscarPorNome(ave.pai),
-    buscarPorNome(ave.mae)
+  // CORREÇÃO (árvore incompleta): a árvore agora é montada AQUI, subindo pelos pais
+  // cadastrados do MESMO criador, até a 5ª geração — a mesma função (public/genealogia.js)
+  // usada pelo painel, pelo crachá e pelo simulador. Antes só buscava pai/mãe por nome
+  // (em qualquer criador!) e olhava no máximo até os avós.
+  const [todasRes, tabelaRes] = await Promise.all([
+    pool.query(
+      `SELECT id, nome, anilha, pai, anilha_pai AS "anilhaPai", mae, anilha_mae AS "anilhaMae",
+              avo_paterno AS "avoPaterno", avo_paterna AS "avoPaterna",
+              avo_materno AS "avoMaterno", avo_materna AS "avoMaterna", ancestrais
+       FROM aves WHERE usuario_id = $1`,
+      [ave.usuario_id]
+    ),
+    pool.query('SELECT nome, anilha FROM ancestrais WHERE usuario_id = $1', [ave.usuario_id])
   ]);
+  const arvore = Genealogia.montar(ave, todasRes.rows, { maxGen: 5, ancestraisTabela: tabelaRes.rows });
 
-  res.json({ ...ave, paiEncontrado, maeEncontrada });
+  const { usuario_id, ...publico } = ave;
+  // paiEncontrado/maeEncontrada continuam sendo enviados (compatibilidade com versões antigas da página)
+  const achado = (c) => (arvore[c] ? { nome: arvore[c].nome, anilha: arvore[c].anilha || '' } : null);
+  res.json({
+    ...publico,
+    arvore: Genealogia.listar(arvore, 1),
+    paiEncontrado: achado('pai'),
+    maeEncontrada: achado('mae')
+  });
 }));
 
 module.exports = router;

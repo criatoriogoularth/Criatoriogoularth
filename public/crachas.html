@@ -998,6 +998,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="genealogia.js"></script>
 <script>
 renderSidebar('crachas');
 
@@ -1670,53 +1671,11 @@ function gerarCaminhos(depth) {
 }
 
 function obterAncestrais(ave, todasAves) {
-  const tree = {};
-  tree[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
-  
-  if (ave.pai && ave.pai !== ave.nome) {
-    const paiEncontrado = todasAves.find(a => a.nome === ave.pai);
-    if (paiEncontrado) {
-      tree['pai'] = { nome: paiEncontrado.nome, anilha: paiEncontrado.anilha || '' };
-      if (paiEncontrado.pai && paiEncontrado.pai !== paiEncontrado.nome) {
-        tree['pai.pai'] = { nome: paiEncontrado.pai, anilha: paiEncontrado.anilhaPai || '' };
-      }
-      if (paiEncontrado.mae && paiEncontrado.mae !== paiEncontrado.nome) {
-        tree['pai.mae'] = { nome: paiEncontrado.mae, anilha: paiEncontrado.anilhaMae || '' };
-      }
-    } else {
-      tree['pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
-    }
-  }
-  
-  if (ave.mae && ave.mae !== ave.nome) {
-    const maeEncontrada = todasAves.find(a => a.nome === ave.mae);
-    if (maeEncontrada) {
-      tree['mae'] = { nome: maeEncontrada.nome, anilha: maeEncontrada.anilha || '' };
-      if (maeEncontrada.pai && maeEncontrada.pai !== maeEncontrada.nome) {
-        tree['mae.pai'] = { nome: maeEncontrada.pai, anilha: maeEncontrada.anilhaPai || '' };
-      }
-      if (maeEncontrada.mae && maeEncontrada.mae !== maeEncontrada.nome) {
-        tree['mae.mae'] = { nome: maeEncontrada.mae, anilha: maeEncontrada.anilhaMae || '' };
-      }
-    } else {
-      tree['mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
-    }
-  }
-  
-  if (ave.avoPaterno && !tree['pai.pai']) {
-    tree['pai.pai'] = { nome: ave.avoPaterno, anilha: ave.anilhaAvoPaterno || '' };
-  }
-  if (ave.avoPaterna && !tree['pai.mae']) {
-    tree['pai.mae'] = { nome: ave.avoPaterna, anilha: ave.anilhaAvoPaterna || '' };
-  }
-  if (ave.avoMaterno && !tree['mae.pai']) {
-    tree['mae.pai'] = { nome: ave.avoMaterno, anilha: ave.anilhaAvoMaterno || '' };
-  }
-  if (ave.avoMaterna && !tree['mae.mae']) {
-    tree['mae.mae'] = { nome: ave.avoMaterna, anilha: ave.anilhaAvoMaterna || '' };
-  }
-  
-  return tree;
+  // Função única do sistema (genealogia.js): colunas + lista salva + pais cadastrados, até a 5ª geração.
+  // Antes o crachá ignorava a lista salva e só chegava nos avós.
+  const t = Genealogia.montar(ave, todasAves || [], { maxGen: 5 });
+  t[''] = { nome: ave.nome, anilha: ave.anilha || '-' };
+  return t;
 }
 
 function obterAncestral(tree, caminho) {
@@ -1905,7 +1864,7 @@ function gerarCrachaHTML(ave, config, todasAves) {
     `background:${fundoDirCor};opacity:${fundoDirOpacidade};`;
   
   // ÁRVORE
-  const profundidades = [1, 2, 3, 4];
+  const profundidades = [1, 2, 3, 4, 5];  // 5 gerações
   const colunas = profundidades.map(depth => {
     const caminhos = gerarCaminhos(depth);
     return caminhos.map(caminho => {
@@ -1921,8 +1880,10 @@ function gerarCrachaHTML(ave, config, todasAves) {
   colunas.forEach(col => {
     colunasHtml += `<div style="display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:1px;min-width:0;">`;
     col.forEach(no => {
-      const tamArvore = config.tamArvore || 6.5;
-      colunasHtml += `<div style="font-size:${tamArvore}px;padding:1px 2px;border-radius:2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${no.classe === 'female' ? '#f5e8ea' : no.classe === 'indefinido' ? '#f5f5f5' : '#e8f0f8'};border-left:2px solid ${no.classe === 'female' ? '#9a5a6a' : no.classe === 'indefinido' ? '#cccccc' : '#3a6a9a'};color:#333;line-height:1.2;">${no.nome}</div>`;
+      const tamBase = config.tamArvore || 6.5;
+      const tamArvore = col.length >= 32 ? Math.min(tamBase, 4.2) : (col.length >= 16 ? Math.min(tamBase, 5.2) : tamBase);
+      const padV = col.length >= 32 ? 0 : 1;
+      colunasHtml += `<div style="font-size:${tamArvore}px;padding:${padV}px 2px;border-radius:2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${no.classe === 'female' ? '#f5e8ea' : no.classe === 'indefinido' ? '#f5f5f5' : '#e8f0f8'};border-left:2px solid ${no.classe === 'female' ? '#9a5a6a' : no.classe === 'indefinido' ? '#cccccc' : '#3a6a9a'};color:#333;line-height:1.2;">${no.nome}</div>`;
     });
     colunasHtml += `</div>`;
   });

@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
 .repro-toolbar {
@@ -746,6 +745,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="genealogia.js"></script>
 <script>renderSidebar('reproducao');</script>
 <script>
 /* ============================================================
@@ -1205,9 +1205,23 @@ function selecionarAveConfirm(id, nome, anilha) {
 // FUNÇÃO PARA HERDAR ANCESTRAIS
 // ============================================================
 
-async function herdarAncestrais(aveId) {
+// Monta TODA a linhagem do pai/mãe (até a 5ª geração do filhote) com os caminhos já ajustados:
+// base = 'pai' (macho) ou 'mae' (fêmea). Ex.: avô do pai vira 'pai.pai.pai'.
+function montarLinhagemParaFilhote(ave, base, todasAves) {
+  // Árvore do pai/mãe até a 4ª geração dele(a) = até a 5ª geração do filhote.
+  // Segue os pais cadastrados (função única do sistema), então herda tudo que existir hoje.
+  const sub = Genealogia.montar(ave, todasAves || [ave], { maxGen: 4 });
+  return Genealogia.listar(sub, 1).map(n => Object.assign({}, n, {
+    caminho: base + '.' + n.caminho,
+    geracao: n.geracao + 1,
+    nomeGeracao: Genealogia.NOME_GERACAO[n.geracao + 1] || ('Geração ' + (n.geracao + 1))
+  }));
+}
+
+async function herdarAncestrais(aveId, base) {
   const ave = await DB.getById(DB.TABLES.AVES, aveId);
   if (!ave) return {};
+  const todasAves = await DB.getAll(DB.TABLES.AVES);
   
   // Buscar todos os ancestrais possíveis
   const ancestrais = {
@@ -1218,7 +1232,8 @@ async function herdarAncestrais(aveId) {
     avoPaterno: ave.avoPaterno || '',
     avoPaterna: ave.avoPaterna || '',
     avoMaterno: ave.avoMaterno || '',
-    avoMaterna: ave.avoMaterna || ''
+    avoMaterna: ave.avoMaterna || '',
+    linhagem: base ? montarLinhagemParaFilhote(ave, base, todasAves) : []
   };
   
   // Tentar buscar avós completos se o pai existir
@@ -1339,8 +1354,8 @@ async function salvarReproducao(event) {
     const filhotesCriados = [];
     
     // Buscar ancestrais completos do pai e da mãe
-    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId) : {};
-    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId) : {};
+    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId, 'pai') : {};
+    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId, 'mae') : {};
     
     for (const f of filhotes) {
       if (f.anilha) {
@@ -1374,11 +1389,8 @@ async function salvarReproducao(event) {
         anilhaAvoMaterno: ancestraisMae.anilhaPai || '',
         avoMaterna: ancestraisMae.mae || '',
         anilhaAvoMaterna: ancestraisMae.anilhaMae || '',
-        // Bisavós - tentar buscar mais profundamente
-        bisavoPaterno: ancestraisPai.avoPaterno || '',
-        bisavoPaterna: ancestraisPai.avoPaterna || '',
-        bisavoMaterno: ancestraisMae.avoMaterno || '',
-        bisavoMaterna: ancestraisMae.avoMaterna || '',
+        // Árvore COMPLETA herdada do pai e da mãe (bisavós, trisavós e tataravós, até a 5ª geração)
+        ancestrais: [...(ancestraisPai.linhagem || []), ...(ancestraisMae.linhagem || [])],
         // Outros campos
         manejo: 'Mantenedor',
         historico: [{

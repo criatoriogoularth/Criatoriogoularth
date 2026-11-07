@@ -820,6 +820,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="genealogia.js"></script>
 <script src="voltar.js"></script>
 <script>
 const CERT_CONFIG = {
@@ -1067,14 +1068,11 @@ function parseAncestraisDaAve(ave) {
 // Copia toda a linhagem já cadastrada da ave escolhida para dentro da árvore do filhote,
 // encaixando-a como "pai" ou "mãe" (mesma lógica da tela Árvore Genealógica).
 function herdarLinhagemNaArvore(basePath, ave) {
-  if (ave.pai) tree[basePath + '.pai'] = { nome: ave.pai, anilha: ave.anilhaPai || '' };
-  if (ave.mae) tree[basePath + '.mae'] = { nome: ave.mae, anilha: ave.anilhaMae || '' };
-  if (ave.avoPaterno) tree[basePath + '.pai.pai'] = { nome: ave.avoPaterno, anilha: '' };
-  if (ave.avoPaterna) tree[basePath + '.pai.mae'] = { nome: ave.avoPaterna, anilha: '' };
-  if (ave.avoMaterno) tree[basePath + '.mae.pai'] = { nome: ave.avoMaterno, anilha: '' };
-  if (ave.avoMaterna) tree[basePath + '.mae.mae'] = { nome: ave.avoMaterna, anilha: '' };
-  parseAncestraisDaAve(ave).forEach(a => {
-    if (a.caminho && a.nome) tree[basePath + '.' + a.caminho] = { nome: a.nome, anilha: a.anilha || '' };
+  // função única do sistema: segue os pais cadastrados até a 5ª geração do filhote (4ª da ave escolhida)
+  const sub = Genealogia.montar(ave, AVES_TODAS, { maxGen: 4 });
+  Object.keys(sub).forEach(c => {
+    if (c === '' || !sub[c].nome) return;
+    tree[basePath + '.' + c] = { nome: sub[c].nome, anilha: sub[c].anilha || '' };
   });
 }
 

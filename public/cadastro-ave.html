@@ -793,6 +793,7 @@
 <script src="auth-client.js"></script>
 <script src="sidebar.js"></script>
 <script src="db-api.js"></script>
+<script src="genealogia.js"></script>
 <script src="voltar.js"></script>
 <script>renderSidebar('cadastro-ave');</script>
 <script>
@@ -1014,33 +1015,34 @@ async function herdarAncestrais(paiNome, maeNome) {
     avoPaterna: '',
     avoMaterno: '',
     avoMaterna: '',
-    ancestraisProfundos: [] // bisavós em diante, herdados do pai e/ou da mãe
+    ancestraisProfundos: [] // avós (com anilha) até a 5ª geração, herdados do pai e/ou da mãe
   };
-  
-  if (paiNome) {
-    const paiCompleto = await buscarAveOuAncestralPorNome(paiNome);
-    if (paiCompleto) {
-      ancestrais.anilhaPai = paiCompleto.anilha || '';
-      if (paiCompleto.pai) {
-        ancestrais.avoPaterno = paiCompleto.pai || '';
-        ancestrais.avoPaterna = paiCompleto.mae || '';
-        ancestrais.ancestraisProfundos.push(...extrairGeracoesProfundas('pai', paiCompleto));
-      }
+  const todas = await DB.getAll(DB.TABLES.AVES);
+
+  // Pai/mãe cadastrados: a árvore vem da função única do sistema (segue os pais deles, até a 5ª geração da ave nova)
+  const lado = async (nome, base, campoAnilha, campoAvo, campoAva) => {
+    if (!nome) return;
+    const k = nome.trim().toLowerCase();
+    const ave = todas.find(a => a.nome && a.nome.trim().toLowerCase() === k);
+    if (ave) {
+      ancestrais[campoAnilha] = ave.anilha || '';
+      const sub = Genealogia.montar(ave, todas, { maxGen: 4 });
+      if (sub['pai']) ancestrais[campoAvo] = sub['pai'].nome;
+      if (sub['mae']) ancestrais[campoAva] = sub['mae'].nome;
+      Genealogia.listar(sub, 1).forEach(n => {
+        ancestrais.ancestraisProfundos.push(Object.assign({}, n, {
+          caminho: base + '.' + n.caminho,
+          geracao: n.geracao + 1,
+          nomeGeracao: Genealogia.NOME_GERACAO[n.geracao + 1] || ('G' + (n.geracao + 1))
+        }));
+      });
+    } else {
+      const anc = await DB.getAncestralPorNome(nome);
+      if (anc) ancestrais[campoAnilha] = anc.anilha || '';
     }
-  }
-  
-  if (maeNome) {
-    const maeCompleta = await buscarAveOuAncestralPorNome(maeNome);
-    if (maeCompleta) {
-      ancestrais.anilhaMae = maeCompleta.anilha || '';
-      if (maeCompleta.pai) {
-        ancestrais.avoMaterno = maeCompleta.pai || '';
-        ancestrais.avoMaterna = maeCompleta.mae || '';
-        ancestrais.ancestraisProfundos.push(...extrairGeracoesProfundas('mae', maeCompleta));
-      }
-    }
-  }
-  
+  };
+  await lado(paiNome, 'pai', 'anilhaPai', 'avoPaterno', 'avoPaterna');
+  await lado(maeNome, 'mae', 'anilhaMae', 'avoMaterno', 'avoMaterna');
   return ancestrais;
 }
 
