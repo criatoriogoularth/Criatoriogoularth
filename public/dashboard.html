@@ -129,6 +129,29 @@
   margin-bottom: 6px;
 }
 .empty-state-painel p { font-size: 13px; }
+
+/* ===== Avisos ===== */
+.avisos-bloco { margin-bottom: 18px; }
+.avisos-sub { font-size: 12px; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; margin: 14px 0 8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.aviso-item {
+  background: var(--bg-elevated-2); border: 1px solid var(--line); border-left: 4px solid var(--brass);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; font-size: 14px; line-height: 1.45;
+}
+.aviso-item.nasce-hoje { border-left-color: #5c9a7c; background: rgba(92,154,124,.10); }
+.aviso-item.atrasado { border-left-color: #e0763a; }
+.aviso-item.lida { opacity: .6; border-left-color: var(--line); }
+.aviso-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline; }
+.aviso-titulo { font-weight: 700; }
+.aviso-quando { font-size: 12px; color: var(--text-muted); }
+.aviso-detalhe { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+.aviso-msg { margin-top: 8px; padding: 8px 10px; background: rgba(0,0,0,.18); border-radius: 8px; font-size: 13.5px; white-space: pre-wrap; word-break: break-word; }
+.aviso-acoes { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+.aviso-acoes .btn { padding: 6px 12px; font-size: 12px; text-decoration: none; }
+.tipo-badge { display:inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 6px; }
+.tipo-reserva { background: rgba(92,154,124,.2); color: #8fc4a6; }
+.tipo-duvida { background: rgba(199,151,63,.2); color: var(--brass-soft); }
+.tipo-contato { background: rgba(90,140,200,.2); color: #8fb4e0; }
+.contador-aviso { background: #e0763a; color: #fff; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -141,23 +164,17 @@
       <div class="topbar">
         <div>
           <h1>Painel do Plantel</h1>
-          <div class="lede">Visão geral do seu criatório — estatísticas e estoque de anilhas.</div>
+          <div class="lede">Visão geral do seu criatório — estatísticas e avisos.</div>
         </div>
         <button class="btn btn-primary" onclick="location.href='cadastro-ave.html'">+ Nova Ave</button>
       </div>
 
       <div class="stats-grid" id="stats-grid"><div class="empty-state-painel">Carregando...</div></div>
 
+      <div id="avisos-area"></div>
+
       <div class="section-title">📋 Espécies no Plantel</div>
       <div class="species-list" id="species-list"></div>
-
-      <div class="section-title">🏷️ Estoque de Anilhas</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Cor</th><th>Número</th><th>Tipo</th><th>Dimensão</th><th>Status</th><th>Disponível</th></tr></thead>
-          <tbody id="anilhas-table"></tbody>
-        </table>
-      </div>
 
     </section>
   </main>
@@ -216,46 +233,186 @@ function renderizarEspecies(aves) {
   `).join('');
 }
 
-function renderizarAnilhas(anilhas) {
-  const tbody = document.getElementById('anilhas-table');
-  if (anilhas.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-note" style="padding:20px;">Nenhuma anilha cadastrada.</td></tr>';
-    return;
-  }
-  const cores = {
-    'Prata': '#C0C0C0', 'Prata - Sispass': '#A8A8A8', 'Amarelo': '#FFD700',
-    'Azul': '#4169E1', 'Castanho': '#8B4513', 'Cinza': '#808080',
-    'Laranja': '#FF8C00', 'Marrom': '#A52A2A', 'Rosa': '#FF69B4',
-    'Verde': '#32CD32', 'Bege': '#F5F5DC', 'Branco': '#FFFFFF',
-    'Caramelo': '#D2691E', 'Bronze': '#CD7F32', 'Cobre': '#B87333',
-    'Dourado': '#FFD700', 'Ferrugem': '#B7410E', 'Marfim': '#FFFFF0',
-    'Ouro': '#FFD700', 'Preto': '#1A1A1A', 'Roxo': '#8B008B',
-    'Vermelho': '#DC143C'
-  };
-  tbody.innerHTML = anilhas.map(item => {
-    let statusClass = 'badge-disponivel', statusText = 'Disponível';
-    if (item.disponivel === 'Não') { statusClass = 'badge-usada'; statusText = 'Indisponível'; }
-    if (item.ativo === 'Não') { statusClass = 'badge-esgotada'; statusText = 'Inativo'; }
-    const corHex = cores[item.cor] || '#808080';
-    return `<tr><td><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${corHex};border:1px solid rgba(255,255,255,0.2);vertical-align:middle;margin-right:6px;"></span> ${item.cor}</td><td><strong>${item.numero}</strong></td><td>${item.tipo}</td><td>${item.dimensao || '-'}</td><td><span class="badge ${statusClass}">${statusText}</span></td><td>${item.disponivel === 'Sim' ? '✅ Sim' : '❌ Não'}</td></tr>`;
-  }).join('');
+// ============================================================
+// AVISOS: filhotes por nascer + caixa de mensagens do site
+// Cada parte só aparece se houver alguma coisa para mostrar.
+// ============================================================
+
+let MENSAGENS = [];
+let mostrarLidas = false;
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
+
+function hojeZerado() { const h = new Date(); h.setHours(0, 0, 0, 0); return h; }
+
+function diasAte(dataIso) {
+  const [a, m, d] = String(dataIso).slice(0, 10).split('-').map(Number);
+  return Math.round((new Date(a, m - 1, d) - hojeZerado()) / 86400000);
+}
+
+function fmtDataBR(iso) {
+  const p = String(iso).slice(0, 10).split('-');
+  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : '';
+}
+
+// Mostra a data/hora como foi gravada (sem converter fuso).
+function fmtQuando(iso) {
+  const t = String(iso || '');
+  return t.length >= 16 ? `${t.slice(8, 10)}/${t.slice(5, 7)} às ${t.slice(11, 16)}` : '';
+}
+
+function textoPrazo(dias) {
+  if (dias === 0) return '🐣 Nasce HOJE';
+  if (dias === 1) return 'Nasce amanhã';
+  if (dias > 1) return `Nasce em ${dias} dias`;
+  if (dias === -1) return 'Previsão era ontem';
+  return `Previsão passou há ${-dias} dias`;
+}
+
+function montarFilhotesPorNascer(reproducoes) {
+  const ativas = reproducoes.filter(r => r.status === 'Ativo' && r.finalizada !== 'Sim');
+
+  const chocando = ativas
+    .filter(r => r.previsaoNascimento)
+    .map(r => ({ r, dias: diasAte(r.previsaoNascimento) }))
+    .filter(x => x.dias <= 14 && x.dias >= -15)
+    .sort((a, b) => a.dias - b.dias);
+
+  const botando = ativas.filter(r => !r.inicioChoco && !r.previsaoNascimento);
+
+  let html = '';
+  if (chocando.length) {
+    html += `<div class="avisos-sub">🥚 Filhotes para nascer</div>`;
+    html += chocando.map(({ r, dias }) => `
+      <div class="aviso-item ${dias === 0 ? 'nasce-hoje' : dias < 0 ? 'atrasado' : ''}">
+        <div class="aviso-top">
+          <span class="aviso-titulo">${textoPrazo(dias)} — ${esc(r.femeaNome)}${r.machoNome ? ' × ' + esc(r.machoNome) : ''}</span>
+          <span class="aviso-quando">previsão ${fmtDataBR(r.previsaoNascimento)}</span>
+        </div>
+        <div class="aviso-detalhe">${r.totalOvos ? `${r.totalOvos} ovo(s)${r.ovosFerteis ? ` · ${r.ovosFerteis} fértil(is)` : ''}` : 'Sem ovos contados'}${r.inicioChoco ? ` · choco iniciado em ${fmtDataBR(r.inicioChoco)}` : ''}</div>
+      </div>`).join('');
+  }
+  if (botando.length) {
+    html += `<div class="avisos-sub">🪺 Ainda botando</div>`;
+    html += botando.map(r => `
+      <div class="aviso-item">
+        <div class="aviso-top">
+          <span class="aviso-titulo">${esc(r.femeaNome)}${r.machoNome ? ' × ' + esc(r.machoNome) : ''}</span>
+          <span class="aviso-quando">${r.primeiroOvo ? 'primeiro ovo em ' + fmtDataBR(r.primeiroOvo) : ''}</span>
+        </div>
+        <div class="aviso-detalhe">${r.totalOvos ? r.totalOvos + ' ovo(s) até agora' : 'Sem ovos contados'} · choco ainda não começou</div>
+      </div>`).join('');
+  }
+  return { html, total: chocando.length + botando.length };
+}
+
+function linkResposta(m) {
+  const c = String(m.contato || '').trim();
+  if (c.includes('@')) {
+    return `<a class="btn btn-primary" href="mailto:${c}?subject=${encodeURIComponent('Re: ' + (m.assunto || 'Contato pelo site'))}">✉️ Responder por e-mail</a>`;
+  }
+  let d = c.replace(/\D/g, '');
+  if (d.length >= 10 && d.length <= 11) d = '55' + d; // DDD + número -> adiciona o Brasil
+  if (d.length >= 12) {
+    const texto = `Olá, ${m.nome}! Aqui é do Criatório Goularth, recebi sua mensagem${m.aveNome ? ' sobre ' + m.aveNome : ''}.`;
+    return `<a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/${d}?text=${encodeURIComponent(texto)}">💬 Responder no WhatsApp</a>`;
+  }
+  return '';
+}
+
+const ROTULO_TIPO = { reserva: ['📩 Reserva', 'tipo-reserva'], duvida: ['❓ Dúvida', 'tipo-duvida'], contato: ['✉️ Contato', 'tipo-contato'] };
+
+function montarMensagens() {
+  const naoLidas = MENSAGENS.filter(m => !m.lida);
+  const lidas = MENSAGENS.filter(m => m.lida);
+  if (!MENSAGENS.length) return { html: '', total: 0 };
+
+  const lista = mostrarLidas ? MENSAGENS : naoLidas;
+  const itens = lista.map(m => {
+    const [rotulo, cls] = ROTULO_TIPO[m.tipo] || ROTULO_TIPO.contato;
+    return `
+      <div class="aviso-item ${m.lida ? 'lida' : ''}">
+        <div class="aviso-top">
+          <span class="aviso-titulo"><span class="tipo-badge ${cls}">${rotulo}</span>${esc(m.nome)}</span>
+          <span class="aviso-quando">${fmtQuando(m.criadoEm)}</span>
+        </div>
+        ${m.aveNome ? `<div class="aviso-detalhe">🐦 ${esc(m.aveNome)}</div>` : ''}
+        ${m.mensagem ? `<div class="aviso-msg">${esc(m.mensagem)}</div>` : ''}
+        <div class="aviso-detalhe" style="margin-top:6px;">📞 ${esc(m.contato)}</div>
+        <div class="aviso-acoes">
+          ${linkResposta(m)}
+          <button class="btn" onclick="alternarLida(${m.id}, ${!m.lida})">${m.lida ? '↩ Marcar como não lida' : '✔ Marcar como lida'}</button>
+          <button class="btn" onclick="excluirMensagem(${m.id})">🗑 Excluir</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const cabecalho = `
+    <div class="avisos-sub">📩 Mensagens do site
+      ${naoLidas.length ? `<span class="contador-aviso">${naoLidas.length} nova(s)</span>` : ''}
+      ${naoLidas.length > 1 ? `<button class="btn" style="padding:3px 10px;font-size:11px;" onclick="lerTodas()">✔ Marcar todas como lidas</button>` : ''}
+      ${lidas.length ? `<button class="btn" style="padding:3px 10px;font-size:11px;" onclick="alternarMostrarLidas()">${mostrarLidas ? 'Ocultar lidas' : `Ver lidas (${lidas.length})`}</button>` : ''}
+    </div>`;
+  const vazio = !lista.length ? `<div class="empty-note" style="padding:10px 2px;">✅ Nenhuma mensagem nova.</div>` : '';
+  return { html: cabecalho + itens + vazio, total: naoLidas.length };
+}
+
+let REPRODUCOES = [];
+
+function renderizarAvisos() {
+  const area = document.getElementById('avisos-area');
+  const nasc = montarFilhotesPorNascer(REPRODUCOES);
+  const msg = montarMensagens();
+  const total = nasc.total + msg.total;
+
+  let corpo = nasc.html + msg.html;
+  if (!corpo) corpo = '<div class="empty-note" style="padding:6px 2px 10px;">✅ Nenhum aviso no momento.</div>';
+  area.innerHTML = `
+    <div class="section-title">🔔 Avisos${total ? `<span class="contador-aviso">${total}</span>` : ''}</div>
+    <div class="avisos-bloco">${corpo}</div>`;
+}
+
+async function carregarMensagens() {
+  try { MENSAGENS = await DB.getMensagens(); } catch (e) { MENSAGENS = []; }
+}
+
+async function alternarLida(id, lida) {
+  try { await DB.marcarMensagem(id, lida); await carregarMensagens(); renderizarAvisos(); }
+  catch (e) { alert('Não foi possível atualizar: ' + e.message); }
+}
+async function lerTodas() {
+  try { await DB.marcarTodasMensagensLidas(); await carregarMensagens(); renderizarAvisos(); }
+  catch (e) { alert('Não foi possível atualizar: ' + e.message); }
+}
+async function excluirMensagem(id) {
+  if (!confirm('Excluir esta mensagem de vez?')) return;
+  try { await DB.excluirMensagem(id); await carregarMensagens(); renderizarAvisos(); }
+  catch (e) { alert('Não foi possível excluir: ' + e.message); }
+}
+function alternarMostrarLidas() { mostrarLidas = !mostrarLidas; renderizarAvisos(); }
 
 async function iniciar() {
   try {
-    const [aves, anilhas] = await Promise.all([
+    const [aves, reproducoes] = await Promise.all([
       DB.getAll(DB.TABLES.AVES),
-      DB.getAll(DB.TABLES.ANILHAS)
+      DB.getAll(DB.TABLES.REPRODUCOES).catch(() => []),
+      carregarMensagens()
     ]);
+    REPRODUCOES = reproducoes;
     await renderizarEstatisticas(aves);
+    renderizarAvisos();
     renderizarEspecies(aves);
-    renderizarAnilhas(anilhas);
   } catch (e) {
     console.error('Erro ao carregar painel:', e);
   }
 }
 
 iniciar();
+
+// Confere mensagens novas do site a cada minuto, sem precisar recarregar a página.
+setInterval(async () => { await carregarMensagens(); renderizarAvisos(); }, 60000);
 </script>
 </body>
 </html>

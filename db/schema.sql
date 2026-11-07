@@ -156,3 +156,18 @@ CREATE TABLE IF NOT EXISTS site_torneios (
 
 CREATE INDEX IF NOT EXISTS idx_torneios_usuario ON site_torneios(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_torneios_categoria ON site_torneios(categoria);
+
+CREATE TABLE IF NOT EXISTS site_mensagens (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL DEFAULT 1,
+  tipo VARCHAR(20) NOT NULL DEFAULT 'contato',
+  nome VARCHAR(120) NOT NULL,
+  contato VARCHAR(160) NOT NULL,
+  assunto VARCHAR(200),
+  mensagem TEXT,
+  ave_id INTEGER,
+  ave_nome VARCHAR(160),
+  lida BOOLEAN NOT NULL DEFAULT false,
+  ip_hash VARCHAR(40),
+  criado_em TIMESTAMP NOT NULL DEFAULT NOW()
+);

@@ -10,6 +10,7 @@ const reproducoesRoutes = require('./routes/reproducoes');
 const configRoutes = require('./routes/config');
 const ancestraisRoutes = require('./routes/ancestrais');
 const visitasRoutes = require('./routes/visitas');
+const mensagensRoutes = require('./routes/mensagens');
 const torneiosRoutes = require('./routes/torneios');
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/reproducoes', reproducoesRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/ancestrais', ancestraisRoutes);
 app.use('/api/visitas', visitasRoutes);
+app.use('/api/mensagens', mensagensRoutes);
 app.use('/api/torneios', torneiosRoutes);
 
 // ===== ARQUIVOS ESTÁTICOS =====

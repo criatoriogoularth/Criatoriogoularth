@@ -290,6 +290,7 @@
   <script src="db-api.js"></script>
   <script src="voltar.js"></script>
   <script src="site-ave-midia.js"></script>
+  <script src="site-mensagem.js"></script>
   <script>
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
@@ -430,6 +431,7 @@
                   ${AveMidia.botoes(a)}
                   <a href="site-certificado.html?id=${a.id}" class="btn btn-primary">📄 Ver Árvore</a>
                   ${(a.status || 'Disponível') === 'Disponível' ? `<button class="btn btn-success" onclick="reservarFilhote(${a.id})">📩 Reservar</button>` : ''}
+                  <button class="btn" onclick="duvidaFilhote(${a.id})">❓ Dúvida</button>
                 </div>
               </td>
             </tr>
@@ -448,18 +450,16 @@
       container.innerHTML = totalHtml + html;
     }
 
-    async function reservarFilhote(id) {
+    // Abre a janela de reserva/dúvida. A mensagem fica guardada no sistema e aparece
+    // em "Avisos" no Painel; o visitante ainda pode chamar pelo WhatsApp depois de enviar.
+    async function abrirMensagemFilhote(id, tipo) {
       const avesSite = await getSiteAves();
       const ave = avesSite.find(a => a.id === id);
       if (!ave) return;
-
-      const nome = ave.nome;
-      const anilha = ave.anilha || 'sem anilha';
-
-      const mensagem = `Olá! Tenho interesse em reservar o filhote ${nome} (${anilha}). Poderia me passar mais informações?`;
-      const telefone = '5511941493657';
-      window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`, '_blank');
+      SiteMensagem.abrir({ id: ave.id, nome: ave.nome, anilha: ave.anilha || '' }, tipo);
     }
+    function reservarFilhote(id) { return abrirMensagemFilhote(id, 'reserva'); }
+    function duvidaFilhote(id) { return abrirMensagemFilhote(id, 'duvida'); }
 
     carregarLogo();
     renderizarFilhotes();

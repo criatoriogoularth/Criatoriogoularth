@@ -420,31 +420,34 @@
 
     async function enviarMensagem(event) {
       event.preventDefault();
-      
+
       const nome = document.getElementById('contato-nome').value.trim();
       const email = document.getElementById('contato-email').value.trim();
       const assunto = document.getElementById('contato-assunto').value.trim();
       const mensagem = document.getElementById('contato-mensagem').value.trim();
-      
+
       if (!nome || !email || !mensagem) {
         alert('Por favor, preencha todos os campos obrigatórios.');
         return;
       }
-      
-      const conteudo = await getSiteConteudo();
-      const contato = conteudo.contato || {};
-      const emailDestino = contato.email || 'criatorio.goularth@gmail.com';
-      
-      const subject = encodeURIComponent(assunto || 'Contato pelo site');
-      const body = encodeURIComponent(`Nome: ${nome}\nE-mail: ${email}\n\n${mensagem}`);
-      window.location.href = `mailto:${emailDestino}?subject=${subject}&body=${body}`;
-      
-      alert(`✅ Mensagem enviada para ${emailDestino}!\n\nDe: ${nome}\nE-mail: ${email}\nAssunto: ${assunto || 'Sem assunto'}`);
-      
-      document.getElementById('contato-nome').value = '';
-      document.getElementById('contato-email').value = '';
-      document.getElementById('contato-assunto').value = '';
-      document.getElementById('contato-mensagem').value = '';
+
+      const botao = event.target.querySelector('button[type=submit]');
+      const textoBotao = botao.textContent;
+      botao.disabled = true; botao.textContent = 'Enviando...';
+      try {
+        const res = await fetch('/api/mensagens', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'contato', nome, contato: email, assunto, mensagem })
+        });
+        const dados = await res.json().catch(() => null);
+        if (!res.ok) throw new Error((dados && dados.error) || 'Não foi possível enviar agora.');
+        alert('✅ Mensagem enviada! Em breve entraremos em contato.');
+        event.target.reset();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      } finally {
+        botao.disabled = false; botao.textContent = textoBotao;
+      }
     }
 
     carregarLogo();

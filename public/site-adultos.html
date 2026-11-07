@@ -290,6 +290,7 @@
   <script src="db-api.js"></script>
   <script src="voltar.js"></script>
   <script src="site-ave-midia.js"></script>
+  <script src="site-mensagem.js"></script>
   <script>
     async function getPersonalizacao() {
       return (await DB.getConfig('site_personalizacao')) || {};
@@ -430,6 +431,7 @@
                   ${AveMidia.botoes(a)}
                   <a href="site-certificado.html?id=${a.id}" class="btn btn-primary">📄 Ver Árvore</a>
                   ${(a.status || 'Disponível') === 'Disponível' ? `<button class="btn btn-success" onclick="reservarAdulto(${a.id})">📩 Reservar</button>` : ''}
+                  <button class="btn" onclick="duvidaAdulto(${a.id})">❓ Dúvida</button>
                 </div>
               </td>
             </tr>
@@ -452,18 +454,14 @@
     // pelo navegador — isso mudava um dado real do sistema sem nenhuma
     // permissão. Agora o visitante só manda a mensagem pelo WhatsApp; quem
     // marca como reservado de fato é o admin, no painel.
-    async function reservarAdulto(id) {
+    async function abrirMensagemAdulto(id, tipo) {
       const avesSite = await getSiteAves();
       const ave = avesSite.find(a => a.id === id);
       if (!ave) return;
-
-      const nome = ave.nome;
-      const anilha = ave.anilha || 'sem anilha';
-
-      const mensagem = `Olá! Tenho interesse em reservar o adulto ${nome} (${anilha}). Poderia me passar mais informações?`;
-      const telefone = '5511941493657';
-      window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`, '_blank');
+      SiteMensagem.abrir({ id: ave.id, nome: ave.nome, anilha: ave.anilha || '' }, tipo);
     }
+    function reservarAdulto(id) { return abrirMensagemAdulto(id, 'reserva'); }
+    function duvidaAdulto(id) { return abrirMensagemAdulto(id, 'duvida'); }
 
     carregarLogo();
     renderizarAdultos();

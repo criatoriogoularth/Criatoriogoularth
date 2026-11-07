@@ -198,6 +198,23 @@ const DB = {
     return apiFetch('/visitas/stats');
   },
 
+  // ---- MENSAGENS DO SITE (reservas, dúvidas e contatos) ----
+  async getMensagens() {
+    return paraCamel(await apiFetch('/mensagens'));
+  },
+  async getMensagensResumo() {
+    return apiFetch('/mensagens/resumo');
+  },
+  async marcarMensagem(id, lida) {
+    return apiFetch(`/mensagens/${id}`, { method: 'PUT', body: JSON.stringify({ lida }) });
+  },
+  async marcarTodasMensagensLidas() {
+    return apiFetch('/mensagens/ler-todas', { method: 'POST', body: JSON.stringify({}) });
+  },
+  async excluirMensagem(id) {
+    return apiFetch(`/mensagens/${id}`, { method: 'DELETE' });
+  },
+
   // ---- TORNEIOS (Copas) ----
   async getTorneiosPublico() {
     const res = await fetch(`${API_BASE}/torneios/publico`);
