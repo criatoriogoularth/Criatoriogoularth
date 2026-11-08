@@ -1,0 +1,328 @@
+/* ============================================================
+   site-mobile.css — AJUSTES SÓ PARA CELULAR do site público
+   ============================================================
+   Tudo aqui dentro de @media (max-width: 768px). Acima disso (tablet em pé,
+   notebook, computador) NADA muda — o site continua exatamente como era.
+
+   Este arquivo é carregado por último em cada página (depois do <style>
+   próprio da página), por isso consegue sobrepor as regras de celular
+   antigas que cada página repetia.
+
+   O que ele faz:
+   1. Topo compacto: logo pequeno + nome + botão ☰ numa linha só, fixo no topo.
+   2. Menu em tela cheia, botões grandes em 2 colunas (fácil de tocar).
+   3. Tabelas (Adultos, Filhotes, Plantel em lista) viram CARTÕES — sem
+      cortar colunas nem precisar arrastar para o lado.
+   4. Plantel em blocos mais compacto, filtros lado a lado, botões maiores.
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  html, body { overflow-x: hidden; }
+  body.menu-aberto { overflow: hidden; }
+
+  /* ---------- 1. TOPO COMPACTO ---------- */
+  body .site-header:not(:has(.site-banner)) {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
+  body .site-nav,
+  body.layout-lateral .site-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    gap: 6px 10px;
+    padding: 8px 12px;
+    position: relative;
+    max-height: none;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  body.layout-lateral .site-nav { position: sticky; top: 0; z-index: 200; }
+
+  body .site-nav .logo {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  body .site-nav .logo .mark {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 17px !important;
+    border-width: 2px;
+  }
+  body .site-nav .logo > img {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  body .site-nav .logo > div:last-child { min-width: 0; }
+  body .site-nav .logo .name {
+    font-size: 16px !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  body .site-nav .logo .sub {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body .site-nav .nav-toggle {
+    display: inline-flex;
+    justify-content: center;
+    flex: 0 0 auto;
+    margin-left: auto;
+    min-height: 42px;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  /* Home: não tem logo na barra (o banner fica acima) -> botão ocupa a barra toda */
+  body .site-nav:not(:has(.logo)) .nav-toggle {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /* ---------- 2. MENU EM TELA CHEIA ---------- */
+  body .site-nav.aberto {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-content: flex-start;
+    background: var(--bg-elevated);
+    padding: 8px 12px 28px;
+    border: none;
+  }
+  body .site-nav.aberto .nav-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    flex: 0 0 100%;
+    margin-top: 10px;
+    align-items: stretch;
+  }
+  body .site-nav.aberto .nav-links > a,
+  body .site-nav.aberto .nav-links > .dropdown > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 50px;
+    padding: 10px 8px;
+    font-size: 15px;
+    font-weight: 600;
+    background: rgba(199, 151, 63, 0.06);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    width: 100%;
+  }
+  body .site-nav.aberto .nav-links > a.active,
+  body .site-nav.aberto .nav-links > .dropdown > a.active {
+    background: rgba(199, 151, 63, 0.14);
+    border-color: var(--brass);
+    color: var(--brass-soft);
+  }
+  body .site-nav.aberto .nav-links > .dropdown { grid-column: 1 / -1; }
+  body .site-nav.aberto .nav-links > .dropdown > a::after { content: ' ▼'; }
+  body .site-nav.aberto .dropdown-content a,
+  body .site-nav.aberto .sub-dropdown > a,
+  body .site-nav.aberto .sub-dropdown-content a {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  body .site-nav.aberto .nav-buttons {
+    display: flex;
+    width: 100%;
+    flex: 0 0 100%;
+    margin-top: 12px;
+  }
+  body .site-nav.aberto .btn-login-site {
+    width: 100%;
+    min-height: 50px;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+
+  /* ---------- submenu "Plantel" (espécies) abre ao tocar ----------
+     As páginas escondiam o submenu com uma regra própria que vencia a regra
+     de abrir; por isso o toque em "Plantel" não mostrava nada no celular. */
+  body .dropdown:hover > .dropdown-content,
+  body .sub-dropdown:hover > .sub-dropdown-content { display: none; }
+  body .dropdown.open > .dropdown-content,
+  body .sub-dropdown.open > .sub-dropdown-content { display: block; }
+  body .dropdown-content {
+    background: rgba(0, 0, 0, 0.18);
+    border-left: 2px solid var(--brass-dim);
+    border-radius: 0 0 10px 10px;
+    margin: 4px 0 2px;
+    padding: 4px 0;
+  }
+  body .sub-dropdown-content { background: transparent; padding-left: 12px; margin: 0 0 4px 8px; }
+  body .dropdown-content .sub-dropdown > a { display: block; text-align: left; font-size: 14px; padding: 12px 14px; }
+  body .sub-dropdown-content a { padding: 11px 14px; font-size: 13.5px; }
+
+  /* ---------- páginas: espaçamentos ---------- */
+  body .site-main { padding: 18px 14px 44px; }
+  body .site-footer { padding: 20px 14px; }
+  body .site-footer .links { gap: 6px 14px; }
+  body .site-footer .links a { padding: 6px 2px; }
+
+  .especie-section { margin-bottom: 22px; }
+  .especie-section .especie-title {
+    font-size: 19px;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  /* ---------- 3. TABELAS VIRAM CARTÕES ---------- */
+  .table-wrapper {
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .table-wrapper table,
+  .table-wrapper tbody {
+    display: block;
+    width: 100%;
+  }
+  .table-wrapper thead { display: none; }
+  .table-wrapper tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .table-wrapper tr:hover td { background: transparent; }
+  .table-wrapper td {
+    display: block;
+    min-width: 0;
+    padding: 0 !important;
+    border: none !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .table-wrapper td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+  /* nome em destaque, no topo, ocupando a linha toda */
+  .table-wrapper td[data-label="Nome"] {
+    grid-column: 1 / -1;
+    order: -4;
+    font-size: 16px;
+  }
+  .table-wrapper td[data-label="Nome"]::before { display: none; }
+  .table-wrapper td[data-label="Nome"] .am-nome {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+  }
+  /* sexo e status lado a lado, logo abaixo do nome */
+  .table-wrapper td[data-label="Sexo"] { order: -3; }
+  .table-wrapper td[data-label="Status"] { order: -2; }
+  .table-wrapper td[data-label="Sexo"]::before,
+  .table-wrapper td[data-label="Status"]::before { display: none; }
+  /* ações embaixo, linha toda */
+  .table-wrapper td[data-label="Ações"] {
+    grid-column: 1 / -1;
+    order: 10;
+    padding-top: 10px !important;
+    margin-top: 2px;
+    border-top: 1px solid var(--line) !important;
+  }
+  .table-wrapper td[data-label="Ações"]::before { display: none; }
+  .table-wrapper td[data-label="Ações"] > div { gap: 6px !important; }
+
+  /* botões com tamanho confortável para o dedo */
+  .table-wrapper .btn,
+  .ave-card .footer .btn,
+  .btn-midia,
+  .am-acoes .btn {
+    padding: 9px 13px !important;
+    font-size: 12.5px !important;
+    line-height: 1.2;
+  }
+  .am-acoes { gap: 6px !important; }
+
+  /* colunas por sexo (Plantel em lista) */
+  .sexo-columns { gap: 14px; }
+  .sexo-column { background: transparent; border: none; border-radius: 0; overflow: visible; }
+  .sexo-column-header { border-radius: 10px; border: 1px solid var(--line); margin-bottom: 10px; }
+
+  /* ---------- 4. PLANTEL ---------- */
+  .plantel-filters {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 14px;
+    align-items: end;
+  }
+  .plantel-filters .filter-group { min-width: 0; }
+  .plantel-filters .btn-limpar {
+    grid-column: 1 / -1;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  /* 16px evita o "zoom" automático do iPhone ao tocar no campo */
+  .plantel-filters .filter-group select,
+  .site-main select,
+  .site-main input[type="text"],
+  .site-main input[type="search"],
+  .site-main input[type="email"],
+  .site-main input[type="tel"],
+  .site-main textarea {
+    font-size: 16px !important;
+  }
+  .plantel-filters .filter-group select { padding: 10px 30px 10px 10px !important; }
+
+  .aves-grid { gap: 12px; }
+  .ave-card .detalhes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .ave-card .detalhes > div { min-width: 0; }
+  .ave-card .detalhes > div:first-child { grid-column: 1 / -1; }
+  .ave-card .header .nome { font-size: 16px; }
+  .total-aves-bar { margin-bottom: 10px; }
+
+  /* janela de fotos/vídeo/CIG ocupa a tela toda */
+  .am-overlay { padding: 0 !important; }
+  .am-box { max-width: none !important; height: 100%; border-radius: 0 !important; border: none !important; }
+}
+
+/* telas bem pequenas */
+@media (max-width: 360px) {
+  body .site-nav .logo .sub { display: none; }
+  body .site-nav.aberto .nav-links { grid-template-columns: 1fr; }
+  .plantel-filters { grid-template-columns: 1fr; }
+}
