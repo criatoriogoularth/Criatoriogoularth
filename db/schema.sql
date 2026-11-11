@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS ancestrais (
   anilha VARCHAR(100),
   sexo VARCHAR(20) NOT NULL,
   especie VARCHAR(255),
+  raca VARCHAR(255),
   observacao TEXT,
   criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
   atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()

@@ -20,7 +20,7 @@ const router = express.Router();
 const CHAVES_VALIDAS = new Set([
   'site_personalizacao', 'site_especies', 'site_noticias',
   'site_fotos', 'site_videos', 'site_banner', 'site_banners', 'site_conteudo',
-  'especies_aves', 'dados_criatorio', 'cert_config'
+  'especies_aves', 'dados_criatorio', 'cert_config', 'site_parceiros'
 ]);
 
 function validarChave(req, res, next) {

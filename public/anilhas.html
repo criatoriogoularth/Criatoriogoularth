@@ -675,7 +675,7 @@ async function renderizarTabela() {
   let anilhas = await DB.getAll(DB.TABLES.ANILHAS);
 
   let lista = anilhas.filter(item => {
-    const matchBusca = item.numero.toLowerCase().includes(busca) || item.cor.toLowerCase().includes(busca);
+    const matchBusca = String(item.numero || '').toLowerCase().includes(busca) || String(item.cor || '').toLowerCase().includes(busca);
     const matchCor = filtroCor ? item.cor === filtroCor : true;
     const matchStatus = filtroStatus ? item.ativo === filtroStatus : true;
     const matchDisponivel = filtroDisponivel ? item.disponivel === filtroDisponivel : true;
@@ -748,7 +748,9 @@ async function editarAnilha(id) {
   document.getElementById('f-observacao').value = item.observacao || '';
   document.querySelector(`input[name="ativo"][value="${item.ativo}"]`).checked = true;
   document.querySelector(`input[name="disponivel"][value="${item.disponivel}"]`).checked = true;
-  document.getElementById('f-data-cadastro').value = item.dataCadastro || '';
+  // CORREÇÃO: a data chegava como "2026-04-18T00:00:00.000Z", que o campo de data rejeita
+  // (ficava em branco). Só os 10 primeiros caracteres (AAAA-MM-DD) servem.
+  document.getElementById('f-data-cadastro').value = item.dataCadastro ? String(item.dataCadastro).slice(0, 10) : '';
   document.getElementById('modal-anilha').classList.add('open');
 }
 
@@ -791,6 +793,12 @@ async function salvarAnilha(event) {
 }
 
 async function excluirAnilha(id) {
+  // CORREÇÃO: dava para excluir uma anilha que está em uso por uma ave, deixando a ave "órfã".
+  try {
+    const [item, aves] = await Promise.all([DB.getById(DB.TABLES.ANILHAS, id), DB.getAll(DB.TABLES.AVES)]);
+    const emUso = item && aves.find(a => a.anilha === item.numero);
+    if (emUso && !confirm(`⚠️ A anilha ${item.numero} está em uso pela ave "${emUso.nome}".\n\nExcluir a anilha do estoque NÃO apaga a ave, mas ela deixará de constar no controle de anilhas. Excluir mesmo assim?`)) return;
+  } catch (e) { /* se não deu para checar, segue para a confirmação normal */ }
   if (!confirm('Tem certeza que deseja excluir esta anilha?')) return;
   try {
     await DB.delete(DB.TABLES.ANILHAS, id);

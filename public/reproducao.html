@@ -491,6 +491,43 @@
   }
 }
 
+/* ===== OVOSCOPIA ===== */
+.ovoscopia-box {
+  background: rgba(199,151,63,0.06);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--brass);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.ovoscopia-info { font-size: 12.5px; color: var(--brass-soft); font-weight: 600; }
+.modal-box .field label.check-inline {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text);
+  font-weight: 500; cursor: pointer; margin-top: 4px;
+}
+.modal-box .field label.check-inline input { width: 16px; height: 16px; accent-color: var(--brass); }
+
+.ovo-linha {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(var(--shade),0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+}
+.ovo-linha.ok { color: var(--sage-soft); background: rgba(92,154,124,0.10); }
+.ovo-linha.alerta {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  color: var(--text);
+  background: rgba(224,118,58,0.12);
+  border: 1px solid rgba(224,118,58,0.45);
+  border-left: 4px solid #e0763a;
+  padding: 8px 12px;
+}
+.ovo-linha.alerta.hoje { background: rgba(199,151,63,0.14); border-color: var(--brass); border-left-color: var(--brass); }
+.ovo-linha.alerta .btn { padding: 4px 12px; font-size: 11px; white-space: nowrap; }
+.repro-card.ativa { border-left: 3px solid var(--sage-soft); }
+.filhote-row .ja-no-plantel { font-size: 11px; color: var(--sage-soft); white-space: nowrap; }
+
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -533,8 +570,8 @@
 
       <div class="repro-toolbar">
         <div class="filters">
-          <input type="text" id="busca-repro" placeholder="Pesquisar..." oninput="renderizarCards()">
-          <select id="filtro-status" onchange="renderizarCards()">
+          <input type="text" id="busca-repro" placeholder="Pesquisar..." oninput="filtrarCards()">
+          <select id="filtro-status" onchange="filtrarCards()">
             <option value="">Todos os status</option>
             <option value="Ativo">Ativo</option>
             <option value="Finalizado">Finalizado</option>
@@ -565,7 +602,7 @@
       <div class="field-grid">
         <div class="field">
           <label>Status <span class="req">*</span></label>
-          <select id="f-status-repro" required>
+          <select id="f-status-repro" required onchange="sincronizarStatusParaFinalizada()">
             <option value="">Selecione...</option>
             <option value="Ativo">Ativo</option>
             <option value="Finalizado">Finalizado</option>
@@ -662,6 +699,14 @@
           <input type="date" id="f-previsao-nascimento" readonly style="background:rgba(92,154,124,0.15) !important;cursor:default;margin-top:4px;">
         </div>
 
+        <!-- OVOSCOPIA -->
+        <div class="field field-full ovoscopia-box">
+          <label>🔍 Ovoscopia <span style="font-weight:400;opacity:.7">(o sistema avisa 5 dias depois que a fêmea começa a chocar)</span></label>
+          <div class="ovoscopia-info" id="ovoscopia-info">Informe o início do choco para calcular a data da ovoscopia.</div>
+          <label class="check-inline"><input type="checkbox" id="f-ovoscopia-feita" onchange="alternarOvoscopiaFeita()"> Ovoscopia já realizada</label>
+          <input type="date" id="f-ovoscopia-data" style="display:none;max-width:200px;" title="Data em que a ovoscopia foi feita">
+        </div>
+
         <!-- OVOS -->
         <div class="field field-full" style="margin-bottom:-6px;">
           <label style="font-size:13px;color:var(--brass-soft);">🥚 Ovos</label>
@@ -711,8 +756,8 @@
         <div class="field">
           <label>Finalizada</label>
           <div class="radio-group">
-            <label><input type="radio" name="finalizada" value="Sim"> Sim</label>
-            <label><input type="radio" name="finalizada" value="Não" checked> Não</label>
+            <label><input type="radio" name="finalizada" value="Sim" onchange="sincronizarFinalizadaParaStatus()"> Sim</label>
+            <label><input type="radio" name="finalizada" value="Não" checked onchange="sincronizarFinalizadaParaStatus()"> Não</label>
           </div>
         </div>
 
@@ -752,25 +797,173 @@
    DADOS - REPRODUÇÕES
    ============================================================ */
 
+const DIAS_OVOSCOPIA = 5; // ovoscopia = 5 dias depois que a fêmea começa a chocar
+
 let reproducoes = [];
 let modoEdicaoRepro = false;
 let selectAveTarget = null;
+let salvandoRepro = false;
+let avesCache = null;      // aves carregadas ao abrir o seletor (evita buscar a cada letra digitada)
+let anilhasCache = null;   // anilhas livres carregadas ao abrir o formulário
+
+// ============================================================
+// UTILITÁRIOS (datas locais — sem o deslocamento de fuso do new Date('AAAA-MM-DD'))
+// ============================================================
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function parseLocal(iso) {
+  const [a, m, d] = String(iso).slice(0, 10).split('-').map(Number);
+  return new Date(a, m - 1, d);
+}
+function paraISO(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+function somarDias(iso, n) {
+  const d = parseLocal(iso);
+  d.setDate(d.getDate() + n);
+  return paraISO(d);
+}
+function hojeISO() { return paraISO(new Date()); }
+function diasEntre(deIso, ateIso) {
+  return Math.round((parseLocal(ateIso) - parseLocal(deIso)) / 86400000);
+}
+
+function formatarData(data) {
+  if (!data) return '-';
+  const partes = String(data).slice(0, 10).split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return data;
+}
+
+// Uma reprodução é "finalizada" se QUALQUER um dos dois campos disser isso
+// (registros antigos podiam ter só um deles marcado).
+function estaFinalizada(item) {
+  return item.status === 'Finalizado' || item.finalizada === 'Sim';
+}
+
+// ============================================================
+// OVOSCOPIA
+// ============================================================
+
+function dataOvoscopia(item) {
+  return item.inicioChoco ? somarDias(item.inicioChoco, DIAS_OVOSCOPIA) : null;
+}
+
+// Devolve { tipo: 'feita' | 'hoje' | 'atrasada' | 'aguardando', dias, data } ou null
+function situacaoOvoscopia(item) {
+  if (estaFinalizada(item) || !item.inicioChoco) return null;
+  const data = dataOvoscopia(item);
+  if (item.ovoscopiaFeita) return { tipo: 'feita', dias: 0, data: item.ovoscopiaData || data };
+  const dias = diasEntre(hojeISO(), data); // >0 falta, 0 hoje, <0 atrasada
+  if (dias > 0) return { tipo: 'aguardando', dias, data };
+  if (dias === 0) return { tipo: 'hoje', dias, data };
+  return { tipo: 'atrasada', dias: -dias, data };
+}
+
+function htmlOvoscopia(item) {
+  const o = situacaoOvoscopia(item);
+  if (!o) return '';
+  if (o.tipo === 'feita') {
+    return `<div class="ovo-linha ok">🔍 Ovoscopia realizada em ${formatarData(o.data)}</div>`;
+  }
+  if (o.tipo === 'aguardando') {
+    return `<div class="ovo-linha">🔍 Ovoscopia em ${o.dias} dia${o.dias > 1 ? 's' : ''} (${formatarData(o.data)})</div>`;
+  }
+  const titulo = o.tipo === 'hoje'
+    ? '🔍 Hoje é o dia da ovoscopia!'
+    : `🔍 Ovoscopia atrasada há ${o.dias} dia${o.dias > 1 ? 's' : ''}`;
+  return `
+    <div class="ovo-linha alerta ${o.tipo}">
+      <div><strong>${titulo}</strong><br><span style="font-size:11px;opacity:.85;">${DIAS_OVOSCOPIA} dias de choco completos em ${formatarData(o.data)} — confira os ovos contra a luz e separe férteis de inférteis.</span></div>
+      <button class="btn btn-primary" onclick="marcarOvoscopiaFeita(${item.id})">✔ Ovoscopia feita</button>
+    </div>`;
+}
+
+async function marcarOvoscopiaFeita(id) {
+  try {
+    await DB.update(DB.TABLES.REPRODUCOES, id, { ovoscopiaFeita: true, ovoscopiaData: hojeISO() });
+  } catch (e) {
+    alert('❌ Não foi possível registrar a ovoscopia: ' + e.message);
+    return;
+  }
+  await renderizarCards();
+  if (confirm('✅ Ovoscopia registrada!\n\nQuer informar agora quantos ovos são férteis e inférteis?')) {
+    editarReproducao(id);
+  }
+}
+
+// Texto "Ovoscopia prevista" dentro do formulário
+function atualizarInfoOvoscopia() {
+  const inicio = document.getElementById('f-inicio-choco').value;
+  const info = document.getElementById('ovoscopia-info');
+  if (!inicio) {
+    info.textContent = 'Informe o início do choco para calcular a data da ovoscopia.';
+    return;
+  }
+  const data = somarDias(inicio, DIAS_OVOSCOPIA);
+  const dias = diasEntre(hojeISO(), data);
+  let quando = '';
+  if (document.getElementById('f-ovoscopia-feita').checked) quando = ' · já realizada ✅';
+  else if (dias > 0) quando = ` · faltam ${dias} dia${dias > 1 ? 's' : ''}`;
+  else if (dias === 0) quando = ' · é HOJE';
+  else quando = ` · atrasada há ${-dias} dia${dias < -1 ? 's' : ''}`;
+  info.textContent = `Ovoscopia prevista para ${formatarData(data)}${quando}`;
+}
+
+function alternarOvoscopiaFeita() {
+  const feita = document.getElementById('f-ovoscopia-feita').checked;
+  const campo = document.getElementById('f-ovoscopia-data');
+  campo.style.display = feita ? '' : 'none';
+  if (feita && !campo.value) campo.value = hojeISO();
+  atualizarInfoOvoscopia();
+}
+
+// ============================================================
+// STATUS x FINALIZADA (os dois campos sempre andam juntos)
+// ============================================================
+
+function sincronizarStatusParaFinalizada() {
+  const st = document.getElementById('f-status-repro').value;
+  if (st === 'Finalizado') document.querySelector('input[name="finalizada"][value="Sim"]').checked = true;
+  else if (st === 'Ativo') document.querySelector('input[name="finalizada"][value="Não"]').checked = true;
+}
+
+function sincronizarFinalizadaParaStatus() {
+  const f = document.querySelector('input[name="finalizada"]:checked');
+  if (!f) return;
+  document.getElementById('f-status-repro').value = f.value === 'Sim' ? 'Finalizado' : 'Ativo';
+}
 
 // ============================================================
 // FUNÇÕES DE RENDERIZAÇÃO
 // ============================================================
 
 async function renderizarCards() {
+  try {
+    reproducoes = await DB.getAll(DB.TABLES.REPRODUCOES);
+  } catch (e) {
+    document.getElementById('repro-cards').innerHTML =
+      `<div class="empty-state"><div class="icon">⚠️</div><h3>Não foi possível carregar</h3><p>${esc(e.message)}</p></div>`;
+    return;
+  }
+  filtrarCards();
+}
+
+// Filtra o que já está na memória (digitar na busca não precisa ir ao servidor a cada letra)
+function filtrarCards() {
   const busca = document.getElementById('busca-repro').value.toLowerCase();
   const filtroStatus = document.getElementById('filtro-status').value;
 
-  reproducoes = await DB.getAll(DB.TABLES.REPRODUCOES);
-
-  let lista = reproducoes.filter(item => {
-    const matchBusca = item.femeaNome.toLowerCase().includes(busca) || 
-                       item.femeaAnilha.toLowerCase().includes(busca) ||
-                       (item.machoNome && item.machoNome.toLowerCase().includes(busca));
-    const matchStatus = filtroStatus ? item.status === filtroStatus : true;
+  const lista = reproducoes.filter(item => {
+    const textos = [item.femeaNome, item.femeaAnilha, item.machoNome].map(t => String(t || '').toLowerCase());
+    const matchBusca = !busca || textos.some(t => t.includes(busca));
+    const fin = estaFinalizada(item);
+    const matchStatus = filtroStatus ? (filtroStatus === 'Finalizado' ? fin : !fin) : true;
     return matchBusca && matchStatus;
   });
 
@@ -781,7 +974,7 @@ async function renderizarCards() {
     container.innerHTML = `
       <div class="empty-state">
         <div class="icon">🥚</div>
-        <h3>Nenhuma reprodução cadastrada</h3>
+        <h3>Nenhuma reprodução encontrada</h3>
         <p>Clique em "+ Nova Reprodução" para adicionar um cruzamento.</p>
       </div>
     `;
@@ -789,17 +982,19 @@ async function renderizarCards() {
   }
 
   container.innerHTML = lista.map(item => {
+    const fin = estaFinalizada(item);
+    const filhotes = Array.isArray(item.filhotes) ? item.filhotes : [];
     let filhotesHtml = '';
-    if (item.filhotes && item.filhotes.length > 0) {
-      filhotesHtml = item.filhotes.map(f => `
+    if (filhotes.length > 0) {
+      filhotesHtml = filhotes.map(f => `
         <div class="filhote-item">
           <div class="info">
-            <span>${f.nome || 'Sem nome'}</span>
+            <span>${esc(f.nome) || 'Sem nome'}</span>
             <span class="sexo-badge ${f.sexo === 'M' ? 'sexo-macho' : 'sexo-femea'}" style="font-size:10px;padding:1px 8px;border-radius:10px;background:${f.sexo === 'M' ? 'rgba(70,130,200,0.15)' : 'rgba(200,100,130,0.15)'};color:${f.sexo === 'M' ? 'var(--info-text)' : 'var(--rose-text)'};">
-              ${f.sexo === 'M' ? '♂' : '♀'}
+              ${f.sexo === 'M' ? '♂' : f.sexo === 'F' ? '♀' : '⚪'}
             </span>
           </div>
-          <span class="anilha-tag">${f.anilha || 'Sem anilha'}</span>
+          <span class="anilha-tag">${esc(f.anilha) || 'Sem anilha'}</span>
         </div>
       `).join('');
     } else {
@@ -807,46 +1002,41 @@ async function renderizarCards() {
     }
 
     return `
-    <div class="repro-card">
+    <div class="repro-card ${fin ? '' : 'ativa'}">
       <div class="card-header">
         <div>
-          <div class="nome-femea">${item.femeaNome}</div>
-          <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">${item.femeaAnilha}</div>
+          <div class="nome-femea">${esc(item.femeaNome) || '(fêmea não informada)'}</div>
+          <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">${esc(item.femeaAnilha)}</div>
         </div>
-        <span class="status-badge ${item.status === 'Ativo' ? 'ativo' : 'finalizado'}">${item.status}</span>
+        <span class="status-badge ${fin ? 'finalizado' : 'ativo'}">${fin ? 'Finalizado' : 'Ativo'}</span>
       </div>
+      ${htmlOvoscopia(item)}
       <div class="card-body">
-        ${item.machoNome ? `<span class="label">Macho:</span><span class="value">${item.machoNome}</span>` : ''}
+        ${item.machoNome ? `<span class="label">Macho:</span><span class="value">${esc(item.machoNome)}</span>` : ''}
         ${item.primeiroOvo ? `<span class="label">1º Ovo:</span><span class="value">${formatarData(item.primeiroOvo)}</span>` : ''}
         ${item.ultimoOvo ? `<span class="label">Último Ovo:</span><span class="value">${formatarData(item.ultimoOvo)}</span>` : ''}
         <span class="label">Início Choco:</span>
         <span class="value">${item.inicioChoco ? formatarData(item.inicioChoco) : '<em style="opacity:.7">ainda não começou</em>'}</span>
         <span class="label">Previsão Nasc.:</span>
-        <span class="value">${formatarData(item.previsaoNascimento) || '-'}</span>
+        <span class="value">${item.previsaoNascimento ? formatarData(item.previsaoNascimento) : '-'}</span>
         <span class="label">Total Ovos:</span>
         <span class="value"><strong>${item.totalOvos || 0}</strong> (${item.ovosFerteis || 0} férteis, ${item.ovosInferteis || 0} inférteis)</span>
         <span class="label">Finalizada:</span>
-        <span class="value">${item.finalizada === 'Sim' ? '✅ Sim' : '⏳ Não'}</span>
+        <span class="value">${fin ? '✅ Sim' : '⏳ Não'}</span>
       </div>
       <div class="card-filhotes">
-        <div class="titulo">🐣 Filhotes (${item.filhotes ? item.filhotes.length : 0})</div>
+        <div class="titulo">🐣 Filhotes (${filhotes.length})</div>
         ${filhotesHtml}
       </div>
       <div class="card-actions">
+        ${fin
+          ? `<button class="btn btn-ghost" onclick="reativarReproducao(${item.id})">↩ Reativar</button>`
+          : `<button class="btn btn-primary" onclick="editarReproducao(${item.id}, true)">✔ Finalizar</button>`}
         <button class="btn btn-ghost" onclick="editarReproducao(${item.id})">✎ Editar</button>
         <button class="btn btn-danger" onclick="excluirReproducao(${item.id})">✕ Excluir</button>
       </div>
     </div>
   `}).join('');
-}
-
-function formatarData(data) {
-  if (!data) return '-';
-  const partes = String(data).slice(0, 10).split('-');
-  if (partes.length === 3) {
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  }
-  return data;
 }
 
 // ============================================================
@@ -877,9 +1067,9 @@ function atualizarPrevisaoNascimento() {
   const inputDias = document.getElementById('f-dias-incubacao');
   const previsaoInput = document.getElementById('f-previsao-nascimento');
   const displayData = document.getElementById('data-previsao-display');
-  
+
   let dias = 0;
-  
+
   if (selectPeriodo.value === '0') {
     dias = parseInt(inputDias.value) || 0;
     inputDias.disabled = false;
@@ -890,27 +1080,26 @@ function atualizarPrevisaoNascimento() {
     inputDias.disabled = true;
     inputDias.style.opacity = '0.6';
   }
-  
+
   if (inicioChoco && dias > 0) {
-    const data = new Date(inicioChoco);
-    data.setDate(data.getDate() + dias);
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-    const dataFormatada = `${ano}-${mes}-${dia}`;
-    previsaoInput.value = dataFormatada;
-    const diaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][data.getDay()];
-    displayData.textContent = `${diaSemana}, ${dia}/${mes}/${ano}`;
+    // CORREÇÃO: antes usava new Date('AAAA-MM-DD'), que o navegador lê como meia-noite
+    // UTC — no Brasil (UTC-3) isso "voltava" um dia e a previsão saía 1 dia adiantada.
+    const dataIso = somarDias(inicioChoco, dias);
+    previsaoInput.value = dataIso;
+    const d = parseLocal(dataIso);
+    const diaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][d.getDay()];
+    displayData.textContent = `${diaSemana}, ${formatarData(dataIso)}`;
   } else {
     previsaoInput.value = '';
     displayData.textContent = '-';
   }
+  atualizarInfoOvoscopia();
 }
 
 function configurarPeriodoIncubacao() {
   const select = document.getElementById('f-periodo-incubacao');
   const inputDias = document.getElementById('f-dias-incubacao');
-  
+
   if (select.value === '0') {
     inputDias.disabled = false;
     inputDias.style.opacity = '1';
@@ -926,6 +1115,17 @@ function configurarPeriodoIncubacao() {
 // MODAL DE REPRODUÇÃO
 // ============================================================
 
+async function carregarAnilhasLivres() {
+  try {
+    const [anilhas, aves] = await Promise.all([DB.getAll(DB.TABLES.ANILHAS), DB.getAll(DB.TABLES.AVES)]);
+    const usadas = new Set(aves.map(a => a.anilha));
+    anilhasCache = anilhas.filter(a => a.disponivel === 'Sim' && a.ativo === 'Sim' && !usadas.has(a.numero));
+  } catch (e) {
+    anilhasCache = [];
+    alert('⚠️ Não foi possível carregar as anilhas: ' + e.message);
+  }
+}
+
 async function abrirModalCadastro() {
   modoEdicaoRepro = false;
   document.getElementById('modal-title-repro').textContent = 'Nova Reprodução';
@@ -937,18 +1137,18 @@ async function abrirModalCadastro() {
   document.getElementById('f-macho-id').value = '';
   document.getElementById('macho-nome').textContent = 'Nenhuma selecionada';
   document.getElementById('macho-anilha').textContent = '-';
-  document.getElementById('f-cruza1').value = '';
-  document.getElementById('f-cruza2').value = '';
-  document.getElementById('f-cruza3').value = '';
-  document.getElementById('f-cruza4').value = '';
-  document.getElementById('f-cruza5').value = '';
-  document.getElementById('f-inicio-choco').value = '';
-  document.getElementById('f-previsao-nascimento').value = '';
+  ['f-cruza1', 'f-cruza2', 'f-cruza3', 'f-cruza4', 'f-cruza5', 'f-inicio-choco', 'f-previsao-nascimento'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
   document.getElementById('data-previsao-display').textContent = '-';
   document.getElementById('f-periodo-incubacao').value = '14';
   document.getElementById('f-dias-incubacao').value = '14';
   document.getElementById('f-dias-incubacao').disabled = true;
   document.getElementById('f-dias-incubacao').style.opacity = '0.6';
+  document.getElementById('f-ovoscopia-feita').checked = false;
+  document.getElementById('f-ovoscopia-data').value = '';
+  document.getElementById('f-ovoscopia-data').style.display = 'none';
+  atualizarInfoOvoscopia();
   document.getElementById('f-primeiro-ovo').value = '';
   document.getElementById('f-ultimo-ovo').value = '';
   document.getElementById('f-ovos-ferteis').value = 0;
@@ -957,35 +1157,39 @@ async function abrirModalCadastro() {
   totalOvosManual = false;
   document.querySelector('input[name="finalizada"][value="Não"]').checked = true;
   document.getElementById('f-observacao-repro').value = '';
-  
+
   document.getElementById('filhotes-list').innerHTML = '';
   document.getElementById('filhotes-empty').style.display = 'block';
-  document.getElementById('filhotes-empty').textContent = 'Nenhum filhote adicionado';
-  
+
+  await carregarAnilhasLivres();
   adicionarLinhaFilhote();
-  
+
   document.getElementById('modal-repro').classList.add('open');
 }
 
-async function editarReproducao(id) {
+// preFinalizar = true quando veio do botão "✔ Finalizar" do card
+async function editarReproducao(id, preFinalizar) {
   modoEdicaoRepro = true;
-  const item = await DB.getById(DB.TABLES.REPRODUCOES, id);
+  let item;
+  try {
+    item = await DB.getById(DB.TABLES.REPRODUCOES, id);
+  } catch (e) {
+    alert('❌ Não foi possível abrir a reprodução: ' + e.message);
+    return;
+  }
   if (!item) return;
 
-  document.getElementById('modal-title-repro').textContent = 'Editar Reprodução';
+  document.getElementById('modal-title-repro').textContent = preFinalizar ? 'Finalizar Reprodução' : 'Editar Reprodução';
   document.getElementById('edit-id-repro').value = id;
-  document.getElementById('f-status-repro').value = item.status;
-  
-  document.getElementById('f-femea-id').value = item.femeaId;
-  document.getElementById('femea-nome').textContent = item.femeaNome;
-  document.getElementById('femea-anilha').textContent = item.femeaAnilha;
-  
-  if (item.machoId) {
-    document.getElementById('f-macho-id').value = item.machoId;
-    document.getElementById('macho-nome').textContent = item.machoNome || '';
-    document.getElementById('macho-anilha').textContent = item.machoAnilha || '';
-  }
-  
+
+  document.getElementById('f-femea-id').value = item.femeaId || '';
+  document.getElementById('femea-nome').textContent = item.femeaNome || 'Nenhuma selecionada';
+  document.getElementById('femea-anilha').textContent = item.femeaAnilha || '-';
+
+  document.getElementById('f-macho-id').value = item.machoId || '';
+  document.getElementById('macho-nome').textContent = item.machoId ? (item.machoNome || '') : 'Nenhuma selecionada';
+  document.getElementById('macho-anilha').textContent = item.machoId ? (item.machoAnilha || '') : '-';
+
   document.getElementById('f-cruza1').value = item.cruza1 || '';
   document.getElementById('f-cruza2').value = item.cruza2 || '';
   document.getElementById('f-cruza3').value = item.cruza3 || '';
@@ -993,14 +1197,14 @@ async function editarReproducao(id) {
   document.getElementById('f-cruza5').value = item.cruza5 || '';
   document.getElementById('f-inicio-choco').value = item.inicioChoco || '';
   document.getElementById('f-previsao-nascimento').value = item.previsaoNascimento || '';
-  
+
   const dias = item.diasIncubacao || 14;
   document.getElementById('f-dias-incubacao').value = dias;
   const select = document.getElementById('f-periodo-incubacao');
   let encontrou = false;
   for (let i = 0; i < select.options.length; i++) {
-    if (parseInt(select.options[i].value) === dias) {
-      select.value = dias;
+    if (parseInt(select.options[i].value) === dias && select.options[i].value !== '0') {
+      select.value = select.options[i].value;
       encontrou = true;
       break;
     }
@@ -1013,7 +1217,11 @@ async function editarReproducao(id) {
     document.getElementById('f-dias-incubacao').disabled = true;
     document.getElementById('f-dias-incubacao').style.opacity = '0.6';
   }
-  
+
+  document.getElementById('f-ovoscopia-feita').checked = !!item.ovoscopiaFeita;
+  document.getElementById('f-ovoscopia-data').value = item.ovoscopiaData || '';
+  document.getElementById('f-ovoscopia-data').style.display = item.ovoscopiaFeita ? '' : 'none';
+
   document.getElementById('f-primeiro-ovo').value = item.primeiroOvo || '';
   document.getElementById('f-ultimo-ovo').value = item.ultimoOvo || '';
   document.getElementById('f-ovos-ferteis').value = item.ovosFerteis || 0;
@@ -1022,30 +1230,52 @@ async function editarReproducao(id) {
   // Se o total salvo é diferente de férteis+inférteis (ainda botando, ou registro antigo com
   // "indefinidos"), mantém o total como está em vez de recalcular por cima.
   totalOvosManual = (item.totalOvos || 0) !== ((item.ovosFerteis || 0) + (item.ovosInferteis || 0));
-  document.querySelector(`input[name="finalizada"][value="${item.finalizada}"]`).checked = true;
+
+  // Status e "Finalizada" sempre iguais; se o registro antigo estava contraditório, vale "finalizado".
+  const finalizado = preFinalizar || estaFinalizada(item);
+  document.getElementById('f-status-repro').value = finalizado ? 'Finalizado' : 'Ativo';
+  const radio = document.querySelector(`input[name="finalizada"][value="${finalizado ? 'Sim' : 'Não'}"]`);
+  if (radio) radio.checked = true;
+
   document.getElementById('f-observacao-repro').value = item.observacao || '';
-  
+
+  await carregarAnilhasLivres();
+
+  // Filhotes já transformados em aves ficam marcados (aveId) para nunca serem criados duas vezes.
+  let filhotes = Array.isArray(item.filhotes) ? item.filhotes.map(f => ({ ...f })) : [];
+  const criados = Array.isArray(item.filhotesCriados) ? item.filhotesCriados : [];
+  if (criados.length && criados.length === filhotes.length) {
+    filhotes.forEach((f, i) => { if (!f.aveId && criados[i] && criados[i].id) f.aveId = criados[i].id; });
+  }
+
   document.getElementById('filhotes-list').innerHTML = '';
-  if (item.filhotes && item.filhotes.length > 0) {
+  if (filhotes.length > 0) {
     document.getElementById('filhotes-empty').style.display = 'none';
-    for (let index = 0; index < item.filhotes.length; index++) {
-      await adicionarLinhaFilhote(item.filhotes[index], index);
-    }
+    filhotes.forEach(f => adicionarLinhaFilhote(f));
   } else {
     document.getElementById('filhotes-empty').style.display = 'block';
-    document.getElementById('filhotes-empty').textContent = 'Nenhum filhote adicionado';
-    await adicionarLinhaFilhote();
+    adicionarLinhaFilhote();
   }
-  
+
   document.getElementById('modal-repro').classList.add('open');
-  
-  if (item.inicioChoco) {
-    atualizarPrevisaoNascimento();
-  }
+  atualizarInfoOvoscopia();
+  // Sempre recalcula: corrige previsões antigas que ficaram 1 dia adiantadas pelo bug de fuso.
+  if (item.inicioChoco) atualizarPrevisaoNascimento();
 }
 
 function fecharModalRepro() {
   document.getElementById('modal-repro').classList.remove('open');
+}
+
+async function reativarReproducao(id) {
+  if (!confirm('Reativar esta reprodução? Ela volta para "Ativo" e os avisos de nascimento voltam a aparecer.\n\n(Filhotes que já foram criados no plantel continuam lá.)')) return;
+  try {
+    await DB.update(DB.TABLES.REPRODUCOES, id, { status: 'Ativo', finalizada: 'Não' });
+  } catch (e) {
+    alert('❌ Erro ao reativar: ' + e.message);
+    return;
+  }
+  renderizarCards();
 }
 
 // ============================================================
@@ -1054,45 +1284,35 @@ function fecharModalRepro() {
 
 let filhoteCounter = 0;
 
-async function obterAnilhasDisponiveis() {
-  const anilhas = await DB.getAll(DB.TABLES.ANILHAS);
-  const aves = await DB.getAll(DB.TABLES.AVES);
-  const anilhasUsadas = new Set(aves.map(a => a.anilha));
-  
-  return anilhas.filter(a => 
-    a.disponivel === 'Sim' && 
-    a.ativo === 'Sim' && 
-    !anilhasUsadas.has(a.numero)
-  );
-}
-
-async function adicionarLinhaFilhote(dados, index) {
+// Linha do formulário. Se a ave já foi criada no plantel (aveId), a linha fica travada.
+function adicionarLinhaFilhote(dados) {
   const container = document.getElementById('filhotes-list');
   const empty = document.getElementById('filhotes-empty');
-  
   if (empty) empty.style.display = 'none';
-  
-  const isNovo = !dados;
-  const rowIndex = isNovo ? filhoteCounter++ : index;
-  
-  const anilhasDisponiveis = await obterAnilhasDisponiveis();
-  
-  let anilhasOptions = '<option value="">Selecionar anilha...</option>';
-  anilhasDisponiveis.forEach(a => {
-    const selected = dados && dados.anilha === a.numero ? 'selected' : '';
-    anilhasOptions += `<option value="${a.numero}" ${selected}>${a.numero} (${a.cor})</option>`;
-  });
-  
+
   const nome = dados ? dados.nome || '' : '';
   const sexo = dados ? dados.sexo || 'Indefinido' : 'Indefinido';
   const anilha = dados ? dados.anilha || '' : '';
-  
+  const aveId = dados && dados.aveId ? dados.aveId : '';
+
+  const lista = anilhasCache || [];
+  let anilhasOptions = '<option value="">Selecionar anilha...</option>';
+  lista.forEach(a => {
+    anilhasOptions += `<option value="${esc(a.numero)}" ${anilha === a.numero ? 'selected' : ''}>${esc(a.numero)} (${esc(a.cor)})</option>`;
+  });
+  // CORREÇÃO: a anilha de um filhote já salvo está "em uso" (pela própria ave dele) e por
+  // isso não vinha na lista — ao reabrir e salvar, o número da anilha era apagado da reprodução.
+  if (anilha && !lista.some(a => a.numero === anilha)) {
+    anilhasOptions += `<option value="${esc(anilha)}" selected>${esc(anilha)}</option>`;
+  }
+
   const row = document.createElement('div');
   row.className = 'filhote-row';
-  row.dataset.index = rowIndex;
+  row.dataset.index = filhoteCounter++;
+  if (aveId) row.dataset.aveId = aveId;
   row.innerHTML = `
     <div class="campo-nome">
-      <input type="text" class="filhote-nome" placeholder="Nome do filhote" value="${nome}">
+      <input type="text" class="filhote-nome" placeholder="Nome do filhote" value="${esc(nome)}">
     </div>
     <div class="campo-sexo">
       <select class="filhote-sexo">
@@ -1106,43 +1326,42 @@ async function adicionarLinhaFilhote(dados, index) {
         ${anilhasOptions}
       </select>
     </div>
+    ${aveId ? '<span class="ja-no-plantel" title="Este filhote já foi criado no plantel">✅ no plantel</span>' : ''}
     <button type="button" class="btn-remover-filhote" onclick="removerLinhaFilhote(this)" title="Remover filhote">✕</button>
   `;
-  
+
   container.appendChild(row);
 }
 
 function removerLinhaFilhote(btn) {
   const row = btn.closest('.filhote-row');
-  if (row) {
-    row.remove();
-    const container = document.getElementById('filhotes-list');
-    const empty = document.getElementById('filhotes-empty');
-    if (container.children.length === 0) {
-      empty.style.display = 'block';
-      empty.textContent = 'Nenhum filhote adicionado';
-    }
+  if (!row) return;
+  if (row.dataset.aveId && !confirm('Este filhote já foi criado no plantel. Remover aqui NÃO apaga a ave do plantel, só tira da lista desta reprodução. Continuar?')) return;
+  row.remove();
+  const container = document.getElementById('filhotes-list');
+  const empty = document.getElementById('filhotes-empty');
+  if (container.children.length === 0) {
+    empty.style.display = 'block';
+    empty.textContent = 'Nenhum filhote adicionado';
   }
 }
 
 function coletarFilhotes() {
   const rows = document.querySelectorAll('#filhotes-list .filhote-row');
   const filhotes = [];
-  
+
   rows.forEach(row => {
     const nome = row.querySelector('.filhote-nome').value.trim();
     const sexo = row.querySelector('.filhote-sexo').value;
     const anilha = row.querySelector('.filhote-anilha').value;
-    
+
     if (nome || anilha) {
-      filhotes.push({
-        nome: nome || 'Filhote',
-        sexo: sexo,
-        anilha: anilha
-      });
+      const f = { nome: nome || 'Filhote', sexo: sexo, anilha: anilha };
+      if (row.dataset.aveId) f.aveId = parseInt(row.dataset.aveId);
+      filhotes.push(f);
     }
   });
-  
+
   return filhotes;
 }
 
@@ -1150,12 +1369,20 @@ function coletarFilhotes() {
 // SELEÇÃO DE AVE
 // ============================================================
 
-function selecionarAve(target) {
+async function selecionarAve(target) {
   selectAveTarget = target;
   const sexo = target === 'femea' ? 'F' : 'M';
   document.getElementById('modal-select-title').textContent = `Selecionar ${target === 'femea' ? 'Fêmea' : 'Macho'}`;
   document.getElementById('modal-select-search').value = '';
   document.getElementById('modal-select-ave').classList.add('open');
+  document.getElementById('modal-select-list').innerHTML = '<div class="empty-note">Carregando...</div>';
+  try {
+    avesCache = await DB.getAll(DB.TABLES.AVES);
+  } catch (e) {
+    avesCache = [];
+    document.getElementById('modal-select-list').innerHTML = `<div class="empty-note">Erro ao carregar: ${esc(e.message)}</div>`;
+    return;
+  }
   renderModalSelectAve(sexo);
 }
 
@@ -1163,32 +1390,37 @@ function fecharModalSelectAve() {
   document.getElementById('modal-select-ave').classList.remove('open');
 }
 
-async function renderModalSelectAve(sexoFiltro) {
+function renderModalSelectAve(sexoFiltro) {
   const busca = document.getElementById('modal-select-search').value.toLowerCase();
-  const sexo = sexoFiltro || (selectAveTarget === 'femea' ? 'F' : 'M');
-  
-  const avesDB = await DB.getAll(DB.TABLES.AVES);
-  let lista = avesDB.filter(a => a.sexo === sexo);
-  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
-  
+  const sexo = (typeof sexoFiltro === 'string' && sexoFiltro) ? sexoFiltro : (selectAveTarget === 'femea' ? 'F' : 'M');
+
+  let lista = (avesCache || []).filter(a => a.sexo === sexo);
+  if (busca) lista = lista.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
+
   const container = document.getElementById('modal-select-list');
   if (lista.length === 0) {
     container.innerHTML = '<div class="empty-note">Nenhuma ave encontrada.</div>';
     return;
   }
-  
+
+  // CORREÇÃO: o nome/anilha ia dentro do onclick; um nome com apóstrofo (ex.: D'Artagnan)
+  // quebrava o botão. Agora só o id vai no onclick e o resto vem do cache.
   container.innerHTML = lista.map(a => `
     <div class="modal-item">
       <div>
-        <div class="mi-name">${a.nome} ${a.sexo === 'F' ? '♀' : '♂'}</div>
-        <div class="mi-band mono">${a.anilha} · ${a.especie}</div>
+        <div class="mi-name">${esc(a.nome)} ${a.sexo === 'F' ? '♀' : '♂'}</div>
+        <div class="mi-band mono">${esc(a.anilha)} · ${esc(a.especie)}</div>
       </div>
-      <button class="btn btn-primary" style="padding:6px 14px;" onclick="selecionarAveConfirm(${a.id}, '${a.nome}', '${a.anilha}')">Selecionar</button>
+      <button type="button" class="btn btn-primary" style="padding:6px 14px;" onclick="selecionarAveConfirm(${a.id})">Selecionar</button>
     </div>
   `).join('');
 }
 
-function selecionarAveConfirm(id, nome, anilha) {
+function selecionarAveConfirm(id) {
+  const ave = (avesCache || []).find(a => a.id === id);
+  if (!ave) return;
+  const nome = ave.nome || '';
+  const anilha = ave.anilha || '';
   if (selectAveTarget === 'femea') {
     document.getElementById('f-femea-id').value = id;
     document.getElementById('femea-nome').textContent = nome;
@@ -1218,11 +1450,10 @@ function montarLinhagemParaFilhote(ave, base, todasAves) {
   }));
 }
 
-async function herdarAncestrais(aveId, base) {
+async function herdarAncestrais(aveId, base, todasAves) {
   const ave = await DB.getById(DB.TABLES.AVES, aveId);
   if (!ave) return {};
-  const todasAves = await DB.getAll(DB.TABLES.AVES);
-  
+
   // Buscar todos os ancestrais possíveis
   const ancestrais = {
     pai: ave.pai || '',
@@ -1235,37 +1466,35 @@ async function herdarAncestrais(aveId, base) {
     avoMaterna: ave.avoMaterna || '',
     linhagem: base ? montarLinhagemParaFilhote(ave, base, todasAves) : []
   };
-  
+
+  const porNome = (nome) => nome ? (todasAves || []).find(a => a.nome && a.nome.toLowerCase() === nome.toLowerCase()) : null;
+
   // Tentar buscar avós completos se o pai existir
-  if (ave.pai) {
-    const paiCompleto = await DB.getAvePorNome(ave.pai);
-    if (paiCompleto) {
-      if (paiCompleto.pai && paiCompleto.pai !== paiCompleto.nome) {
-        ancestrais.avoPaterno = paiCompleto.pai;
-        ancestrais.anilhaAvoPaterno = paiCompleto.anilhaPai || '';
-      }
-      if (paiCompleto.mae && paiCompleto.mae !== paiCompleto.nome) {
-        ancestrais.avoPaterna = paiCompleto.mae;
-        ancestrais.anilhaAvoPaterna = paiCompleto.anilhaMae || '';
-      }
+  const paiCompleto = porNome(ave.pai);
+  if (paiCompleto) {
+    if (paiCompleto.pai && paiCompleto.pai !== paiCompleto.nome) {
+      ancestrais.avoPaterno = paiCompleto.pai;
+      ancestrais.anilhaAvoPaterno = paiCompleto.anilhaPai || '';
+    }
+    if (paiCompleto.mae && paiCompleto.mae !== paiCompleto.nome) {
+      ancestrais.avoPaterna = paiCompleto.mae;
+      ancestrais.anilhaAvoPaterna = paiCompleto.anilhaMae || '';
     }
   }
-  
+
   // Tentar buscar avós completos se a mãe existir
-  if (ave.mae) {
-    const maeCompleta = await DB.getAvePorNome(ave.mae);
-    if (maeCompleta) {
-      if (maeCompleta.pai && maeCompleta.pai !== maeCompleta.nome) {
-        ancestrais.avoMaterno = maeCompleta.pai;
-        ancestrais.anilhaAvoMaterno = maeCompleta.anilhaPai || '';
-      }
-      if (maeCompleta.mae && maeCompleta.mae !== maeCompleta.nome) {
-        ancestrais.avoMaterna = maeCompleta.mae;
-        ancestrais.anilhaAvoMaterna = maeCompleta.anilhaMae || '';
-      }
+  const maeCompleta = porNome(ave.mae);
+  if (maeCompleta) {
+    if (maeCompleta.pai && maeCompleta.pai !== maeCompleta.nome) {
+      ancestrais.avoMaterno = maeCompleta.pai;
+      ancestrais.anilhaAvoMaterno = maeCompleta.anilhaPai || '';
+    }
+    if (maeCompleta.mae && maeCompleta.mae !== maeCompleta.nome) {
+      ancestrais.avoMaterna = maeCompleta.mae;
+      ancestrais.anilhaAvoMaterna = maeCompleta.anilhaMae || '';
     }
   }
-  
+
   return ancestrais;
 }
 
@@ -1275,10 +1504,14 @@ async function herdarAncestrais(aveId, base) {
 
 async function salvarReproducao(event) {
   event.preventDefault();
+  if (salvandoRepro) return; // evita duplo clique criando tudo duas vezes
 
   const filhotes = coletarFilhotes();
   const finalizada = document.querySelector('input[name="finalizada"]:checked').value;
-  const status = document.getElementById('f-status-repro').value;
+  // Status e "Finalizada" são a mesma informação: um decide o outro (ver sincronizar...)
+  const status = finalizada === 'Sim' ? 'Finalizado' : 'Ativo';
+
+  const ovoscopiaFeita = document.getElementById('f-ovoscopia-feita').checked;
 
   const dados = {
     status: status,
@@ -1296,6 +1529,8 @@ async function salvarReproducao(event) {
     inicioChoco: document.getElementById('f-inicio-choco').value,
     previsaoNascimento: document.getElementById('f-previsao-nascimento').value,
     diasIncubacao: parseInt(document.getElementById('f-dias-incubacao').value) || 14,
+    ovoscopiaFeita: ovoscopiaFeita,
+    ovoscopiaData: ovoscopiaFeita ? (document.getElementById('f-ovoscopia-data').value || hojeISO()) : '',
     primeiroOvo: document.getElementById('f-primeiro-ovo').value,
     ultimoOvo: document.getElementById('f-ultimo-ovo').value,
     ovosFerteis: parseInt(document.getElementById('f-ovos-ferteis').value) || 0,
@@ -1306,8 +1541,8 @@ async function salvarReproducao(event) {
     filhotes: filhotes
   };
 
-  if (!dados.status || !dados.femeaId || !dados.cruza1) {
-    alert('Preencha os campos obrigatórios: Status, Fêmea e 1ª Dia da Cruza.');
+  if (!dados.femeaId || !dados.cruza1) {
+    alert('Preencha os campos obrigatórios: Fêmea e 1ª Dia da Cruza.');
     return;
   }
   if (dados.ovosFerteis + dados.ovosInferteis > dados.totalOvos) {
@@ -1321,121 +1556,165 @@ async function salvarReproducao(event) {
 
   const editId = document.getElementById('edit-id-repro').value;
 
-  // Se finalizada, cria os filhotes
-  if (finalizada === 'Sim' && filhotes.length > 0) {
-    if (!confirm(`🐣 ${filhotes.length} filhote(s) serão criados no plantel com status "Filhote". Continuar?`)) {
-      return;
-    }
-    
-    const avesExistentes = await DB.getAll(DB.TABLES.AVES);
-    const anilhasExistentes = new Set(avesExistentes.map(a => a.anilha));
-    const anilhasDuplicadas = filhotes.filter(f => f.anilha && anilhasExistentes.has(f.anilha));
-    
-    if (anilhasDuplicadas.length > 0) {
-      const msg = anilhasDuplicadas.map(f => `• ${f.nome}: ${f.anilha}`).join('\n');
-      if (!confirm(`⚠️ As seguintes anilhas já estão em uso:\n${msg}\n\nDeseja continuar mesmo assim?`)) {
+  // Filhotes que ainda NÃO viraram ave no plantel (os que já viraram têm aveId e são pulados)
+  const novos = finalizada === 'Sim' ? filhotes.filter(f => !f.aveId) : [];
+
+  salvandoRepro = true;
+  const botaoSalvar = document.querySelector('#form-repro button[type="submit"]');
+  if (botaoSalvar) { botaoSalvar.disabled = true; botaoSalvar.textContent = 'Salvando...'; }
+
+  try {
+    if (novos.length > 0) {
+      // Anilha repetida na própria lista de filhotes
+      const vistas = new Set();
+      const repetidas = [];
+      novos.forEach(f => {
+        if (!f.anilha) return;
+        if (vistas.has(f.anilha)) repetidas.push(f.anilha);
+        vistas.add(f.anilha);
+      });
+      if (repetidas.length) {
+        alert('⚠️ A mesma anilha foi escolhida para mais de um filhote: ' + [...new Set(repetidas)].join(', ') + '.\nCada filhote precisa de uma anilha diferente.');
+        return;
+      }
+
+      // Anilha que já pertence a outra ave: o servidor recusaria, então avisa ANTES de salvar
+      // qualquer coisa (antes, a reprodução era salva e os filhotes falhavam pela metade).
+      const avesExistentes = await DB.getAll(DB.TABLES.AVES);
+      const anilhasExistentes = new Set(avesExistentes.map(a => a.anilha));
+      const duplicadas = novos.filter(f => f.anilha && anilhasExistentes.has(f.anilha));
+      if (duplicadas.length > 0) {
+        const msg = duplicadas.map(f => `• ${f.nome}: ${f.anilha}`).join('\n');
+        alert(`⚠️ Estas anilhas já pertencem a outras aves:\n${msg}\n\nEscolha outra anilha para cada filhote.`);
+        return;
+      }
+
+      if (!confirm(`🐣 ${novos.length} filhote(s) serão criados no plantel com status "Filhote". Continuar?`)) {
         return;
       }
     }
-  }
 
-  // Salvar reprodução
-  let reproSalva;
-  if (editId) {
-    await DB.update(DB.TABLES.REPRODUCOES, parseInt(editId), dados);
-    reproSalva = await DB.getById(DB.TABLES.REPRODUCOES, parseInt(editId));
-  } else {
-    reproSalva = await DB.add(DB.TABLES.REPRODUCOES, dados);
-  }
+    // Salvar reprodução
+    let reproSalva;
+    if (editId) {
+      reproSalva = await DB.update(DB.TABLES.REPRODUCOES, parseInt(editId), dados);
+    } else {
+      reproSalva = await DB.add(DB.TABLES.REPRODUCOES, dados);
+    }
 
-  // Se finalizada, criar os filhotes com HERANÇA COMPLETA
-  if (finalizada === 'Sim' && filhotes.length > 0) {
-    const especieFemea = await obterEspecieAve(dados.femeaId);
-    const filhotesCriados = [];
-    
-    // Buscar ancestrais completos do pai e da mãe
-    const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId, 'pai') : {};
-    const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId, 'mae') : {};
-    
-    for (const f of filhotes) {
-      if (f.anilha) {
-        const anilhaObj = await DB.getAnilhaPorNumero(f.anilha);
-        if (anilhaObj) {
-          await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
+    // Se finalizada, criar os filhotes com HERANÇA COMPLETA
+    if (novos.length > 0) {
+      const todasAves = await DB.getAll(DB.TABLES.AVES);
+      const especieFemea = await obterEspecieAve(dados.femeaId);
+      const dataNasc = dados.previsaoNascimento || dados.inicioChoco || dados.ultimoOvo || dados.primeiroOvo || '';
+
+      // Buscar ancestrais completos do pai e da mãe
+      const ancestraisPai = dados.machoId ? await herdarAncestrais(dados.machoId, 'pai', todasAves) : {};
+      const ancestraisMae = dados.femeaId ? await herdarAncestrais(dados.femeaId, 'mae', todasAves) : {};
+
+      let criados = 0;
+      const falhas = [];
+
+      for (const f of novos) {
+        try {
+          const novaAve = {
+            nome: f.nome || 'Filhote',
+            anilha: f.anilha || '',
+            sexo: f.sexo || 'Indefinido',
+            especie: especieFemea || 'Não identificada',
+            dataNasc: dataNasc,
+            situacao: 'Filhote',
+            filhote: true,
+            pai: dados.machoNome || '',
+            anilhaPai: dados.machoAnilha || '',
+            mae: dados.femeaNome || '',
+            anilhaMae: dados.femeaAnilha || '',
+            avoPaterno: ancestraisPai.pai || '',
+            anilhaAvoPaterno: ancestraisPai.anilhaPai || '',
+            avoPaterna: ancestraisPai.mae || '',
+            anilhaAvoPaterna: ancestraisPai.anilhaMae || '',
+            avoMaterno: ancestraisMae.pai || '',
+            anilhaAvoMaterno: ancestraisMae.anilhaPai || '',
+            avoMaterna: ancestraisMae.mae || '',
+            anilhaAvoMaterna: ancestraisMae.anilhaMae || '',
+            ancestrais: [...(ancestraisPai.linhagem || []), ...(ancestraisMae.linhagem || [])],
+            manejo: 'Mantenedor',
+            historico: [{
+              motivo: 'Nascimento',
+              descricao: `Filhote nascido da reprodução de ${dados.femeaNome}${dados.machoNome ? ' com ' + dados.machoNome : ''}`,
+              data: dataNasc,
+              detalhes: `Reprodução ID: ${reproSalva.id}`
+            }]
+          };
+
+          const aveCriada = await DB.add(DB.TABLES.AVES, novaAve);
+          f.aveId = aveCriada.id;
+          criados++;
+
+          if (f.anilha) {
+            try {
+              const anilhaObj = await DB.getAnilhaPorNumero(f.anilha);
+              if (anilhaObj) await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
+            } catch (e) {
+              console.warn('Não foi possível marcar a anilha como indisponível:', f.anilha, e.message);
+            }
+          }
+        } catch (e) {
+          falhas.push(`${f.nome || 'Filhote'}: ${e.message}`);
         }
       }
-      
-      // Montar árvore genealógica COMPLETA
-      const novaAve = {
-        nome: f.nome || 'Filhote',
-        anilha: f.anilha || '',
-        sexo: f.sexo || 'Indefinido',
-        especie: especieFemea || 'Não identificada',
-        dataNasc: dados.previsaoNascimento || dados.inicioChoco || dados.ultimoOvo || dados.primeiroOvo || '',
-        situacao: 'Filhote',
-        filhote: true,
-        // Pai e Mãe (diretos)
-        pai: dados.machoNome || '',
-        anilhaPai: dados.machoAnilha || '',
-        mae: dados.femeaNome || '',
-        anilhaMae: dados.femeaAnilha || '',
-        // Avós paternos (herdados do pai)
-        avoPaterno: ancestraisPai.pai || '',
-        anilhaAvoPaterno: ancestraisPai.anilhaPai || '',
-        avoPaterna: ancestraisPai.mae || '',
-        anilhaAvoPaterna: ancestraisPai.anilhaMae || '',
-        // Avós maternos (herdados da mãe)
-        avoMaterno: ancestraisMae.pai || '',
-        anilhaAvoMaterno: ancestraisMae.anilhaPai || '',
-        avoMaterna: ancestraisMae.mae || '',
-        anilhaAvoMaterna: ancestraisMae.anilhaMae || '',
-        // Árvore COMPLETA herdada do pai e da mãe (bisavós, trisavós e tataravós, até a 5ª geração)
-        ancestrais: [...(ancestraisPai.linhagem || []), ...(ancestraisMae.linhagem || [])],
-        // Outros campos
-        manejo: 'Mantenedor',
-        historico: [{
-          motivo: 'Nascimento',
-          descricao: `Filhote nascido da reprodução de ${dados.femeaNome}${dados.machoNome ? ' com ' + dados.machoNome : ''}`,
-          data: dados.previsaoNascimento || dados.inicioChoco || dados.ultimoOvo || dados.primeiroOvo || '',
-          detalhes: `Reprodução ID: ${reproSalva.id}`
-        }]
-      };
-      
-      const aveCriada = await DB.add(DB.TABLES.AVES, novaAve);
-      filhotesCriados.push(aveCriada);
-    }
-    
-    if (filhotesCriados.length > 0) {
-      const reproAtualizada = await DB.getById(DB.TABLES.REPRODUCOES, reproSalva.id);
-      if (reproAtualizada) {
-        const filhotesComIds = filhotesCriados.map((ave, index) => ({
-          ...filhotes[index],
-          id: ave.id
-        }));
-        await DB.update(DB.TABLES.REPRODUCOES, reproSalva.id, { filhotesCriados: filhotesComIds });
+
+      // Guarda quais filhotes já viraram ave (aveId) — assim, se algum falhou, dá para
+      // abrir de novo e salvar: só os que faltam são criados, sem duplicar os que deram certo.
+      const filhotesComIds = filhotes.map(f => ({ ...f }));
+      try {
+        await DB.update(DB.TABLES.REPRODUCOES, reproSalva.id, {
+          filhotes: filhotesComIds,
+          filhotesCriados: filhotesComIds.filter(f => f.aveId).map(f => ({ ...f, id: f.aveId }))
+        });
+      } catch (e) {
+        console.warn('Não foi possível registrar os filhotes criados:', e.message);
+      }
+
+      if (falhas.length) {
+        alert(`⚠️ ${criados} filhote(s) criado(s), mas ${falhas.length} falharam:\n\n${falhas.join('\n')}\n\nCorrija e abra esta reprodução de novo para criar só os que faltam.`);
+      } else {
+        alert(`✅ ${criados} filhote(s) criados com sucesso!\n\n🌳 Árvore genealógica herdada dos pais.`);
       }
     }
-    
-    alert(`✅ ${filhotesCriados.length} filhote(s) criados com sucesso!\n\n🌳 Árvore genealógica herdada dos pais.`);
-  }
 
-  fecharModalRepro();
-  renderizarCards();
+    fecharModalRepro();
+    renderizarCards();
+  } catch (e) {
+    alert('❌ Erro ao salvar a reprodução: ' + e.message);
+  } finally {
+    salvandoRepro = false;
+    if (botaoSalvar) { botaoSalvar.disabled = false; botaoSalvar.textContent = 'Salvar'; }
+  }
 }
 
 async function obterEspecieAve(id) {
-  const ave = await DB.getById(DB.TABLES.AVES, id);
-  return ave ? ave.especie : 'Não identificada';
+  try {
+    const ave = await DB.getById(DB.TABLES.AVES, id);
+    return ave ? ave.especie : 'Não identificada';
+  } catch (e) {
+    return 'Não identificada';
+  }
 }
 
 async function excluirReproducao(id) {
-  if (!confirm('Tem certeza que deseja excluir esta reprodução?')) return;
-  await DB.delete(DB.TABLES.REPRODUCOES, id);
+  if (!confirm('Tem certeza que deseja excluir esta reprodução?\n\n(Os filhotes que já foram criados no plantel NÃO são apagados.)')) return;
+  try {
+    await DB.delete(DB.TABLES.REPRODUCOES, id);
+  } catch (e) {
+    alert('❌ Erro ao excluir: ' + e.message);
+    return;
+  }
   renderizarCards();
 }
 
 // ============================================================
-// ATUALIZAR TOTAL DE OVOS
+// EVENTOS
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1448,20 +1727,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!totalOvosManual) recalcularTotalOvos();
   });
 
-  document.getElementById('f-inicio-choco').addEventListener('change', function() {
-    atualizarPrevisaoNascimento();
-  });
-  
-  document.getElementById('f-periodo-incubacao').addEventListener('change', function() {
-    configurarPeriodoIncubacao();
-  });
-  
-  document.getElementById('f-dias-incubacao').addEventListener('change', function() {
-    if (document.getElementById('f-periodo-incubacao').value === '0') {
-      atualizarPrevisaoNascimento();
-    }
-  });
-  
+  document.getElementById('f-inicio-choco').addEventListener('change', atualizarPrevisaoNascimento);
+
+  document.getElementById('f-periodo-incubacao').addEventListener('change', configurarPeriodoIncubacao);
+
   document.getElementById('f-dias-incubacao').addEventListener('input', function() {
     if (document.getElementById('f-periodo-incubacao').value === '0') {
       atualizarPrevisaoNascimento();
@@ -1481,6 +1750,7 @@ renderizarCards();
 document.getElementById('form-repro').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.preventDefault();
 });
+
 </script>
 </body>
 </html>

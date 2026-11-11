@@ -1423,7 +1423,7 @@ async function renderModalSelectAve() {
   }
   
   if (busca) {
-    todas = todas.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+    todas = todas.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
   }
   
   const container = document.getElementById('modal-select-list');
@@ -1894,34 +1894,52 @@ async function salvarAve() {
   const anilhaEmUso = aves.some(a => a.anilha === anilha && a.id !== parseInt(id));
   if (anilhaEmUso) { alert('Esta anilha já está sendo usada por outra ave!'); return; }
   
+  if (window._salvandoAve) return; // evita duplo clique
+  window._salvandoAve = true;
+
+  // 1) Salva a ave. Se isto falhar, nada foi gravado e o erro é mostrado.
+  let resultado;
   try {
-    let resultado;
     if (id) {
       resultado = await DB.update(DB.TABLES.AVES, parseInt(id), dados);
-      // Se trocou a anilha da ave, a antiga volta para o estoque
-      if (aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
-        const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
-        if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
-      }
-      alert('✅ Ave atualizada com sucesso!');
     } else {
       resultado = await DB.add(DB.TABLES.AVES, dados);
-      alert('✅ Ave cadastrada com sucesso!');
     }
-    
+  } catch (e) {
+    window._salvandoAve = false;
+    alert('❌ Erro ao salvar: ' + e.message);
+    return;
+  }
+
+  // 2) Passos complementares. CORREÇÃO: antes ficavam no mesmo try do passo 1, então se um deles
+  // falhasse aparecia "Erro ao salvar" mesmo com a ave já gravada — e ao tentar de novo o sistema
+  // reclamava que a anilha já estava em uso (pela própria ave que tinha acabado de salvar).
+  const avisos = [];
+  try {
+    // Se trocou a anilha da ave, a antiga volta para o estoque
+    if (id && aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
+      const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
+      if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
+    }
+  } catch (e) { avisos.push('não consegui devolver a anilha antiga ao estoque (' + e.message + ')'); }
+
+  try {
     // Anilha usada deixa de estar disponível no estoque
     const anilhaObj = await DB.getAnilhaPorNumero(anilha);
     if (anilhaObj && anilhaObj.disponivel !== 'Não') {
       await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
     }
+  } catch (e) { avisos.push('não consegui marcar a anilha como indisponível (' + e.message + ')'); }
 
-    // ===== NOVO: Salvar ancestrais criados na árvore na tabela de ancestrais =====
+  try {
+    // Salvar ancestrais criados na árvore na tabela de ancestrais
     await salvarAncestraisDaArvore(dados.ancestrais, nome, dados.especie);
-    
-    voltarLista();
-  } catch (e) {
-    alert('❌ Erro ao salvar: ' + e.message);
-  }
+  } catch (e) { avisos.push('não consegui atualizar a lista de ancestrais (' + e.message + ')'); }
+
+  window._salvandoAve = false;
+  alert((id ? '✅ Ave atualizada com sucesso!' : '✅ Ave cadastrada com sucesso!') +
+        (avisos.length ? '\n\n⚠️ A ave foi salva, mas ' + avisos.join('; ') + '.' : ''));
+  voltarLista();
 }
 
 /* ============================================================

@@ -35,6 +35,7 @@ async function renderSidebar(activePage) {
             { id: 'cadastro-criador', href: 'cadastro-criador.html', icon: '🏷️', label: 'Dados do Criatório' },
             { id: 'admin-site', href: 'admin-site.html', icon: '🌐', label: 'Site do Criatório' },
             { id: 'site-editor-torneios', href: 'site-editor-torneios.html', icon: '🏆', label: 'Copas e Torneios' },
+            { id: 'site-editor-parceiros', href: 'site-editor-parceiros.html', icon: '🤝', label: 'Parceiros' },
             { id: 'admin-db', href: 'admin-db.html', icon: '🗄️', label: 'Backup & Dados' },
         ] },
     ];
@@ -49,6 +50,7 @@ async function renderSidebar(activePage) {
             { id: 'site-filhotes', href: 'site-filhotes.html', icon: '🐣', label: 'Filhotes' },
             { id: 'site-fotos', href: 'site-fotos.html', icon: '📸', label: 'Fotos' },
             { id: 'site-videos', href: 'site-videos.html', icon: '🎬', label: 'Vídeos' },
+            { id: 'site-parceiros', href: 'site-parceiros.html', icon: '🤝', label: 'Parceiros' },
             { id: 'site-contato', href: 'site-contato.html', icon: '📧', label: 'Contato' },
         ] },
     ];

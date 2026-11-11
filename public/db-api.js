@@ -103,7 +103,7 @@ const DB = {
   },
   async getReproducoesAtivas() {
     const reproducoes = await this.getAll(this.TABLES.REPRODUCOES);
-    return reproducoes.filter(r => r.status === 'Ativo');
+    return reproducoes.filter(r => r.status === 'Ativo' && r.finalizada !== 'Sim');
   },
   async getAvePorAnilha(anilha) {
     if (!anilha) return null;
@@ -153,6 +153,11 @@ const DB = {
     if (!nome) return null;
     const ancestrais = await this.getAncestrais();
     return ancestrais.find(a => a.nome && a.nome.toLowerCase() === nome.toLowerCase()) || null;
+  },
+
+  // Aves COMPLETAS (com fotos, CIG e laudo) — só para backup
+  async getAvesBackupCompleto() {
+    return apiFetch('/aves/backup/completo');
   },
 
   // ---- PÚBLICO ----
@@ -245,6 +250,42 @@ const DB = {
     return apiFetch('/torneios/reordenar/lote', { method: 'PUT', body: JSON.stringify({ itens }) });
   }
 };
+
+// ============================================================
+// AVISO GLOBAL DE ERRO
+// ============================================================
+// Várias telas chamam a API sem try/catch: quando algo falhava (salvar, excluir,
+// carregar), nada aparecia e parecia que "o programa não fez nada". Agora qualquer erro
+// não tratado vira um aviso discreto no canto da tela (só para quem está logado,
+// nunca para visitantes do site público).
+function mostrarAvisoErro(msg) {
+  try {
+    let box = document.getElementById('aviso-erro-global');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'aviso-erro-global';
+      box.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:99999;max-width:340px;' +
+        'background:#5a1f1f;color:#fff;border:1px solid #c75a5a;border-radius:10px;padding:12px 14px;' +
+        'font:13px/1.4 Manrope,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);cursor:pointer;';
+      box.title = 'Clique para fechar';
+      box.onclick = () => box.remove();
+      document.body.appendChild(box);
+    }
+    box.textContent = '⚠️ ' + msg;
+    clearTimeout(box._t);
+    box._t = setTimeout(() => box.remove(), 9000);
+  } catch (e) { /* nunca deixa o aviso quebrar a página */ }
+}
+window.mostrarAvisoErro = mostrarAvisoErro;
+
+window.addEventListener('unhandledrejection', (ev) => {
+  const err = ev.reason;
+  const msg = err && err.message ? err.message : String(err || 'Erro desconhecido');
+  console.error('Erro não tratado:', err);
+  if (msg === 'Não autenticado') return;
+  if (!localStorage.getItem('token')) return;
+  mostrarAvisoErro('Não foi possível concluir: ' + msg);
+});
 
 window.DB = DB;
 console.log('✅ db-api.js carregado');

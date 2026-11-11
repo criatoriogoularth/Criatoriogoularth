@@ -12,10 +12,15 @@
     'site-home.html', 'site-criatorio.html', 'site-noticias.html',
     'site-plantel.html', 'site-adultos.html', 'site-filhotes.html',
     'site-fotos.html', 'site-videos.html', 'site-contato.html',
-    'site-certificado.html'
+    'site-certificado.html', 'site-parceiros.html'
   ];
 
-  if (paginasPublicas.includes(page) || page.startsWith('site-')) {
+  // CORREÇÃO: toda página que começa com "site-" era tratada como pública — inclusive os
+  // EDITORES do site (site-editor-*.html e site-editar.html), que abriam sem login (só não
+  // conseguiam salvar). Agora os editores exigem login como o resto do painel.
+  const ehEditor = page.startsWith('site-editor') || page.startsWith('site-editar');
+
+  if (!ehEditor && (paginasPublicas.includes(page) || page.startsWith('site-'))) {
     return;
   }
 

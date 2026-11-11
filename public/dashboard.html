@@ -271,8 +271,40 @@ function textoPrazo(dias) {
   return `Previsão passou há ${-dias} dias`;
 }
 
+const DIAS_OVOSCOPIA = 5; // ovoscopia = 5 dias depois que a fêmea começa a chocar
+
+function somarDiasIso(iso, n) {
+  const [a, m, d] = String(iso).slice(0, 10).split('-').map(Number);
+  const dt = new Date(a, m - 1, d + n);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
+// Ovoscopias que já estão no dia (ou atrasadas) e ainda não foram marcadas como feitas.
+function ovoscopiasPendentes(ativas) {
+  return ativas
+    .filter(r => r.inicioChoco && !r.ovoscopiaFeita)
+    .map(r => {
+      const data = somarDiasIso(r.inicioChoco, DIAS_OVOSCOPIA);
+      return { r, data, dias: diasAte(data) };
+    })
+    // só avisa a partir do dia; e para de insistir depois que o nascimento previsto já passou
+    .filter(x => x.dias <= 0 && (!x.r.previsaoNascimento || diasAte(x.r.previsaoNascimento) >= 0))
+    .sort((a, b) => a.dias - b.dias);
+}
+
+async function marcarOvoscopia(id) {
+  try {
+    const hoje = new Date();
+    const iso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    await DB.update(DB.TABLES.REPRODUCOES, id, { ovoscopiaFeita: true, ovoscopiaData: iso });
+    REPRODUCOES = await DB.getAll(DB.TABLES.REPRODUCOES);
+    renderizarAvisos();
+  } catch (e) { alert('Não foi possível registrar a ovoscopia: ' + e.message); }
+}
+
 function montarFilhotesPorNascer(reproducoes) {
   const ativas = reproducoes.filter(r => r.status === 'Ativo' && r.finalizada !== 'Sim');
+  const ovoscopias = ovoscopiasPendentes(ativas);
 
   const chocando = ativas
     .filter(r => r.previsaoNascimento)
@@ -283,6 +315,18 @@ function montarFilhotesPorNascer(reproducoes) {
   const botando = ativas.filter(r => !r.inicioChoco && !r.previsaoNascimento);
 
   let html = '';
+  if (ovoscopias.length) {
+    html += `<div class="avisos-sub">🔍 Ovoscopia</div>`;
+    html += ovoscopias.map(({ r, dias, data }) => `
+      <div class="aviso-item ${dias === 0 ? 'nasce-hoje' : 'atrasado'}">
+        <div class="aviso-top">
+          <span class="aviso-titulo">${dias === 0 ? 'Hoje é dia de ovoscopia' : 'Ovoscopia atrasada há ' + (-dias) + ' dia' + (dias < -1 ? 's' : '')} — ${esc(r.femeaNome)}${r.machoNome ? ' × ' + esc(r.machoNome) : ''}</span>
+          <span class="aviso-quando">choco desde ${fmtDataBR(r.inicioChoco)}</span>
+        </div>
+        <div class="aviso-detalhe">${DIAS_OVOSCOPIA} dias de choco completos em ${fmtDataBR(data)}. Confira os ovos contra a luz e separe férteis de inférteis.</div>
+        <div class="aviso-acoes"><button class="btn btn-primary" onclick="marcarOvoscopia(${r.id})">✔ Ovoscopia feita</button></div>
+      </div>`).join('');
+  }
   if (chocando.length) {
     html += `<div class="avisos-sub">🥚 Filhotes para nascer</div>`;
     html += chocando.map(({ r, dias }) => `
@@ -305,7 +349,7 @@ function montarFilhotesPorNascer(reproducoes) {
         <div class="aviso-detalhe">${r.totalOvos ? r.totalOvos + ' ovo(s) até agora' : 'Sem ovos contados'} · choco ainda não começou</div>
       </div>`).join('');
   }
-  return { html, total: chocando.length + botando.length };
+  return { html, total: ovoscopias.length + chocando.length + botando.length };
 }
 
 function linkResposta(m) {

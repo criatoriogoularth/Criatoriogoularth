@@ -1,6 +1,11 @@
 // db/pool.js
 require('dotenv').config();
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// CORREÇÃO: por padrão o driver converte colunas DATE em objetos Date (com fuso
+// horário), o que pode "voltar um dia" dependendo do servidor. Aqui o DATE passa a
+// chegar como texto puro "AAAA-MM-DD", exatamente o que o <input type=date> espera.
+types.setTypeParser(1082, (v) => v);
 
 if (!process.env.DATABASE_URL) {
   console.error('❌ DATABASE_URL não definida. Crie um arquivo .env (veja .env.example).');

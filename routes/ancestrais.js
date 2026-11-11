@@ -5,6 +5,14 @@ const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
+
+// CORREÇÃO: esta rota grava a coluna "raca", mas o schema.sql original não a criava —
+// em um banco novo todo cadastro de ancestral falhava. Cria sozinha se faltar.
+const colunasProntas = pool.query(
+  'ALTER TABLE ancestrais ADD COLUMN IF NOT EXISTS raca VARCHAR(255)'
+).catch((e) => console.error('Falha ao criar coluna raca em ancestrais:', e.message));
+router.use((req, res, next) => { colunasProntas.then(() => next()); });
+
 router.use(authMiddleware);
 
 router.get('/', asyncHandler(async (req, res) => {

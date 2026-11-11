@@ -180,6 +180,16 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
   res.json(rows.map(linhaParaAve));
 }));
 
+// BACKUP COMPLETO: a listagem normal omite fotos/CIG/laudo (são pesados). Para o backup
+// elas precisam ir junto, senão restaurar apagaria as imagens.
+router.get('/backup/completo', authMiddleware, asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(
+    'SELECT * FROM aves WHERE usuario_id = $1 ORDER BY id',
+    [req.user.id]
+  );
+  res.json(rows);
+}));
+
 router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
     'SELECT * FROM aves WHERE id = $1 AND usuario_id = $2',

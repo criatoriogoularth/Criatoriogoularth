@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criatório Goularth — Parceiros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Criatório de aves com excelência genética: conheça nosso plantel, filhotes e adultos.">
+<meta name="theme-color" content="#0d1a16">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%90%A6%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-site.css">
+<style>
+.site-header {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav {
+  background: var(--bg-elevated);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 60px;
+}
+
+.site-main .subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+
+/* ===== PARCEIROS (cards compactos: ~metade da altura do card de ave) ===== */
+.parceiros-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.parceiros-barra select {
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-family: var(--font-texto);
+  font-size: 12.5px;
+  outline: none;
+}
+
+.parceiros-barra .total {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.parceiros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.parceiro-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  transition: .15s ease;
+  min-width: 0;
+}
+
+.parceiro-card:hover {
+  border-color: var(--brass-dim);
+}
+
+.parceiro-card .p-img {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(199,151,63,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: var(--font-titulo);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--brass-soft);
+}
+
+.parceiro-card a.p-img:hover {
+  border-color: var(--brass);
+}
+
+.parceiro-card .p-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.parceiro-card .p-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.parceiro-card .p-nome {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parceiro-card .p-cidade {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parceiro-card .p-especies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.parceiro-card .p-especies span {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(199,151,63,0.12);
+  color: var(--brass-soft);
+  white-space: nowrap;
+}
+
+.parceiro-card .p-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.parceiro-card .p-links a {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--text);
+  background: rgba(var(--shade, 255,255,255),0.06);
+  border: 1px solid var(--line);
+  transition: .15s ease;
+}
+
+.parceiro-card .p-links a:hover {
+  border-color: var(--brass);
+  color: var(--brass-soft);
+  transform: translateY(-1px);
+}
+
+.parceiro-card .p-links a.wa { color: #4cc27a; }
+.parceiro-card .p-links a.ig { color: #e08ab4; }
+.parceiro-card .p-links a.fb { color: #6a9be0; }
+.parceiro-card .p-links a.yt { color: #e06a6a; }
+.parceiro-card .p-links a.tt { color: #7fd6d6; }
+
+.empty-parceiros {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.empty-parceiros .icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 8px 12px;
+  }
+  .site-nav .logo {
+    justify-content: center;
+  }
+  .nav-links {
+    justify-content: center;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .parceiros-grid {
+    grid-template-columns: 1fr;
+  }
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0;
+  }
+  .sub-dropdown-content {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    border-radius: 0;
+    padding-left: 16px;
+  }
+  .dropdown:hover .dropdown-content {
+    display: none;
+  }
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
+}
+</style>
+<link rel="stylesheet" href="site-mobile.css">
+<script src="site-mobile.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-nav">
+      <div class="logo" id="logo-section">
+        <!-- Preenchido pelo JavaScript -->
+      </div>
+      <div class="nav-links" id="nav-links">
+        <a href="site-home.html">Home</a>
+        <a href="site-criatorio.html">O Criatório</a>
+        <a href="site-noticias.html">Notícias</a>
+        <div class="dropdown">
+          <a>Plantel</a>
+          <div class="dropdown-content" id="plantel-dropdown"></div>
+        </div>
+        <a href="site-adultos.html">Adultos</a>
+        <a href="site-filhotes.html">Filhotes</a>
+        <a href="site-fotos.html">Fotos</a>
+        <a href="site-videos.html">Vídeos</a>
+        <a href="site-torneios.html">Copas</a>
+        <a href="site-crachas.html">Crachás</a>
+        <a href="site-parceiros.html" class="active">Parceiros</a>
+        <a href="site-contato.html">Contato</a>
+      </div>
+      <div class="nav-buttons">
+        <a href="login.html" class="btn-login-site">🔐 Entrar</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="subtitle">Criatórios amigos que recomendamos. Clique na imagem ou nos ícones para falar com eles.</div>
+
+    <div class="parceiros-barra" id="parceiros-barra" style="display:none;">
+      <select id="filtro-especie" onchange="renderizarParceiros()"></select>
+      <span class="total" id="total-parceiros"></span>
+    </div>
+
+    <div id="parceiros-grid" class="parceiros-grid"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="links">
+      <a href="site-home.html">Home</a>
+      <a href="site-criatorio.html">O Criatório</a>
+      <a href="site-noticias.html">Notícias</a>
+      <a href="site-plantel.html">Plantel</a>
+      <a href="site-adultos.html">Adultos</a>
+      <a href="site-filhotes.html">Filhotes</a>
+      <a href="site-fotos.html">Fotos</a>
+      <a href="site-videos.html">Vídeos</a>
+      <a href="site-torneios.html">Copas</a>
+      <a href="site-crachas.html">Crachás</a>
+      <a href="site-parceiros.html">Parceiros</a>
+      <a href="site-contato.html">Contato</a>
+    </div>
+    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+  </footer>
+
+  <script src="db-api.js"></script>
+  <script>
+    async function getPersonalizacao() {
+      return (await DB.getConfig('site_personalizacao')) || {};
+    }
+
+    async function carregarLogo() {
+      const personalizacao = await getPersonalizacao();
+      const logoSection = document.getElementById('logo-section');
+      
+      const nome = personalizacao.nome || 'Criatório Goularth';
+      const subtitulo = personalizacao.subtitulo || '';
+      const iniciais = personalizacao.logoIniciais || 'CG';
+      const logoUrl = personalizacao.logoUrl || '';
+      const logoTamanho = personalizacao.logoTamanho || 76;
+      const nomeTamanho = personalizacao.nomeTamanho || 20;
+      
+      let logoHtml = '';
+      if (logoUrl) {
+        logoHtml = `<img src="${logoUrl}" style="width:${logoTamanho}px;height:${logoTamanho}px;border-radius:50%;border:2px solid var(--brass);object-fit:cover;" onerror="this.parentElement.innerHTML='<div class=\\'mark\\' style=\\'width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;\\'>${iniciais}</div>'">`;
+      } else {
+        logoHtml = `<div class="mark" style="width:${logoTamanho}px;height:${logoTamanho}px;font-size:${logoTamanho * 0.4}px;">${iniciais}</div>`;
+      }
+      
+      logoSection.innerHTML = `
+        ${logoHtml}
+        <div>
+          <div class="name" style="font-size:${nomeTamanho}px;">${nome}</div>
+          ${subtitulo ? `<div class="sub">${subtitulo}</div>` : ''}
+        </div>
+      `;
+    }
+
+    async function carregarDropdownPlantel() {
+      const avesSite = await DB.getAvesPublicas();
+      const dropdownPlantel = document.getElementById('plantel-dropdown');
+      const especiesPlantel = [...new Set(avesSite.map(a => a.especie).filter(Boolean))];
+      
+      let dropdownHtml = '';
+      especiesPlantel.sort().forEach(esp => {
+        const count = avesSite.filter(a => a.especie === esp).length;
+        if (count === 0) return;
+        
+        dropdownHtml += `
+          <div class="sub-dropdown">
+            <a href="site-plantel.html?especie=${encodeURIComponent(esp)}">${esp}</a>
+            <div class="sub-dropdown-content">
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=M">${esp} - <span class="sexo-icon">♂</span> Machos</a>
+              <a href="site-plantel.html?especie=${encodeURIComponent(esp)}&sexo=F">${esp} - <span class="sexo-icon">♀</span> Fêmeas</a>
+            </div>
+          </div>
+        `;
+      });
+      dropdownPlantel.innerHTML = dropdownHtml || `<a href="site-plantel.html" style="display:block;padding:8px 16px;color:var(--text-muted);text-decoration:none;">Ver Plantel</a>`;
+    }
+
+    // ------------------------------------------------------------
+    // PARCEIROS
+    // Cada contato só aparece se foi preenchido. Todo link é normalizado e só
+    // aceita http/https (nada de "javascript:" vindo de um campo digitado).
+    // ------------------------------------------------------------
+    let parceiros = [];
+
+    function esc(t) {
+      return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function urlSegura(u) {
+      u = String(u || '').trim();
+      if (!u) return '';
+      if (!/^https?:\/\//i.test(u)) {
+        if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '';   // outro esquema (javascript:, data:...) -> descarta
+        u = 'https://' + u.replace(/^\/+/, '');
+      }
+      try {
+        const x = new URL(u);
+        return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : '';
+      } catch (e) { return ''; }
+    }
+
+    function linkRede(valor, base) {
+      let v = String(valor || '').trim();
+      if (!v) return '';
+      if (/^https?:\/\//i.test(v) || /^(www\.)?[a-z0-9-]+\.[a-z]{2,}\//i.test(v)) return urlSegura(v);
+      v = v.replace(/^@/, '').replace(/\s+/g, '');
+      return v ? urlSegura(base + encodeURIComponent(v)) : '';
+    }
+
+    function linkWhatsapp(valor) {
+      let d = String(valor || '').replace(/\D/g, '');
+      if (!d) return '';
+      if (d.length === 10 || d.length === 11) d = '55' + d;   // DDD + número -> adiciona o Brasil
+      return d.length >= 12 ? 'https://wa.me/' + d : '';
+    }
+
+    function contatosDoParceiro(p) {
+      return {
+        whatsapp: linkWhatsapp(p.whatsapp),
+        instagram: linkRede(p.instagram, 'https://instagram.com/'),
+        facebook: linkRede(p.facebook, 'https://facebook.com/'),
+        youtube: /^@/.test(String(p.youtube || '').trim()) ? urlSegura('https://youtube.com/' + String(p.youtube).trim()) : urlSegura(p.youtube),
+        tiktok: /^@?[\w.]+$/.test(String(p.tiktok || '').trim()) ? urlSegura('https://tiktok.com/@' + String(p.tiktok).trim().replace(/^@/, '')) : urlSegura(p.tiktok),
+        site: urlSegura(p.site)
+      };
+    }
+
+    function iniciais(nome) {
+      const partes = String(nome || '?').trim().split(/\s+/).filter(Boolean);
+      return ((partes[0] || '?')[0] + (partes[1] ? partes[1][0] : '')).toUpperCase();
+    }
+
+    function cartaoParceiro(p) {
+      const c = contatosDoParceiro(p);
+
+      // Imagem clicável: usa o link escolhido para a imagem; se não houver, cai no site,
+      // depois Instagram, WhatsApp e Facebook.
+      const linkImg = urlSegura(p.linkImagem) || c.site || c.instagram || c.whatsapp || c.facebook || c.youtube || c.tiktok;
+      const imgInterna = p.imagem
+        ? `<img src="${esc(p.imagem)}" alt="${esc(p.nome)}" loading="lazy" decoding="async">`
+        : esc(iniciais(p.nome));
+      const blocoImg = linkImg
+        ? `<a class="p-img" href="${esc(linkImg)}" target="_blank" rel="noopener noreferrer" title="Abrir ${esc(p.nome)}">${imgInterna}</a>`
+        : `<div class="p-img">${imgInterna}</div>`;
+
+      const especies = (Array.isArray(p.especies) ? p.especies : []).filter(Boolean);
+      const especiesHtml = especies.length
+        ? `<div class="p-especies">${especies.slice(0, 4).map(e => `<span>${esc(e)}</span>`).join('')}${especies.length > 4 ? `<span title="${esc(especies.slice(4).join(', '))}">+${especies.length - 4}</span>` : ''}</div>`
+        : '';
+
+      const botoes = [];
+      if (c.whatsapp)  botoes.push(`<a class="wa" href="${esc(c.whatsapp)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp de ${esc(p.nome)}">💬</a>`);
+      if (c.instagram) botoes.push(`<a class="ig" href="${esc(c.instagram)}" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram de ${esc(p.nome)}">📷</a>`);
+      if (c.facebook)  botoes.push(`<a class="fb" href="${esc(c.facebook)}" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook de ${esc(p.nome)}">f</a>`);
+      if (c.youtube)   botoes.push(`<a class="yt" href="${esc(c.youtube)}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube de ${esc(p.nome)}">▶</a>`);
+      if (c.tiktok)    botoes.push(`<a class="tt" href="${esc(c.tiktok)}" target="_blank" rel="noopener noreferrer" title="TikTok" aria-label="TikTok de ${esc(p.nome)}">♪</a>`);
+      if (c.site)      botoes.push(`<a href="${esc(c.site)}" target="_blank" rel="noopener noreferrer" title="Site" aria-label="Site de ${esc(p.nome)}">🌐</a>`);
+
+      return `
+        <article class="parceiro-card">
+          ${blocoImg}
+          <div class="p-info">
+            <div class="p-nome" title="${esc(p.nome)}">${esc(p.nome)}</div>
+            ${p.cidade ? `<div class="p-cidade">📍 ${esc(p.cidade)}</div>` : ''}
+            ${especiesHtml}
+            ${botoes.length ? `<div class="p-links">${botoes.join('')}</div>` : ''}
+          </div>
+        </article>`;
+    }
+
+    function renderizarParceiros() {
+      const grid = document.getElementById('parceiros-grid');
+      const filtro = document.getElementById('filtro-especie').value;
+
+      const lista = parceiros.filter(p => !filtro || (Array.isArray(p.especies) && p.especies.includes(filtro)));
+
+      document.getElementById('total-parceiros').textContent = lista.length + (lista.length === 1 ? ' parceiro' : ' parceiros');
+
+      if (lista.length === 0) {
+        grid.innerHTML = `<div class="empty-parceiros"><div class="icon">🤝</div><p>${parceiros.length ? 'Nenhum parceiro com essa espécie.' : 'Em breve, criatórios parceiros por aqui.'}</p></div>`;
+        return;
+      }
+      grid.innerHTML = lista.map(cartaoParceiro).join('');
+    }
+
+    async function carregarParceiros() {
+      let dados = [];
+      try { dados = await DB.getConfig('site_parceiros'); } catch (e) { dados = []; }
+      parceiros = (Array.isArray(dados) ? dados : []).filter(p => p && p.nome && p.visivel !== false);
+
+      // filtro por espécie (só aparece se houver mais de uma espécie entre os parceiros)
+      const especies = [...new Set(parceiros.flatMap(p => Array.isArray(p.especies) ? p.especies : []).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      const select = document.getElementById('filtro-especie');
+      select.innerHTML = '<option value="">Todas as espécies</option>' + especies.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
+      document.getElementById('parceiros-barra').style.display = parceiros.length > 1 ? 'flex' : 'none';
+      select.style.display = especies.length > 1 ? '' : 'none';
+
+      renderizarParceiros();
+    }
+
+    carregarLogo();
+    carregarDropdownPlantel();
+    carregarParceiros();
+  </script>
+  <script src="site-buttons.js"></script>
+</body>
+</html>

@@ -1799,7 +1799,7 @@ async function renderizarLista() {
   if (valorAtual) selectEspecie.value = valorAtual;
   
   if (busca) {
-    aves = aves.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+    aves = aves.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
   }
   if (filtroEspecie) {
     aves = aves.filter(a => a.especie === filtroEspecie);

@@ -1377,7 +1377,7 @@ async function renderListaAves() {
     if (listaFiltro === 'filhotes') return ehFilhote(a);
     return a.situacao === 'Plantel';
   });
-  if (busca) lista = lista.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+  if (busca) lista = lista.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
   if (lista.length === 0) {
     document.getElementById('lista-aves').innerHTML = '<div class="empty-note">Nenhuma ave encontrada.</div>';
     return;
@@ -1744,7 +1744,7 @@ async function renderModalLista() {
     todas = todas.filter(a => a.especie === aveSelecionada.especie);
   }
   if (busca) {
-    todas = todas.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+    todas = todas.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
   }
   
   const container = document.getElementById('modal-list');

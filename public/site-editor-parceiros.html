@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviário — Parceiros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-card { background: var(--bg-elevated-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; }
+.editor-card h3 { font-family: 'Fraunces', serif; font-size: 18px; color: var(--brass-soft); margin-bottom: 6px; }
+.editor-card .ajuda { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+
+.parc-item { display: flex; gap: 12px; align-items: center; background: rgba(var(--shade),0.15); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.parc-item.oculto { opacity: .55; }
+.parc-item .thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); flex-shrink: 0; background: rgba(199,151,63,.08); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--brass-soft); font-family:'Fraunces',serif; }
+.parc-item .info { flex: 1; min-width: 0; }
+.parc-item .nome { font-weight: 700; font-size: 14px; color: var(--text); }
+.parc-item .sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.parc-item .chips { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
+.parc-item .chips span { font-size:10px; padding:1px 8px; border-radius:10px; background: rgba(199,151,63,.12); color: var(--brass-soft); }
+.parc-item .acoes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.parc-item .acoes .btn { padding: 4px 10px; font-size: 11px; }
+.empty-list { text-align: center; padding: 30px; color: var(--text-muted); }
+
+.pm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.pm-overlay.open { display: flex; }
+.pm-box { background: var(--bg-elevated-2); border: 1px solid var(--brass-dim); border-radius: 14px; max-width: 560px; width: 100%; padding: 22px; max-height: 92vh; overflow-y: auto; }
+.pm-box h3 { font-family: 'Fraunces', serif; color: var(--brass-soft); margin-bottom: 14px; }
+.pm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pm-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.field label small { font-weight: 400; opacity: .75; }
+.field input, .field textarea { background: var(--input-bg) !important; border: 1px solid var(--line) !important; border-radius: 6px !important; padding: 8px 10px !important; color: var(--text) !important; font-size: 13px !important; outline: none !important; font-family: 'Manrope', sans-serif; }
+.field input:focus { border-color: var(--brass) !important; }
+.img-linha { display: flex; gap: 12px; align-items: center; }
+.img-linha .prev { width: 72px; height: 72px; border-radius: 12px; border: 1px dashed var(--line); object-fit: cover; display:flex; align-items:center; justify-content:center; color: var(--text-muted); font-size: 11px; text-align:center; overflow:hidden; flex-shrink:0; }
+.img-linha .prev img { width:100%; height:100%; object-fit:cover; }
+.tags-box { display:flex; flex-wrap:wrap; gap:6px; background: var(--input-bg); border:1px solid var(--line); border-radius:6px; padding:6px; }
+.tags-box .tag { background: rgba(199,151,63,.18); color: var(--brass-soft); border-radius: 12px; padding: 2px 4px 2px 10px; font-size: 12px; display:flex; align-items:center; gap:4px; }
+.tags-box .tag button { background:none; border:none; color: inherit; cursor:pointer; font-size:14px; line-height:1; padding:0 4px; }
+.tags-box input { flex:1; min-width:120px; border:none !important; background:transparent !important; padding:4px 6px !important; }
+.pm-acoes { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+.check-linha { display:flex; align-items:center; gap:8px; font-size:13px; color: var(--text); cursor:pointer; }
+@media (max-width: 600px) { .pm-grid { grid-template-columns: 1fr; } .parc-item { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main>
+    <button class="burger" onclick="toggleSidebar()">☰ menu</button>
+    <section class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1>🤝 Parceiros</h1>
+          <div class="lede">Divulgue criatórios amigos no seu site</div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-ghost" onclick="window.open('site-parceiros.html','_blank')">🌐 Ver no site</button>
+          <button class="btn btn-primary" onclick="abrirForm()">+ Novo Parceiro</button>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <h3>Criatórios parceiros</h3>
+        <div class="ajuda">Tudo é salvo na hora. No site, cada contato (WhatsApp, redes, site) só aparece se você preencher. A aba "Parceiros" some do menu sozinha quando não há nenhum parceiro visível.</div>
+        <div id="lista"></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<div class="pm-overlay" id="pm-overlay">
+  <div class="pm-box">
+    <h3 id="pm-titulo">Novo parceiro</h3>
+    <input type="hidden" id="pm-id">
+    <div class="pm-grid">
+      <div class="field full">
+        <label>Imagem ou logo <small>(é reduzida automaticamente para ocupar pouco espaço)</small></label>
+        <div class="img-linha">
+          <div class="prev" id="pm-prev">sem imagem</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('pm-file').click()">📤 Escolher</button>
+            <button type="button" class="btn btn-ghost" id="pm-rem-img" onclick="removerImagem()" style="display:none;">Remover</button>
+          </div>
+          <input type="file" id="pm-file" accept="image/*" style="display:none" onchange="escolherImagem(event)">
+        </div>
+      </div>
+
+      <div class="field full"><label>Nome do criatório *</label><input type="text" id="pm-nome" maxlength="80" placeholder="Ex: Criatório Silva"></div>
+      <div class="field full"><label>Cidade / UF <small>(opcional)</small></label><input type="text" id="pm-cidade" maxlength="80" placeholder="Ex: Campinas/SP"></div>
+
+      <div class="field full">
+        <label>Espécies que cria <small>(digite e aperte Enter ou vírgula)</small></label>
+        <div class="tags-box" id="pm-tags"><input type="text" id="pm-tag-input" list="pm-sugestoes" placeholder="Ex: Canário-da-terra"></div>
+        <datalist id="pm-sugestoes"></datalist>
+      </div>
+
+      <div class="field"><label>WhatsApp <small>(com DDD)</small></label><input type="text" id="pm-whatsapp" placeholder="(11) 91234-5678"></div>
+      <div class="field"><label>Instagram <small>(@usuario ou link)</small></label><input type="text" id="pm-instagram" placeholder="@criatoriosilva"></div>
+      <div class="field"><label>Facebook <small>(link)</small></label><input type="text" id="pm-facebook" placeholder="facebook.com/..."></div>
+      <div class="field"><label>YouTube <small>(link ou @canal)</small></label><input type="text" id="pm-youtube" placeholder="@canal"></div>
+      <div class="field"><label>TikTok <small>(@usuario ou link)</small></label><input type="text" id="pm-tiktok" placeholder="@usuario"></div>
+      <div class="field"><label>Site <small>(link)</small></label><input type="text" id="pm-site" placeholder="www.exemplo.com.br"></div>
+
+      <div class="field full">
+        <label>Link ao clicar na imagem <small>(opcional — se vazio, usa o site, depois o Instagram ou o WhatsApp)</small></label>
+        <input type="text" id="pm-linkimg" placeholder="https://...">
+      </div>
+
+      <div class="field full"><label class="check-linha"><input type="checkbox" id="pm-visivel" checked> Mostrar no site</label></div>
+    </div>
+    <div class="pm-acoes">
+      <button class="btn btn-ghost" onclick="fecharForm()">Cancelar</button>
+      <button class="btn btn-primary" id="pm-salvar" onclick="salvarForm()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="sidebar.js"></script>
+<script src="db-api.js"></script>
+<script src="voltar.js"></script>
+<script>
+renderSidebar('admin-site');
+
+let parceiros = [];
+let tagsAtuais = [];
+let imagemAtual = '';
+let ocupado = false;
+
+function esc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function novoId() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// ---------- persistência ----------
+async function carregar() {
+  try {
+    const dados = await DB.getConfig('site_parceiros');
+    parceiros = Array.isArray(dados) ? dados : [];
+  } catch (e) { parceiros = []; }
+  // garante id em registros antigos
+  parceiros.forEach(p => { if (!p.id) p.id = novoId(); });
+  render();
+  carregarSugestoes();
+}
+
+// Salva a lista inteira. Se falhar, recarrega do servidor para a tela nunca mostrar algo que não foi gravado.
+async function persistir(novaLista) {
+  if (ocupado) { alert('Aguarde o salvamento anterior terminar.'); return false; }
+  ocupado = true;
+  try {
+    await DB.setConfig('site_parceiros', novaLista);
+    parceiros = novaLista;
+    render();
+    return true;
+  } catch (e) {
+    alert('❌ Não foi possível salvar: ' + e.message);
+    await carregar();
+    return false;
+  } finally { ocupado = false; }
+}
+
+async function carregarSugestoes() {
+  const nomes = new Set();
+  try { ((await DB.getConfig('especies_aves')) || []).forEach(e => e && e.popular && nomes.add(e.popular)); } catch (e) {}
+  try { (await DB.getAll(DB.TABLES.AVES)).forEach(a => a.especie && nomes.add(a.especie)); } catch (e) {}
+  document.getElementById('pm-sugestoes').innerHTML = [...nomes].sort().map(n => `<option value="${esc(n)}">`).join('');
+}
+
+// ---------- lista ----------
+function render() {
+  const el = document.getElementById('lista');
+  if (!parceiros.length) {
+    el.innerHTML = '<div class="empty-list">Nenhum parceiro ainda. Clique em "+ Novo Parceiro".</div>';
+    return;
+  }
+  el.innerHTML = parceiros.map((p, i) => `
+    <div class="parc-item ${p.visivel === false ? 'oculto' : ''}">
+      ${p.imagem ? `<img class="thumb" src="${esc(p.imagem)}" alt="">` : `<div class="thumb">${esc((p.nome || '?').slice(0, 2).toUpperCase())}</div>`}
+      <div class="info">
+        <div class="nome">${esc(p.nome)} ${p.visivel === false ? '<small style="color:var(--text-muted);font-weight:400;">(oculto)</small>' : ''}</div>
+        <div class="sub">${esc(p.cidade || '')}</div>
+        ${(p.especies && p.especies.length) ? `<div class="chips">${p.especies.map(e => `<span>${esc(e)}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="acoes">
+        <button class="btn btn-ghost" ${i === 0 ? 'disabled' : ''} onclick="mover('${p.id}', -1)" title="Subir">↑</button>
+        <button class="btn btn-ghost" ${i === parceiros.length - 1 ? 'disabled' : ''} onclick="mover('${p.id}', 1)" title="Descer">↓</button>
+        <button class="btn btn-ghost" onclick="abrirForm('${p.id}')">✎ Editar</button>
+        <button class="btn btn-danger" onclick="excluir('${p.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+async function mover(id, delta) {
+  const lista = parceiros.slice();
+  const i = lista.findIndex(p => p.id === id);
+  const j = i + delta;
+  if (i < 0 || j < 0 || j >= lista.length) return;
+  [lista[i], lista[j]] = [lista[j], lista[i]];
+  await persistir(lista);
+}
+
+async function excluir(id) {
+  const p = parceiros.find(x => x.id === id);
+  if (!p || !confirm(`Excluir o parceiro "${p.nome}"?`)) return;
+  await persistir(parceiros.filter(x => x.id !== id));
+}
+
+// ---------- formulário ----------
+function renderTags() {
+  const box = document.getElementById('pm-tags');
+  const input = document.getElementById('pm-tag-input');
+  box.querySelectorAll('.tag').forEach(t => t.remove());
+  tagsAtuais.forEach((t, i) => {
+    const s = document.createElement('span');
+    s.className = 'tag';
+    s.innerHTML = `${esc(t)}<button type="button" aria-label="Remover" onclick="removerTag(${i})">×</button>`;
+    box.insertBefore(s, input);
+  });
+}
+function adicionarTag(valor) {
+  const v = String(valor || '').trim().replace(/,+$/, '').trim();
+  if (!v) return;
+  if (!tagsAtuais.some(t => t.toLowerCase() === v.toLowerCase())) tagsAtuais.push(v.slice(0, 40));
+  renderTags();
+}
+function removerTag(i) { tagsAtuais.splice(i, 1); renderTags(); }
+
+document.getElementById('pm-tag-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); adicionarTag(this.value); this.value = ''; }
+  else if (e.key === 'Backspace' && !this.value && tagsAtuais.length) { tagsAtuais.pop(); renderTags(); }
+});
+document.getElementById('pm-tag-input').addEventListener('change', function () { adicionarTag(this.value); this.value = ''; });
+
+function mostrarPreview() {
+  const prev = document.getElementById('pm-prev');
+  prev.innerHTML = imagemAtual ? `<img src="${esc(imagemAtual)}" alt="">` : 'sem imagem';
+  document.getElementById('pm-rem-img').style.display = imagemAtual ? '' : 'none';
+}
+function removerImagem() { imagemAtual = ''; mostrarPreview(); }
+
+// Reduz a imagem para no máximo 160 px e comprime (WebP; se o navegador não suportar, JPEG).
+// Resultado típico: 4 a 12 KB — não pesa no banco nem na página do site.
+function comprimirImagem(arquivo, lado = 160) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(arquivo);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const escala = Math.min(1, lado / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * escala));
+      const h = Math.max(1, Math.round(img.height * escala));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      let out = c.toDataURL('image/webp', 0.8);
+      if (!out.startsWith('data:image/webp')) {
+        const c2 = document.createElement('canvas');
+        c2.width = w; c2.height = h;
+        const x = c2.getContext('2d');
+        x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+        out = c2.toDataURL('image/jpeg', 0.8);
+      }
+      resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não consegui ler essa imagem.')); };
+    img.src = url;
+  });
+}
+
+async function escolherImagem(ev) {
+  const f = ev.target.files[0];
+  ev.target.value = '';
+  if (!f) return;
+  if (!f.type.startsWith('image/')) { alert('Escolha um arquivo de imagem.'); return; }
+  try { imagemAtual = await comprimirImagem(f); mostrarPreview(); }
+  catch (e) { alert(e.message); }
+}
+
+function abrirForm(id) {
+  const p = id ? parceiros.find(x => x.id === id) : null;
+  document.getElementById('pm-titulo').textContent = p ? 'Editar parceiro' : 'Novo parceiro';
+  document.getElementById('pm-id').value = p ? p.id : '';
+  document.getElementById('pm-nome').value = p ? p.nome || '' : '';
+  document.getElementById('pm-cidade').value = p ? p.cidade || '' : '';
+  document.getElementById('pm-whatsapp').value = p ? p.whatsapp || '' : '';
+  document.getElementById('pm-instagram').value = p ? p.instagram || '' : '';
+  document.getElementById('pm-facebook').value = p ? p.facebook || '' : '';
+  document.getElementById('pm-youtube').value = p ? p.youtube || '' : '';
+  document.getElementById('pm-tiktok').value = p ? p.tiktok || '' : '';
+  document.getElementById('pm-site').value = p ? p.site || '' : '';
+  document.getElementById('pm-linkimg').value = p ? p.linkImagem || '' : '';
+  document.getElementById('pm-visivel').checked = p ? p.visivel !== false : true;
+  tagsAtuais = p && Array.isArray(p.especies) ? p.especies.slice() : [];
+  imagemAtual = p ? p.imagem || '' : '';
+  document.getElementById('pm-tag-input').value = '';
+  renderTags(); mostrarPreview();
+  document.getElementById('pm-overlay').classList.add('open');
+  document.getElementById('pm-nome').focus();
+}
+function fecharForm() { document.getElementById('pm-overlay').classList.remove('open'); }
+
+function linkValido(v) {
+  v = String(v || '').trim();
+  return !v || !/^[a-z][a-z0-9+.-]*:/i.test(v) || /^https?:/i.test(v);
+}
+
+async function salvarForm() {
+  adicionarTag(document.getElementById('pm-tag-input').value);
+  document.getElementById('pm-tag-input').value = '';
+
+  const g = id => document.getElementById(id).value.trim();
+  const nome = g('pm-nome');
+  if (!nome) { alert('Digite o nome do criatório.'); document.getElementById('pm-nome').focus(); return; }
+
+  const wa = g('pm-whatsapp');
+  if (wa && wa.replace(/\D/g, '').length < 10) { alert('O WhatsApp precisa ter o DDD e o número (ex.: 11 91234-5678).'); return; }
+  for (const [campo, rotulo] of [['pm-facebook', 'Facebook'], ['pm-youtube', 'YouTube'], ['pm-tiktok', 'TikTok'], ['pm-site', 'Site'], ['pm-instagram', 'Instagram'], ['pm-linkimg', 'Link da imagem']]) {
+    if (!linkValido(g(campo))) { alert(`O campo ${rotulo} tem um link inválido. Use um endereço http:// ou https://.`); return; }
+  }
+
+  const id = g('pm-id');
+  const registro = {
+    id: id || novoId(),
+    nome,
+    cidade: g('pm-cidade'),
+    especies: tagsAtuais.slice(),
+    whatsapp: wa,
+    instagram: g('pm-instagram'),
+    facebook: g('pm-facebook'),
+    youtube: g('pm-youtube'),
+    tiktok: g('pm-tiktok'),
+    site: g('pm-site'),
+    linkImagem: g('pm-linkimg'),
+    imagem: imagemAtual,
+    visivel: document.getElementById('pm-visivel').checked
+  };
+
+  const lista = parceiros.slice();
+  const i = lista.findIndex(p => p.id === registro.id);
+  if (i >= 0) lista[i] = registro; else lista.push(registro);
+
+  const btn = document.getElementById('pm-salvar');
+  btn.disabled = true;
+  const ok = await persistir(lista);
+  btn.disabled = false;
+  if (ok) fecharForm();
+}
+
+carregar();
+</script>
+</body>
+</html>

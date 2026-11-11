@@ -647,7 +647,7 @@ async function renderizarPassaros() {
   
   // Filtrar por busca
   if (busca) {
-    aves = aves.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
+    aves = aves.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
   }
   
   const totalEl = document.getElementById('total-passaros');
@@ -1029,11 +1029,29 @@ async function excluirPassaro(id) {
   }
   if (!confirm(`Tem certeza que deseja excluir "${ave.nome}" (${ave.anilha})?`)) return;
   if (!confirm(`⚠️ Esta ação é irreversível! Confirmar exclusão de "${ave.nome}"?`)) return;
+
+  // CORREÇÃO: ao excluir a ave, a anilha dela continuava marcada como "Indisponível" para
+  // sempre. Agora pergunta se a anilha deve voltar para o estoque.
+  let liberarAnilha = false;
+  if (ave.anilha) {
+    try {
+      const anilhaObj = await DB.getAnilhaPorNumero(ave.anilha);
+      if (anilhaObj && anilhaObj.disponivel === 'Não') {
+        liberarAnilha = confirm(`A anilha ${ave.anilha} voltará a ficar DISPONÍVEL no estoque?\n\nOK = liberar a anilha (ex.: cadastro feito por engano)\nCancelar = manter como indisponível (ave existiu, anilha foi usada)`);
+        if (liberarAnilha) ave._anilhaId = anilhaObj.id;
+      }
+    } catch (e) { /* segue sem mexer na anilha */ }
+  }
+
   try {
     await DB.delete(DB.TABLES.AVES, id);
   } catch (e) {
     alert('❌ Erro ao excluir: ' + e.message);
     return;
+  }
+  if (liberarAnilha && ave._anilhaId) {
+    try { await DB.update(DB.TABLES.ANILHAS, ave._anilhaId, { disponivel: 'Sim' }); }
+    catch (e) { alert('A ave foi excluída, mas não consegui liberar a anilha: ' + e.message); }
   }
   await renderizarFiltros();
   await renderizarPassaros();

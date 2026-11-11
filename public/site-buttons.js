@@ -93,16 +93,23 @@ function aplicarTemaPersonalizado(personalizacao) {
     // página do site porque este arquivo é incluído em todas elas.
     document.querySelectorAll('a[href="site-torneios.html"]').forEach(el => el.remove());
 
-    const [conteudo, personalizacao] = await Promise.all([
+    const [conteudo, personalizacao, parceirosCfg] = await Promise.all([
         getConfig('site_conteudo'),
-        getConfig('site_personalizacao')
+        getConfig('site_personalizacao'),
+        getConfig('site_parceiros')
     ]);
+
+    // A aba "Parceiros" só aparece no menu se existir pelo menos um parceiro visível —
+    // assim o visitante nunca cai numa página vazia.
+    const temParceiros = Array.isArray(parceirosCfg) && parceirosCfg.some(p => p && p.visivel !== false);
 
     aplicarTemaPersonalizado(personalizacao);
 
     // ---- Botões de WhatsApp ----
     const whatsappBtns = document.querySelectorAll('.btn-whatsapp, .btn-whatsapp-site, a[href*="wa.me"], a[href*="whatsapp"]');
     whatsappBtns.forEach(btn => {
+        // Links de WhatsApp dos PARCEIROS têm número próprio: nunca trocar pelo do criatório.
+        if (btn.closest('.parceiro-card')) return;
         if (conteudo.whatsapp) {
             const numero = conteudo.whatsapp.replace(/\D/g, '');
             btn.href = `https://wa.me/${numero}`;
@@ -128,7 +135,8 @@ function aplicarTemaPersonalizado(personalizacao) {
     // (.site-footer .links) nunca era tocado, por isso sempre mostrava
     // todas as abas, mesmo as escondidas. Como o mapa de nomes e a ordem
     // são os mesmos, a mesma função é aplicada nos dois containers agora.
-    const vis = personalizacao.visibilidade || {};
+    const vis = Object.assign({}, personalizacao.visibilidade || {});
+    if (!temParceiros) vis.parceiros = false;
 
     const mapa = {
         'Home': 'home',
@@ -140,6 +148,7 @@ function aplicarTemaPersonalizado(personalizacao) {
         'Fotos': 'fotos',
         'Vídeos': 'videos',
         'Crachás': 'crachas',
+        'Parceiros': 'parceiros',
         'Contato': 'contato'
     };
 
@@ -172,10 +181,16 @@ function aplicarTemaPersonalizado(personalizacao) {
         });
 
         if (Array.isArray(personalizacao.ordemMenu)) {
-            personalizacao.ordemMenu.forEach(chave => {
-                const el = elementoPorChave[chave];
-                if (el) container.appendChild(el);
+            const ordem = personalizacao.ordemMenu.filter(chave => elementoPorChave[chave]);
+            // CORREÇÃO: abas que existem na página mas ainda não estão na ordem salva (ex.: uma aba
+            // nova) ficavam de fora do reposicionamento e iam parar no INÍCIO do menu. Agora entram
+            // logo antes de "Contato" (ou no fim, se não houver Contato).
+            Object.keys(elementoPorChave).forEach(chave => {
+                if (ordem.includes(chave)) return;
+                const posContato = ordem.indexOf('contato');
+                if (posContato >= 0) ordem.splice(posContato, 0, chave); else ordem.push(chave);
             });
+            ordem.forEach(chave => container.appendChild(elementoPorChave[chave]));
         }
     }
 

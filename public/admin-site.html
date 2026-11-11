@@ -96,6 +96,7 @@
              adicionado o link aqui, então não tinha como chegar nela a
              partir do painel admin-site. -->
         <a href="site-editor-torneios.html" class="admin-card"><div class="icon">🏆</div><h3>Copas e Torneios</h3><p>Etapas e resultados</p></a>
+        <a href="site-editor-parceiros.html" class="admin-card"><div class="icon">🤝</div><h3>Parceiros</h3><p>Criatórios amigos no site</p></a>
         <a href="site-editar.html?pagina=home" class="admin-card"><div class="icon">📝</div><h3>Editar Home</h3><p>Conteúdo da página inicial</p></a>
         <a href="site-editar.html?pagina=criatorio" class="admin-card"><div class="icon">🏷️</div><h3>Editar Criatório</h3><p>História e genética</p></a>
         <a href="site-editar.html?pagina=contato" class="admin-card"><div class="icon">📧</div><h3>Editar Contato</h3><p>Informações de contato</p></a>
@@ -122,7 +123,9 @@ async function atualizarEstatisticas() {
     const aves = await DB.getAll(DB.TABLES.AVES);
     const machos = aves.filter(a => a.sexo === 'M').length;
     const femeas = aves.filter(a => a.sexo === 'F').length;
-    const noSite = aves.filter(a => a.no_site === true).length;
+    // CORREÇÃO: o DB.getAll já converte para camelCase (noSite). Com "no_site" o filtro nunca
+    // achava nada e o contador "No Site" ficava sempre em 0.
+    const noSite = aves.filter(a => a.noSite === true).length;
 
     document.getElementById('total-aves').textContent = aves.length;
     document.getElementById('total-machos').textContent = machos;
@@ -159,7 +162,8 @@ async function atualizarEstatisticasVisitas() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const chave = d.toISOString().slice(0, 10);
+      // data LOCAL (toISOString usa UTC e, à noite no Brasil, já cai no dia seguinte)
+      const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const registro = stats.ultimos7.find(r => String(r.data).slice(0, 10) === chave);
       dias.push({ chave, total: registro ? registro.total : 0 });
     }
