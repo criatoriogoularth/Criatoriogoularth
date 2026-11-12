@@ -1,0 +1,109 @@
+/* ============================================================
+   temas-modelos.css — personalidade de cada modelo de visual
+   ============================================================
+   As CORES vêm do tema.js (variáveis na <html>). Este arquivo cuida do
+   que variáveis sozinhas não resolvem: menu/barra lateral coloridos,
+   peso dos títulos, botões arredondados e o botão dia/noite do site.
+   Vale tanto para o gerenciador quanto para o site público.
+   ============================================================ */
+
+/* ---------- MENU DO SITE e BARRA LATERAL do gerenciador COLORIDOS ---------- */
+html[data-nav="cor"] .site-nav,
+html[data-side="cor"] .sidebar {
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,.86);
+  --brass: #ffffff;
+  --brass-soft: #ffffff;
+  --brass-dim: rgba(255,255,255,.45);
+  --line: rgba(255,255,255,.28);
+  --accent-rgb: 255,255,255;
+}
+html[data-nav="cor"] .site-nav {
+  /* !important: várias páginas ainda têm uma cópia antiga do CSS do menu com fundo fixo */
+  background: var(--nav-bg) !important;
+  border-bottom-color: transparent;
+  box-shadow: 0 6px 24px -12px rgba(var(--shade,0,0,0), .5);
+}
+html[data-side="cor"] .sidebar {
+  background: var(--side-bg) !important;
+  border-right-color: transparent;
+  --danger: rgba(255,255,255,.7);
+  --danger-text: #ffe0dc;
+}
+
+/* menus suspensos abrem sobre o conteúdo: voltam às cores normais do tema */
+html[data-nav="cor"] .site-nav .dropdown-content,
+html[data-nav="cor"] .site-nav .sub-dropdown-content {
+  --text: var(--t-text);
+  --text-muted: var(--t-muted);
+  --brass: var(--t-brass);
+  --brass-soft: var(--t-brass-soft);
+  --brass-dim: var(--t-brass-dim);
+  --line: var(--t-line);
+  --accent-rgb: var(--t-accent-rgb);
+}
+html[data-nav="cor"] .site-nav .btn-login-site { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.45); }
+html[data-nav="cor"] .site-nav .btn-login-site:hover { background: rgba(255,255,255,.28); }
+html[data-side="cor"] .sidebar .plan-chip { background: rgba(0,0,0,.22); }
+html[data-side="cor"] .sidebar .plan-chip b { color: #ffffff; }
+
+/* ---------- BOTÃO DIA/NOITE DO SITE ---------- */
+.btn-modo-site {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(var(--accent-rgb,199,151,63), .12);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-soft);
+  font-size: 16px; line-height: 1; cursor: pointer; padding: 0;
+  transition: .15s ease;
+}
+.btn-modo-site:hover { background: rgba(var(--accent-rgb,199,151,63), .24); border-color: var(--brass); transform: rotate(18deg) scale(1.06); }
+
+/* ---------- TÍTULOS ---------- */
+html[data-modelo="ceu"] h1, html[data-modelo="ceu"] h2, html[data-modelo="ceu"] h3,
+html[data-modelo="ceu"] .display, html[data-modelo="ceu"] .site-nav .logo .name { font-weight: 500; letter-spacing: .01em; }
+
+html[data-modelo="vibrante"] h1, html[data-modelo="vibrante"] h2,
+html[data-modelo="vibrante"] .display { font-weight: 800; letter-spacing: -.01em; }
+html[data-modelo="vibrante"] h3 { font-weight: 700; }
+
+html[data-modelo="tropical"] h1, html[data-modelo="tropical"] h2, html[data-modelo="tropical"] h3,
+html[data-modelo="tropical"] .display { font-weight: 800; }
+
+html[data-modelo="poente"] h1, html[data-modelo="poente"] h2, html[data-modelo="poente"] h3,
+html[data-modelo="poente"] .display { font-weight: 700; }
+
+/* ---------- BOTÕES E MENU EM "PÍLULA" (modelos mais arredondados) ---------- */
+html[data-modelo="vibrante"] .btn, html[data-modelo="tropical"] .btn, html[data-modelo="poente"] .btn,
+html[data-modelo="vibrante"] .btn-login-site, html[data-modelo="tropical"] .btn-login-site, html[data-modelo="poente"] .btn-login-site,
+html[data-modelo="vibrante"] .nav-links > a, html[data-modelo="tropical"] .nav-links > a, html[data-modelo="poente"] .nav-links > a,
+html[data-modelo="vibrante"] .nav-links > .dropdown > a, html[data-modelo="tropical"] .nav-links > .dropdown > a, html[data-modelo="poente"] .nav-links > .dropdown > a {
+  border-radius: 999px;
+}
+html[data-modelo="ceu"] .btn, html[data-modelo="ceu"] .btn-login-site { border-radius: 6px; }
+
+html[data-modelo="vibrante"] .btn-primary, html[data-modelo="tropical"] .btn-primary, html[data-modelo="poente"] .btn-primary {
+  box-shadow: 0 8px 20px -8px rgba(var(--accent-rgb), .75);
+  letter-spacing: .02em;
+}
+
+/* ---------- CARDS ---------- */
+html[data-modelo="ceu"] .card, html[data-modelo="ceu"] .editor-card, html[data-modelo="ceu"] .admin-card { box-shadow: 0 2px 10px -4px rgba(var(--shade,0,0,0), .25); }
+html[data-modelo="vibrante"] .card, html[data-modelo="vibrante"] .editor-card, html[data-modelo="vibrante"] .admin-card,
+html[data-modelo="tropical"] .card, html[data-modelo="tropical"] .editor-card, html[data-modelo="tropical"] .admin-card,
+html[data-modelo="poente"] .card, html[data-modelo="poente"] .editor-card, html[data-modelo="poente"] .admin-card { box-shadow: var(--shadow); }
+
+/* ---------- CELULAR: painel do menu aberto nos modelos coloridos ---------- */
+html[data-nav="cor"] body .site-nav.aberto { background: var(--nav-bg) !important; }
+html[data-nav="cor"] body .site-nav.aberto .dropdown-content,
+html[data-nav="cor"] body .site-nav.aberto .sub-dropdown-content {
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,.88);
+  --brass: #ffffff;
+  --brass-soft: #ffffff;
+  --brass-dim: rgba(255,255,255,.45);
+  --line: rgba(255,255,255,.28);
+  --accent-rgb: 255,255,255;
+}
+html[data-nav="cor"] body .site-nav.aberto .nav-links > a,
+html[data-nav="cor"] body .site-nav.aberto .nav-links > .dropdown > a { background: rgba(255,255,255,.12); }

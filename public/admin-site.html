@@ -4,13 +4,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .admin-grid {
   display: grid;
@@ -31,7 +32,7 @@
 }
 .admin-card:hover { border-color: var(--brass-dim); transform: translateY(-3px); }
 .admin-card .icon { font-size: 40px; margin-bottom: 8px; }
-.admin-card h3 { font-family: 'Fraunces', serif; font-size: 16px; color: var(--brass-soft); }
+.admin-card h3 { font-family: var(--font-titulo,'Fraunces',serif); font-size: 16px; color: var(--brass-soft); }
 .admin-card p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 .estatisticas {
   display: grid;
@@ -46,7 +47,7 @@
   padding: 14px 16px;
   text-align: center;
 }
-.estatistica-item .numero { font-family: 'Fraunces', serif; font-size: 28px; color: var(--brass-soft); }
+.estatistica-item .numero { font-family: var(--font-titulo,'Fraunces',serif); font-size: 28px; color: var(--brass-soft); }
 .estatistica-item .label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 .sync-status { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
 </style>
@@ -88,7 +89,7 @@
         <a href="site-editor-personalizacao.html" class="admin-card"><div class="icon">🎨</div><h3>Personalizar Site</h3><p>Logo, cores e identidade</p></a>
         <a href="site-editor-especies.html" class="admin-card"><div class="icon">🐦</div><h3>Espécies da Home</h3><p>Espécies em destaque</p></a>
         <a href="site-editor-banner.html" class="admin-card"><div class="icon">🖼️</div><h3>Banner do Site</h3><p>Imagem de cabeçalho</p></a>
-        <a href="site-editor-tema.html" class="admin-card"><div class="icon">🎨</div><h3>Cores e Fonte</h3><p>Tema visual do site</p></a>
+        <a href="site-editor-tema.html" class="admin-card"><div class="icon">🎨</div><h3>Modelos e Cores</h3><p>Visual do site e do painel</p></a>
         <a href="site-editor-anuncios.html" class="admin-card"><div class="icon">📢</div><h3>Banners de Anúncio</h3><p>Home e Criatório</p></a>
         <!-- CORREÇÃO: faltava o card de "Copas e Torneios" — a página
              site-editor-torneios.html já existia e já funcionava (inclusive

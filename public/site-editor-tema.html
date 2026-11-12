@@ -1,154 +1,123 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
-<title>Aviário — Editar Tema do Site</title>
+<title>Aviário — Modelos e Cores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
-.editor-card {
-  background: var(--bg-elevated-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  margin-bottom: 20px;
-}
-.editor-card h3 {
-  font-family: 'Fraunces', serif;
-  font-size: 18px;
-  color: var(--brass-soft);
-  margin-bottom: 6px;
-}
-.editor-card .desc {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
+.editor-card { background: var(--bg-elevated-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; }
+.editor-card h3 { font-family: var(--font-titulo,'Fraunces',serif); font-size: 18px; color: var(--brass-soft); margin-bottom: 6px; }
+.editor-card .desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px; }
 
-/* ---- cores ---- */
-.cores-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-}
-.cor-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(var(--shade),0.15);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 14px;
-}
-.cor-field input[type="color"] {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-}
-.cor-field .cor-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.cor-field .cor-label {
-  font-size: 12.5px;
-  color: var(--text);
-  font-weight: 600;
-}
-.cor-field .cor-hex {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-}
+/* abas de escopo */
+.escopo-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.escopo-tabs button { flex: 1; min-width: 200px; background: var(--bg-elevated-2); border: 1px solid var(--line); color: var(--text-muted); border-radius: var(--radius); padding: 14px 18px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 700; text-align: left; transition: .15s ease; }
+.escopo-tabs button small { display: block; font-weight: 500; font-size: 11.5px; margin-top: 2px; opacity: .85; }
+.escopo-tabs button.on { border-color: var(--brass); color: var(--brass-soft); background: rgba(var(--accent-rgb,199,151,63), .12); }
 
-/* ---- fontes ---- */
-.fontes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
-}
-.fonte-card {
-  background: rgba(var(--shade),0.15);
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  padding: 16px;
-  cursor: pointer;
-  transition: .15s ease;
-}
-.fonte-card:hover {
-  border-color: var(--brass-dim);
-}
-.fonte-card.selecionada {
-  border-color: var(--brass);
-  background: rgba(199,151,63,0.08);
-}
-.fonte-card .fonte-nome {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.fonte-card .fonte-titulo-preview {
-  font-size: 22px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.fonte-card .fonte-texto-preview {
-  font-size: 13px;
-  color: var(--text-muted);
-}
+/* galeria de modelos */
+.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.modelo-card { border: 2px solid var(--line); border-radius: var(--radius); padding: 10px; cursor: pointer; background: rgba(var(--shade),.12); transition: .15s ease; position: relative; }
+.modelo-card:hover { border-color: var(--brass-dim); transform: translateY(-2px); }
+.modelo-card.sel { border-color: var(--brass); box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63), .22); }
+.modelo-card.sel::after { content: '✓ Em uso'; position: absolute; top: 14px; right: 14px; background: var(--brass); color: var(--on-brass); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.modelo-card .nome { font-weight: 800; font-size: 14px; color: var(--text); margin: 10px 2px 2px; }
+.modelo-card .txt { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; margin: 0 2px; }
 
-/* ---- pré-visualização ---- */
-.preview-tema {
-  border-radius: 12px;
-  padding: 28px 24px;
-  border: 1px solid;
-  transition: background .2s ease, color .2s ease, border-color .2s ease;
-}
-.preview-tema .preview-titulo {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.preview-tema .preview-sub {
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.preview-tema .preview-btn {
-  display: inline-block;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  border: none;
-  cursor: default;
-}
-.preview-tema .preview-card {
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid;
-  font-size: 12px;
-}
+/* miniatura (escopo = variáveis do próprio elemento) */
+.mini { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-family: var(--font-texto); }
+.mini .m-nav { background: var(--nav-bg); padding: 7px 9px; display: flex; align-items: center; gap: 6px; }
+.mini .m-logo { width: 14px; height: 14px; border-radius: 50%; background: var(--brass); }
+.mini .m-link { height: 4px; width: 22px; border-radius: 3px; background: var(--nav-fg); opacity: .6; }
+.mini .m-link.a { opacity: 1; }
+.mini .m-body { padding: 9px; }
+.mini .m-titulo { font-family: var(--font-titulo); font-weight: 700; font-size: 13px; color: var(--brass-soft); margin-bottom: 5px; }
+.mini .m-card { background: var(--bg-elevated-2); border: 1px solid var(--line); border-radius: calc(var(--radius) * .6); padding: 7px; display: flex; align-items: center; gap: 7px; }
+.mini .m-foto { width: 26px; height: 26px; border-radius: calc(var(--radius) * .5); background: linear-gradient(135deg, var(--brass), var(--sage)); flex-shrink: 0; }
+.mini .m-linha { height: 4px; border-radius: 3px; background: var(--text-muted); opacity: .55; margin-bottom: 4px; }
+.mini .m-btn { margin-top: 7px; display: inline-block; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: linear-gradient(135deg, var(--btn-from), var(--btn-to)); color: var(--on-brass); }
+.mini .m-dots { display: flex; gap: 4px; padding: 0 9px 9px; }
+.mini .m-dots i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(128,128,128,.35); }
 
-.botoes-acao {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
+/* modo + opções */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip-btn { background: transparent; border: 1px solid var(--line); color: var(--text-muted); border-radius: 999px; padding: 8px 16px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: .15s ease; }
+.chip-btn.on { border-color: var(--brass); color: var(--brass-soft); background: rgba(var(--accent-rgb,199,151,63), .14); }
+.linha-opcao { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.linha-opcao > .rot { font-size: 13px; font-weight: 700; color: var(--text); min-width: 210px; }
+.check-linha { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.check-linha input { width: 16px; height: 16px; accent-color: var(--brass); }
+
+/* cores */
+.cores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.cor-field { display: flex; align-items: center; gap: 12px; background: rgba(var(--shade),0.15); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.cor-field input[type="color"] { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
+.cor-field .cor-info { display: flex; flex-direction: column; gap: 2px; }
+.cor-field .cor-label { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.cor-field .cor-hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.cor-field.editada { border-color: var(--brass); }
+
+/* fontes */
+.fontes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.fonte-card { border: 2px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; background: rgba(var(--shade),.12); transition: .15s ease; }
+.fonte-card:hover { border-color: var(--brass-dim); }
+.fonte-card.sel { border-color: var(--brass); background: rgba(var(--accent-rgb,199,151,63), .08); }
+.fonte-card .fn { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.fonte-card .ft { font-size: 19px; font-weight: 700; color: var(--text); }
+.fonte-card .fx { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+
+/* pré-visualização grande */
+.pv { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-family: var(--font-texto); }
+.pv-nav { background: var(--nav-bg); padding: 12px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.pv-nav .logo { display: flex; align-items: center; gap: 9px; }
+.pv-nav .mark { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--brass); display: flex; align-items: center; justify-content: center; font-family: var(--font-titulo); font-weight: 700; font-size: 12px; color: var(--brass-soft); }
+.pv-nav .nome { font-family: var(--font-titulo); font-weight: 700; color: var(--brass-soft); }
+.pv[data-colorida="1"] .pv-nav .nome, .pv[data-colorida="1"] .pv-nav .mark { color: #fff; border-color: #fff; }
+.pv-nav .links { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+.pv-nav .links span { color: var(--nav-fg); font-size: 12.5px; font-weight: 500; padding: 5px 11px; border-radius: 8px; border: 1px solid transparent; }
+.pv[data-modelo="vibrante"] .pv-nav .links span, .pv[data-modelo="tropical"] .pv-nav .links span, .pv[data-modelo="poente"] .pv-nav .links span { border-radius: 999px; }
+.pv-nav .links span.a { border-color: var(--brass); color: var(--brass-soft); background: rgba(var(--accent-rgb), .12); }
+.pv[data-colorida="1"] .pv-nav .links span.a { border-color: rgba(255,255,255,.7); color: #fff; background: rgba(255,255,255,.2); }
+.pv-nav .modo { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--brass-dim); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--nav-fg); }
+.pv-hero { padding: 26px 20px 8px; }
+.pv-hero h4 { font-family: var(--font-titulo); font-size: 24px; color: var(--text); margin: 0 0 6px; }
+.pv[data-modelo="ceu"] .pv-hero h4 { font-weight: 500; } .pv[data-modelo="vibrante"] .pv-hero h4 { font-weight: 800; } .pv[data-modelo="tropical"] .pv-hero h4 { font-weight: 800; } .pv[data-modelo="poente"] .pv-hero h4 { font-weight: 700; }
+.pv-hero p { color: var(--text-muted); font-size: 13.5px; margin: 0 0 14px; max-width: 480px; }
+.pv-btn { display: inline-block; font-weight: 800; font-size: 13px; padding: 10px 20px; border-radius: 9px; background: linear-gradient(135deg, var(--btn-from), var(--btn-to)); color: var(--on-brass); box-shadow: 0 8px 20px -8px rgba(var(--accent-rgb), .75); margin-right: 8px; }
+.pv-btn.g { background: transparent; color: var(--text-muted); border: 1px solid var(--line); box-shadow: none; }
+.pv[data-modelo="vibrante"] .pv-btn, .pv[data-modelo="tropical"] .pv-btn, .pv[data-modelo="poente"] .pv-btn { border-radius: 999px; }
+.pv-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; padding: 14px 20px 20px; }
+.pv-ave { background: var(--bg-elevated-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.pv-ave .foto { height: 70px; background: linear-gradient(135deg, var(--brass), var(--sage)); opacity: .85; }
+.pv-ave .corpo { padding: 10px 12px 12px; }
+.pv-ave .n { font-family: var(--font-titulo); font-weight: 700; font-size: 15px; color: var(--text); }
+.pv-ave .s { font-size: 11.5px; color: var(--text-muted); margin: 2px 0 8px; }
+.pv-ave .tag { display: inline-block; font-size: 10.5px; padding: 2px 9px; border-radius: 999px; background: rgba(var(--sage-rgb), .18); color: var(--sage-soft); font-weight: 700; }
+.pv-ave .tag.b { background: rgba(var(--accent-rgb), .14); color: var(--brass-soft); }
+
+/* pré-visualização do gerenciador */
+.pv-admin { display: grid; grid-template-columns: 170px 1fr; min-height: 270px; }
+.pv-side { background: var(--side-bg); border-right: 1px solid var(--line); padding: 14px 10px; }
+.pv-side .sn { font-family: var(--font-titulo); font-weight: 700; font-size: 13px; color: var(--brass-soft); margin: 0 6px 12px; }
+.pv[data-colorida="1"] .pv-side .sn { color: #fff; }
+.pv-side .it { font-size: 12px; padding: 7px 9px; border-radius: 8px; color: var(--nav-fg); border: 1px solid transparent; margin-bottom: 3px; }
+.pv-side .it.a { border-color: var(--brass-dim); color: var(--brass-soft); background: rgba(var(--accent-rgb), .12); }
+.pv[data-colorida="1"] .pv-side .it.a { color: #fff; border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.18); }
+.pv-main { padding: 16px 18px; }
+.pv-main h4 { font-family: var(--font-titulo); font-size: 20px; margin: 0 0 12px; color: var(--text); }
+.pv-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.pv-stat { background: var(--bg-elevated-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow); }
+.pv-stat b { display: block; font-family: var(--font-titulo); font-size: 22px; color: var(--brass-soft); }
+.pv-stat span { font-size: 11px; color: var(--text-muted); }
+@media (max-width: 640px) { .pv-admin { grid-template-columns: 1fr; } .pv-side { display: none; } }
+
+.barra-salvar { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 12px 0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; z-index: 5; }
+.barra-salvar .status { font-size: 12.5px; color: var(--sage-soft); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -160,41 +129,72 @@
 
       <div class="topbar">
         <div>
-          <h1>🎨 Cores e Fonte do Site</h1>
-          <div class="lede">Personalize a identidade visual do site público — as mudanças valem para todas as páginas.</div>
+          <h1>🎨 Modelos e Cores</h1>
+          <div class="lede">Escolha o visual do site e do gerenciador — cada um pode ter o seu modelo, com modo dia e noite.</div>
         </div>
         <div>
-          <button class="btn btn-ghost" onclick="voltar('admin-site.html')">← Voltar</button>
-          <button class="btn btn-primary" onclick="salvarTema()">💾 Salvar Tema</button>
+          <button class="btn btn-ghost" onclick="location.href='admin-site.html'">← Voltar</button>
+          <button class="btn btn-ghost" onclick="window.open('site-home.html','_blank')">🌐 Ver o site</button>
+        </div>
+      </div>
+
+      <div class="escopo-tabs">
+        <button id="tab-site" class="on" onclick="trocarEscopo('site')">🌐 Site público<small>O que seus visitantes veem</small></button>
+        <button id="tab-admin" onclick="trocarEscopo('admin')">⚙️ Gerenciador<small>Este painel onde você administra</small></button>
+      </div>
+
+      <div class="editor-card">
+        <h3>1. Escolha o modelo</h3>
+        <div class="desc">Cada modelo já vem com cores, fontes e formato próprios, nos dois modos (dia e noite). Você pode ajustar tudo depois.</div>
+        <div class="galeria" id="galeria"></div>
+      </div>
+
+      <div class="editor-card">
+        <h3>2. Modo dia / noite</h3>
+        <div class="desc" id="desc-modo"></div>
+        <div class="linha-opcao">
+          <span class="rot">Ver e editar o modo:</span>
+          <div class="chips">
+            <button class="chip-btn" id="pv-noite" onclick="definirModoPrev('noite')">🌙 Noite</button>
+            <button class="chip-btn" id="pv-dia" onclick="definirModoPrev('dia')">☀️ Dia</button>
+          </div>
+        </div>
+        <div id="opcoes-site">
+          <div class="linha-opcao">
+            <span class="rot">Modo inicial dos visitantes:</span>
+            <div class="chips">
+              <button class="chip-btn" id="mp-noite" onclick="definirModoPadrao('noite')">🌙 Noite</button>
+              <button class="chip-btn" id="mp-dia" onclick="definirModoPadrao('dia')">☀️ Dia</button>
+              <button class="chip-btn" id="mp-auto" onclick="definirModoPadrao('auto')">📱 Igual ao aparelho</button>
+            </div>
+          </div>
+          <label class="check-linha"><input type="checkbox" id="chk-botao" onchange="mudouBotao()"> Mostrar o botão ☀️/🌙 no menu do site (o visitante escolhe o modo dele)</label>
         </div>
       </div>
 
       <div class="editor-card">
-        <h3>🖌️ Cores</h3>
-        <div class="desc">Escolha as 6 cores principais — as demais variações (tons mais claros/transparentes usados em bordas e destaques) são calculadas automaticamente a partir delas.</div>
+        <h3>3. Ajuste as cores <span style="font-size:12px;font-weight:500;color:var(--text-muted);">(modo <span id="rot-modo-cores">noite</span>)</span></h3>
+        <div class="desc">Mexeu em uma cor? O sistema recalcula os tons derivados sozinho. Cada modelo guarda suas cores editadas, separadas para dia e noite.</div>
         <div class="cores-grid" id="cores-grid"></div>
+        <div style="margin-top:14px;"><button class="btn btn-ghost" onclick="limparCores()">↩ Voltar às cores originais do modelo (neste modo)</button></div>
       </div>
 
       <div class="editor-card">
-        <h3>🔤 Fonte</h3>
-        <div class="desc">Escolha uma combinação de fontes para títulos e textos do site.</div>
+        <h3>4. Fonte</h3>
+        <div class="desc">Por padrão vale a fonte do modelo. Se preferir, troque por outra.</div>
         <div class="fontes-grid" id="fontes-grid"></div>
       </div>
 
       <div class="editor-card">
-        <h3>👁️ Pré-visualização</h3>
-        <div class="desc">Assim ficará, com as escolhas atuais (ainda não salvas).</div>
-        <div class="preview-tema" id="preview-tema">
-          <div class="preview-titulo" id="preview-titulo">Criatório Goularth</div>
-          <div class="preview-sub" id="preview-sub">Excelência na criação de aves — canários, coleiros e trinca-ferro.</div>
-          <a class="preview-btn" id="preview-btn">📩 Reservar</a>
-          <div class="preview-card" id="preview-card">Card de exemplo — assim ficam os blocos de conteúdo do site.</div>
-        </div>
+        <h3>Pré-visualização</h3>
+        <div class="desc" id="desc-prev"></div>
+        <div id="preview"></div>
       </div>
 
-      <div class="botoes-acao">
-        <button class="btn btn-primary" onclick="salvarTema()">💾 Salvar Tema</button>
-        <button class="btn btn-ghost" onclick="restaurarPadrao()">↩️ Restaurar Padrão</button>
+      <div class="barra-salvar">
+        <button class="btn btn-primary" id="btn-salvar" onclick="salvar()">💾 Salvar</button>
+        <button class="btn btn-ghost" onclick="restaurarPadrao()">↩ Restaurar padrão (<span id="rot-escopo-rest">site</span>)</button>
+        <span class="status" id="status"></span>
       </div>
 
     </section>
@@ -208,243 +208,247 @@
 <script>
 renderSidebar('admin-site');
 
-// ============================================================
-// DEFINIÇÕES
-// ============================================================
+const TE = window.TemaEngine;
+const CAMPOS = TE.CAMPOS;
 
-// Cores padrão (as mesmas do style-site.css)
-const CORES_PADRAO = {
-  bg: '#0d1a16',
-  bgElevated: '#132621',
-  brass: '#c7973f',
-  text: '#ece6d6',
-  textMuted: '#9aa89e',
-  sageSoft: '#8fc3a8'
+let escopo = 'site';
+let modoPrev = 'noite';
+// estado editável de cada escopo
+let est = {
+  site:  { modelo: 'classico', modoPadrao: 'noite', mostrarBotao: true, cores: {}, fonte: null },
+  admin: { modelo: 'classico', cores: {}, fonte: null }
 };
 
-const CAMPOS_COR = [
-  { chave: 'bg', label: 'Fundo principal' },
-  { chave: 'bgElevated', label: 'Fundo dos cards' },
-  { chave: 'brass', label: 'Cor de destaque (dourado)' },
-  { chave: 'text', label: 'Texto principal' },
-  { chave: 'textMuted', label: 'Texto secundário' },
-  { chave: 'sageSoft', label: 'Cor de sucesso/positivo' }
-];
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function ee() { return est[escopo]; }
+function overAtual() {
+  const e = ee();
+  return (e.cores[e.modelo] && e.cores[e.modelo][modoPrev]) || {};
+}
 
-const FONTES_DISPONIVEIS = {
-  padrao: {
-    label: 'Padrão',
-    titulo: "'Fraunces', serif",
-    texto: "'Manrope', sans-serif",
-    googleFontsUrl: null
-  },
-  elegante: {
-    label: 'Elegante',
-    titulo: "'Playfair Display', serif",
-    texto: "'Lato', sans-serif",
-    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Lato:wght@400;500;600;700&display=swap'
-  },
-  moderno: {
-    label: 'Moderno',
-    titulo: "'Poppins', sans-serif",
-    texto: "'Inter', sans-serif",
-    googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap'
+// ---------- carregar ----------
+async function carregar() {
+  let pers = {};
+  try { pers = (await DB.getConfig('site_personalizacao')) || {}; }
+  catch (e) { alert('⚠️ Não foi possível carregar as configurações: ' + e.message); }
+
+  const t = pers.temas || {};
+  if (t.site && t.site.modelo) {
+    est.site = { modelo: TE.MODELOS[t.site.modelo] ? t.site.modelo : 'classico', modoPadrao: t.site.modoPadrao || 'noite',
+      mostrarBotao: t.site.mostrarBotao !== false, cores: JSON.parse(JSON.stringify(t.site.cores || {})), fonte: t.site.fonte || null };
+  } else {
+    // site ainda no formato antigo (só cores/fonte do tema escuro)
+    const leg = TE.normalizarSite(pers);
+    est.site = { modelo: 'classico', modoPadrao: 'noite', mostrarBotao: true, cores: { classico: leg.over || {} }, fonte: leg.fonte };
   }
-};
-
-// ============================================================
-// FUNÇÕES DE COR (derivar tons a partir das 6 cores escolhidas)
-// ============================================================
-
-function hexParaRgb(hex) {
-  const h = hex.replace('#', '');
-  return {
-    r: parseInt(h.substring(0, 2), 16),
-    g: parseInt(h.substring(2, 4), 16),
-    b: parseInt(h.substring(4, 6), 16)
-  };
+  if (t.admin && t.admin.modelo) {
+    est.admin = { modelo: TE.MODELOS[t.admin.modelo] ? t.admin.modelo : 'classico',
+      cores: JSON.parse(JSON.stringify(t.admin.cores || {})), fonte: t.admin.fonte || null };
+  }
+  // o modo de visualização começa no modo em que o painel está agora
+  modoPrev = TE.cfgAdminDoCache().modo === 'dia' ? 'dia' : 'noite';
+  renderTudo();
 }
 
-function clarear(hex, fator) {
-  const { r, g, b } = hexParaRgb(hex);
-  const mix = (canal) => Math.round(canal + (255 - canal) * fator);
-  const toHex = (n) => n.toString(16).padStart(2, '0');
-  return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+// ---------- render ----------
+function renderTudo() {
+  document.getElementById('tab-site').classList.toggle('on', escopo === 'site');
+  document.getElementById('tab-admin').classList.toggle('on', escopo === 'admin');
+  document.getElementById('rot-escopo-rest').textContent = escopo === 'site' ? 'site' : 'gerenciador';
+  document.getElementById('opcoes-site').style.display = escopo === 'site' ? '' : 'none';
+  document.getElementById('desc-modo').textContent = escopo === 'site'
+    ? 'Os visitantes podem alternar entre dia e noite. Aqui você escolhe com qual modo o site abre e edita as cores de cada modo.'
+    : 'O modo do painel você troca nos botões 🌙/☀️ do menu lateral. Aqui você só escolhe qual modo ver/editar nas cores abaixo.';
+  document.getElementById('desc-prev').textContent = escopo === 'site'
+    ? 'Assim ficará o menu, os títulos, botões e cards do seu site.'
+    : 'Assim ficará a barra lateral, os títulos, botões e cards do gerenciador.';
+  renderGaleria(); renderModo(); renderCores(); renderFontes(); renderPreview();
 }
 
-function hexParaRgba(hex, alpha) {
-  const { r, g, b } = hexParaRgb(hex);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function calcularCoresDerivadas(cores) {
-  return {
-    ...cores,
-    bgElevated2: clarear(cores.bgElevated, 0.06),
-    brassSoft: clarear(cores.brass, 0.45),
-    brassDim: hexParaRgba(cores.brass, 0.28),
-    line: hexParaRgba(cores.brass, 0.22)
-  };
-}
-
-// ============================================================
-// ESTADO EM MEMÓRIA
-// ============================================================
-
-let coresAtuais = { ...CORES_PADRAO };
-let fonteAtual = 'padrao';
-
-// ============================================================
-// BANCO
-// ============================================================
-
-async function getPersonalizacao() {
-  return (await DB.getConfig('site_personalizacao')) || {};
-}
-
-async function salvarPersonalizacaoParcial(campos) {
-  const personalizacao = await getPersonalizacao();
-  Object.assign(personalizacao, campos);
-  await DB.setConfig('site_personalizacao', personalizacao);
-  return personalizacao;
-}
-
-// ============================================================
-// RENDERIZAR CAMPOS DE COR
-// ============================================================
-
-function renderizarCores() {
-  const grid = document.getElementById('cores-grid');
-  grid.innerHTML = CAMPOS_COR.map(({ chave, label }) => `
-    <div class="cor-field">
-      <input type="color" id="cor-${chave}" value="${coresAtuais[chave]}" oninput="onCorAlterada('${chave}', this.value)">
-      <div class="cor-info">
-        <span class="cor-label">${label}</span>
-        <span class="cor-hex" id="cor-hex-${chave}">${coresAtuais[chave]}</span>
+function renderGaleria() {
+  const g = document.getElementById('galeria');
+  g.innerHTML = Object.keys(TE.MODELOS).map(id => {
+    const m = TE.MODELOS[id];
+    return `<div class="modelo-card ${ee().modelo === id ? 'sel' : ''}" onclick="escolherModelo('${id}')">
+      <div class="mini" id="mini-${id}">
+        <div class="m-nav"><span class="m-logo"></span><span class="m-link a"></span><span class="m-link"></span><span class="m-link"></span></div>
+        <div class="m-body">
+          <div class="m-titulo">Plantel</div>
+          <div class="m-card"><span class="m-foto"></span><div style="flex:1"><div class="m-linha" style="width:70%"></div><div class="m-linha" style="width:45%"></div></div></div>
+          <span class="m-btn">Ver aves</span>
+        </div>
+        <div class="m-dots"><i id="d1-${id}"></i><i id="d2-${id}"></i><i id="d3-${id}"></i><i id="d4-${id}"></i></div>
       </div>
-    </div>
-  `).join('');
-}
-
-function onCorAlterada(chave, valor) {
-  coresAtuais[chave] = valor;
-  document.getElementById(`cor-hex-${chave}`).textContent = valor;
-  atualizarPreview();
-}
-
-// ============================================================
-// RENDERIZAR SELETOR DE FONTE
-// ============================================================
-
-function renderizarFontes() {
-  const grid = document.getElementById('fontes-grid');
-  grid.innerHTML = Object.entries(FONTES_DISPONIVEIS).map(([chave, f]) => `
-    <div class="fonte-card ${chave === fonteAtual ? 'selecionada' : ''}" id="fonte-card-${chave}" onclick="selecionarFonte('${chave}')">
-      <div class="fonte-nome">${f.label} ${chave === fonteAtual ? '✓' : ''}</div>
-      <div class="fonte-titulo-preview" style="font-family:${f.titulo};">Título de exemplo</div>
-      <div class="fonte-texto-preview" style="font-family:${f.texto};">Texto corrido de exemplo, assim fica a leitura no site.</div>
-    </div>
-  `).join('');
-}
-
-function carregarGoogleFont(chave) {
-  const fonte = FONTES_DISPONIVEIS[chave];
-  if (!fonte.googleFontsUrl) return;
-  if (document.querySelector(`link[href="${fonte.googleFontsUrl}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = fonte.googleFontsUrl;
-  document.head.appendChild(link);
-}
-
-function selecionarFonte(chave) {
-  fonteAtual = chave;
-  carregarGoogleFont(chave);
-  renderizarFontes();
-  atualizarPreview();
-}
-
-// ============================================================
-// PRÉ-VISUALIZAÇÃO
-// ============================================================
-
-function atualizarPreview() {
-  const d = calcularCoresDerivadas(coresAtuais);
-  const fonte = FONTES_DISPONIVEIS[fonteAtual];
-
-  const box = document.getElementById('preview-tema');
-  box.style.background = d.bg;
-  box.style.borderColor = d.line;
-  box.style.color = d.text;
-
-  const titulo = document.getElementById('preview-titulo');
-  titulo.style.color = d.brassSoft;
-  titulo.style.fontFamily = fonte.titulo;
-
-  const sub = document.getElementById('preview-sub');
-  sub.style.color = d.textMuted;
-  sub.style.fontFamily = fonte.texto;
-
-  const btn = document.getElementById('preview-btn');
-  btn.style.background = d.sageSoft;
-  btn.style.color = d.bg;
-  btn.style.fontFamily = fonte.texto;
-
-  const card = document.getElementById('preview-card');
-  card.style.background = d.bgElevated2;
-  card.style.borderColor = d.line;
-  card.style.color = d.textMuted;
-  card.style.fontFamily = fonte.texto;
-}
-
-// ============================================================
-// CARREGAR / SALVAR / RESTAURAR
-// ============================================================
-
-async function carregarTema() {
-  const personalizacao = await getPersonalizacao();
-
-  coresAtuais = { ...CORES_PADRAO, ...(personalizacao.temaCores || {}) };
-  // remove campos derivados que porventura tenham vindo salvos, pra não
-  // conflitar com o recálculo automático
-  delete coresAtuais.bgElevated2;
-  delete coresAtuais.brassSoft;
-  delete coresAtuais.brassDim;
-  delete coresAtuais.line;
-
-  fonteAtual = personalizacao.temaFonte || 'padrao';
-  carregarGoogleFont(fonteAtual);
-
-  renderizarCores();
-  renderizarFontes();
-  atualizarPreview();
-}
-
-async function salvarTema() {
-  const derivadas = calcularCoresDerivadas(coresAtuais);
-  await salvarPersonalizacaoParcial({
-    temaCores: derivadas,
-    temaFonte: fonteAtual
+      <div class="nome">${m.emoji} ${esc(m.nome)}</div>
+      <div class="txt">${esc(m.desc)}</div>
+    </div>`;
+  }).join('');
+  // pinta cada miniatura com o modelo dele, no modo em visualização (sem edições, para comparar)
+  Object.keys(TE.MODELOS).forEach(id => {
+    const el = document.getElementById('mini-' + id);
+    const over = (ee().cores[id] && ee().cores[id][modoPrev]) || {};
+    const r = TE.aplicarEm(el, id, modoPrev, over, null);
+    const p = TE.paleta(id, modoPrev, over);
+    ['d1', 'd2', 'd3', 'd4'].forEach((d, i) => {
+      document.getElementById(d + '-' + id).style.background = [p.bg, p.accent, p.btnTo, p.sage][i];
+    });
   });
-  alert('✅ Tema salvo! As páginas do site já vão carregar com as novas cores e fonte.');
+}
+
+function renderModo() {
+  document.getElementById('pv-noite').classList.toggle('on', modoPrev === 'noite');
+  document.getElementById('pv-dia').classList.toggle('on', modoPrev === 'dia');
+  document.getElementById('rot-modo-cores').textContent = modoPrev === 'dia' ? 'dia' : 'noite';
+  if (escopo === 'site') {
+    ['noite', 'dia', 'auto'].forEach(m => document.getElementById('mp-' + m).classList.toggle('on', est.site.modoPadrao === m));
+    document.getElementById('chk-botao').checked = est.site.mostrarBotao !== false;
+  }
+}
+
+function renderCores() {
+  const e = ee();
+  const over = overAtual();
+  const pal = TE.paleta(e.modelo, modoPrev, over);
+  document.getElementById('cores-grid').innerHTML = CAMPOS.map(c => `
+    <div class="cor-field ${over[c.chave] ? 'editada' : ''}" id="cf-${c.chave}">
+      <input type="color" id="cor-${c.chave}" value="${pal[c.chave]}" oninput="mudouCor('${c.chave}', this.value)">
+      <div class="cor-info"><span class="cor-label">${c.label}${over[c.chave] ? ' ✎' : ''}</span><span class="cor-hex" id="hex-${c.chave}">${pal[c.chave]}</span></div>
+    </div>`).join('');
+}
+
+function renderFontes() {
+  const e = ee();
+  const m = TE.MODELOS[e.modelo];
+  const opcoes = [{ chave: null, label: 'Do modelo', titulo: m.fonte.titulo, texto: m.fonte.texto, url: m.fonte.url }]
+    .concat(Object.keys(TE.FONTES_EXTRA).map(k => ({ chave: k, label: TE.FONTES_EXTRA[k].label, titulo: TE.FONTES_EXTRA[k].titulo, texto: TE.FONTES_EXTRA[k].texto, url: TE.FONTES_EXTRA[k].url })));
+  opcoes.forEach(o => TE.carregarFonte(o.url));
+  document.getElementById('fontes-grid').innerHTML = opcoes.map(o => `
+    <div class="fonte-card ${(e.fonte || null) === o.chave ? 'sel' : ''}" onclick="escolherFonte(${o.chave ? "'" + o.chave + "'" : 'null'})">
+      <div class="fn">${o.label} ${(e.fonte || null) === o.chave ? '✓' : ''}</div>
+      <div class="ft" style="font-family:${o.titulo}">Canário-da-terra</div>
+      <div class="fx" style="font-family:${o.texto}">Texto corrido de exemplo para ler no site.</div>
+    </div>`).join('');
+}
+
+function renderPreview() {
+  const e = ee();
+  const box = document.getElementById('preview');
+  const nome = (document.querySelector('.brand-text .name') || {}).textContent || 'Criatório';
+  let html;
+  if (escopo === 'site') {
+    html = `<div class="pv" id="pv">
+      <div class="pv-nav">
+        <div class="logo"><div class="mark">CG</div><span class="nome">${esc(nome)}</span></div>
+        <div class="links"><span class="a">Home</span><span>Plantel</span><span>Filhotes</span><span>Parceiros</span><span>Contato</span></div>
+        <div class="modo">${modoPrev === 'dia' ? '🌙' : '☀️'}</div>
+      </div>
+      <div class="pv-hero"><h4>Aves criadas com carinho</h4><p>Conheça nosso plantel, filhotes disponíveis e os criatórios parceiros.</p>
+        <span class="pv-btn">Ver o plantel</span><span class="pv-btn g">Falar no WhatsApp</span></div>
+      <div class="pv-cards">
+        <div class="pv-ave"><div class="foto"></div><div class="corpo"><div class="n">Sol</div><div class="s">Canário-da-terra · Macho</div><span class="tag">Disponível</span></div></div>
+        <div class="pv-ave"><div class="foto" style="filter:hue-rotate(40deg)"></div><div class="corpo"><div class="n">Lua</div><div class="s">Coleiro · Fêmea</div><span class="tag b">Reservada</span></div></div>
+        <div class="pv-ave"><div class="foto" style="filter:hue-rotate(-40deg)"></div><div class="corpo"><div class="n">Aurora</div><div class="s">Trinca-ferro · Fêmea</div><span class="tag">Disponível</span></div></div>
+      </div></div>`;
+  } else {
+    html = `<div class="pv" id="pv"><div class="pv-admin">
+      <div class="pv-side"><div class="sn">${esc(nome)}</div><div class="it a">🏠 Painel</div><div class="it">🐦 Pássaros</div><div class="it">🥚 Reprodução</div><div class="it">🏷️ Anilhas</div><div class="it">🌐 Site</div></div>
+      <div class="pv-main"><h4>Painel</h4>
+        <div class="pv-stats"><div class="pv-stat"><b>42</b><span>Aves no plantel</span></div><div class="pv-stat"><b>6</b><span>Reproduções</span></div><div class="pv-stat"><b>18</b><span>Anilhas livres</span></div></div>
+        <span class="pv-btn">+ Nova ave</span><span class="pv-btn g">Exportar</span></div>
+    </div></div>`;
+  }
+  box.innerHTML = html;
+  TE.aplicarEm(document.getElementById('pv'), e.modelo, modoPrev, overAtual(), e.fonte);
+}
+
+// ---------- ações ----------
+function trocarEscopo(s) { escopo = s; renderTudo(); }
+function escolherModelo(id) { ee().modelo = id; renderTudo(); }
+function definirModoPrev(m) { modoPrev = m; renderTudo(); }
+function definirModoPadrao(m) { est.site.modoPadrao = m; renderModo(); }
+function mudouBotao() { est.site.mostrarBotao = document.getElementById('chk-botao').checked; }
+function escolherFonte(k) { ee().fonte = k; renderFontes(); renderPreview(); }
+
+function mudouCor(chave, valor) {
+  const e = ee();
+  if (!e.cores[e.modelo]) e.cores[e.modelo] = {};
+  if (!e.cores[e.modelo][modoPrev]) e.cores[e.modelo][modoPrev] = {};
+  e.cores[e.modelo][modoPrev][chave] = valor;
+  document.getElementById('hex-' + chave).textContent = valor;
+  document.getElementById('cf-' + chave).classList.add('editada');
+  renderPreview();
+  renderGaleria();
+}
+
+function limparCores() {
+  const e = ee();
+  if (e.cores[e.modelo]) delete e.cores[e.modelo][modoPrev];
+  renderTudo();
+}
+
+// remove edições vazias antes de gravar
+function limpar(cores) {
+  const out = {};
+  Object.keys(cores || {}).forEach(m => {
+    if (!TE.MODELOS[m]) return;
+    ['noite', 'dia'].forEach(modo => {
+      const v = cores[m] && cores[m][modo];
+      if (v && Object.keys(v).length) { out[m] = out[m] || {}; out[m][modo] = v; }
+    });
+  });
+  return out;
+}
+
+function mostrarStatus(txt) {
+  const s = document.getElementById('status');
+  s.textContent = txt;
+  clearTimeout(mostrarStatus._t);
+  mostrarStatus._t = setTimeout(() => { s.textContent = ''; }, 5000);
+}
+
+async function salvar() {
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    // lê de novo antes de gravar para não pisar em outras configurações salvas nesse meio-tempo
+    const pers = (await DB.getConfig('site_personalizacao')) || {};
+    pers.temas = pers.temas || {};
+    pers.temas.site = { modelo: est.site.modelo, modoPadrao: est.site.modoPadrao, mostrarBotao: est.site.mostrarBotao !== false,
+      cores: limpar(est.site.cores), fonte: est.site.fonte || null };
+    pers.temas.admin = { modelo: est.admin.modelo, cores: limpar(est.admin.cores), fonte: est.admin.fonte || null };
+    await DB.setConfig('site_personalizacao', pers);
+
+    // este navegador já passa a mostrar o novo visual sem precisar recarregar
+    try { localStorage.setItem('tema_site', JSON.stringify(TE.normalizarSite(pers))); } catch (e) {}
+    TE.sincronizarAdmin(pers);
+    renderTudo();
+    mostrarStatus('✅ Salvo! O site e o painel já usam o novo visual.');
+  } catch (e) {
+    alert('❌ Não foi possível salvar: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salvar';
+  }
 }
 
 async function restaurarPadrao() {
-  if (!confirm('Isso vai voltar as cores e a fonte para o padrão original. Continuar?')) return;
-  coresAtuais = { ...CORES_PADRAO };
-  fonteAtual = 'padrao';
-  renderizarCores();
-  renderizarFontes();
-  atualizarPreview();
-  await salvarPersonalizacaoParcial({ temaCores: null, temaFonte: null });
-  alert('✅ Tema restaurado para o padrão.');
+  const nome = escopo === 'site' ? 'o site' : 'o gerenciador';
+  if (!confirm(`Voltar ${nome} para o modelo Clássico, sem nenhuma cor editada?`)) return;
+  if (escopo === 'site') est.site = { modelo: 'classico', modoPadrao: 'noite', mostrarBotao: true, cores: {}, fonte: null };
+  else est.admin = { modelo: 'classico', cores: {}, fonte: null };
+  try {
+    const pers = (await DB.getConfig('site_personalizacao')) || {};
+    pers.temas = pers.temas || {};
+    if (escopo === 'site') { pers.temas.site = { modelo: 'classico', modoPadrao: 'noite', mostrarBotao: true, cores: {}, fonte: null }; pers.temaCores = null; pers.temaFonte = null; }
+    else pers.temas.admin = { modelo: 'classico', cores: {}, fonte: null };
+    await DB.setConfig('site_personalizacao', pers);
+    try { localStorage.setItem('tema_site', JSON.stringify(TE.normalizarSite(pers))); } catch (e) {}
+    TE.sincronizarAdmin(pers);
+    renderTudo();
+    mostrarStatus('✅ Restaurado para o padrão.');
+  } catch (e) { alert('❌ Não foi possível restaurar: ' + e.message); }
 }
 
-// ============================================================
-// INICIALIZAR
-// ============================================================
-
-carregarTema();
+carregar();
 </script>
 </body>
 </html>

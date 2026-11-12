@@ -25,8 +25,8 @@
 // já vem no <link> fixo de cada página, então não precisa recarregar nada.
 const FONTES_DISPONIVEIS = {
   padrao: {
-    titulo: "'Fraunces', serif",
-    texto: "'Manrope', sans-serif",
+    titulo: "var(--font-titulo,'Fraunces',serif)",
+    texto: "var(--font-texto,'Manrope',sans-serif)",
     googleFontsUrl: null
   },
   elegante: {
@@ -42,40 +42,9 @@ const FONTES_DISPONIVEIS = {
 };
 window.FONTES_DISPONIVEIS = FONTES_DISPONIVEIS;
 
+// O visual (modelo, dia/noite, cores, fonte) agora é aplicado pelo motor de temas (tema.js).
 function aplicarTemaPersonalizado(personalizacao) {
-  const cores = personalizacao.temaCores;
-  const fonteChave = personalizacao.temaFonte || 'padrao';
-  const fonte = FONTES_DISPONIVEIS[fonteChave] || FONTES_DISPONIVEIS.padrao;
-
-  if (fonte.googleFontsUrl && !document.querySelector(`link[href="${fonte.googleFontsUrl}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = fonte.googleFontsUrl;
-    document.head.appendChild(link);
-  }
-
-  const linhas = [`--font-titulo: ${fonte.titulo};`, `--font-texto: ${fonte.texto};`];
-
-  if (cores) {
-    if (cores.bg) linhas.push(`--bg: ${cores.bg};`);
-    if (cores.bgElevated) linhas.push(`--bg-elevated: ${cores.bgElevated};`);
-    if (cores.bgElevated2) linhas.push(`--bg-elevated-2: ${cores.bgElevated2};`);
-    if (cores.brass) linhas.push(`--brass: ${cores.brass};`);
-    if (cores.brassSoft) linhas.push(`--brass-soft: ${cores.brassSoft};`);
-    if (cores.brassDim) linhas.push(`--brass-dim: ${cores.brassDim};`);
-    if (cores.line) linhas.push(`--line: ${cores.line};`);
-    if (cores.text) linhas.push(`--text: ${cores.text};`);
-    if (cores.textMuted) linhas.push(`--text-muted: ${cores.textMuted};`);
-    if (cores.sageSoft) linhas.push(`--sage-soft: ${cores.sageSoft};`);
-  }
-
-  let styleTag = document.getElementById('tema-personalizado');
-  if (!styleTag) {
-    styleTag = document.createElement('style');
-    styleTag.id = 'tema-personalizado';
-    document.head.appendChild(styleTag);
-  }
-  styleTag.textContent = `:root {\n  ${linhas.join('\n  ')}\n}`;
+  if (window.TemaEngine && TemaEngine.escopo === 'site') TemaEngine.sincronizarSite(personalizacao);
 }
 
 (async function () {
@@ -93,9 +62,16 @@ function aplicarTemaPersonalizado(personalizacao) {
     // página do site porque este arquivo é incluído em todas elas.
     document.querySelectorAll('a[href="site-torneios.html"]').forEach(el => el.remove());
 
-    const [conteudo, personalizacao, parceirosCfg] = await Promise.all([
+    // Se a busca falhar (internet instável), NÃO troca o visual guardado pelo padrão:
+    // devolve null e o tema já aplicado pelo cache permanece.
+    async function getPersonalizacaoSegura() {
+        try { return (window.DB ? await DB.getConfig('site_personalizacao') : null) || {}; }
+        catch (e) { return null; }
+    }
+
+    const [conteudo, personalizacaoBruta, parceirosCfg] = await Promise.all([
         getConfig('site_conteudo'),
-        getConfig('site_personalizacao'),
+        getPersonalizacaoSegura(),
         getConfig('site_parceiros')
     ]);
 
@@ -103,7 +79,9 @@ function aplicarTemaPersonalizado(personalizacao) {
     // assim o visitante nunca cai numa página vazia.
     const temParceiros = Array.isArray(parceirosCfg) && parceirosCfg.some(p => p && p.visivel !== false);
 
-    aplicarTemaPersonalizado(personalizacao);
+    const personalizacao = personalizacaoBruta || {};
+    if (personalizacaoBruta) aplicarTemaPersonalizado(personalizacaoBruta);
+    else if (window.TemaEngine) TemaEngine.liberarSite();
 
     // ---- Botões de WhatsApp ----
     const whatsappBtns = document.querySelectorAll('.btn-whatsapp, .btn-whatsapp-site, a[href*="wa.me"], a[href*="whatsapp"]');

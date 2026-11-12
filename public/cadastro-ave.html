@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Cadastro de Ave</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .field-grid .field-full { grid-column: 1 / -1; }
 
@@ -22,7 +24,7 @@
   background: none;
   border: none;
   color: var(--text-muted);
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
   font-size: 12.5px;
   font-weight: 600;
   padding: 9px 14px;
@@ -110,14 +112,14 @@
   border-radius: 6px !important;
   padding: 6px 10px !important;
   color: var(--text) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 12px !important;
   outline: none !important;
 }
 .nova-anilha-row select:focus,
 .nova-anilha-row input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 .nova-anilha-row .btn {
   padding: 6px 14px;
@@ -151,16 +153,16 @@
 .btn-atualizar-especies {
   padding: 4px 12px;
   font-size: 11px;
-  background: rgba(199,151,63,0.12);
+  background: rgba(var(--accent-rgb,199,151,63),0.12);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   border-radius: 6px;
   cursor: pointer;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
   transition: .15s ease;
 }
 .btn-atualizar-especies:hover {
-  background: rgba(199,151,63,0.2);
+  background: rgba(var(--accent-rgb,199,151,63),0.2);
 }
 
 .historico-container {
@@ -276,7 +278,7 @@
   border-radius: 6px !important;
   padding: 8px 10px !important;
   color: var(--text) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 13px !important;
   outline: none !important;
   transition: .15s !important;
@@ -286,7 +288,7 @@
 .modal-box .field select:focus,
 .modal-box .field textarea:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 
 .modal-box .field select option {
@@ -346,8 +348,8 @@
 }
 
 .heranca-aviso {
-  background: rgba(92, 154, 124, 0.08);
-  border: 1px solid rgba(92, 154, 124, 0.25);
+  background: rgba(var(--sage-rgb,92,154,124), 0.08);
+  border: 1px solid rgba(var(--sage-rgb,92,154,124), 0.25);
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 4px;
@@ -402,7 +404,7 @@
   word-break: break-word;
   line-height: 1.1;
 }
-.arvore-no.filled { background: rgba(199,151,63,0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
+.arvore-no.filled { background: rgba(var(--accent-rgb,199,151,63),0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
 .arvore-no.filled.female { background: rgba(185,116,98,0.06); border-color: rgba(185,116,98,0.3); color: var(--rose-text); }
 .arvore-no.empty { color: var(--text-muted); opacity: 0.4; font-style: italic; font-size: 8px; }
 .arvore-no .anilha-tag {
@@ -711,7 +713,7 @@
       <!-- ABA HISTÓRICO -->
       <div class="subpage" id="ave-historico">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-          <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:0;">Histórico da Ave</h3>
+          <h3 style="font-family:var(--font-titulo,'Fraunces',serif);font-size:18px;margin:0;">Histórico da Ave</h3>
           <button class="btn btn-primary" onclick="abrirModalHistorico()">+ Adicionar Histórico</button>
         </div>
         <div id="historico-lista" class="historico-container">

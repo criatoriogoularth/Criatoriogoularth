@@ -68,7 +68,8 @@ async function renderSidebar(activePage) {
 
     // o servidor é a fonte da verdade (vale em qualquer aparelho); sem ele, usa o salvo no navegador
     const temaAtual = personalizacao.tema || localStorage.getItem('tema') || 'escuro';
-    aplicarTema(temaAtual);
+    // aplica o MODELO do gerenciador (ex.: Vibrante) no modo dia/noite escolhido
+    if (window.TemaEngine) TemaEngine.sincronizarAdmin(personalizacao);
 
     const usuarioStr = localStorage.getItem('usuario');
     const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
@@ -83,13 +84,13 @@ async function renderSidebar(activePage) {
         </div>
         <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
             <button onclick="setTheme('escuro')"
-                style="background:${temaAtual === 'escuro' ? 'rgba(199,151,63,0.2)' : 'transparent'};
+                style="background:${temaAtual === 'escuro' ? 'rgba(var(--accent-rgb,199,151,63),0.2)' : 'transparent'};
                        border:1px solid ${temaAtual === 'escuro' ? 'var(--brass)' : 'var(--line)'};
                        border-radius:6px;padding:4px 10px;
                        color:${temaAtual === 'escuro' ? 'var(--brass-soft)' : 'var(--text-muted)'};
                        cursor:pointer;font-size:10px;transition:.15s ease;">🌙</button>
             <button onclick="setTheme('claro')"
-                style="background:${temaAtual === 'claro' ? 'rgba(199,151,63,0.2)' : 'transparent'};
+                style="background:${temaAtual === 'claro' ? 'rgba(var(--accent-rgb,199,151,63),0.2)' : 'transparent'};
                        border:1px solid ${temaAtual === 'claro' ? 'var(--brass)' : 'var(--line)'};
                        border-radius:6px;padding:4px 10px;
                        color:${temaAtual === 'claro' ? 'var(--brass-soft)' : 'var(--text-muted)'};
@@ -119,20 +120,11 @@ async function renderSidebar(activePage) {
 }
 
 function aplicarTema(tema) {
-    const root = document.documentElement;
-    // limpa valores inline antigos, para o CSS (data-theme) mandar
-    ['--bg', '--bg-elevated', '--bg-elevated-2', '--text', '--text-muted', '--line']
-        .forEach(v => root.style.removeProperty(v));
-    if (tema === 'claro') root.setAttribute('data-theme', 'claro');
-    else root.removeAttribute('data-theme');
-    try { localStorage.setItem('tema', tema === 'claro' ? 'claro' : 'escuro'); } catch (e) {}
+    if (window.TemaEngine) TemaEngine.definirModoAdmin(tema);
 }
 
 async function setTheme(tema) {
     aplicarTema(tema); // troca na hora, sem esperar o servidor
-
-    const path = window.location.pathname.split('/').pop();
-    renderSidebar(path.replace('.html', ''));
 
     try {
         const personalizacao = (await DB.getConfig('site_personalizacao')) || {};
@@ -141,6 +133,11 @@ async function setTheme(tema) {
     } catch (e) {
         console.warn('Não foi possível salvar o tema no servidor:', e);
     }
+
+    // só redesenha a barra lateral DEPOIS de salvar: antes ela relia o valor antigo do
+    // servidor e o tema "voltava" sozinho até recarregar a página.
+    const path = window.location.pathname.split('/').pop();
+    renderSidebar(path.replace('.html', ''));
 }
 
 function fazerLogout() {

@@ -123,14 +123,14 @@
     padding: 10px 8px;
     font-size: 15px;
     font-weight: 600;
-    background: rgba(199, 151, 63, 0.06);
+    background: rgba(var(--accent-rgb,199,151,63), 0.06);
     border: 1px solid var(--line);
     border-radius: 10px;
     width: 100%;
   }
   body .site-nav.aberto .nav-links > a.active,
   body .site-nav.aberto .nav-links > .dropdown > a.active {
-    background: rgba(199, 151, 63, 0.14);
+    background: rgba(var(--accent-rgb,199,151,63), 0.14);
     border-color: var(--brass);
     color: var(--brass-soft);
   }

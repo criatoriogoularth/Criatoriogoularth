@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Pássaros</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .passaros-toolbar {
   display: flex;
@@ -31,7 +32,7 @@
   border-radius: 8px;
   padding: 8px 12px;
   color: var(--text);
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
   font-size: 12.5px;
   outline: none;
   min-width: 150px;
@@ -78,14 +79,14 @@
   font-weight: 600;
   cursor: pointer;
   transition: .15s ease;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
 }
 .situacao-filters .situacao-btn:hover {
   border-color: var(--brass-dim);
   color: var(--text);
 }
 .situacao-filters .situacao-btn.active {
-  background: rgba(199,151,63,0.15);
+  background: rgba(var(--accent-rgb,199,151,63),0.15);
   border-color: var(--brass);
   color: var(--brass-soft);
 }
@@ -140,7 +141,7 @@
   color: var(--rose-text);
 }
 .sexo-indefinido {
-  background: rgba(199, 151, 63, 0.15);
+  background: rgba(var(--accent-rgb,199,151,63), 0.15);
   color: var(--brass-soft);
 }
 .passaro-card .card-body {
@@ -183,14 +184,14 @@
   font-weight: 600;
   text-transform: uppercase;
 }
-.status-badge.plantel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
-.status-badge.filhote { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
+.status-badge.plantel { background: rgba(var(--sage-rgb,92,154,124), 0.2); color: var(--sage-soft); }
+.status-badge.filhote { background: rgba(var(--accent-rgb,199,151,63), 0.15); color: var(--brass-soft); }
 .status-badge.quarentena { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
 .status-badge.pareamento { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
 .status-badge.fuga { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
 .status-badge.obito { background: var(--input-bg); color: #666; }
 .status-badge.saida { background: rgba(192, 89, 74, 0.15); color: #c0594a; }
-.status-badge.disponivel { background: rgba(92, 154, 124, 0.15); color: var(--sage-soft); }
+.status-badge.disponivel { background: rgba(var(--sage-rgb,92,154,124), 0.15); color: var(--sage-soft); }
 
 .situacao-select-wrapper {
   position: relative;
@@ -207,7 +208,7 @@
   padding: 2px 6px !important;
   padding-right: 20px !important;
   outline: none !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   width: 100% !important;
@@ -224,7 +225,7 @@
 
 .situacao-select-wrapper select:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 
 .situacao-select-wrapper select:disabled {
@@ -244,7 +245,7 @@
   opacity: 0.4;
 }
 .empty-state h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-titulo,'Fraunces',serif);
   font-size: 20px;
   color: var(--text);
   margin-bottom: 8px;
@@ -297,7 +298,7 @@
   border-radius: 6px !important;
   padding: 8px 10px !important;
   color: var(--text) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 13px !important;
   outline: none !important;
   transition: .15s !important;
@@ -307,7 +308,7 @@
 .modal-box .field select:focus,
 .modal-box .field textarea:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 
 .modal-box .field select option {

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Criatório Goularth — Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style-site.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 /* ===== HEADER COM BANNER ===== */
 .site-header {
@@ -198,7 +200,7 @@
   margin-top: 10px;
   padding: 6px 16px;
   border-radius: 6px;
-  background: rgba(199,151,63,0.12);
+  background: rgba(var(--accent-rgb,199,151,63),0.12);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   text-decoration: none;
@@ -208,7 +210,7 @@
 }
 
 .species-card .btn:hover {
-  background: rgba(199,151,63,0.2);
+  background: rgba(var(--accent-rgb,199,151,63),0.2);
 }
 
 .species-card .ver-mais {
@@ -299,7 +301,7 @@
   margin: 16px auto 0;
   padding: 8px 24px;
   border-radius: 8px;
-  background: rgba(199,151,63,0.12);
+  background: rgba(var(--accent-rgb,199,151,63),0.12);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   text-decoration: none;
@@ -310,7 +312,7 @@
 }
 
 .species-modal .modal-content .modal-btn:hover {
-  background: rgba(199,151,63,0.2);
+  background: rgba(var(--accent-rgb,199,151,63),0.2);
 }
 
 @media (max-width: 768px) {
@@ -414,7 +416,7 @@
   <main class="site-main">
     <div class="intro-text" id="intro-text"></div>
 
-    <h2 style="font-family:'Fraunces',serif;font-size:24px;color:var(--brass-soft);text-align:center;margin-bottom:8px;">Nossas Espécies</h2>
+    <h2 style="font-family:var(--font-titulo,'Fraunces',serif);font-size:24px;color:var(--brass-soft);text-align:center;margin-bottom:8px;">Nossas Espécies</h2>
     <div id="species-grid-container">
       <!-- Preenchido pelo JavaScript -->
     </div>

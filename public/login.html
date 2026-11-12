@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .login-wrap {
     min-height: 100vh;
@@ -15,7 +16,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: radial-gradient(ellipse at top, rgba(199,151,63,0.08), transparent 55%), var(--bg);
+    background: radial-gradient(ellipse at top, rgba(var(--accent-rgb,199,151,63),0.08), transparent 55%), var(--bg);
 }
 .login-card {
     width: 100%;
@@ -41,10 +42,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Fraunces', serif;
+    font-family: var(--font-titulo,'Fraunces',serif);
     font-size: 24px;
     color: var(--brass-soft);
-    background: rgba(199,151,63,0.06);
+    background: rgba(var(--accent-rgb,199,151,63),0.06);
 }
 .login-card h2 { margin: 0; font-size: 20px; text-align: center; color: var(--brass-soft); }
 .login-card .sub { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 2px; }
@@ -62,7 +63,7 @@
 }
 .login-card .field input:focus {
     border-color: var(--brass) !important;
-    box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.15) !important;
 }
 .login-card .btn-login {
     width: 100%;
@@ -71,7 +72,7 @@
     background: linear-gradient(135deg, var(--brass-soft), var(--brass));
     color: var(--on-brass);
     border: none;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-texto,'Manrope',sans-serif);
     font-weight: 700;
     font-size: 15px;
     cursor: pointer;

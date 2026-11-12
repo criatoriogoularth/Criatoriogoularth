@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Dados do Criatório</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .field-grid .field-full {
   grid-column: 1 / -1;
@@ -80,12 +81,12 @@
   border: 1px solid var(--brass-dim);
   border-radius: var(--radius);
   padding: 20px 24px;
-  background: rgba(199,151,63,0.04);
+  background: rgba(var(--accent-rgb,199,151,63),0.04);
 }
 
 .trocar-senha-section legend {
   color: var(--brass-soft);
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-titulo,'Fraunces',serif);
   font-size: 16px;
   font-weight: 600;
   padding: 0 10px;
@@ -123,7 +124,7 @@
   border-radius: 8px !important;
   padding: 9px 11px !important;
   color: var(--text) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 13.5px !important;
   outline: none !important;
   transition: .15s !important;
@@ -131,7 +132,7 @@
 
 .trocar-senha-section .field input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.15) !important;
 }
 
 .trocar-senha-section .btn-alterar-senha {
@@ -140,7 +141,7 @@
   color: var(--on-brass);
   border: none;
   border-radius: 9px;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
@@ -170,8 +171,8 @@
 
 .trocar-senha-section .senha-status.success {
   display: block;
-  background: rgba(92,154,124,0.15);
-  border: 1px solid rgba(92,154,124,0.3);
+  background: rgba(var(--sage-rgb,92,154,124),0.15);
+  border: 1px solid rgba(var(--sage-rgb,92,154,124),0.3);
   color: var(--sage-soft);
 }
 
@@ -184,8 +185,8 @@
 
 .trocar-senha-section .senha-status.info {
   display: block;
-  background: rgba(199,151,63,0.15);
-  border: 1px solid rgba(199,151,63,0.3);
+  background: rgba(var(--accent-rgb,199,151,63),0.15);
+  border: 1px solid rgba(var(--accent-rgb,199,151,63),0.3);
   color: var(--brass-soft);
 }
 
@@ -210,7 +211,7 @@
   border: 1px solid var(--line) !important;
   border-radius: 6px;
   padding: 7px 12px;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
   font-size: 12px;
   outline: none;
   flex: 1;
@@ -224,7 +225,7 @@
 .especies-toolbar input:focus,
 .especies-toolbar select:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 
 .especies-toolbar select option {
@@ -272,7 +273,7 @@
 .especie-row .info .usada {
   font-size: 9px;
   color: var(--sage-soft);
-  background: rgba(92,154,124,0.15);
+  background: rgba(var(--sage-rgb,92,154,124),0.15);
   padding: 1px 8px;
   border-radius: 10px;
 }
@@ -340,7 +341,7 @@
   border-radius: 6px !important;
   padding: 8px 10px !important;
   color: var(--text) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 13px !important;
   outline: none !important;
   transition: .15s !important;
@@ -348,7 +349,7 @@
 
 .modal-box .field input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
 }
 
 .modal-actions {
@@ -369,7 +370,7 @@
 }
 
 .especies-rapidas .chip {
-  background: rgba(199,151,63,0.1);
+  background: rgba(var(--accent-rgb,199,151,63),0.1);
   border: 1px solid var(--brass-dim);
   border-radius: 16px;
   padding: 4px 14px;
@@ -380,7 +381,7 @@
 }
 
 .especies-rapidas .chip:hover {
-  background: rgba(199,151,63,0.2);
+  background: rgba(var(--accent-rgb,199,151,63),0.2);
 }
 
 .especies-rapidas .chip .cientifico-chip {
@@ -397,7 +398,7 @@
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
   padding: 9px 11px !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: var(--font-texto,'Manrope',sans-serif) !important;
   font-size: 13.5px !important;
   outline: none !important;
   -webkit-appearance: none !important;
@@ -417,7 +418,7 @@
 #f-categoria:focus,
 #f-uf:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.15) !important;
 }
 
 @media (max-width: 768px) {

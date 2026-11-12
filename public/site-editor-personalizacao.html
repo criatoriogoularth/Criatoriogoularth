@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Personalizar Site</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +12,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .editor-card {
   background: var(--bg-elevated-2);
@@ -22,7 +23,7 @@
   margin-bottom: 20px;
 }
 .editor-card h3 {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-titulo,'Fraunces',serif);
   font-size: 18px;
   color: var(--brass-soft);
   margin-bottom: 14px;
@@ -77,13 +78,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-titulo,'Fraunces',serif);
   font-weight: 700;
   color: var(--brass-soft);
-  background: rgba(199,151,63,0.1);
+  background: rgba(var(--accent-rgb,199,151,63),0.1);
 }
 .preview-container .info-preview .nome {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-titulo,'Fraunces',serif);
   font-weight: 700;
   color: var(--brass-soft);
 }
@@ -124,16 +125,16 @@
   margin-top: 8px;
   padding: 6px 18px;
   border-radius: 6px;
-  background: rgba(199,151,63,0.15);
+  background: rgba(var(--accent-rgb,199,151,63),0.15);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-texto,'Manrope',sans-serif);
 }
 .upload-area .btn-upload:hover {
-  background: rgba(199,151,63,0.25);
+  background: rgba(var(--accent-rgb,199,151,63),0.25);
 }
 .toggle-container {
   display: flex;
@@ -232,7 +233,7 @@
   transform: rotate(45deg);
 }
 .ave-selector-item:has(input[type="checkbox"]:checked) {
-  background: rgba(199,151,63,0.1);
+  background: rgba(var(--accent-rgb,199,151,63),0.1);
   border-color: var(--brass-dim);
 }
 .ave-selector-item label {
@@ -259,7 +260,7 @@
 }
 .aba-item.drag-over {
   border-color: var(--brass);
-  background: rgba(199,151,63,0.12);
+  background: rgba(var(--accent-rgb,199,151,63),0.12);
 }
 .aba-item .handle {
   color: var(--text-muted);
@@ -366,7 +367,7 @@
           </div>
           <span class="toggle-label" id="tema-label-claro">☀️ Claro</span>
         </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Selecione o tema que será aplicado em todo o site.</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Modo dia/noite do gerenciador (painel). O modelo e as cores do painel e do site ficam em <a href="site-editor-tema.html" style="color:var(--brass-soft);">🎨 Modelos e Cores</a>.</div>
       </div>
 
       <!-- VISUALIZAÇÃO DO PLANTEL -->
@@ -489,31 +490,9 @@ function savePersonalizacaoDebounced(data) {
 // ============================================================
 
 function aplicarTema(tema) {
-  const root = document.documentElement;
-  
-  if (tema === 'claro') {
-    root.style.setProperty('--bg', '#f5f0e8');
-    root.style.setProperty('--bg-elevated', '#ede8df');
-    root.style.setProperty('--bg-elevated-2', '#e5dfd4');
-    root.style.setProperty('--text', '#23291f');
-    root.style.setProperty('--text-muted', '#5a6355');
-    root.style.setProperty('--line', 'rgba(199,151,63,0.3)');
-    root.style.setProperty('--parchment', '#f5f0e8');
-    root.style.setProperty('--parchment-dim', '#e5dfd4');
-    root.style.setProperty('--ink', '#23291f');
-    root.style.setProperty('--ink-soft', '#5a6355');
-  } else {
-    root.style.setProperty('--bg', '#0d1a16');
-    root.style.setProperty('--bg-elevated', '#132621');
-    root.style.setProperty('--bg-elevated-2', '#17302a');
-    root.style.setProperty('--text', '#ece6d6');
-    root.style.setProperty('--text-muted', '#9aa89e');
-    root.style.setProperty('--line', 'rgba(199,151,63,0.22)');
-    root.style.setProperty('--parchment', '#f3ecda');
-    root.style.setProperty('--parchment-dim', '#e7dec5');
-    root.style.setProperty('--ink', '#23291f');
-    root.style.setProperty('--ink-soft', '#4a5347');
-  }
+  // O visual agora é controlado pelo motor de temas (tema.js), que respeita o modelo escolhido
+  // em "Modelos e Cores". Aqui só se troca o modo dia/noite do gerenciador.
+  if (window.TemaEngine) TemaEngine.definirModoAdmin(tema);
 }
 
 // ============================================================
