@@ -118,6 +118,24 @@
 
 .barra-salvar { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 12px 0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; z-index: 5; }
 .barra-salvar .status { font-size: 12.5px; color: var(--sage-soft); font-weight: 700; }
+
+/* ---- novos modelos: Velho Oeste · Código Verde · Corrida de Rua ---- */
+.pv[data-modelo="faroeste"] .pv-hero h4, .pv[data-modelo="matrix"] .pv-hero h4, .pv[data-modelo="velozes"] .pv-hero h4,
+.pv[data-modelo="faroeste"] .pv-ave .n, .pv[data-modelo="matrix"] .pv-ave .n, .pv[data-modelo="velozes"] .pv-ave .n,
+.pv[data-modelo="faroeste"] .pv-main h4, .pv[data-modelo="matrix"] .pv-main h4, .pv[data-modelo="velozes"] .pv-main h4,
+.pv[data-modelo="faroeste"] .pv-stat b, .pv[data-modelo="matrix"] .pv-stat b, .pv[data-modelo="velozes"] .pv-stat b { font-weight: 400; }
+.pv[data-modelo="velozes"] .pv-hero h4, .pv[data-modelo="velozes"] .pv-ave .n, .pv[data-modelo="velozes"] .pv-main h4,
+.pv[data-modelo="velozes"] .pv-nav .nome { font-style: italic; text-transform: uppercase; }
+.pv[data-modelo="matrix"] .pv-hero h4 { text-shadow: 0 0 12px rgba(var(--accent-rgb), .6); }
+.pv[data-modelo="faroeste"] .pv-btn, .pv[data-modelo="faroeste"] .pv-nav .links span { border-radius: 4px; }
+.pv[data-modelo="matrix"] .pv-btn { border-radius: 3px; text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 0 14px -2px rgba(var(--accent-rgb), .65); }
+.pv[data-modelo="velozes"] .pv-btn { border-radius: 4px 14px 4px 14px; text-transform: uppercase; letter-spacing: .06em; }
+.pv[data-modelo="faroeste"] .pv-ave, .pv[data-modelo="faroeste"] .pv-stat { border-width: 2px; box-shadow: 4px 4px 0 rgba(var(--shade,0,0,0), .38); }
+.pv[data-modelo="velozes"] .pv-ave, .pv[data-modelo="velozes"] .pv-stat { border-radius: 6px 18px 6px 18px; border-left: 4px solid var(--brass); }
+.pv[data-modelo="faroeste"] .pv-nav { border-bottom: 3px dashed rgba(240,195,106,.8); }
+.pv[data-modelo="velozes"] .pv-nav { padding-bottom: 24px; }
+.mini[data-modelo="velozes"] .m-nav { padding-bottom: 19px; }
+.mini[data-modelo="faroeste"] .m-nav { border-bottom: 2px dashed rgba(240,195,106,.8); }
 </style>
 </head>
 <body>

@@ -126,6 +126,70 @@
         roseText: '#a3124f', infoText: '#6b3fb5', shade: '90,40,70', inputBg: '#ffffff', optionBg: '#ffffff',
         navBg: 'linear-gradient(120deg,#4a1a8c 0%,#a3207f 55%,#f0603d 100%)',
         glow1: 'rgba(240,96,61,0.10)', glow2: 'rgba(162,28,201,0.08)' }
+    },
+
+    // ---------------------------------------------------------------
+    // VELHO OESTE — couro, madeira e papel envelhecido, dourado de xerife
+    // ---------------------------------------------------------------
+    faroeste: {
+      nome: 'Velho Oeste', emoji: '🤠', desc: 'Couro, madeira e papel de cartaz "procurado", com dourado de xerife. Poeira, saloon e duelo ao meio-dia.',
+      fonte: { titulo: "'Rye', serif", texto: "'Roboto Slab', serif",
+        url: 'https://fonts.googleapis.com/css2?family=Rye&family=Roboto+Slab:wght@400;500;600;700&display=swap' },
+      raio: 6, btnDeriva: true,
+      navBg: 'linear-gradient(180deg,#6e4626,#46290f)',
+      noite: { bg: '#1a110a', bgElevated: '#2a1a10', bgElevated2: '#36231a', text: '#f3e4c4', textMuted: '#b9a07a',
+        accent: '#d9a441', accentSoft: '#f0cd85', sage: '#8fa860', sageSoft: '#b4c98a', onAccent: '#2a1604',
+        btnFrom: '#e8b954', btnTo: '#b9791f', line: 'rgba(217,164,65,0.28)', danger: '#c0462b', dangerText: '#e88a72',
+        roseText: '#e0a08a', infoText: '#8fb3c9', shade: '0,0,0', inputBg: 'rgba(0,0,0,0.35)', optionBg: '#2a1a10',
+        glow1: 'rgba(217,164,65,0.08)', glow2: 'rgba(192,70,43,0.08)' },
+      dia: { bg: '#efe0bd', bgElevated: '#f8edd2', bgElevated2: '#fff7e1', text: '#2e1d0e', textMuted: '#6b5238',
+        accent: '#9a4a1c', accentSoft: '#7a3511', sage: '#5d7a32', sageSoft: '#46601f', onAccent: '#ffffff',
+        btnFrom: '#b45a22', btnTo: '#8a3a12', line: 'rgba(110,70,30,0.32)', danger: '#b03a22', dangerText: '#a23220',
+        roseText: '#9a4630', infoText: '#2f5a78', shade: '80,50,20', inputBg: '#fff9ea', optionBg: '#fff9ea',
+        glow1: 'rgba(154,74,28,0.10)', glow2: 'rgba(93,122,50,0.08)' }
+    },
+
+    // ---------------------------------------------------------------
+    // CÓDIGO VERDE (estilo Matrix) — preto, verde-neon e fonte de terminal.
+    // No site público ganha a chuva de código animada (ver iniciarChuva).
+    // ---------------------------------------------------------------
+    matrix: {
+      nome: 'Código Verde', emoji: '🟢', desc: 'Estilo Matrix: chuva de código verde sobre o preto, brilho neon e letras de terminal.',
+      fonte: { titulo: "'Share Tech Mono', monospace", texto: "'IBM Plex Mono', monospace",
+        url: 'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap' },
+      raio: 3, btnDeriva: true,
+      noite: { bg: '#000a04', bgElevated: '#031409', bgElevated2: '#06210f', text: '#c8ffd8', textMuted: '#5fbf83',
+        accent: '#00ff66', accentSoft: '#7dffaa', sage: '#00e5c3', sageSoft: '#7ff5e0', onAccent: '#00200b',
+        btnFrom: '#3dff8a', btnTo: '#00c94d', line: 'rgba(0,255,102,0.30)', danger: '#ff4d5e', dangerText: '#ff9aa4',
+        roseText: '#ff9ac0', infoText: '#6fd6ff', shade: '0,0,0', inputBg: 'rgba(0,255,102,0.05)', optionBg: '#031409',
+        glow1: 'rgba(0,255,102,0.10)', glow2: 'rgba(0,180,80,0.08)' },
+      dia: { bg: '#e9f4ec', bgElevated: '#f8fdf9', bgElevated2: '#ffffff', text: '#06301a', textMuted: '#3f6b50',
+        accent: '#008a3a', accentSoft: '#00692c', sage: '#00897b', sageSoft: '#00695c', onAccent: '#ffffff',
+        btnFrom: '#00a844', btnTo: '#007a30', line: 'rgba(0,120,50,0.30)', danger: '#c62828', dangerText: '#b71c1c',
+        roseText: '#ad1457', infoText: '#01579b', shade: '10,60,30', inputBg: '#ffffff', optionBg: '#ffffff',
+        glow1: 'rgba(0,160,70,0.10)', glow2: 'rgba(0,137,123,0.08)' }
+    },
+
+    // ---------------------------------------------------------------
+    // CORRIDA DE RUA (estilo Velozes e Furiosos) — asfalto, laranja nitro,
+    // azul neon e faixa quadriculada. O menu e o rodapé ganham a faixa.
+    // ---------------------------------------------------------------
+    velozes: {
+      nome: 'Corrida de Rua', emoji: '🏎️', desc: 'Estilo Velozes e Furiosos: asfalto preto, laranja nitro, azul neon e faixa quadriculada. Pura velocidade.',
+      fonte: { titulo: "'Racing Sans One', sans-serif", texto: "'Barlow', sans-serif",
+        url: 'https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Barlow:wght@400;500;600;700;800&display=swap' },
+      raio: 8, btnDeriva: false,
+      navBg: 'repeating-conic-gradient(#f4f4f4 0% 25%, #15151d 0% 50%) left bottom / 12px 12px repeat-x, linear-gradient(180deg,#20202c,#0b0b11)',
+      noite: { bg: '#09090e', bgElevated: '#14141c', bgElevated2: '#1d1d28', text: '#f4f4f8', textMuted: '#9c9cb0',
+        accent: '#ff4a1c', accentSoft: '#ff9a7a', sage: '#1fb6ff', sageSoft: '#7fd6ff', onAccent: '#ffffff',
+        btnFrom: '#ff6a2b', btnTo: '#e5260f', line: 'rgba(255,74,28,0.30)', danger: '#ff2d55', dangerText: '#ff8aa0',
+        roseText: '#ff8ab8', infoText: '#7fd6ff', shade: '0,0,0', inputBg: 'rgba(255,255,255,0.05)', optionBg: '#14141c',
+        glow1: 'rgba(255,74,28,0.16)', glow2: 'rgba(25,181,255,0.12)' },
+      dia: { bg: '#eef0f4', bgElevated: '#ffffff', bgElevated2: '#f6f7fa', text: '#13141a', textMuted: '#5b5f70',
+        accent: '#e03a10', accentSoft: '#b22c08', sage: '#0a8fd0', sageSoft: '#06689a', onAccent: '#ffffff',
+        btnFrom: '#ff5a24', btnTo: '#d92a0a', line: 'rgba(224,58,16,0.28)', danger: '#d01b3f', dangerText: '#b8123a',
+        roseText: '#b01462', infoText: '#06689a', shade: '30,30,50', inputBg: '#ffffff', optionBg: '#ffffff',
+        glow1: 'rgba(224,58,16,0.10)', glow2: 'rgba(10,143,208,0.10)' }
     }
   };
 
@@ -238,7 +302,7 @@
     ATTRS.forEach(function (a) { root.removeAttribute(a); });
     root.style.removeProperty('color-scheme');
 
-    if (limpo) { root.setAttribute('data-modelo', 'classico'); return; }
+    if (limpo) { root.setAttribute('data-modelo', 'classico'); atualizarEfeitos('classico', modo); return; }
 
     var r = variaveis(modelo, modo, over, cfg.fonte);
     Object.keys(r.vars).forEach(function (k) { root.style.setProperty(k, r.vars[k]); });
@@ -247,6 +311,7 @@
     if (r.colorida) { root.setAttribute('data-nav', 'cor'); root.setAttribute('data-side', 'cor'); }
     root.style.setProperty('color-scheme', r.claro ? 'light' : 'dark');
     carregarFonte(r.fonte.url);
+    atualizarEfeitos(modelo, modo);
   }
 
   // aplica as variáveis só em um elemento (pré-visualização do editor)
@@ -263,6 +328,111 @@
   var pagina = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var ehSite = /^site-/.test(pagina) && !/^site-(editor|editar)/.test(pagina);
   var escopo = ehSite ? 'site' : 'admin';
+
+  // marca o escopo na <html>: o CSS dos modelos usa isso para aplicar
+  // efeitos decorativos só no site público (o gerenciador fica limpo e leve)
+  document.documentElement.setAttribute('data-escopo', escopo);
+
+  // ---------- EFEITOS ANIMADOS (só no site público) ----------
+  // Hoje: a "chuva de código" do modelo Código Verde. É um <canvas> fixo ATRÁS
+  // do conteúdo (z-index -1, sem capturar cliques), que:
+  //   • usa a cor de destaque do tema (acompanha se o dono editar a cor)
+  //   • pausa quando a aba fica escondida (não gasta bateria)
+  //   • não liga se o visitante pediu "reduzir movimento" no aparelho
+  var chuva = { canvas: null, ctx: null, raf: 0, ultimo: 0, cols: [], tam: 16, w: 0, h: 0, modo: 'noite', timerResize: 0, ligado: false, querer: false };
+  var GLIFOS = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
+
+  function reduzMovimento() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+  }
+
+  function chuvaDimensionar() {
+    var c = chuva.canvas; if (!c) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    chuva.w = window.innerWidth; chuva.h = window.innerHeight;
+    c.width = Math.round(chuva.w * dpr); c.height = Math.round(chuva.h * dpr);
+    chuva.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    chuva.tam = chuva.w < 600 ? 14 : 16;
+    var n = Math.ceil(chuva.w / chuva.tam), antigo = chuva.cols;
+    chuva.cols = [];
+    for (var i = 0; i < n; i++) chuva.cols.push(antigo[i] !== undefined ? antigo[i] : Math.floor(Math.random() * 40) - 25);
+  }
+
+  function chuvaCor() {
+    var c = '';
+    try { c = getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(); } catch (e) {}
+    return c || '#00ff66';
+  }
+
+  function chuvaQuadro(t) {
+    chuva.raf = requestAnimationFrame(chuvaQuadro);
+    if (t - chuva.ultimo < 55) return;          // ~18 quadros/s: suave e econômico
+    chuva.ultimo = t;
+    var ctx = chuva.ctx, tam = chuva.tam;
+    ctx.globalCompositeOperation = 'destination-out';   // apaga aos poucos → cria o rastro
+    ctx.fillStyle = 'rgba(0,0,0,0.07)';
+    ctx.fillRect(0, 0, chuva.w, chuva.h);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.font = tam + 'px monospace';
+    var cor = chuvaCor();
+    for (var i = 0; i < chuva.cols.length; i++) {
+      var y = chuva.cols[i];
+      if (y >= 0) {
+        ctx.fillStyle = Math.random() < 0.07 ? '#e6fff0' : cor;   // de vez em quando uma "cabeça" brilhante
+        ctx.fillText(GLIFOS[Math.floor(Math.random() * GLIFOS.length)], i * tam, y * tam);
+      }
+      chuva.cols[i] = (y * tam > chuva.h && Math.random() > 0.975) ? -Math.floor(Math.random() * 20) : y + 1;
+    }
+  }
+
+  function chuvaVisibilidade() {
+    if (!chuva.ligado) return;
+    if (document.hidden) { cancelAnimationFrame(chuva.raf); chuva.raf = 0; }
+    else if (!chuva.raf) chuva.raf = requestAnimationFrame(chuvaQuadro);
+  }
+  function chuvaRedimensionou() {
+    clearTimeout(chuva.timerResize);
+    chuva.timerResize = setTimeout(chuvaDimensionar, 150);
+  }
+
+  function chuvaEstilo(modo) {
+    if (chuva.canvas) chuva.canvas.style.opacity = modo === 'dia' ? '0.16' : '0.34';
+  }
+
+  function iniciarChuva(modo) {
+    chuva.modo = modo; chuva.querer = true;
+    if (chuva.canvas) { chuvaEstilo(modo); return; }
+    if (reduzMovimento()) return;
+    function montar() {
+      if (!chuva.querer || chuva.canvas || !document.body) return;
+      var c = document.createElement('canvas');
+      c.id = 'tema-chuva'; c.setAttribute('aria-hidden', 'true');
+      c.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
+      document.body.appendChild(c);
+      chuva.canvas = c; chuva.ctx = c.getContext('2d');
+      chuvaEstilo(chuva.modo);
+      chuvaDimensionar();
+      chuva.ligado = true;
+      window.addEventListener('resize', chuvaRedimensionou);
+      document.addEventListener('visibilitychange', chuvaVisibilidade);
+      chuva.raf = requestAnimationFrame(chuvaQuadro);
+    }
+    if (document.body) montar(); else document.addEventListener('DOMContentLoaded', montar);
+  }
+
+  function pararChuva() {
+    chuva.querer = false; chuva.ligado = false;
+    if (chuva.raf) cancelAnimationFrame(chuva.raf);
+    chuva.raf = 0;
+    window.removeEventListener('resize', chuvaRedimensionou);
+    document.removeEventListener('visibilitychange', chuvaVisibilidade);
+    if (chuva.canvas && chuva.canvas.parentNode) chuva.canvas.parentNode.removeChild(chuva.canvas);
+    chuva.canvas = null; chuva.ctx = null;
+  }
+
+  function atualizarEfeitos(modelo, modo) {
+    if (escopo === 'site' && modelo === 'matrix') iniciarChuva(modo); else pararChuva();
+  }
 
   function ler(chave) { try { return JSON.parse(localStorage.getItem(chave)); } catch (e) { return null; } }
   function gravar(chave, obj) { try { localStorage.setItem(chave, JSON.stringify(obj)); } catch (e) {} }
