@@ -253,6 +253,27 @@
         btnFrom: '#2a85f5', btnTo: '#0b52c4', line: 'rgba(15,98,214,0.28)', danger: '#d81b60', dangerText: '#ad1457',
         roseText: '#c2185b', infoText: '#0a4aa8', shade: '10,60,110', inputBg: '#ffffff', optionBg: '#ffffff',
         glow1: 'rgba(255,196,0,0.14)', glow2: 'rgba(255,61,139,0.10)' }
+    },
+
+    // ---------------------------------------------------------------
+    // MAR DOS PIRATAS (estilo One Piece) — vermelho de aventura, amarelo palha, azul do mar
+    // ---------------------------------------------------------------
+    pirata: {
+      nome: 'Mar dos Piratas', emoji: '🏴‍☠️', desc: 'Estilo One Piece: vermelho de aventura, amarelo de chapéu de palha e azul do mar, com navio, gaivotas, ondas e caveira pirata.',
+      fonte: { titulo: "'Pirata One', cursive", texto: "'Nunito', sans-serif",
+        url: 'https://fonts.googleapis.com/css2?family=Pirata+One&family=Nunito:wght@400;600;700;800&display=swap' },
+      raio: 10, btnDeriva: false,
+      navBg: 'linear-gradient(90deg,#f4c430,#ffe08a,#f4c430) left bottom / 100% 4px no-repeat, linear-gradient(180deg,#d62f3a,#9c1c27)',
+      noite: { bg: '#06172e', bgElevated: '#0d2a4d', bgElevated2: '#143a66', text: '#fdf6e3', textMuted: '#9fbad6',
+        accent: '#f4c430', accentSoft: '#ffe08a', sage: '#33c3d6', sageSoft: '#8fe3ee', onAccent: '#2a1a00',
+        btnFrom: '#ffd54a', btnTo: '#e0a100', line: 'rgba(244,196,48,0.30)', danger: '#ff5a5f', dangerText: '#ff9a9d',
+        roseText: '#ff9ac0', infoText: '#8fe3ee', shade: '0,10,30', inputBg: 'rgba(255,255,255,0.07)', optionBg: '#0d2a4d',
+        glow1: 'rgba(244,196,48,0.12)', glow2: 'rgba(51,195,214,0.12)' },
+      dia: { bg: '#fdf0cf', bgElevated: '#fff9e8', bgElevated2: '#ffffff', text: '#1a2a44', textMuted: '#58698a',
+        accent: '#c8281f', accentSoft: '#9c1c14', sage: '#0a8aa6', sageSoft: '#066a82', onAccent: '#ffffff',
+        btnFrom: '#ef4444', btnTo: '#b91c1c', line: 'rgba(200,40,31,0.30)', danger: '#c62828', dangerText: '#b71c1c',
+        roseText: '#ad1457', infoText: '#066a82', shade: '60,40,10', inputBg: '#fffdf5', optionBg: '#fffdf5',
+        glow1: 'rgba(244,196,48,0.20)', glow2: 'rgba(10,138,166,0.10)' }
     }
   };
 
@@ -507,29 +528,27 @@
   function estrela(cx, cy, r, cor) {
     var p = [];
     for (var i = 0; i < 10; i++) {
-      var ang = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r;
+      var ang = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r;
       p.push((cx + rr * Math.cos(ang)).toFixed(1) + ',' + (cy + rr * Math.sin(ang)).toFixed(1));
     }
-    return '<polygon points="' + p.join(' ') + '" fill="' + cor + '"/>';
+    return '<polygon points="' + p.join(' ') + '" fill="' + cor + '" stroke="#8f0b10" stroke-width="0.9" stroke-linejoin="round"/>';
   }
   var POS_ESFERA = {
-    1: [[50, 50]], 2: [[38, 50], [62, 50]], 3: [[50, 36], [36, 62], [64, 62]], 4: [[50, 34], [34, 50], [66, 50], [50, 66]],
-    5: [[50, 30], [30, 48], [70, 48], [38, 70], [62, 70]], 6: [[50, 28], [30, 44], [70, 44], [30, 66], [70, 66], [50, 76]],
-    7: [[50, 26], [28, 42], [72, 42], [50, 50], [28, 66], [72, 66], [50, 78]]
+    1: [[50, 50]], 2: [[38, 50], [62, 50]], 3: [[50, 37], [38, 60], [62, 60]],
+    4: [[38, 38], [62, 38], [38, 62], [62, 62]],
+    5: [[50, 29], [28, 46], [72, 46], [37, 70], [63, 70]],
+    6: [[50, 26], [72, 38], [72, 62], [50, 74], [28, 62], [28, 38]],
+    7: [[50, 26], [72, 38], [72, 62], [50, 74], [28, 62], [28, 38], [50, 50]]
   };
+  var R_ESTRELA = { 1: 22, 2: 14, 3: 12.5, 4: 11, 5: 10, 6: 9, 7: 9 };
+  // Esfera do Dragão: âmbar translúcido, brilho, estrelas vermelhas bem visíveis e aura
   function esfera(n) {
-    var s = '<svg ' + NS + ' viewBox="0 0 100 100"><defs><radialGradient id="g" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffe08a"/><stop offset=".45" stop-color="#ff9d1f"/><stop offset="1" stop-color="#d95a00"/></radialGradient></defs><circle cx="50" cy="50" r="46" fill="url(#g)"/><ellipse cx="34" cy="26" rx="14" ry="8" fill="#fff" opacity=".45"/>';
-    POS_ESFERA[n].forEach(function (q) { s += estrela(q[0], q[1], n === 1 ? 15 : (n < 5 ? 10 : 7.5), '#d4141c'); });
-    return I(s + '</svg>', 1);
-  }
-  function carro(c1, c2, brilho) {
-    return I('<svg ' + NS + ' viewBox="0 0 240 80"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>' +
-      '<ellipse cx="120" cy="70" rx="112" ry="7" fill="' + brilho + '" opacity=".5"/>' +
-      '<path d="M8 54Q10 42 30 39L70 35Q88 15 120 13L160 13Q186 15 200 35L226 41Q236 45 236 55L236 60L8 60Z" fill="url(#g)"/>' +
-      '<path d="M86 35Q98 21 122 20L158 20Q176 22 186 35Z" fill="#0b0b11" opacity=".85"/>' +
-      '<rect x="8" y="51" width="228" height="3" fill="#fff" opacity=".4"/>' +
-      '<circle cx="62" cy="60" r="15" fill="#111"/><circle cx="62" cy="60" r="7" fill="#c9ced8"/>' +
-      '<circle cx="186" cy="60" r="15" fill="#111"/><circle cx="186" cy="60" r="7" fill="#c9ced8"/></svg>', 3);
+    var s = '<svg ' + NS + ' viewBox="0 0 100 100"><defs>' +
+      '<radialGradient id="b" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#fff3b0"/><stop offset=".32" stop-color="#ffbf24"/><stop offset=".75" stop-color="#f58a00"/><stop offset="1" stop-color="#d45a00"/></radialGradient>' +
+      '<radialGradient id="h"><stop offset="0.6" stop-color="#ffd24a" stop-opacity=".6"/><stop offset="1" stop-color="#ffd24a" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="50" cy="50" r="50" fill="url(#h)"/><circle cx="50" cy="50" r="40" fill="url(#b)"/>';
+    POS_ESFERA[n].forEach(function (q) { s += estrela(q[0], q[1], R_ESTRELA[n], '#e3171e'); });
+    return I(s + '<ellipse cx="37" cy="31" rx="13" ry="7" transform="rotate(-32 37 31)" fill="#fff" opacity=".75"/><circle cx="66" cy="68" r="3" fill="#fff" opacity=".35"/></svg>', 1);
   }
   function risco(cor) {
     return I('<svg ' + NS + ' viewBox="0 0 300 6"><defs><linearGradient id="g"><stop offset="0" stop-color="' + cor + '" stop-opacity="0"/><stop offset="1" stop-color="' + cor + '"/></linearGradient></defs><rect y="1" width="300" height="4" rx="2" fill="url(#g)"/></svg>', 50);
@@ -549,14 +568,37 @@
   function confete(cor) {
     return I('<svg ' + NS + ' viewBox="0 0 20 12"><rect width="20" height="12" rx="2" fill="' + cor + '"/></svg>', 1.6);
   }
-  function arara(cc, ca) {
-    return I('<svg ' + NS + ' viewBox="0 0 170 110"><path d="M24 66Q4 84 2 104Q34 98 58 78Z" fill="' + ca + '"/><path d="M22 64Q62 44 100 56Q116 62 120 70Q100 80 62 80Z" fill="' + cc + '"/><path d="M58 56Q44 12 90 2Q84 30 98 54Z" fill="' + ca + '"/><circle cx="122" cy="56" r="14" fill="' + cc + '"/><path d="M132 52Q150 54 146 68Q138 64 132 62Z" fill="#2b2b33"/><circle cx="124" cy="53" r="3" fill="#fff"/><circle cx="125" cy="53" r="1.4" fill="#111"/></svg>', 170 / 110);
+  // Arara em voo: corpo fino, cabeça com bico curvo, cauda longa e DUAS asas de penas que batem (animação dentro do próprio SVG)
+  function arara(cc, cf, ct) {
+    var bate = function (v) { return '<animateTransform attributeName="transform" type="rotate" values="' + v + '" dur="0.8s" repeatCount="indefinite"/>'; };
+    return I('<svg ' + NS + ' viewBox="0 0 200 130">' +
+      '<g>' + bate('8 98 76;-24 98 76;8 98 76') + '<path d="M92 78C70 92 60 110 70 126L78 120L82 128L92 118L98 126L104 112C112 100 116 90 118 80Z" fill="' + ct + '"/></g>' +
+      '<path d="M66 82L4 126L10 112L60 78Z" fill="' + ct + '"/><path d="M68 78L12 112L22 100L64 74Z" fill="' + cf + '"/>' +
+      '<path d="M60 80C64 60 92 54 116 56C136 58 146 66 142 76C136 88 104 94 74 90Z" fill="' + cc + '"/>' +
+      '<ellipse cx="112" cy="80" rx="28" ry="6" fill="#fff" opacity=".18"/>' +
+      '<circle cx="146" cy="54" r="17" fill="' + cc + '"/><ellipse cx="152" cy="59" rx="9" ry="8" fill="#d6e8f5"/>' +
+      '<path d="M158 44C182 42 184 66 172 72C170 64 164 62 158 60Z" fill="#33333d"/><path d="M160 62C168 64 172 68 168 73C163 72 160 68 159 64Z" fill="#4a4a55"/>' +
+      '<circle cx="150" cy="50" r="3.6" fill="#fff"/><circle cx="151" cy="50" r="1.8" fill="#111"/>' +
+      '<g>' + bate('-6 104 64;32 104 64;-6 104 64') + '<path d="M100 66C82 44 74 20 94 6L98 14L104 3L110 13L118 4L120 16L130 9L130 26C128 44 122 58 116 66Z" fill="' + cf + '"/><path d="M104 62C92 44 90 28 100 16C108 30 112 46 112 62Z" fill="#fff" opacity=".22"/></g></svg>', 200 / 130);
   }
+  // Gaivota com asas que batem (o desenho do SVG muda de forma)
+  var GAIVOTA = I('<svg ' + NS + ' viewBox="0 0 80 40"><path fill="#fff" stroke="#9fb3c8" stroke-width="1" d="M2 22Q20 2 40 20Q60 2 78 22Q60 14 40 28Q20 14 2 22Z"><animate attributeName="d" dur="0.9s" repeatCount="indefinite" values="M2 22Q20 2 40 20Q60 2 78 22Q60 14 40 28Q20 14 2 22Z;M2 34Q20 22 40 22Q60 22 78 34Q60 28 40 30Q20 28 2 34Z;M2 22Q20 2 40 20Q60 2 78 22Q60 14 40 28Q20 14 2 22Z"/></path></svg>', 2);
   var FENO = I('<svg ' + NS + ' viewBox="0 0 100 100" fill="none" stroke="#b58a4c" stroke-width="3" stroke-linecap="round"><circle cx="50" cy="50" r="40"/><ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(30 50 50)"/><ellipse cx="50" cy="50" rx="40" ry="16" transform="rotate(-35 50 50)"/><ellipse cx="50" cy="50" rx="16" ry="40" transform="rotate(12 50 50)"/><path d="M18 32Q50 58 84 30"/><path d="M16 68Q50 42 86 70"/><path d="M30 18Q44 50 28 84"/></svg>', 1);
   var CACTO = I('<svg ' + NS + ' viewBox="0 0 80 140" fill="#6f9448"><rect x="30" y="8" width="20" height="128" rx="10"/><rect x="6" y="46" width="13" height="42" rx="6.5"/><rect x="6" y="76" width="32" height="12" rx="6"/><rect x="61" y="30" width="13" height="40" rx="6.5"/><rect x="42" y="58" width="32" height="12" rx="6"/></svg>', 80 / 140);
   var ABUTRE = I('<svg ' + NS + ' viewBox="0 0 120 50"><path d="M0 30Q30 0 60 28Q90 0 120 30Q90 20 60 44Q30 20 0 30Z" fill="#6b4a2a"/></svg>', 2.4);
   var NUVEM = I('<svg ' + NS + ' viewBox="0 0 160 80"><g fill="#ffd84a"><circle cx="45" cy="50" r="26"/><circle cx="80" cy="38" r="32"/><circle cx="115" cy="50" r="26"/><rect x="30" y="50" width="100" height="26" rx="13"/></g><circle cx="75" cy="28" r="14" fill="#fff3b0" opacity=".6"/></svg>', 2);
   var FAISCA = I('<svg ' + NS + ' viewBox="0 0 20 20"><defs><radialGradient id="g"><stop offset="0" stop-color="#fff7b0"/><stop offset="1" stop-color="#ffb800" stop-opacity="0"/></radialGradient></defs><circle cx="10" cy="10" r="10" fill="url(#g)"/></svg>', 1);
+  var RIO_SIL = I('<svg ' + NS + ' viewBox="0 0 600 120" preserveAspectRatio="none"><path d="M0 120L0 92Q60 80 120 94Q170 60 205 40Q232 28 250 44Q268 66 300 78Q360 70 420 90Q500 70 600 88L600 120Z" fill="#1f6fe5"/></svg>', 5);
+
+  function nuvem(c1, c2) {
+    return I('<svg ' + NS + ' viewBox="0 0 160 80"><g fill="' + c1 + '"><circle cx="45" cy="50" r="26"/><circle cx="80" cy="38" r="32"/><circle cx="115" cy="50" r="26"/><rect x="30" y="50" width="100" height="26" rx="13"/></g><circle cx="75" cy="28" r="14" fill="' + c2 + '" opacity=".6"/></svg>', 2);
+  }
+  var NUVEM_B = nuvem('#ffffff', '#e3eef9');
+  var ONDA_T = '<svg ' + NS + ' viewBox="0 0 600 60" preserveAspectRatio="none"><path d="M0 30Q75 0 150 30T300 30T450 30T600 30V60H0Z" fill="COR"/></svg>';
+  var CHAPEU = I('<svg ' + NS + ' viewBox="0 0 100 70"><ellipse cx="50" cy="48" rx="48" ry="14" fill="#f4c430"/><path d="M24 46Q26 8 50 8Q74 8 76 46Z" fill="#f4c430"/><rect x="25" y="32" width="50" height="9" fill="#d62f3a"/><ellipse cx="50" cy="48" rx="48" ry="14" fill="none" stroke="#c99a12" stroke-width="2"/></svg>', 100 / 70);
+  var CAVEIRA = I('<svg ' + NS + ' viewBox="0 0 120 120"><g stroke="#e8e8e8" stroke-width="7" stroke-linecap="round"><line x1="22" y1="88" x2="98" y2="114"/><line x1="98" y1="88" x2="22" y2="114"/></g><path d="M30 62Q30 30 60 30Q90 30 90 62Q90 78 78 82L78 92L42 92L42 82Q30 78 30 62Z" fill="#f2f2f2"/><circle cx="47" cy="62" r="9" fill="#111"/><circle cx="73" cy="62" r="9" fill="#111"/><path d="M60 70L55 80L65 80Z" fill="#111"/><path d="M50 92V84M60 92V84M70 92V84" stroke="#111" stroke-width="2"/><ellipse cx="60" cy="34" rx="42" ry="8" fill="#f4c430"/><path d="M34 34Q36 4 60 4Q84 4 86 34Z" fill="#f4c430"/><rect x="35" y="22" width="50" height="8" fill="#d62f3a"/></svg>', 1);
+  var BUSSOLA = I('<svg ' + NS + ' viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#f4c430" stroke-width="3"/><circle cx="50" cy="50" r="38" fill="none" stroke="#f4c430" stroke-width="1" stroke-dasharray="2 5"/><path d="M50 4L58 42L96 50L58 58L50 96L42 58L4 50L42 42Z" fill="#f4c430" opacity=".85"/><path d="M50 4L58 42L42 42Z" fill="#d62f3a"/><circle cx="50" cy="50" r="5" fill="#d62f3a"/></svg>', 1);
+  var NAVIO = I('<svg ' + NS + ' viewBox="0 0 260 220"><path d="M20 150L240 150Q230 192 190 202L60 202Q30 192 20 150Z" fill="#8a5a2b"/><path d="M26 164L236 164M34 178L226 178" stroke="#5c3a1a" stroke-width="2"/><path d="M236 150L258 134" stroke="#5c3a1a" stroke-width="5" stroke-linecap="round"/><rect x="124" y="18" width="6" height="134" fill="#5c3a1a"/><rect x="190" y="50" width="5" height="102" fill="#5c3a1a"/><path d="M70 30Q127 22 184 30Q196 74 184 118Q127 126 70 118Q58 74 70 30Z" fill="#fff7e0" stroke="#c9b88a" stroke-width="2"/><path d="M164 56Q193 52 222 56Q228 80 222 104Q193 108 164 104Q158 80 164 56Z" fill="#fffaf0" stroke="#c9b88a" stroke-width="2"/><g stroke="#222" stroke-width="4" stroke-linecap="round"><line x1="110" y1="92" x2="144" y2="104"/><line x1="144" y1="92" x2="110" y2="104"/></g><circle cx="127" cy="70" r="13" fill="#222"/><circle cx="122" cy="68" r="3.4" fill="#fff"/><circle cx="132" cy="68" r="3.4" fill="#fff"/><ellipse cx="127" cy="58" rx="20" ry="5" fill="#f4c430"/><path d="M113 58Q115 42 127 42Q139 42 141 58Z" fill="#f4c430"/><rect x="114" y="52" width="26" height="5" fill="#d62f3a"/><path d="M130 18L162 27L130 36Z" fill="#d62f3a"/></svg>', 260 / 220);
   var RIO_SIL = I('<svg ' + NS + ' viewBox="0 0 600 120" preserveAspectRatio="none"><path d="M0 120L0 92Q60 80 120 94Q170 60 205 40Q232 28 250 44Q268 66 300 78Q360 70 420 90Q500 70 600 88L600 120Z" fill="#1f6fe5"/></svg>', 5);
 
   // Cada item: i=figura, w=largura(px ou css), css=posição, a=animação, d=duração(s), de=atraso(s, negativo = já começa no meio),
@@ -572,14 +614,15 @@
       { i: CACTO, w: 52, css: 'bottom:0;right:2%', o: .24, m: false }
     ]; },
 
+    // Corrida de Rua: sem carros — só riscos de velocidade (as faixas das bordas e o quadriculado vêm do CSS/menu)
     velozes: function () { return [
-      { i: risco('#ff4a1c'), w: 360, css: 'top:16%;left:0', a: 'cruzar', d: 2.6, de: -1, o: .4 },
-      { i: risco('#19b5ff'), w: 300, css: 'top:31%;left:0', a: 'cruzar', d: 3.4, de: -2.2, o: .34 },
-      { i: risco('#ffffff'), w: 420, css: 'top:52%;left:0', a: 'cruzar', d: 2.9, de: -0.4, o: .22, m: false },
-      { i: risco('#ff4a1c'), w: 320, css: 'top:68%;left:0', a: 'cruzar', d: 3.8, de: -3, o: .3 },
-      { i: carro('#ff4a1c', '#ff9a3c', '#19b5ff'), w: 210, css: 'top:calc(100% - 118px);left:0', a: 'cruzar', d: 9, de: -2, o: .4 },
-      { i: carro('#19b5ff', '#7fd6ff', '#ff4a1c'), w: 150, css: 'top:calc(100% - 74px);left:0', a: 'cruzar-rev', d: 13, de: -7, o: .34 },
-      { i: carro('#f4f4f4', '#9c9cb0', '#ff4a1c'), w: 120, css: 'top:42%;left:0', a: 'cruzar', d: 17, de: -10, o: .2, m: false }
+      { i: risco('#ff4a1c'), w: 360, css: 'top:14%;left:0', a: 'cruzar', d: 2.6, de: -1, o: .42 },
+      { i: risco('#19b5ff'), w: 300, css: 'top:27%;left:0', a: 'cruzar', d: 3.4, de: -2.2, o: .36 },
+      { i: risco('#ffffff'), w: 420, css: 'top:41%;left:0', a: 'cruzar', d: 2.9, de: -0.4, o: .24, m: false },
+      { i: risco('#ff4a1c'), w: 320, css: 'top:55%;left:0', a: 'cruzar', d: 3.8, de: -3, o: .34 },
+      { i: risco('#19b5ff'), w: 380, css: 'top:69%;left:0', a: 'cruzar', d: 2.4, de: -1.6, o: .3, m: false },
+      { i: risco('#ffffff'), w: 280, css: 'top:82%;left:0', a: 'cruzar', d: 3.1, de: -2.6, o: .26 },
+      { i: risco('#ff4a1c'), w: 440, css: 'top:92%;left:0', a: 'cruzar', d: 2.2, de: -0.8, o: .36, m: false }
     ]; },
 
     ninja: function () { return [
@@ -599,11 +642,11 @@
     dragao: function () {
       var l = [
         { bg: 'radial-gradient(ellipse at 50% 100%, rgba(255,184,0,.38), rgba(255,122,0,.12) 45%, transparent 72%)', w: '100vw', h: '42vh', css: 'bottom:0;left:0', a: 'pulsar', d: 4, o: 1 },
-        { i: NUVEM, w: 150, css: 'top:24%;left:0', a: 'cruzar', d: 38, de: -8, o: .36 },
-        { i: esfera(4), w: 56, css: 'top:0;left:7%', a: 'subir', d: 28, de: -6, o: .5 },
-        { i: esfera(1), w: 48, css: 'top:0;left:38%', a: 'subir', d: 34, de: -20, o: .46 },
-        { i: esfera(7), w: 60, css: 'top:0;left:68%', a: 'subir', d: 31, de: -12, o: .5, m: false },
-        { i: esfera(2), w: 44, css: 'top:0;left:90%', a: 'subir', d: 37, de: -26, o: .44, m: false }
+        { i: nuvem('#ffd84a', '#fff3b0'), w: 150, css: 'top:30%;left:0', a: 'cruzar', d: 38, de: -8, o: .34 },
+        { i: esfera(4), w: 66, css: 'top:0;left:6%', a: 'subir', d: 30, de: -6, o: .78 },
+        { i: esfera(1), w: 58, css: 'top:0;left:36%', a: 'subir', d: 36, de: -22, o: .74 },
+        { i: esfera(7), w: 70, css: 'top:0;left:66%', a: 'subir', d: 33, de: -12, o: .78, m: false },
+        { i: esfera(2), w: 54, css: 'top:0;left:90%', a: 'subir', d: 39, de: -28, o: .72, m: false }
       ];
       var lefts = [5, 17, 29, 41, 53, 65, 77, 89];
       for (var k = 0; k < lefts.length; k++)
@@ -614,8 +657,8 @@
     rio: function () {
       var l = [
         { bg: svgUrl(RIO_SIL.s) + ' bottom/100% 100% no-repeat', w: '100vw', h: '16vh', css: 'bottom:0;left:0', o: .16 },
-        { i: arara('#1f6fe5', '#ffc400'), w: 112, css: 'top:14%;left:0', a: 'onda', d: 24, de: -6, o: .55 },
-        { i: arara('#ffc400', '#1f6fe5'), w: 80, css: 'top:40%;left:0', a: 'onda', d: 32, de: -20, o: .45, m: false }
+        { i: arara('#2b86ff', '#1f6fe5', '#0f4fb8'), w: 150, css: 'top:16%;left:0', a: 'onda', d: 26, de: -6, o: .8 },
+        { i: arara('#ff4d4d', '#ffc400', '#1f6fe5'), w: 104, css: 'top:42%;left:0', a: 'onda', d: 34, de: -22, o: .7, m: false }
       ];
       var cores = ['#2b86ff', '#ffc400', '#ff3d8b', '#1fd6a3', '#2b86ff', '#ff3d8b'];
       for (var k = 0; k < cores.length; k++)
@@ -624,7 +667,22 @@
       for (var j = 0; j < cc.length; j++)
         l.push({ i: confete(cc[j]), w: 12 + (j % 3) * 3, css: 'top:0;left:' + (4 + j * 12) + '%', a: 'cair', d: 10 + (j % 4) * 3, de: -j * 2.3, o: .65, m: j < 5 });
       return l;
-    }
+    },
+
+    // Mar dos Piratas (estilo One Piece): ondas, navio, gaivotas, nuvens, chapéu de palha, caveira e bússola
+    pirata: function () { return [
+      { i: BUSSOLA, w: 200, css: 'right:-60px;top:28%', a: 'girar', d: 120, o: .12, m: false },
+      { i: CAVEIRA, w: 120, css: 'bottom:15vh;left:2%', a: 'flutuar', d: 8, o: .16, m: false },
+      { i: NUVEM_B, w: 170, css: 'top:9%;left:0', a: 'cruzar', d: 90, de: -30, o: .22 },
+      { i: NUVEM_B, w: 110, css: 'top:22%;left:0', a: 'cruzar', d: 120, de: -80, o: .16, m: false },
+      { i: GAIVOTA, w: 62, css: 'top:13%;left:0', a: 'cruzar', d: 32, de: -9, o: .6 },
+      { i: GAIVOTA, w: 44, css: 'top:19%;left:0', a: 'cruzar', d: 40, de: -24, o: .5 },
+      { i: GAIVOTA, w: 52, css: 'top:30%;left:0', a: 'cruzar-rev', d: 46, de: -30, o: .45, m: false },
+      { i: CHAPEU, w: 78, css: 'top:34%;right:3%', a: 'flutuar', d: 6, o: .34, m: false },
+      { bg: svgUrl(ONDA_T.replace('COR', '#4fb6e8')) + ' 0 100% / 600px 100% repeat-x', w: '100vw', h: '11vh', css: 'bottom:0;left:0', a: 'ondas', d: 18, o: .3 },
+      { i: NAVIO, w: 210, css: 'bottom:3vh;left:0', a: 'navegar', d: 70, de: -18, o: .6 },
+      { bg: svgUrl(ONDA_T.replace('COR', '#1e7fc0')) + ' 0 100% / 600px 100% repeat-x', w: '100vw', h: '7vh', css: 'bottom:0;left:0', a: 'ondas', d: 10, o: .42 }
+    ]; }
   };
 
   function removerFx() {
@@ -670,9 +728,202 @@
     if (document.body) montar(); else document.addEventListener('DOMContentLoaded', montar);
   }
 
+  // ---------- SHENLONG ENROLADO NO MENU (tema Esferas do Dragão) ----------
+  // O dragão é desenhado por código na largura real do menu, em DUAS camadas:
+  // uma ATRÁS dos links (z-index -1) e outra NA FRENTE, transparente. Os trechos
+  // alternam entre as camadas, então ele parece passar por dentro do menu sem
+  // esconder os botões (que continuam clicáveis: pointer-events:none).
+  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false };
+  var CABECA =
+    '<path d="M96 38Q70 72 24 70" stroke="#fff" stroke-width="2.2" fill="none" opacity=".9"/>' +
+    '<path d="M102 32Q90 68 58 80" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>' +
+    '<path d="M30 14Q20 -10 42 -18Q36 -2 46 12Z" fill="#f0d98a" stroke="#a07c1c" stroke-width="1.5"/>' +
+    '<path d="M14 22Q0 4 10 -10Q16 4 26 18Z" fill="#f0d98a" stroke="#a07c1c" stroke-width="1.5"/>' +
+    '<path d="M4 36Q8 12 40 10Q74 8 102 24Q114 32 108 40Q98 52 70 52Q36 58 14 50Q2 46 4 36Z" fill="#3dbb52" stroke="#0e5326" stroke-width="2"/>' +
+    '<path d="M22 47Q70 58 106 41Q98 53 70 55Q42 59 22 47Z" fill="#eef5b4" stroke="#0e5326" stroke-width="1.2"/>' +
+    '<path d="M108 40Q84 47 50 44" stroke="#0e5326" stroke-width="2" fill="none"/>' +
+    '<path d="M97 43l3 6l3-7zM83 45l3 6l3-6z" fill="#fff"/>' +
+    '<ellipse cx="62" cy="26" rx="7" ry="4.5" fill="#ff2a2a"/><circle cx="64" cy="26" r="2" fill="#111"/>' +
+    '<path d="M52 20Q64 13 77 22" stroke="#0e5326" stroke-width="2.4" fill="none"/>' +
+    '<circle cx="101" cy="30" r="2" fill="#0e5326"/>';
+
+  function dragaoLimpar() {
+    var xs = document.querySelectorAll('.dragao-enrolado');
+    for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
+    if (dragao.nav && dragao.estilo) {
+      if (dragao.estilo.pos) dragao.nav.style.position = '';
+      if (dragao.estilo.z) dragao.nav.style.zIndex = '';
+    }
+    dragao.estilo = null;
+  }
+
+  function dragaoCamada(W, Ht, OV, cls, z, op, conteudo) {
+    var d = document.createElement('div');
+    d.className = 'dragao-enrolado ' + cls;
+    d.setAttribute('aria-hidden', 'true');
+    d.style.cssText = 'position:absolute;left:0;top:' + (-OV) + 'px;width:' + W + 'px;height:' + Ht + 'px;pointer-events:none;z-index:' + z + ';opacity:' + op + ';';
+    d.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + Ht + '" viewBox="0 0 ' + W + ' ' + Ht + '">' + conteudo + '</svg>';
+    return d;
+  }
+
+  function dragaoMontar() {
+    if (!dragao.querer || !document.body) return;
+    var nav = document.querySelector('.site-nav');
+    if (!nav || document.body.classList.contains('layout-lateral')) return;
+    var r = nav.getBoundingClientRect(), W = Math.round(r.width), H = Math.round(r.height);
+    dragaoLimpar();
+    dragao.nav = nav;
+    if (W < 760 || H < 30) return;               // celular: o menu vira botão, sem dragão
+
+    var cs = getComputedStyle(nav);
+    dragao.estilo = { pos: false, z: false };
+    if (cs.position === 'static') { nav.style.position = 'relative'; dragao.estilo.pos = true; }
+    if (cs.zIndex === 'auto') { nav.style.zIndex = '50'; dragao.estilo.z = true; }
+
+    var OV = 50, Ht = H + OV * 2, cy = OV + H / 2;
+    var A = H * 0.5 + 14;                          // a onda passa um pouco da borda do menu
+    var P = Math.max(220, Math.min(320, W / 4.4)); // comprimento de cada volta
+    var xCab = W - 170, x0 = -30, passo = 4.5, yCab = OV - 24;
+    var n = Math.ceil((xCab - x0) / passo), L = { f: ['', '', ''], t: ['', '', ''] };
+    for (var k = 0; k <= n; k++) {
+      var x = x0 + k * passo, t = (x - x0) / (xCab - x0);
+      var fim = Math.max(0, (t - 0.76) / 0.24), fim2 = fim * fim;       // perto da cabeça a onda acalma e sobe
+      var fase = 2 * Math.PI * (x - x0) / P;
+      var y = cy + A * (1 - fim2) * Math.sin(fase) + (yCab - cy) * fim2;
+      var rr = 5 + 10 * Math.pow(t, 0.7);                                 // cauda fina → corpo grosso
+      var c = L[Math.floor(fase / Math.PI) % 2 === 0 ? 'f' : 't'], xs = x.toFixed(1), ys = y.toFixed(1);
+      c[0] += '<circle cx="' + xs + '" cy="' + ys + '" r="' + (rr + 1.7).toFixed(1) + '" fill="#0e5326"/>';      // contorno contínuo
+      c[1] += '<circle cx="' + xs + '" cy="' + ys + '" r="' + rr.toFixed(1) + '" fill="#3dbb52"/>';              // corpo
+      c[2] += '<circle cx="' + xs + '" cy="' + (y + rr * 0.45).toFixed(1) + '" r="' + (rr * 0.5).toFixed(1) + '" fill="#bfe38a"/>';   // barriga
+    }
+    var frente = L.f.join(''), tras = L.t.join('');
+    var cabeca = '<g transform="translate(' + xCab.toFixed(1) + ',' + yCab.toFixed(1) + ') rotate(-8) scale(.9) translate(-6,-34)">' + CABECA + '</g>';
+    nav.appendChild(dragaoCamada(W, Ht, OV, 'tras', -1, 0.9, tras));
+    nav.appendChild(dragaoCamada(W, Ht, OV, 'frente', 6, 0.32, frente + cabeca));
+  }
+
+  function dragaoAgendar() {
+    clearTimeout(dragao.timer);
+    dragao.timer = setTimeout(dragaoMontar, 140);
+  }
+
+  function iniciarDragao() {
+    dragao.querer = true;
+    if (dragao.ligado) { dragaoAgendar(); return; }
+    dragao.ligado = true;
+    window.addEventListener('resize', dragaoAgendar);
+    window.addEventListener('load', dragaoAgendar);
+    document.addEventListener('DOMContentLoaded', function () {
+      dragaoAgendar();
+      var nav = document.querySelector('.site-nav');
+      if (nav && window.ResizeObserver) {
+        dragao.ro = new ResizeObserver(function () { dragaoAgendar(); });
+        dragao.ro.observe(nav);
+      }
+    });
+    if (document.body) dragaoAgendar();
+  }
+
+  function pararDragao() {
+    dragao.querer = false; clearTimeout(dragao.timer);
+    if (dragao.ro) { dragao.ro.disconnect(); dragao.ro = null; }
+    if (dragao.ligado) {
+      window.removeEventListener('resize', dragaoAgendar);
+      window.removeEventListener('load', dragaoAgendar);
+      dragao.ligado = false;
+    }
+    dragaoLimpar();
+  }
+
+  // ---------- JUTSU AO TROCAR DE PÁGINA (tema Ninja da Folha) ----------
+  // Ao clicar num link do próprio site: nuvem de fumaça sai do ponto do clique, folhas
+  // giram em espiral, anel de chakra se abre e o kanji 術 (técnica) aparece. A página
+  // seguinte já abre dentro da fumaça e ela se dissipa. Se o aparelho pede "reduzir
+  // movimento", nada disso acontece e o link funciona normalmente.
+  var jutsu = { ligado: false, ocupado: false, entrou: false };
+
+  function jutsuAtivo() {
+    return escopo === 'site' && document.documentElement.getAttribute('data-modelo') === 'ninja' && !reduzMovimento();
+  }
+
+  function jutsuMontar(x, y, modo) {
+    var o = document.createElement('div');
+    o.id = 'tema-jutsu'; o.className = 'jutsu-' + modo; o.setAttribute('aria-hidden', 'true');
+    o.style.cssText = '--jx:' + Math.round(x) + 'px;--jy:' + Math.round(y) + 'px;';
+    var h = '<div class="j-flash"></div>', i;
+    for (i = 0; i < 9; i++) {
+      var ang = i * 40 * Math.PI / 180, d = 6 + (i % 3) * 10;
+      h += '<i class="j-nuvem" style="--dx:' + Math.round(Math.cos(ang) * d) + 'vmax;--dy:' + Math.round(Math.sin(ang) * d) + 'vmax;--de:' + (i * 35) + 'ms;--s:' + (0.8 + (i % 4) * 0.35).toFixed(2) + '"></i>';
+    }
+    for (i = 0; i < 14; i++)
+      h += '<b class="j-folha" style="--a:' + (i * 26) + 'deg;--r:' + (14 + (i % 5) * 9) + 'vmax;--de:' + (i * 28) + 'ms;--c:' + (i % 2 ? '#6fbf3c' : '#ff9d3a') + '"></b>';
+    o.innerHTML = h + '<span class="j-anel"></span><span class="j-kanji">術</span>';
+    document.body.appendChild(o);
+    return o;
+  }
+
+  function jutsuClique(e) {
+    if (jutsu.ocupado || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!jutsuAtivo()) return;
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    var href = a.getAttribute('href') || '';
+    if (!href || href.charAt(0) === '#' || /^(javascript:|mailto:|tel:)/i.test(href)) return;
+    var url; try { url = new URL(a.href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname && url.search === location.search) return;
+    if (/^\/api\//.test(url.pathname) || /\.(pdf|zip|png|jpe?g|webp|gif|mp4)$/i.test(url.pathname)) return;
+    e.preventDefault();
+    jutsu.ocupado = true;
+    var x = e.clientX, y = e.clientY;
+    if (!x && !y) { var rc = a.getBoundingClientRect(); x = rc.left + rc.width / 2; y = rc.top + rc.height / 2; }   // clique por teclado
+    jutsuMontar(x, y, 'sair');
+    try { sessionStorage.setItem('tema_jutsu', JSON.stringify({ t: Date.now(), x: x, y: y })); } catch (err) {}
+    setTimeout(function () { location.href = url.href; }, 620);
+    setTimeout(function () {                      // rede de segurança: se a navegação não acontecer, destrava a página
+      jutsu.ocupado = false;
+      var o = document.getElementById('tema-jutsu'); if (o && o.parentNode) o.parentNode.removeChild(o);
+    }, 3000);
+  }
+  function jutsuVoltou(e) {
+    if (!e.persisted) return;
+    jutsu.ocupado = false;
+    var o = document.getElementById('tema-jutsu'); if (o && o.parentNode) o.parentNode.removeChild(o);
+  }
+
+  function iniciarJutsu() {
+    if (!jutsu.ligado) {
+      jutsu.ligado = true;
+      document.addEventListener('click', jutsuClique, true);
+      window.addEventListener('pageshow', jutsuVoltou);
+    }
+    if (jutsu.entrou) return;
+    jutsu.entrou = true;
+    if (reduzMovimento()) return;
+    var d = null;
+    try { d = JSON.parse(sessionStorage.getItem('tema_jutsu') || 'null'); sessionStorage.removeItem('tema_jutsu'); } catch (err) {}
+    if (!d || Date.now() - d.t > 5000) return;
+    document.documentElement.classList.add('tema-jutsu-cobre');    // cobre a tela desde o 1º quadro (sem "piscar")
+    function mostrar() {
+      var o = jutsuMontar(d.x, d.y, 'entrar');
+      document.documentElement.classList.remove('tema-jutsu-cobre');
+      setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); }, 1000);
+    }
+    if (document.body) mostrar(); else document.addEventListener('DOMContentLoaded', mostrar);
+  }
+  function pararJutsu() {
+    if (jutsu.ligado) {
+      document.removeEventListener('click', jutsuClique, true);
+      window.removeEventListener('pageshow', jutsuVoltou);
+      jutsu.ligado = false;
+    }
+  }
+
   function atualizarEfeitos(modelo, modo) {
     if (escopo === 'site' && modelo === 'matrix') iniciarChuva(modo); else pararChuva();
     if (escopo === 'site' && FX[modelo]) iniciarFx(modelo, modo); else pararFx();
+    if (escopo === 'site' && modelo === 'dragao') iniciarDragao(); else pararDragao();
+    if (escopo === 'site' && modelo === 'ninja') iniciarJutsu(); else pararJutsu();
   }
 
   function ler(chave) { try { return JSON.parse(localStorage.getItem(chave)); } catch (e) { return null; } }
