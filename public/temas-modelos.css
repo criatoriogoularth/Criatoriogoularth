@@ -248,7 +248,7 @@ html[data-modelo="velozes"][data-side="cor"] .sidebar {
   --accent-rgb: var(--t-accent-rgb);
   --line: rgba(255,255,255,.18);
 }
-html[data-modelo="velozes"] body:not(.layout-lateral) .site-nav { padding-bottom: 24px; }
+html[data-modelo="velozes"] body:not(.layout-lateral) .site-nav { padding-bottom: 32px; }
 /* barra lateral do gerenciador: só o asfalto, sem a faixa (nada colado no rodapé da barra) */
 html[data-modelo="velozes"][data-side="cor"] .sidebar { background: linear-gradient(180deg,#20202c,#0b0b11) !important; }
 
@@ -278,8 +278,8 @@ html[data-modelo="velozes"][data-nav="cor"] .site-nav .btn-login-site:hover { fi
 
 /* rodapé com faixa quadriculada em cima */
 html[data-modelo="velozes"][data-escopo="site"] .site-footer {
-  border-top: 0; padding-top: 36px;
-  background: repeating-conic-gradient(#f4f4f4 0% 25%, #15151d 0% 50%) left top / 12px 12px repeat-x, var(--bg-elevated);
+  border-top: 0; padding-top: 44px;
+  background: linear-gradient(90deg,#ff4a1c,#19b5ff) left 16px / 100% 3px no-repeat, repeating-conic-gradient(#f4f4f4 0% 25%, #15151d 0% 50%) left top / 16px 16px repeat-x, var(--bg-elevated);
 }
 
 /* faixas de velocidade na diagonal, bem sutis, atrás do conteúdo */
@@ -299,4 +299,165 @@ html[data-theme="claro"]:is([data-modelo="faroeste"], [data-modelo="matrix"], [d
 @media (prefers-reduced-motion: reduce) {
   html[data-modelo] *::before, html[data-modelo] *::after { animation: none !important; }
   html[data-modelo="velozes"] .btn-primary:hover { transform: none; }
+}
+
+
+
+/* ============================================================
+   RODADA 2 — letras fortes por tema + cenário animado
+   Novos temas: NINJA DA FOLHA (Naruto) · ESFERAS DO DRAGÃO (Dragon Ball)
+   · RIO DAS ARARAS (desenho Rio). Melhorias: Velho Oeste e Corrida de Rua.
+   ------------------------------------------------------------
+   Vale só para estes temas (os antigos ficam como estão).
+   O "cenário" (#tema-fx) é criado pelo tema.js, fica por cima do conteúdo
+   SEM capturar cliques e só existe no site público.
+   ============================================================ */
+
+/* ---------- cenário animado: movimentos ---------- */
+@keyframes tema-fx-cruzar     { from { transform: translate3d(-30vw,0,0); } to { transform: translate3d(130vw,0,0); } }
+@keyframes tema-fx-cruzar-rev { from { transform: translate3d(130vw,0,0) scaleX(-1); } to { transform: translate3d(-30vw,0,0) scaleX(-1); } }
+@keyframes tema-fx-rolar {
+  0%   { transform: translate3d(-20vw,0,0) rotate(0); }
+  20%  { transform: translate3d(8vw,-18px,0) rotate(180deg); }
+  40%  { transform: translate3d(36vw,0,0) rotate(360deg); }
+  60%  { transform: translate3d(64vw,-26px,0) rotate(540deg); }
+  80%  { transform: translate3d(92vw,0,0) rotate(720deg); }
+  100% { transform: translate3d(120vw,-10px,0) rotate(900deg); }
+}
+@keyframes tema-fx-onda {
+  0%   { transform: translate3d(-30vw,0,0); }
+  20%  { transform: translate3d(-2vw,-4vh,0); }
+  40%  { transform: translate3d(26vw,2vh,0); }
+  60%  { transform: translate3d(54vw,-4vh,0); }
+  80%  { transform: translate3d(82vw,2vh,0); }
+  100% { transform: translate3d(130vw,-3vh,0); }
+}
+@keyframes tema-fx-cair {
+  0%   { transform: translate3d(0,-15vh,0) rotate(0); }
+  50%  { transform: translate3d(5vw,50vh,0) rotate(270deg); }
+  100% { transform: translate3d(-3vw,115vh,0) rotate(540deg); }
+}
+@keyframes tema-fx-subir {
+  0%   { transform: translate3d(0,115vh,0); }
+  50%  { transform: translate3d(3vw,50vh,0); }
+  100% { transform: translate3d(-2vw,-15vh,0); }
+}
+@keyframes tema-fx-girar   { to { transform: rotate(360deg); } }
+@keyframes tema-fx-flutuar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+@keyframes tema-fx-pulsar  { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+
+#tema-fx { --fx-k: 1; }
+@media (max-width: 700px) {
+  #tema-fx { --fx-k: .62; }
+  #tema-fx [data-fx-m="0"] { display: none; }
+}
+@media print { #tema-fx { display: none !important; } }
+
+/* ---------- LETRAS: força a fonte do tema em tudo (botões, campos, títulos) ---------- */
+html:is([data-modelo="faroeste"],[data-modelo="matrix"],[data-modelo="velozes"],[data-modelo="ninja"],[data-modelo="dragao"],[data-modelo="rio"])
+  :where(body, button, input, select, textarea, .btn) { font-family: var(--font-texto) !important; }
+html:is([data-modelo="faroeste"],[data-modelo="matrix"],[data-modelo="velozes"],[data-modelo="ninja"],[data-modelo="dragao"],[data-modelo="rio"])
+  :where(h1, h2, h3, h4, .display, .logo .name, .brand-text .name, .stat-value, .modal-head, .cert-title, .subject-name) { font-family: var(--font-titulo) !important; }
+/* botão principal usa a fonte "de título" (mais marcante) */
+html:is([data-modelo="faroeste"],[data-modelo="velozes"],[data-modelo="dragao"],[data-modelo="rio"]) .btn-primary,
+html:is([data-modelo="faroeste"],[data-modelo="velozes"],[data-modelo="dragao"],[data-modelo="rio"]) .btn-login-site { font-family: var(--font-titulo) !important; font-weight: 400; }
+
+html:is([data-modelo="ninja"],[data-modelo="dragao"],[data-modelo="rio"]) { font-synthesis: none; }
+html:is([data-modelo="ninja"],[data-modelo="dragao"],[data-modelo="rio"]) ::selection { background: var(--brass); color: var(--on-brass); }
+html:is([data-modelo="ninja"],[data-modelo="dragao"],[data-modelo="rio"]) :is(h1,h2,h3,.display,.site-nav .logo .name) { font-weight: 400; }
+
+/* título sobre o banner no modo dia (faixa atrás é sempre escura) — também nos novos */
+html[data-theme="claro"]:is([data-modelo="ninja"], [data-modelo="dragao"], [data-modelo="rio"]) .banner-overlay h1 { color: #ffffff; text-shadow: 2px 2px 0 rgba(0,0,0,.6); }
+html[data-theme="claro"]:is([data-modelo="ninja"], [data-modelo="dragao"], [data-modelo="rio"]) .banner-overlay p { color: rgba(255,255,255,.94); text-shadow: 0 1px 8px rgba(0,0,0,.55); }
+
+/* grupo de seletores de "cards" usado abaixo */
+/* (repetido em cada tema porque :is() com muitas classes fica ilegível) */
+
+/* =================== 🤠 VELHO OESTE — letras de cartaz =================== */
+html[data-modelo="faroeste"] :is(h1, h2) { text-transform: uppercase; }
+html[data-modelo="faroeste"] :is(h1, h2, h3, .display) { text-shadow: 1px 2px 0 rgba(0,0,0,.5); letter-spacing: .04em; }
+html[data-modelo="faroeste"][data-theme="claro"] :is(h1, h2, h3, .display) { text-shadow: 1px 1px 0 rgba(255,240,200,.7); }
+
+/* =================== 🏎️ CORRIDA DE RUA — mais velocidade =================== */
+/* faixas de corrida nas duas bordas da tela */
+html[data-modelo="velozes"][data-escopo="site"]::after {
+  content: ''; position: fixed; inset: 0; z-index: 8000; pointer-events: none; opacity: .6;
+  background: linear-gradient(90deg,
+    var(--brass) 0 6px, transparent 6px 10px, #19b5ff 10px 13px, transparent 13px calc(100% - 13px),
+    #19b5ff calc(100% - 13px) calc(100% - 10px), transparent calc(100% - 10px) calc(100% - 6px), var(--brass) calc(100% - 6px));
+}
+
+/* =================== 🍥 NINJA DA FOLHA (Naruto) =================== */
+html[data-modelo="ninja"][data-nav="cor"] .site-nav,
+html[data-modelo="ninja"][data-side="cor"] .sidebar {
+  --brass: var(--t-brass); --brass-dim: var(--t-brass-dim); --accent-rgb: var(--t-accent-rgb); --line: rgba(255,255,255,.18);
+}
+html[data-modelo="ninja"] :is(h1, h2) { text-transform: uppercase; }
+html[data-modelo="ninja"] :is(h1, h2, h3, .display) { letter-spacing: .02em; text-shadow: 2px 2px 0 rgba(0,0,0,.55); }
+html[data-modelo="ninja"][data-theme="claro"] :is(h1, h2, h3, .display) { text-shadow: 2px 2px 0 rgba(255,138,31,.3); }
+
+html[data-modelo="ninja"] .btn-primary, html[data-modelo="ninja"] .btn-login-site {
+  text-transform: uppercase; font-weight: 800; letter-spacing: .04em;
+  border: 2px solid rgba(0,0,0,.35); box-shadow: 0 4px 0 rgba(0,0,0,.4);
+}
+html[data-modelo="ninja"] .btn-primary:hover, html[data-modelo="ninja"] .btn-login-site:hover {
+  box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 0 22px rgba(77,184,255,.75);   /* brilho de rasengan */
+}
+html[data-modelo="ninja"] :is(.card, .editor-card, .admin-card, .plan-card, .login-card, .ave-card, .species-card, .noticia-card, .categoria-card, .bird-card) {
+  border-width: 2px; border-top: 4px solid var(--brass); box-shadow: 0 6px 0 rgba(var(--shade,0,0,0), .3);
+}
+html[data-modelo="ninja"][data-escopo="site"] .site-footer::before {
+  content: '忍 · 火 · 影'; display: block; letter-spacing: .5em; color: var(--brass); font-size: 18px; margin-bottom: 10px;
+  font-family: "Noto Sans JP","Yu Gothic","Hiragino Sans","Meiryo",sans-serif;
+}
+/* retícula de mangá (tela pontilhada) que some na diagonal */
+html[data-modelo="ninja"][data-escopo="site"]::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(rgba(var(--accent-rgb), .22) 1.3px, transparent 1.8px) 0 0 / 12px 12px;
+  -webkit-mask-image: linear-gradient(135deg, #000 0%, transparent 60%); mask-image: linear-gradient(135deg, #000 0%, transparent 60%);
+}
+
+/* =================== 🐉 ESFERAS DO DRAGÃO (Dragon Ball) =================== */
+html[data-modelo="dragao"] :is(h1, h2, h3, .display) { text-transform: uppercase; letter-spacing: .05em; text-shadow: 2px 2px 0 #c24a00, 4px 4px 0 rgba(0,0,0,.35); }
+html[data-modelo="dragao"][data-theme="claro"] :is(h1, h2, h3, .display) { text-shadow: 2px 2px 0 rgba(255,184,0,.85); }
+html[data-modelo="dragao"] .btn-primary, html[data-modelo="dragao"] .btn-login-site {
+  letter-spacing: .07em; text-transform: uppercase; font-size: 1.08em;
+  border: 2px solid rgba(0,0,0,.4); box-shadow: 0 4px 0 rgba(0,0,0,.4);
+}
+html[data-modelo="dragao"] .btn-primary:hover, html[data-modelo="dragao"] .btn-login-site:hover { box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 0 24px rgba(255,184,0,.85); }
+html[data-modelo="dragao"] :is(.card, .editor-card, .admin-card, .plan-card, .login-card, .ave-card, .species-card, .noticia-card, .categoria-card, .bird-card) {
+  border-width: 3px; border-color: var(--brass); border-radius: 14px; box-shadow: 5px 5px 0 rgba(var(--shade,0,0,0), .5);
+}
+html[data-modelo="dragao"][data-escopo="site"] .site-footer::before {
+  content: '★★★★★★★'; display: block; letter-spacing: .35em; color: var(--brass); font-size: 18px; margin-bottom: 10px;
+}
+/* raios de energia saindo do centro (efeito de mangá) */
+html[data-modelo="dragao"][data-escopo="site"]::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg at 50% 38%, rgba(255,184,0,.11) 0 3deg, transparent 3deg 9deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 38%, transparent 0 16%, #000 62%); mask-image: radial-gradient(circle at 50% 38%, transparent 0 16%, #000 62%);
+}
+html[data-modelo="dragao"][data-escopo="site"][data-theme="claro"]::before {
+  background: repeating-conic-gradient(from 0deg at 50% 38%, rgba(255,170,0,.2) 0 3deg, transparent 3deg 9deg);
+}
+
+/* =================== 🦜 RIO DAS ARARAS =================== */
+html[data-modelo="rio"] :is(h1, h2, h3, .display) { letter-spacing: .01em; text-shadow: 0 3px 0 rgba(0,0,0,.28); }
+html[data-modelo="rio"][data-theme="claro"] :is(h1, h2, h3, .display) { text-shadow: 0 3px 0 rgba(255,196,0,.4); }
+html[data-modelo="rio"] .btn, html[data-modelo="rio"] .btn-login-site { border-radius: 999px; }
+html[data-modelo="rio"] .btn-primary, html[data-modelo="rio"] .btn-login-site { box-shadow: 0 5px 0 rgba(0,0,0,.25); letter-spacing: .02em; }
+html[data-modelo="rio"] .btn-primary:hover { transform: translateY(-2px) rotate(-1deg); box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+html[data-modelo="rio"] :is(.card, .editor-card, .admin-card, .plan-card, .login-card, .ave-card, .species-card, .noticia-card, .categoria-card, .bird-card) {
+  border-radius: 22px; box-shadow: inset 0 6px 0 var(--brass), 0 8px 0 rgba(var(--shade,0,0,0), .2);
+}
+html[data-modelo="rio"][data-escopo="site"] .site-footer::before {
+  content: '🌴  🦜  🌴'; display: block; letter-spacing: .3em; font-size: 20px; margin-bottom: 10px;
+}
+/* clarões de carnaval ao fundo */
+html[data-modelo="rio"][data-escopo="site"]::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,61,139,.14), transparent 38%),
+    radial-gradient(circle at 90% 88%, rgba(31,214,163,.14), transparent 40%),
+    radial-gradient(circle at 80% 12%, rgba(255,196,0,.12), transparent 34%);
 }
