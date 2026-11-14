@@ -394,6 +394,9 @@
           <span class="toggle-label" id="layout-label-lateral">▮ Lateral</span>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">"Topo" é o menu horizontal atual. "Lateral" fixa o menu numa coluna à esquerda, estilo blog — em telas de celular ele volta a aparecer no topo automaticamente.</div>
+        <div id="layout-aviso-tema" style="display:none;margin-top:10px;font-size:12px;line-height:1.5;padding:10px 12px;border-radius:8px;border:1px solid var(--brass);color:var(--brass-soft);">
+          🔒 O tema escolhido para o site usa o <b>menu em cascata no topo</b> (Aves ▾ e Mídias ▾), por isso o menu lateral fica desativado. Para usar o lateral, escolha um tema clássico em <b>Modelos e Cores</b>.
+        </div>
       </div>
 
       <!-- ===== VISIBILIDADE E ORDEM DAS ABAS ===== -->
@@ -560,10 +563,17 @@ async function carregarPersonalizacao() {
   }
 
   // LAYOUT DO MENU
-  const layoutMenu = personalizacao.layoutMenu || 'topo';
+  const TEMAS_SEM_LATERAL = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
+  const layoutBloqueado = TEMAS_SEM_LATERAL.includes(personalizacao.temas && personalizacao.temas.site && personalizacao.temas.site.modelo);
+  const layoutMenu = layoutBloqueado ? 'topo' : (personalizacao.layoutMenu || 'topo');   // a escolha salva não é apagada
   const layoutToggle = document.getElementById('layout-menu-toggle');
   const layoutLabelTopo = document.getElementById('layout-label-topo');
   const layoutLabelLateral = document.getElementById('layout-label-lateral');
+  if (layoutBloqueado) {
+    document.getElementById('layout-aviso-tema').style.display = 'block';
+    layoutToggle.style.opacity = '.4'; layoutToggle.style.pointerEvents = 'none';
+    layoutLabelLateral.style.opacity = '.4';
+  }
 
   if (layoutMenu === 'lateral') {
     layoutToggle.classList.add('active');

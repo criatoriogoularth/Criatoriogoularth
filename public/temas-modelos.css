@@ -631,3 +631,103 @@ html.dragao-arte .dragao-arte-img.tras {
 
 /* faixa do cabeçalho transparente quando o dragão está no menu (sem "degrau" de cor atrás dele) */
 html.dragao-arte .site-header { background: transparent !important; border-bottom: 0 !important; box-shadow: none !important; }
+
+
+/* ============================================================
+   RODADA 4 — MENU EM CASCATA (Aves ▾ · Mídias ▾) + dragão reorganizado + olhos que brilham
+   ============================================================ */
+html.tema-menu-grupos .dr-oculto { display: none !important; }
+
+.dr-grupo { position: relative; }
+.dr-trigger { cursor: pointer; user-select: none; }
+.dr-trigger.active { color: var(--brass-soft); border-color: rgba(var(--accent-rgb), .5) !important; background: rgba(var(--accent-rgb), .12); }
+
+.dr-painel {
+  display: none; position: absolute; top: 100%; left: 50%; translate: calc(-50% + var(--dr-shift, 0px)) 0;
+  z-index: 120; min-width: 300px; padding: 12px; gap: 10px; margin-top: 8px; text-align: left;
+  background: var(--bg-elevated); border: 1px solid var(--line); border-radius: var(--radius, 12px);
+  box-shadow: 0 26px 50px -20px rgba(var(--shade,0,0,0), .75), 0 0 0 1px rgba(255,255,255,.03) inset;
+  /* dentro de menus coloridos o texto do tema vira branco: aqui volta ao normal do tema */
+  --text: var(--t-text); --text-muted: var(--t-muted); --brass: var(--t-brass); --brass-soft: var(--t-brass-soft);
+  --line: var(--t-line); --accent-rgb: var(--t-accent-rgb);
+  transform-origin: 50% 0;
+}
+.dr-painel::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }   /* ponte: o mouse não "cai" no vão */
+@media (hover: hover) and (min-width: 769px) { .dr-grupo:hover > .dr-painel { display: grid; } }
+.dr-grupo.aberto > .dr-painel { display: grid; }
+.dr-painel-4 { grid-template-columns: repeat(2, minmax(230px, 1fr)); }
+.dr-painel-3 { grid-template-columns: repeat(3, minmax(190px, 1fr)); }
+.dr-painel-2 { grid-template-columns: repeat(2, minmax(210px, 1fr)); }
+
+.dr-item { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.dr-card {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: calc(var(--radius, 12px) - 2px); border: 1px solid var(--line); background: var(--bg-elevated-2);
+  color: var(--text) !important; text-decoration: none !important; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.dr-card:hover, .dr-card.atual, .dr-card:focus-visible {
+  border-color: var(--brass); transform: translateY(-2px); outline: none;
+  box-shadow: 0 0 0 1px var(--brass) inset, 0 12px 24px -14px rgba(var(--accent-rgb), .8);
+}
+.dr-ico { width: 42px; height: 42px; display: grid; place-items: center; font-size: 22px; border-radius: 50%; background: rgba(var(--accent-rgb), .16); flex-shrink: 0; }
+.dr-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.dr-txt b { font-family: var(--font-titulo); font-size: 15px; color: var(--brass-soft); }
+.dr-txt small { font-size: 11.5px; color: var(--text-muted); }
+
+.dr-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px; }
+.dr-chip { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: rgba(var(--accent-rgb), .08); }
+.dr-chip a { color: var(--text) !important; text-decoration: none !important; font-size: 12px; padding: 4px 9px; line-height: 1.25; }
+.dr-chip a:hover { background: var(--brass); color: var(--on-brass) !important; }
+.dr-chip a.dr-sx { padding: 4px 8px; border-left: 1px solid var(--line); color: var(--brass-soft) !important; font-weight: 700; }
+
+/* celular: o painel vira lista empilhada dentro do menu aberto */
+@media (max-width: 768px) {
+  .dr-grupo { width: 100%; }
+  .dr-painel { position: static; translate: none; min-width: 0; width: 100%; margin: 6px 0 0; box-shadow: none; background: rgba(0,0,0,.14); grid-template-columns: 1fr !important; }
+  .dr-painel::before { display: none; }
+}
+
+/* ---------- cada tema abre o painel do seu jeito ---------- */
+@keyframes dr-abrir     { from { opacity: 0; scale: .96; } to { opacity: 1; scale: 1; } }
+@keyframes dr-balanco   { 0% { opacity: 0; rotate: -8deg; } 35% { opacity: 1; rotate: 4deg; } 65% { rotate: -2deg; } 100% { rotate: 0deg; } }
+@keyframes dr-scan      { from { clip-path: inset(0 0 100% 0); opacity: .4; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+@keyframes dr-varrer    { from { clip-path: inset(0 100% 0 0); filter: brightness(2); } to { clip-path: inset(0 0 0 0); filter: none; } }
+@keyframes dr-fumaca    { from { opacity: 0; scale: .35; filter: blur(8px) brightness(2.2); } to { opacity: 1; scale: 1; filter: none; } }
+@keyframes dr-energia   { 0% { opacity: 0; scale: .5; filter: brightness(3) blur(3px); } 60% { opacity: 1; scale: 1.05; filter: brightness(1.5); } 100% { scale: 1; filter: none; } }
+@keyframes dr-pulo      { 0% { opacity: 0; scale: .5; } 60% { opacity: 1; scale: 1.08; } 80% { scale: .97; } 100% { scale: 1; } }
+@keyframes dr-pergaminho{ from { clip-path: inset(0 0 100% 0); rotate: -1.5deg; } to { clip-path: inset(0 0 0 0); rotate: 0deg; } }
+.dr-painel { animation: dr-abrir .22s ease-out both; }
+html[data-modelo="faroeste"] .dr-painel { animation: dr-balanco .65s ease-out both; }
+html[data-modelo="matrix"]   .dr-painel { animation: dr-scan .35s steps(14, end) both; }
+html[data-modelo="velozes"]  .dr-painel { animation: dr-varrer .28s ease-out both; }
+html[data-modelo="ninja"]    .dr-painel { animation: dr-fumaca .4s ease-out both; }
+html[data-modelo="dragao"]   .dr-painel { animation: dr-energia .45s ease-out both; }
+html[data-modelo="rio"]      .dr-painel { animation: dr-pulo .5s ease-out both; }
+html[data-modelo="pirata"]   .dr-painel { animation: dr-pergaminho .5s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .dr-painel { animation: none !important; } }
+
+/* ---------- DRAGÃO: botões e logo na ponta esquerda (junto da garra), esfera na direita ---------- */
+html.dragao-arte .site-nav .nav-buttons { left: var(--dr-btn-l); right: auto; }
+html.dragao-arte .site-nav .logo .mark { width: var(--dr-logo-d) !important; height: var(--dr-logo-d) !important; }
+html.dragao-arte .site-nav .logo > *:not(.mark) { display: none !important; }
+/* banner: fica alto o bastante p/ o título ficar ACIMA do dragão (sem se misturar) */
+html.dragao-arte .site-banner { min-height: var(--dr-banner-min); }
+html.dragao-arte .site-banner img { min-height: var(--dr-banner-min); }
+html.dragao-arte .banner-overlay {
+  top: 0; bottom: auto; right: auto; max-width: min(46%, 560px); padding: 22px 28px 44px;
+  background: linear-gradient(135deg, rgba(8,14,34,.8), rgba(8,14,34,0)); border-radius: 0 0 48px 0;
+}
+
+/* olhos do Shenlong: pulsam de leve e se acendem quando o mouse passa no menu */
+.dragao-olho {
+  background: radial-gradient(circle, rgba(255,235,170,.95) 0, rgba(255,110,20,.8) 30%, rgba(255,40,0,0) 68%);
+  mix-blend-mode: screen; opacity: .45; animation: dr-olho 3.2s ease-in-out infinite; transition: opacity .25s ease, scale .25s ease;
+}
+@keyframes dr-olho { 0%, 100% { opacity: .35; scale: .9; } 50% { opacity: .75; scale: 1.05; } }
+html.dragao-hover .dragao-olho { opacity: 1; scale: 1.8; animation: none; filter: drop-shadow(0 0 10px rgba(255,80,0,.95)); }
+html.dragao-hover .dragao-esfera { filter: drop-shadow(0 0 20px rgba(255,200,0,1)); }
+.dragao-esfera { transition: filter .3s ease; filter: drop-shadow(0 0 10px rgba(255,170,0,.7)); }
+@media (prefers-reduced-motion: reduce) { .dragao-olho { animation: none; } }
+
+/* abas centralizadas dentro da barra do dragão (em todas as páginas) */
+html.dragao-arte .site-nav .nav-links { flex: 1; justify-content: center; }

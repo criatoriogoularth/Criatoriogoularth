@@ -195,7 +195,11 @@ function aplicarTemaPersonalizado(personalizacao) {
     if (footerContainer) footerContainer.style.visibility = 'visible';
 
     // ---- Layout do menu: topo (padrão) ou lateral ----
-    if ((personalizacao.layoutMenu || 'topo') === 'lateral') {
+    // Os temas novos (Velho Oeste, Código Verde, Corrida de Rua, Ninja, Dragão, Rio, Piratas) usam um
+    // menu no topo em cascata — o menu lateral fica desativado neles (a escolha do dono continua salva).
+    const _temasSemLateral = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
+    const _modeloSite = personalizacao && personalizacao.temas && personalizacao.temas.site && personalizacao.temas.site.modelo;
+    if ((personalizacao.layoutMenu || 'topo') === 'lateral' && !_temasSemLateral.includes(_modeloSite)) {
         document.body.classList.add('layout-lateral');
     }
 

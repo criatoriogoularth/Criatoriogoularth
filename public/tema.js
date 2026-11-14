@@ -694,7 +694,7 @@
   function montarFx(modelo, modo) {
     var c = document.createElement('div');
     c.id = 'tema-fx'; c.setAttribute('aria-hidden', 'true');
-    c.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;z-index:9000;pointer-events:none;overflow:hidden;opacity:' + (modo === 'dia' ? '.85' : '1') + ';';
+    c.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;z-index:30;pointer-events:none;overflow:hidden;opacity:' + (modo === 'dia' ? '.85' : '1') + ';';
     FX[modelo]().forEach(function (sp) {
       var e = document.createElement('div');
       var w = typeof sp.w === 'number' ? sp.w + 'px' : (sp.w || 'auto');
@@ -728,26 +728,227 @@
     if (document.body) montar(); else document.addEventListener('DOMContentLoaded', montar);
   }
 
+  // ---------- MENU EM CASCATA (temas novos) ----------
+  // Em vez de 10-11 abas soltas, os temas novos mostram: Home · O Criatório · Notícias ·
+  // Aves ▾ (Plantel, Adultos, Filhotes, Crachás) · Mídias ▾ (Fotos, Vídeos) · Parceiros · Contato.
+  // O painel de "Aves" lista as espécies como atalhos (♂ machos / ♀ fêmeas).
+  // Respeita o que o dono configurou (abas escondidas e ordem): o agrupamento roda DEPOIS do
+  // site-buttons.js, usa só as abas visíveis e NÃO apaga nada — as abas originais ficam apenas
+  // ocultas (e voltam sozinhas ao trocar para um tema antigo).
+  var TEMAS_NOVOS = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
+  var MG_GRUPOS = [
+    { id: 'aves', titulo: 'Aves', itens: ['plantel', 'adultos', 'filhotes', 'crachas'] },
+    { id: 'midias', titulo: 'Mídias', itens: ['fotos', 'videos'] }
+  ];
+  var MG_TEXTO = { 'Plantel': 'plantel', 'Adultos': 'adultos', 'Filhotes': 'filhotes', 'Crachás': 'crachas', 'Fotos': 'fotos', 'Vídeos': 'videos' };
+  var MG_CARD = {
+    plantel: ['🐦', 'Plantel', 'Nossas aves, por espécie'],
+    adultos: ['🦜', 'Adultos', 'Aves adultas do criatório'],
+    filhotes: ['🐣', 'Filhotes', 'Filhotes e novas gerações'],
+    crachas: ['🏷️', 'Crachás', 'Identificação das aves'],
+    fotos: ['📸', 'Fotos', 'Galeria de fotos'],
+    videos: ['🎬', 'Vídeos', 'Vídeos do criatório']
+  };
+  var mg = { querer: false, grupos: [], timer: 0, espera: 0, ligado: false, navEstilo: null };
+
+  function mgChave(el) {
+    var a = el.tagName === 'A' ? el : el.querySelector(':scope > a');
+    return a ? (MG_TEXTO[a.textContent.trim()] || null) : null;
+  }
+  function mgEsc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function mgFecharTodos(exceto) {
+    var abertos = document.querySelectorAll('.dr-grupo.aberto');
+    for (var i = 0; i < abertos.length; i++) {
+      if (abertos[i] === exceto) continue;
+      abertos[i].classList.remove('aberto');
+      var t = abertos[i].querySelector('.dr-trigger'); if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  }
+  // empurra o painel para dentro da tela se ele passar da borda
+  function mgAjustar(g) {
+    var p = g.querySelector('.dr-painel'); if (!p) return;
+    requestAnimationFrame(function () {
+      p.style.setProperty('--dr-shift', '0px');
+      var r = p.getBoundingClientRect(), vw = document.documentElement.clientWidth, d = 0;
+      if (!r.width) return;
+      if (r.left < 8) d = 8 - r.left; else if (r.right > vw - 8) d = vw - 8 - r.right;
+      if (d) p.style.setProperty('--dr-shift', Math.round(d) + 'px');
+    });
+  }
+  function mgToggle(g) {
+    var abrir = !g.classList.contains('aberto');
+    mgFecharTodos(abrir ? g : null);
+    g.classList.toggle('aberto', abrir);
+    var t = g.querySelector('.dr-trigger'); if (t) t.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    if (abrir) mgAjustar(g);
+  }
+  function mgPassaMouse() { return window.matchMedia && window.matchMedia('(hover: hover) and (min-width: 769px)').matches; }
+  function mgClique(e) {
+    var t = e.target.closest ? e.target.closest('.dr-trigger') : null;
+    if (t) { e.preventDefault(); if (!mgPassaMouse()) mgToggle(t.parentNode); return; }   // no computador o painel abre só de passar o mouse
+    if (!e.target.closest || !e.target.closest('.dr-grupo')) mgFecharTodos(null);
+  }
+  function mgTecla(e) {
+    if (e.key === 'Escape') { mgFecharTodos(null); return; }
+    var t = e.target.closest ? e.target.closest('.dr-trigger') : null;
+    if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); mgToggle(t.parentNode); }
+  }
+  function mgEntrou(e) {
+    var g = e.target.closest ? e.target.closest('.dr-grupo') : null;
+    if (g && !(e.relatedTarget && g.contains(e.relatedTarget))) mgAjustar(g);
+  }
+
+  function mgChips(origem, alvo) {                 // atalhos de espécie (lidos do dropdown original do Plantel)
+    var cont = origem.querySelector('.dropdown-content'), h = '';
+    if (cont) {
+      var subs = cont.querySelectorAll(':scope > .sub-dropdown');
+      for (var i = 0; i < subs.length; i++) {
+        var a = subs[i].querySelector(':scope > a'); if (!a) continue;
+        var sx = subs[i].querySelectorAll('.sub-dropdown-content a'), m = sx[0], f = sx[1];
+        h += '<span class="dr-chip"><a href="' + mgEsc(a.getAttribute('href') || '#') + '">' + mgEsc(a.textContent.trim()) + '</a>' +
+          (m ? '<a class="dr-sx" title="Machos" href="' + mgEsc(m.getAttribute('href')) + '">♂</a>' : '') +
+          (f ? '<a class="dr-sx" title="Fêmeas" href="' + mgEsc(f.getAttribute('href')) + '">♀</a>' : '') + '</span>';
+      }
+    }
+    alvo.innerHTML = h; alvo.style.display = h ? '' : 'none';
+  }
+
+  function mgConstruir(def, navLinks, porChave) {
+    var vis = def.itens.filter(function (k) { return porChave[k] && porChave[k].style.display !== 'none'; });
+    if (vis.length < 2) return;                    // com 1 aba só, não vale agrupar
+    var els = vis.map(function (k) { return porChave[k]; });
+    var primeiro = els.slice().sort(function (a, b) { return (a.compareDocumentPosition(b) & 4) ? -1 : 1; })[0];
+    var g = document.createElement('div');
+    g.className = 'dropdown dr-grupo dr-grupo-' + def.id;
+    var ativo = false, cards = '';
+    vis.forEach(function (k) {
+      var el = porChave[k], a = el.tagName === 'A' ? el : el.querySelector(':scope > a');
+      var href = (k === 'plantel') ? 'site-plantel.html' : (a.getAttribute('href') || '#');
+      var atual = a.classList.contains('active') || el.classList.contains('active'); if (atual) ativo = true;
+      var c = MG_CARD[k];
+      cards += '<div class="dr-item dr-item-' + k + '"><a class="dr-card' + (atual ? ' atual' : '') + '" href="' + mgEsc(href) + '"><span class="dr-ico">' + c[0] + '</span><span class="dr-txt"><b>' + c[1] + '</b><small>' + c[2] + '</small></span></a>' + (k === 'plantel' ? '<div class="dr-chips"></div>' : '') + '</div>';
+    });
+    g.innerHTML = '<a class="dr-trigger' + (ativo ? ' active' : '') + '" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">' + def.titulo + '</a>' +
+      '<div class="dr-painel dr-painel-' + vis.length + '" role="menu">' + cards + '</div>';
+    navLinks.insertBefore(g, primeiro);
+    els.forEach(function (el) { el.classList.add('dr-oculto'); });
+    var est = { el: g, itens: els, obs: null };
+    var chips = g.querySelector('.dr-chips');
+    if (chips && porChave.plantel) {
+      var atualizar = function () { mgChips(porChave.plantel, chips); };
+      atualizar();
+      var alvoObs = porChave.plantel.querySelector('.dropdown-content');   // as espécies chegam depois (carregadas pela página)
+      if (alvoObs && window.MutationObserver) { est.obs = new MutationObserver(atualizar); est.obs.observe(alvoObs, { childList: true, subtree: true }); }
+    }
+    mg.grupos.push(est);
+  }
+
+  function mgNavAcima(ligar) {                     // menu (e seus painéis) acima do cenário animado
+    var nav = document.querySelector('.site-nav'); if (!nav) return;
+    if (ligar) {
+      if (mg.navEstilo) return;
+      var cs = getComputedStyle(nav); mg.navEstilo = { pos: false, z: false };
+      if (cs.position === 'static') { nav.style.position = 'relative'; mg.navEstilo.pos = true; }
+      if (cs.zIndex === 'auto') { nav.style.zIndex = '60'; mg.navEstilo.z = true; }
+    } else if (mg.navEstilo) {
+      if (mg.navEstilo.pos) nav.style.position = '';
+      if (mg.navEstilo.z) nav.style.zIndex = '';
+      mg.navEstilo = null;
+    }
+  }
+
+  function mgAgrupar() {
+    if (!mg.querer) return;
+    var navLinks = document.querySelector('.site-nav .nav-links');
+    if (!navLinks || navLinks.querySelector('.dr-grupo')) return;
+    mgNavAcima(true);
+    var porChave = {};
+    Array.prototype.forEach.call(navLinks.children, function (el) { var k = mgChave(el); if (k) porChave[k] = el; });
+    MG_GRUPOS.forEach(function (def) { mgConstruir(def, navLinks, porChave); });
+    if (mg.grupos.length) document.documentElement.classList.add('tema-menu-grupos');
+  }
+
+  function mgDesagrupar() {
+    mg.grupos.forEach(function (g) {
+      if (g.obs) g.obs.disconnect();
+      if (g.el.parentNode) g.el.parentNode.removeChild(g.el);
+      g.itens.forEach(function (it) { it.classList.remove('dr-oculto'); });
+    });
+    mg.grupos = [];
+    document.documentElement.classList.remove('tema-menu-grupos');
+    mgNavAcima(false);
+  }
+
+  function mgAgendar() { clearTimeout(mg.timer); mg.timer = setTimeout(mgTentar, 120); }
+  function mgTentar() {
+    if (!mg.querer || !document.body) return;
+    if (document.body.classList.contains('layout-lateral')) return;
+    var nl = document.querySelector('.site-nav .nav-links');
+    var pronto = nl && (nl.style.visibility === 'visible' || mg.espera >= 25);   // espera o site-buttons.js filtrar/ordenar as abas
+    if (!pronto) { if (mg.espera++ < 30) mgAgendar(); return; }
+    mgAgrupar();
+  }
+
+  function iniciarMenuGrupos() {
+    mg.querer = true;
+    if (!mg.ligado) {
+      mg.ligado = true;
+      document.addEventListener('click', mgClique);
+      document.addEventListener('keydown', mgTecla);
+      document.addEventListener('mouseover', mgEntrou);
+      window.addEventListener('load', mgAgendar);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mgAgendar); else mgAgendar();
+  }
+  function pararMenuGrupos() {
+    mg.querer = false; clearTimeout(mg.timer);
+    if (mg.ligado) {
+      document.removeEventListener('click', mgClique);
+      document.removeEventListener('keydown', mgTecla);
+      document.removeEventListener('mouseover', mgEntrou);
+      window.removeEventListener('load', mgAgendar);
+      mg.ligado = false;
+    }
+    mgDesagrupar();
+  }
+
+  // ---------- MENU LATERAL: desativado nos temas novos ----------
+  // (ele não combina com o menu em cascata e com a arte do topo). A escolha do dono continua salva:
+  // se ele voltar a um tema antigo, o menu lateral volta sozinho.
+  var lat = { obs: null };
+  function semLateral(ativo) {
+    if (!ativo) { if (lat.obs) { lat.obs.disconnect(); lat.obs = null; } return; }
+    function remover() { if (document.body && document.body.classList.contains('layout-lateral')) document.body.classList.remove('layout-lateral'); }
+    function ligar() {
+      remover();
+      if (!lat.obs && window.MutationObserver) { lat.obs = new MutationObserver(remover); lat.obs.observe(document.body, { attributes: true, attributeFilter: ['class'] }); }
+    }
+    if (document.body) ligar(); else document.addEventListener('DOMContentLoaded', ligar);
+  }
+
   // ---------- SHENLONG NO MENU (tema Esferas do Dragão) ----------
   // Usa a ilustração em /temas-img (duas camadas com transparência): uma ATRÁS do menu
   // (corpo e cabeça) e outra NA FRENTE (garras e a cauda que cruzam a barra). O menu real do
-  // site vira a "barra" no meio, então os links continuam de verdade clicáveis. Só em telas
-  // largas (>= 1180px); no celular/tablet o menu fica normal. Se as imagens não carregarem,
-  // nada muda no menu.
-  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false, imgs: null, carregando: false };
+  // site vira a "barra" no meio, então os links continuam clicáveis. Logo redondo e botões ficam na
+  // ponta esquerda (junto da garra); a esfera fica na ponta direita. O título do banner sobe para o
+  // canto de cima do banner, fora da área do dragão. Os olhos brilham quando o mouse passa no menu.
+  // Só em telas largas (>= 1180px); no celular/tablet o menu fica normal.
+  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false, imgs: null, carregando: false, hover: null };
   var BASE_IMG = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, '') : '';
-  // medidas da arte original (px): largura total, barra do menu e onde o corpo termina embaixo
-  var ARTE = { w: 1672, imgW: 1632, imgH: 640, x0: 58, x1: 1565, y0: 362, y1: 483, fimY: 633 };
-  var DR_VARS = ['--dr-h', '--dr-pl', '--dr-pr', '--dr-mt', '--dr-mb', '--dr-btn-r', '--dr-logo-l'];
+  var ARTE = { w: 1672, imgW: 1632, imgH: 640, x0: 58, x1: 1565, y0: 362, y1: 483, fimY: 633, olhos: [[572, 212, 28], [640, 199, 22]] };
+  var DR_VARS = ['--dr-h', '--dr-pl', '--dr-pr', '--dr-mt', '--dr-mb', '--dr-btn-l', '--dr-logo-l', '--dr-logo-d'];
 
   function dragaoLimpar() {
     var xs = document.querySelectorAll('.dragao-enrolado');
     for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
-    document.documentElement.classList.remove('dragao-arte');
+    var root = document.documentElement;
+    root.classList.remove('dragao-arte'); root.classList.remove('dragao-hover'); root.style.removeProperty('--dr-banner-min');
     if (dragao.nav) {
       for (var k = 0; k < DR_VARS.length; k++) dragao.nav.style.removeProperty(DR_VARS[k]);
       var lg = dragao.nav.querySelector('.btn-login-site');
       if (lg && lg.getAttribute('data-dr-label')) { lg.removeAttribute('aria-label'); lg.removeAttribute('data-dr-label'); }
+      if (dragao.hover) { dragao.nav.removeEventListener('mouseenter', dragao.hover.e); dragao.nav.removeEventListener('mouseleave', dragao.hover.l); dragao.hover = null; }
       if (dragao.estilo) {
         if (dragao.estilo.pos) dragao.nav.style.position = '';
         if (dragao.estilo.z) dragao.nav.style.zIndex = '';
@@ -788,18 +989,23 @@
 
     var artW = Math.min(W, 1500), s = artW / ARTE.w, L = (W - artW) / 2;
     var pillH = (ARTE.y1 - ARTE.y0) * s, pillW = (ARTE.x1 - ARTE.x0) * s, T = -ARTE.y0 * s;
-    var topoPagina = nav.getBoundingClientRect().top + (window.pageYOffset || 0);
-    var mt = Math.max(0, ARTE.y0 * s + 6 - topoPagina);                 // espaço em cima para a cabeça não cortar
-    var mb = (ARTE.fimY - ARTE.y1) * s + 14;                            // espaço embaixo para as voltas do corpo
+    var root = document.documentElement;
+    root.style.setProperty('--dr-banner-min', Math.round(ARTE.y0 * s + 150) + 'px');   // banner alto o bastante p/ o título ficar acima do dragão
+    root.classList.add('dragao-arte');
+    var topoPagina = nav.getBoundingClientRect().top + (window.pageYOffset || 0);       // medido já com o banner no tamanho final
+    var mt = Math.max(0, ARTE.y0 * s + 6 - topoPagina);                                  // espaço em cima p/ a cabeça não cortar
+    var mb = (ARTE.fimY - ARTE.y1) * s + 14;                                             // espaço embaixo p/ as voltas do corpo
+    var D = Math.min(76, pillH * 0.72), temLogo = !!nav.querySelector('.logo');
+    var xLogo = L + ARTE.x0 * s + 12, xBtn = xLogo + (temLogo ? D + 10 : 0);
     var st = nav.style;
     st.setProperty('--dr-h', pillH.toFixed(1) + 'px');
-    st.setProperty('--dr-pl', (L + 205 * s).toFixed(1) + 'px');          // links começam depois da "bola"
-    st.setProperty('--dr-pr', (W - (L + 1290 * s)).toFixed(1) + 'px');   // e terminam antes da cauda
+    st.setProperty('--dr-pl', (L + 296 * s).toFixed(1) + 'px');                          // links começam depois da garra
+    st.setProperty('--dr-pr', (W - (L + 1290 * s)).toFixed(1) + 'px');                   // e terminam antes da cauda
     st.setProperty('--dr-mt', mt.toFixed(1) + 'px');
     st.setProperty('--dr-mb', mb.toFixed(1) + 'px');
-    st.setProperty('--dr-btn-r', (W - (L + 1553 * s)).toFixed(1) + 'px'); // botões ficam na ponta direita da barra
-    st.setProperty('--dr-logo-l', (L + 134 * s - 30).toFixed(1) + 'px');  // logo no lugar da esfera
-    document.documentElement.classList.add('dragao-arte');
+    st.setProperty('--dr-logo-l', xLogo.toFixed(1) + 'px');
+    st.setProperty('--dr-logo-d', D.toFixed(1) + 'px');
+    st.setProperty('--dr-btn-l', xBtn.toFixed(1) + 'px');
 
     function img(cls, z, fonte) {
       var i = document.createElement('img');
@@ -813,15 +1019,24 @@
     barra.style.cssText = 'position:absolute;left:' + (L + ARTE.x0 * s).toFixed(1) + 'px;top:0;width:' + pillW.toFixed(1) + 'px;height:' + pillH.toFixed(1) + 'px;border-radius:' + (pillH / 2).toFixed(1) + 'px;pointer-events:none;z-index:-1;';
     nav.appendChild(img('tras', -2, dragao.imgs[0]));
     nav.appendChild(barra);
-    if (!nav.querySelector('.logo')) {                                   // esfera de 4 estrelas na ponta esquerda (como na arte)
-      var d = ARTE.imgW * 0 + 112 * s, bola = document.createElement('div');
-      bola.className = 'dragao-enrolado dragao-esfera'; bola.setAttribute('aria-hidden', 'true');
-      bola.style.cssText = 'position:absolute;left:' + (L + 134 * s - d / 2).toFixed(1) + 'px;top:' + ((pillH - d) / 2).toFixed(1) + 'px;width:' + d.toFixed(1) + 'px;height:' + d.toFixed(1) + 'px;pointer-events:none;z-index:0;background:' + svgUrl(esfera(4).s) + ' center/contain no-repeat;filter:drop-shadow(0 0 10px rgba(255,170,0,.7));';
-      nav.appendChild(bola);
-    }
+
+    var d = 84 * s, bola = document.createElement('div');                                // esfera de 4 estrelas na ponta direita da barra
+    bola.className = 'dragao-enrolado dragao-esfera'; bola.setAttribute('aria-hidden', 'true');
+    bola.style.cssText = 'position:absolute;left:' + (L + 1515 * s - d / 2).toFixed(1) + 'px;top:' + ((pillH - d) / 2).toFixed(1) + 'px;width:' + d.toFixed(1) + 'px;height:' + d.toFixed(1) + 'px;pointer-events:none;z-index:0;background:' + svgUrl(esfera(4).s) + ' center/contain no-repeat;';
+    nav.appendChild(bola);
+
+    ARTE.olhos.forEach(function (o) {                                                    // olhos que brilham quando o mouse passa no menu
+      var dd = o[2] * 2 * s, e = document.createElement('div');
+      e.className = 'dragao-enrolado dragao-olho'; e.setAttribute('aria-hidden', 'true');
+      e.style.cssText = 'position:absolute;left:' + (L + o[0] * s - dd / 2).toFixed(1) + 'px;top:' + (T + o[1] * s - dd / 2).toFixed(1) + 'px;width:' + dd.toFixed(1) + 'px;height:' + dd.toFixed(1) + 'px;border-radius:50%;pointer-events:none;z-index:-1;';
+      nav.appendChild(e);
+    });
     nav.appendChild(img('frente', 6, dragao.imgs[1]));
 
-    var lg = nav.querySelector('.btn-login-site');                      // o botão "Entrar" vira só o ícone: acessível por rótulo
+    dragao.hover = { e: function () { root.classList.add('dragao-hover'); }, l: function () { root.classList.remove('dragao-hover'); } };
+    nav.addEventListener('mouseenter', dragao.hover.e); nav.addEventListener('mouseleave', dragao.hover.l);
+
+    var lg = nav.querySelector('.btn-login-site');                                      // o botão "Entrar" vira só o ícone: rótulo p/ acessibilidade
     if (lg && !lg.getAttribute('aria-label')) { lg.setAttribute('aria-label', 'Entrar'); lg.setAttribute('data-dr-label', '1'); }
   }
 
@@ -946,6 +1161,9 @@
     if (escopo === 'site' && modelo === 'matrix') iniciarChuva(modo); else pararChuva();
     if (escopo === 'site' && FX[modelo]) iniciarFx(modelo, modo); else pararFx();
     if (escopo === 'site' && modelo === 'dragao') iniciarDragao(); else pararDragao();
+    var novoTema = escopo === 'site' && TEMAS_NOVOS.indexOf(modelo) >= 0;
+    semLateral(novoTema);                                   // sem menu lateral nos temas novos
+    if (novoTema) iniciarMenuGrupos(); else pararMenuGrupos();   // menu em cascata (Aves, Mídias)
     if (escopo === 'site' && modelo === 'ninja') iniciarJutsu(); else pararJutsu();
   }
 
