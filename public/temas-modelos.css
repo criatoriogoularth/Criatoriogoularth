@@ -584,3 +584,50 @@ html[data-modelo="pirata"][data-escopo="site"]::before {
     radial-gradient(circle at 88% -4%, rgba(244,196,48,.20), transparent 38%),
     radial-gradient(circle at 6% 100%, rgba(51,195,214,.14), transparent 42%);
 }
+
+
+/* ============================================================
+   SHENLONG NO MENU (ilustração) — só quando o tema.js montou a arte (html.dragao-arte)
+   O menu vira a "barra" que o dragão envolve: a pílula escura fica entre as duas camadas.
+   ============================================================ */
+.dragao-arte-img, .dragao-barra { animation: none !important; }
+html.dragao-arte .site-nav {
+  height: var(--dr-h); box-sizing: border-box; align-items: center;
+  padding-top: 0 !important; padding-bottom: 0 !important;
+  padding-left: var(--dr-pl) !important; padding-right: var(--dr-pr) !important;
+  margin-top: var(--dr-mt); margin-bottom: var(--dr-mb);
+  background: transparent !important; box-shadow: none !important; border: 0 !important;
+  --brass: var(--t-brass); --brass-dim: var(--t-brass-dim); --accent-rgb: var(--t-accent-rgb); --line: rgba(255,255,255,.18);
+}
+html.dragao-arte .dragao-barra {
+  background: linear-gradient(180deg, #1e231f, #0b0f0c);
+  border: 1px solid rgba(160,210,160,.28);
+  box-shadow: 0 12px 30px -12px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.06);
+}
+html.dragao-arte .site-nav .nav-links > a,
+html.dragao-arte .site-nav .nav-links > .dropdown > a { padding: 8px 10px; }
+/* botões (modo dia/noite + entrar) ficam na ponta direita da barra, acima da cauda */
+html.dragao-arte .site-nav .nav-buttons {
+  position: absolute; right: var(--dr-btn-r); top: 0; height: var(--dr-h);
+  display: flex; align-items: center; gap: 8px; z-index: 8;
+}
+html.dragao-arte .site-nav .btn-login-site {
+  font-size: 0; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+}
+html.dragao-arte .site-nav .btn-login-site::before { content: '🔐'; font-size: 15px; line-height: 1; }
+/* logo no lugar da esfera (sem o nome, que já está no banner) */
+html.dragao-arte .site-nav .logo { position: absolute; left: var(--dr-logo-l); top: 50%; transform: translateY(-50%); z-index: 8; }
+html.dragao-arte .site-nav .logo .name { display: none; }
+/* o título do banner fica por cima do dragão */
+html.dragao-arte .banner-overlay { z-index: 60; }
+html.dragao-arte .banner-overlay h1 { text-shadow: 2px 2px 0 #000, 0 0 18px rgba(0,0,0,.85); }
+
+/* a arte original é cortada no topo/esquerda da imagem: esmaece essas bordas para não aparecer uma linha reta */
+html.dragao-arte .dragao-arte-img.tras {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 56px), linear-gradient(to right, transparent 0, #000 40px);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 56px), linear-gradient(to right, transparent 0, #000 40px);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+
+/* faixa do cabeçalho transparente quando o dragão está no menu (sem "degrau" de cor atrás dele) */
+html.dragao-arte .site-header { background: transparent !important; border-bottom: 0 !important; box-shadow: none !important; }

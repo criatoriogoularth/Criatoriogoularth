@@ -728,78 +728,101 @@
     if (document.body) montar(); else document.addEventListener('DOMContentLoaded', montar);
   }
 
-  // ---------- SHENLONG ENROLADO NO MENU (tema Esferas do Dragão) ----------
-  // O dragão é desenhado por código na largura real do menu, em DUAS camadas:
-  // uma ATRÁS dos links (z-index -1) e outra NA FRENTE, transparente. Os trechos
-  // alternam entre as camadas, então ele parece passar por dentro do menu sem
-  // esconder os botões (que continuam clicáveis: pointer-events:none).
-  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false };
-  var CABECA =
-    '<path d="M96 38Q70 72 24 70" stroke="#fff" stroke-width="2.2" fill="none" opacity=".9"/>' +
-    '<path d="M102 32Q90 68 58 80" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>' +
-    '<path d="M30 14Q20 -10 42 -18Q36 -2 46 12Z" fill="#f0d98a" stroke="#a07c1c" stroke-width="1.5"/>' +
-    '<path d="M14 22Q0 4 10 -10Q16 4 26 18Z" fill="#f0d98a" stroke="#a07c1c" stroke-width="1.5"/>' +
-    '<path d="M4 36Q8 12 40 10Q74 8 102 24Q114 32 108 40Q98 52 70 52Q36 58 14 50Q2 46 4 36Z" fill="#3dbb52" stroke="#0e5326" stroke-width="2"/>' +
-    '<path d="M22 47Q70 58 106 41Q98 53 70 55Q42 59 22 47Z" fill="#eef5b4" stroke="#0e5326" stroke-width="1.2"/>' +
-    '<path d="M108 40Q84 47 50 44" stroke="#0e5326" stroke-width="2" fill="none"/>' +
-    '<path d="M97 43l3 6l3-7zM83 45l3 6l3-6z" fill="#fff"/>' +
-    '<ellipse cx="62" cy="26" rx="7" ry="4.5" fill="#ff2a2a"/><circle cx="64" cy="26" r="2" fill="#111"/>' +
-    '<path d="M52 20Q64 13 77 22" stroke="#0e5326" stroke-width="2.4" fill="none"/>' +
-    '<circle cx="101" cy="30" r="2" fill="#0e5326"/>';
+  // ---------- SHENLONG NO MENU (tema Esferas do Dragão) ----------
+  // Usa a ilustração em /temas-img (duas camadas com transparência): uma ATRÁS do menu
+  // (corpo e cabeça) e outra NA FRENTE (garras e a cauda que cruzam a barra). O menu real do
+  // site vira a "barra" no meio, então os links continuam de verdade clicáveis. Só em telas
+  // largas (>= 1180px); no celular/tablet o menu fica normal. Se as imagens não carregarem,
+  // nada muda no menu.
+  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false, imgs: null, carregando: false };
+  var BASE_IMG = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, '') : '';
+  // medidas da arte original (px): largura total, barra do menu e onde o corpo termina embaixo
+  var ARTE = { w: 1672, imgW: 1632, imgH: 640, x0: 58, x1: 1565, y0: 362, y1: 483, fimY: 633 };
+  var DR_VARS = ['--dr-h', '--dr-pl', '--dr-pr', '--dr-mt', '--dr-mb', '--dr-btn-r', '--dr-logo-l'];
 
   function dragaoLimpar() {
     var xs = document.querySelectorAll('.dragao-enrolado');
     for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
-    if (dragao.nav && dragao.estilo) {
-      if (dragao.estilo.pos) dragao.nav.style.position = '';
-      if (dragao.estilo.z) dragao.nav.style.zIndex = '';
+    document.documentElement.classList.remove('dragao-arte');
+    if (dragao.nav) {
+      for (var k = 0; k < DR_VARS.length; k++) dragao.nav.style.removeProperty(DR_VARS[k]);
+      var lg = dragao.nav.querySelector('.btn-login-site');
+      if (lg && lg.getAttribute('data-dr-label')) { lg.removeAttribute('aria-label'); lg.removeAttribute('data-dr-label'); }
+      if (dragao.estilo) {
+        if (dragao.estilo.pos) dragao.nav.style.position = '';
+        if (dragao.estilo.z) dragao.nav.style.zIndex = '';
+      }
     }
     dragao.estilo = null;
   }
 
-  function dragaoCamada(W, Ht, OV, cls, z, op, conteudo) {
-    var d = document.createElement('div');
-    d.className = 'dragao-enrolado ' + cls;
-    d.setAttribute('aria-hidden', 'true');
-    d.style.cssText = 'position:absolute;left:0;top:' + (-OV) + 'px;width:' + W + 'px;height:' + Ht + 'px;pointer-events:none;z-index:' + z + ';opacity:' + op + ';';
-    d.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + Ht + '" viewBox="0 0 ' + W + ' ' + Ht + '">' + conteudo + '</svg>';
-    return d;
+  function dragaoImagens() {
+    if (dragao.imgs || dragao.carregando) return;
+    dragao.carregando = true;
+    var a = new Image(), b = new Image(), n = 0, ok = true;
+    function fim() {
+      if (++n < 2) return;
+      dragao.carregando = false;
+      if (ok) { dragao.imgs = [a, b]; dragaoAgendar(); }
+    }
+    a.onload = b.onload = fim;
+    a.onerror = b.onerror = function () { ok = false; fim(); };
+    a.src = BASE_IMG + 'temas-img/shenron-tras.webp';
+    b.src = BASE_IMG + 'temas-img/shenron-frente.webp';
   }
 
   function dragaoMontar() {
     if (!dragao.querer || !document.body) return;
     var nav = document.querySelector('.site-nav');
     if (!nav || document.body.classList.contains('layout-lateral')) return;
-    var r = nav.getBoundingClientRect(), W = Math.round(r.width), H = Math.round(r.height);
     dragaoLimpar();
     dragao.nav = nav;
-    if (W < 760 || H < 30) return;               // celular: o menu vira botão, sem dragão
+    var W = Math.round(nav.getBoundingClientRect().width);
+    if (W < 1180) return;                              // telas menores: menu normal
+    if (!dragao.imgs) { dragaoImagens(); return; }
 
     var cs = getComputedStyle(nav);
     dragao.estilo = { pos: false, z: false };
     if (cs.position === 'static') { nav.style.position = 'relative'; dragao.estilo.pos = true; }
     if (cs.zIndex === 'auto') { nav.style.zIndex = '50'; dragao.estilo.z = true; }
 
-    var OV = 50, Ht = H + OV * 2, cy = OV + H / 2;
-    var A = H * 0.5 + 14;                          // a onda passa um pouco da borda do menu
-    var P = Math.max(220, Math.min(320, W / 4.4)); // comprimento de cada volta
-    var xCab = W - 170, x0 = -30, passo = 4.5, yCab = OV - 24;
-    var n = Math.ceil((xCab - x0) / passo), L = { f: ['', '', ''], t: ['', '', ''] };
-    for (var k = 0; k <= n; k++) {
-      var x = x0 + k * passo, t = (x - x0) / (xCab - x0);
-      var fim = Math.max(0, (t - 0.76) / 0.24), fim2 = fim * fim;       // perto da cabeça a onda acalma e sobe
-      var fase = 2 * Math.PI * (x - x0) / P;
-      var y = cy + A * (1 - fim2) * Math.sin(fase) + (yCab - cy) * fim2;
-      var rr = 5 + 10 * Math.pow(t, 0.7);                                 // cauda fina → corpo grosso
-      var c = L[Math.floor(fase / Math.PI) % 2 === 0 ? 'f' : 't'], xs = x.toFixed(1), ys = y.toFixed(1);
-      c[0] += '<circle cx="' + xs + '" cy="' + ys + '" r="' + (rr + 1.7).toFixed(1) + '" fill="#0e5326"/>';      // contorno contínuo
-      c[1] += '<circle cx="' + xs + '" cy="' + ys + '" r="' + rr.toFixed(1) + '" fill="#3dbb52"/>';              // corpo
-      c[2] += '<circle cx="' + xs + '" cy="' + (y + rr * 0.45).toFixed(1) + '" r="' + (rr * 0.5).toFixed(1) + '" fill="#bfe38a"/>';   // barriga
+    var artW = Math.min(W, 1500), s = artW / ARTE.w, L = (W - artW) / 2;
+    var pillH = (ARTE.y1 - ARTE.y0) * s, pillW = (ARTE.x1 - ARTE.x0) * s, T = -ARTE.y0 * s;
+    var topoPagina = nav.getBoundingClientRect().top + (window.pageYOffset || 0);
+    var mt = Math.max(0, ARTE.y0 * s + 6 - topoPagina);                 // espaço em cima para a cabeça não cortar
+    var mb = (ARTE.fimY - ARTE.y1) * s + 14;                            // espaço embaixo para as voltas do corpo
+    var st = nav.style;
+    st.setProperty('--dr-h', pillH.toFixed(1) + 'px');
+    st.setProperty('--dr-pl', (L + 205 * s).toFixed(1) + 'px');          // links começam depois da "bola"
+    st.setProperty('--dr-pr', (W - (L + 1290 * s)).toFixed(1) + 'px');   // e terminam antes da cauda
+    st.setProperty('--dr-mt', mt.toFixed(1) + 'px');
+    st.setProperty('--dr-mb', mb.toFixed(1) + 'px');
+    st.setProperty('--dr-btn-r', (W - (L + 1553 * s)).toFixed(1) + 'px'); // botões ficam na ponta direita da barra
+    st.setProperty('--dr-logo-l', (L + 134 * s - 30).toFixed(1) + 'px');  // logo no lugar da esfera
+    document.documentElement.classList.add('dragao-arte');
+
+    function img(cls, z, fonte) {
+      var i = document.createElement('img');
+      i.className = 'dragao-enrolado dragao-arte-img ' + cls; i.alt = ''; i.draggable = false; i.src = fonte.src;
+      i.setAttribute('aria-hidden', 'true');
+      i.style.cssText = 'position:absolute;left:' + L.toFixed(1) + 'px;top:' + T.toFixed(1) + 'px;width:' + (ARTE.imgW * s).toFixed(1) + 'px;height:' + (ARTE.imgH * s).toFixed(1) + 'px;max-width:none;pointer-events:none;user-select:none;z-index:' + z + ';';
+      return i;
     }
-    var frente = L.f.join(''), tras = L.t.join('');
-    var cabeca = '<g transform="translate(' + xCab.toFixed(1) + ',' + yCab.toFixed(1) + ') rotate(-8) scale(.9) translate(-6,-34)">' + CABECA + '</g>';
-    nav.appendChild(dragaoCamada(W, Ht, OV, 'tras', -1, 0.9, tras));
-    nav.appendChild(dragaoCamada(W, Ht, OV, 'frente', 6, 0.32, frente + cabeca));
+    var barra = document.createElement('div');
+    barra.className = 'dragao-enrolado dragao-barra'; barra.setAttribute('aria-hidden', 'true');
+    barra.style.cssText = 'position:absolute;left:' + (L + ARTE.x0 * s).toFixed(1) + 'px;top:0;width:' + pillW.toFixed(1) + 'px;height:' + pillH.toFixed(1) + 'px;border-radius:' + (pillH / 2).toFixed(1) + 'px;pointer-events:none;z-index:-1;';
+    nav.appendChild(img('tras', -2, dragao.imgs[0]));
+    nav.appendChild(barra);
+    if (!nav.querySelector('.logo')) {                                   // esfera de 4 estrelas na ponta esquerda (como na arte)
+      var d = ARTE.imgW * 0 + 112 * s, bola = document.createElement('div');
+      bola.className = 'dragao-enrolado dragao-esfera'; bola.setAttribute('aria-hidden', 'true');
+      bola.style.cssText = 'position:absolute;left:' + (L + 134 * s - d / 2).toFixed(1) + 'px;top:' + ((pillH - d) / 2).toFixed(1) + 'px;width:' + d.toFixed(1) + 'px;height:' + d.toFixed(1) + 'px;pointer-events:none;z-index:0;background:' + svgUrl(esfera(4).s) + ' center/contain no-repeat;filter:drop-shadow(0 0 10px rgba(255,170,0,.7));';
+      nav.appendChild(bola);
+    }
+    nav.appendChild(img('frente', 6, dragao.imgs[1]));
+
+    var lg = nav.querySelector('.btn-login-site');                      // o botão "Entrar" vira só o ícone: acessível por rótulo
+    if (lg && !lg.getAttribute('aria-label')) { lg.setAttribute('aria-label', 'Entrar'); lg.setAttribute('data-dr-label', '1'); }
   }
 
   function dragaoAgendar() {
