@@ -282,6 +282,7 @@
   line-height: 1.4;
 }
 </style>
+<script src="modelos-impressao.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -672,6 +673,12 @@ async function uploadLogo(event) {
     }
     
     await savePersonalizacao(personalizacao);
+    // Cópia em ALTA resolução (900 px, PNG) para impressão de crachás e árvores. O site continua usando a versão leve.
+    // Se não der para guardar, nada se perde: o logo normal já foi salvo acima.
+    try {
+      personalizacao.logoUrlHD = await ModelosImpressao.logoHD(file, 900);
+      await savePersonalizacao(personalizacao);
+    } catch (e) { delete personalizacao.logoUrlHD; console.warn('Cópia em alta resolução do logo não foi salva:', e); }
     
     const tamanhoLogo = parseInt(document.getElementById('logo-tamanho').value) || 76;
     const iniciais = document.getElementById('logo-iniciais').value || 'CG';
@@ -692,6 +699,7 @@ async function excluirLogo() {
   
   const personalizacao = await getPersonalizacao();
   personalizacao.logoUrl = '';
+  personalizacao.logoUrlHD = '';
   await savePersonalizacao(personalizacao);
   
   const tamanho = parseInt(document.getElementById('logo-tamanho').value) || 76;

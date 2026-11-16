@@ -487,7 +487,7 @@ html[data-modelo="rio"][data-escopo="site"]::before {
 /* ---------- JUTSU: transição entre páginas (tema Ninja da Folha) ---------- */
 html.tema-jutsu-cobre::after {
   content: ''; position: fixed; inset: 0; z-index: 10000; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, #ffffff 0, #eef1f7 40%, #cfd6e4 100%);
+  background: var(--tt-cobre, radial-gradient(circle at 50% 50%, #ffffff 0, #eef1f7 40%, #cfd6e4 100%));
 }
 #tema-jutsu { position: fixed; inset: 0; z-index: 10001; overflow: hidden; }
 #tema-jutsu.jutsu-sair { pointer-events: auto; }
@@ -731,3 +731,36 @@ html.dragao-hover .dragao-esfera { filter: drop-shadow(0 0 20px rgba(255,200,0,1
 
 /* abas centralizadas dentro da barra do dragão (em todas as páginas) */
 html.dragao-arte .site-nav .nav-links { flex: 1; justify-content: center; }
+
+
+/* ============================================================
+   RODADA 7 — sem "pulos" entre páginas + transição temática
+   ============================================================ */
+/* abas escondidas só até o menu em cascata ficar pronto (tem rede de segurança no JS) */
+html.tema-menu-pendente .site-nav .nav-links { visibility: hidden !important; }
+
+/* dragão: se a página não tem banner, reserva o espaço da cabeça em cima desde o 1º quadro */
+html.dragao-arte .site-header:not(:has(.site-banner)) .site-nav { margin-top: var(--dr-need-top); }
+/* a arte entra com um fade suave (só na primeira vez) */
+@keyframes tt-fade { from { opacity: 0; } to { opacity: 1; } }
+.dragao-arte-img.dr-novo { animation: tt-fade .45s ease both !important; }
+/* cenário animado também entra suave */
+#tema-fx { animation: tt-fade .7s ease both; }
+@media (prefers-reduced-motion: reduce) { #tema-fx, .dragao-arte-img.dr-novo { animation: none !important; } }
+
+/* transição temática (Velho Oeste, Código Verde, Corrida de Rua, Dragão, Rio, Piratas) */
+#tema-jutsu .tt-fundo { position: absolute; inset: 0; }
+#tema-jutsu.trans-sair .tt-fundo { clip-path: circle(0 at var(--jx) var(--jy)); animation: tt-cobrir .55s cubic-bezier(.5,0,.8,.4) forwards; }
+@keyframes tt-cobrir { to { clip-path: circle(150vmax at var(--jx) var(--jy)); } }
+#tema-jutsu.trans-entrar .tt-fundo { animation: tt-sumir .65s ease-out .05s forwards; }
+@keyframes tt-sumir { to { opacity: 0; } }
+#tema-jutsu .tt-emb { position: absolute; left: 50%; top: 50%; font-size: 24vmin; line-height: 1; transform: translate(-50%, -50%); opacity: 0; text-shadow: 0 0 40px rgba(0,0,0,.35); }
+#tema-jutsu.trans-sair .tt-emb { animation: tt-emb .55s ease-out both; }
+@keyframes tt-emb { 0%, 30% { opacity: 0; transform: translate(-50%,-50%) scale(.4); } 70% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); } }
+#tema-jutsu.trans-entrar .tt-emb { opacity: 1; animation: tt-emb-sai .55s ease-out forwards; }
+@keyframes tt-emb-sai { to { opacity: 0; transform: translate(-50%,-50%) scale(1.8); } }
+#tema-jutsu .tt-p { position: absolute; left: var(--jx); top: var(--jy); font-size: 6vmin; line-height: 1; opacity: 0; }
+#tema-jutsu.trans-sair .tt-p { animation: tt-p-sair .55s ease-out var(--de) both; }
+@keyframes tt-p-sair { 0% { opacity: 0; transform: translate(0,0) scale(.3); } 30% { opacity: 1; } 100% { opacity: 1; transform: translate(var(--tx),var(--ty)) scale(1.2) rotate(var(--r)); } }
+#tema-jutsu.trans-entrar .tt-p { opacity: 1; transform: translate(var(--tx),var(--ty)) scale(1.2) rotate(var(--r)); animation: tt-p-entra .6s ease-out var(--de) forwards; }
+@keyframes tt-p-entra { to { opacity: 0; transform: translate(calc(var(--tx) * 2.2), calc(var(--ty) * 2.2)) scale(.5) rotate(calc(var(--r) * 2)); } }

@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="temas-modelos.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="modelos-impressao.js"></script>
 <style>
 .tree-container {
   background: var(--bg-elevated-2);
@@ -2099,7 +2100,7 @@ function gerarPDF() {
     const largura = certificado.scrollWidth;
     const altura = certificado.scrollHeight;
     html2canvas(certificado, {
-      scale: 3, useCORS: true, allowTaint: true,
+      scale: Math.min(6, Math.max(3, Math.ceil(4677 / Math.max(1, certificado.offsetWidth)))), useCORS: true, allowTaint: true,
       backgroundColor: '#ffffff', logging: false,
       width: largura, height: altura,
       windowWidth: largura, windowHeight: altura,
@@ -2138,7 +2139,7 @@ function gerarPDF() {
         if (cloneCriador) cloneCriador.style.color = CONFIG.corCriador;
       }
     }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('landscape', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -2178,5 +2179,115 @@ renderListaAves();
 carregarAvePorId();
 renderSidebar('arvore');
 </script>
+
+<script>
+/* ============================================================
+   ÁRVORE EM MODELO TEMÁTICO (modelos-impressao.js) — A4, alta resolução
+   ============================================================ */
+(function () {
+  const MI = window.ModelosImpressao; if (!MI) return;
+  const CHAVE = 'arvore_tema_v1', CHAVE_LOGO = 'cracha_tema_logo';
+  const cfg = { modelo: 'ouro', logo: 'proprio', dpi: 300 };
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem(CHAVE) || '{}')); } catch (e) {}
+  if (!MI.MODELOS[cfg.modelo]) cfg.modelo = 'ouro';
+  let logoProprio = '', logoSite = { url: '', iniciais: '' };
+  try { logoProprio = localStorage.getItem(CHAVE_LOGO) || ''; } catch (e) {}
+  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); } catch (e) {} };
+  const cracha = () => { try { return JSON.parse(localStorage.getItem('cracha_config') || '{}'); } catch (e) { return {}; } };
+
+  function criador() {
+    const c = cracha(), el = document.getElementById('cert-criador');
+    return { nome: c.propNome || (el ? el.textContent.trim() : ''), registro: c.propRegistro || '', telefone: c.propContato || '' };
+  }
+  const iniciais = n => String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+  function logoAtual() {
+    const ini = iniciais(criador().nome);
+    if (cfg.logo === 'site') return { url: logoSite.url, iniciais: logoSite.iniciais || ini };
+    if (cfg.logo === 'nenhum') return { url: '', iniciais: ini };
+    return { url: logoProprio || cracha().logoUrl || '', iniciais: ini };
+  }
+  function montarHtml() {
+    if (typeof aveSelecionada === 'undefined' || !aveSelecionada) return null;
+    // usa a árvore de trabalho da tela (inclui as edições feitas à mão); se não houver, monta pelos dados cadastrados
+    const t = (typeof tree !== 'undefined' && tree && Object.keys(tree).length > 1) ? tree : Genealogia.montar(aveSelecionada, AVES, { maxGen: 3, ancestraisTabela: ANCESTRAIS_TAB });
+    const nome = c => (t[c] && t[c].nome) ? t[c].nome : '';
+    const a = aveSelecionada;
+    const dados = { nome: a.nome, especie: a.especie, raca: a.raca, anilha: a.anilha, nasc: a.dataNasc, sexo: a.sexo, pai: nome('pai'), mae: nome('mae'), criador: criador() };
+    return { html: MI.htmlArvore(dados, c => t[c] || null, cfg.modelo, { logo: logoAtual(), formato: 'folha' }), nome: a.nome };
+  }
+  async function carregarSite() {
+    try { const p = await DB.getConfig('site_personalizacao'); if (p) logoSite = { url: p.logoUrlHD || p.logoUrl || '', iniciais: p.logoIniciais || '' }; } catch (e) {}
+  }
+  let timer = 0;
+  function previa() {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const alvo = document.getElementById('mi-arv-previa'); if (!alvo) return;
+      const r = montarHtml(); if (!r) { alvo.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:13px;">Escolha uma ave acima para ver a prévia.</div>'; return; }
+      await carregarSite();
+      const larg = Math.min(640, Math.max(280, alvo.clientWidth - 4)), k = larg / (MI.FOLHA.w * 3.7795);
+      alvo.innerHTML = '<div style="width:' + larg + 'px;height:' + (MI.FOLHA.h * 3.7795 * k) + 'px;overflow:hidden;border-radius:8px;box-shadow:0 8px 22px -10px #0009;"><div id="mi-arv-in" style="transform:scale(' + k + ');transform-origin:0 0;width:' + MI.FOLHA.w + 'mm;"></div></div>';
+      await MI.montar(document.getElementById('mi-arv-in'), r.html, cfg.modelo);
+    }, 120);
+  }
+  async function exportar(tipo) {
+    const r = montarHtml(); if (!r) { alert('Escolha uma ave primeiro.'); return; }
+    const btns = document.querySelectorAll('.mi-arv-bloco button.mi-b'); btns.forEach(b => b.disabled = true);
+    try {
+      await carregarSite(); await MI.carregarFontes(cfg.modelo);
+      const arq = 'arvore-' + String(r.nome || 'ave').replace(/[^\w\-]+/g, '_');
+      if (tipo === 'pdf') { const d = await MI.pdf([{ html: r.html, modelo: cfg.modelo }], { dpi: cfg.dpi, formato: 'folha' }); d.save(arq + '.pdf'); }
+      else { MI.baixar(await MI.png(r.html, cfg.modelo, Math.max(cfg.dpi, 300)), arq + '.png'); }
+    } catch (e) { console.error(e); alert('❌ Não consegui gerar: ' + e.message); }
+    finally { btns.forEach(b => b.disabled = false); }
+  }
+  function mudou() {
+    cfg.modelo = document.getElementById('mi-arv-modelo').value;
+    cfg.dpi = parseInt(document.getElementById('mi-arv-dpi').value, 10) || 300;
+    const r = document.querySelector('input[name="mi-arv-logo"]:checked'); if (r) cfg.logo = r.value;
+    salvar(); previa();
+  }
+  function enviar(ev) {
+    const f = ev.target.files[0]; if (!f) return;
+    MI.logoHD(f, 900).then(url => {
+      logoProprio = url; try { localStorage.setItem(CHAVE_LOGO, url); } catch (e) {}
+      cfg.logo = 'proprio'; document.querySelector('input[name="mi-arv-logo"][value="proprio"]').checked = true; salvar(); previa();
+    }).catch(e => alert('❌ ' + e.message));
+    ev.target.value = '';
+  }
+  function montarBloco() {
+    const ancora = document.querySelector('.cert-actions'); if (!ancora || document.getElementById('mi-arv-bloco')) return;
+    const opt = (rot, ids) => '<optgroup label="' + rot + '">' + ids.map(id => '<option value="' + id + '">' + MI.MODELOS[id].emoji + ' ' + MI.MODELOS[id].nome + '</option>').join('') + '</optgroup>';
+    ancora.insertAdjacentHTML('afterend',
+      '<div class="mi-arv-bloco" id="mi-arv-bloco" style="margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--bg-elevated);">' +
+      '<div style="font-weight:700;color:var(--brass-soft);margin-bottom:10px;">🎨 Árvore em modelo temático <small style="font-weight:400;color:var(--text-muted);margin-left:6px;">A4 paisagem · alta resolução</small></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;align-items:start;font-size:12.5px;color:var(--text-muted);">' +
+      '<label style="display:flex;flex-direction:column;gap:6px;">Modelo<select id="mi-arv-modelo" style="padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--bg-elevated-2);color:var(--text);">' +
+      opt('Clássicos e modernos', ['ouro', 'moderno-claro', 'moderno-escuro', 'elegante']) + opt('Temas do site', ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata']) + '</select></label>' +
+      '<label style="display:flex;flex-direction:column;gap:6px;">Qualidade<select id="mi-arv-dpi" style="padding:9px;border-radius:8px;border:1px solid var(--line);background:var(--bg-elevated-2);color:var(--text);"><option value="300">Alta — 300 dpi</option><option value="400">Máxima — 400 dpi</option></select></label>' +
+      '<div style="display:flex;flex-direction:column;gap:5px;color:var(--text);"><span style="color:var(--text-muted);">Logo</span>' +
+      '<label><input type="radio" name="mi-arv-logo" value="proprio"> 🖼️ Meu logo</label><label><input type="radio" name="mi-arv-logo" value="site"> 🌐 Logo do site</label><label><input type="radio" name="mi-arv-logo" value="nenhum"> ⭕ Só as iniciais</label>' +
+      '<button type="button" class="btn btn-secondary" style="margin-top:4px;" onclick="document.getElementById(\'mi-arv-up\').click()">⬆️ Enviar meu logo</button><input type="file" id="mi-arv-up" accept="image/*" hidden></div></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 10px;"><button type="button" class="btn btn-primary mi-b" id="mi-arv-pdf">📄 Baixar PDF (A4)</button><button type="button" class="btn btn-secondary mi-b" id="mi-arv-png">🖼️ Baixar PNG</button></div>' +
+      '<div id="mi-arv-previa"></div></div>');
+    document.getElementById('mi-arv-modelo').value = cfg.modelo;
+    document.getElementById('mi-arv-dpi').value = String(cfg.dpi);
+    const r = document.querySelector('input[name="mi-arv-logo"][value="' + cfg.logo + '"]'); if (r) r.checked = true;
+    ['mi-arv-modelo', 'mi-arv-dpi'].forEach(id => document.getElementById(id).addEventListener('change', mudou));
+    document.querySelectorAll('input[name="mi-arv-logo"]').forEach(x => x.addEventListener('change', mudou));
+    document.getElementById('mi-arv-up').addEventListener('change', enviar);
+    document.getElementById('mi-arv-pdf').addEventListener('click', () => exportar('pdf'));
+    document.getElementById('mi-arv-png').addEventListener('click', () => exportar('png'));
+    window.__miArvPrevia = previa;
+    setInterval(() => {                    // atualiza a prévia quando troca a ave ou quando a árvore é editada
+      const a = (typeof aveSelecionada !== 'undefined' && aveSelecionada) ? aveSelecionada.id : null;
+      const sig = a + '|' + ((typeof tree !== 'undefined' && tree) ? Object.keys(tree).sort().map(k => k + ':' + (tree[k] && tree[k].nome)).join(';') : '');
+      if (sig !== montarBloco._ult) { montarBloco._ult = sig; previa(); }
+    }, 700);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montarBloco); else montarBloco();
+})();
+</script>
+
 </body>
 </html>

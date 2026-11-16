@@ -730,14 +730,14 @@
 
   // ---------- MENU EM CASCATA (temas novos) ----------
   // Em vez de 10-11 abas soltas, os temas novos mostram: Home · O Criatório · Notícias ·
-  // Aves ▾ (Plantel, Adultos, Filhotes, Crachás) · Mídias ▾ (Fotos, Vídeos) · Parceiros · Contato.
+  // Aves ▾ (Plantel, Adultos, Filhotes) · Crachás · Mídias ▾ (Fotos, Vídeos) · Parceiros · Contato.
   // O painel de "Aves" lista as espécies como atalhos (♂ machos / ♀ fêmeas).
   // Respeita o que o dono configurou (abas escondidas e ordem): o agrupamento roda DEPOIS do
   // site-buttons.js, usa só as abas visíveis e NÃO apaga nada — as abas originais ficam apenas
   // ocultas (e voltam sozinhas ao trocar para um tema antigo).
   var TEMAS_NOVOS = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
   var MG_GRUPOS = [
-    { id: 'aves', titulo: 'Aves', itens: ['plantel', 'adultos', 'filhotes', 'crachas'] },
+    { id: 'aves', titulo: 'Aves', itens: ['plantel', 'adultos', 'filhotes'] },
     { id: 'midias', titulo: 'Mídias', itens: ['fotos', 'videos'] }
   ];
   var MG_TEXTO = { 'Plantel': 'plantel', 'Adultos': 'adultos', 'Filhotes': 'filhotes', 'Crachás': 'crachas', 'Fotos': 'fotos', 'Vídeos': 'videos' };
@@ -749,7 +749,7 @@
     fotos: ['📸', 'Fotos', 'Galeria de fotos'],
     videos: ['🎬', 'Vídeos', 'Vídeos do criatório']
   };
-  var mg = { querer: false, grupos: [], timer: 0, espera: 0, ligado: false, navEstilo: null };
+  var mg = { querer: false, grupos: [], timer: 0, espera: 0, ligado: false, navEstilo: null, obsNav: null, seguranca: 0 };
 
   function mgChave(el) {
     var a = el.tagName === 'A' ? el : el.querySelector(':scope > a');
@@ -867,6 +867,7 @@
     Array.prototype.forEach.call(navLinks.children, function (el) { var k = mgChave(el); if (k) porChave[k] = el; });
     MG_GRUPOS.forEach(function (def) { mgConstruir(def, navLinks, porChave); });
     if (mg.grupos.length) document.documentElement.classList.add('tema-menu-grupos');
+    mgPronto();
   }
 
   function mgDesagrupar() {
@@ -880,6 +881,14 @@
     mgNavAcima(false);
   }
 
+  function mgPronto() { document.documentElement.classList.remove('tema-menu-pendente'); }
+  function mgObservar() {                           // agrupa no mesmo instante em que as abas ficam visíveis (antes do 1º desenho)
+    var nl = document.querySelector('.site-nav .nav-links');
+    if (!nl || !window.MutationObserver || mg.obsNav) return;
+    var tentar = function () { if (nl.style.visibility === 'visible') { mgTentar(); if (mg.obsNav) { mg.obsNav.disconnect(); mg.obsNav = null; } } };
+    mg.obsNav = new MutationObserver(tentar); mg.obsNav.observe(nl, { attributes: true, attributeFilter: ['style'] });
+    tentar();
+  }
   function mgAgendar() { clearTimeout(mg.timer); mg.timer = setTimeout(mgTentar, 120); }
   function mgTentar() {
     if (!mg.querer || !document.body) return;
@@ -899,10 +908,13 @@
       document.addEventListener('mouseover', mgEntrou);
       window.addEventListener('load', mgAgendar);
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mgAgendar); else mgAgendar();
+    document.documentElement.classList.add('tema-menu-pendente');            // esconde as abas até o menu em cascata estar pronto
+    clearTimeout(mg.seguranca); mg.seguranca = setTimeout(mgPronto, 3200);   // rede de segurança: nunca deixa o menu escondido
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { mgObservar(); mgAgendar(); }); else { mgObservar(); mgAgendar(); }
   }
   function pararMenuGrupos() {
-    mg.querer = false; clearTimeout(mg.timer);
+    mg.querer = false; clearTimeout(mg.timer); clearTimeout(mg.seguranca); mgPronto();
+    if (mg.obsNav) { mg.obsNav.disconnect(); mg.obsNav = null; }
     if (mg.ligado) {
       document.removeEventListener('click', mgClique);
       document.removeEventListener('keydown', mgTecla);
@@ -934,16 +946,30 @@
   // ponta esquerda (junto da garra); a esfera fica na ponta direita. O título do banner sobe para o
   // canto de cima do banner, fora da área do dragão. Os olhos brilham quando o mouse passa no menu.
   // Só em telas largas (>= 1180px); no celular/tablet o menu fica normal.
-  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false, imgs: null, carregando: false, hover: null };
+  var dragao = { querer: false, timer: 0, ro: null, nav: null, estilo: null, ligado: false, imgs: null, carregando: false, hover: null, entrou: false };
   var BASE_IMG = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, '') : '';
   var ARTE = { w: 1672, imgW: 1632, imgH: 640, x0: 58, x1: 1565, y0: 362, y1: 483, fimY: 633, olhos: [[572, 212, 28], [640, 199, 22]] };
   var DR_VARS = ['--dr-h', '--dr-pl', '--dr-pr', '--dr-mt', '--dr-mb', '--dr-btn-l', '--dr-logo-l', '--dr-logo-d'];
 
+  var DR_RAIZ = ['--dr-h', '--dr-pl', '--dr-pr', '--dr-mb', '--dr-need-top', '--dr-banner-min'];
+  function dragaoReservar() {                       // fixa o espaço do menu/banner pela largura da janela: nada "pula" depois
+    var root = document.documentElement, W = root.clientWidth;
+    if (!dragao.querer || W < 1180 || (document.body && document.body.classList.contains('layout-lateral'))) return;
+    var artW = Math.min(W, 1500), s = artW / ARTE.w, L = (W - artW) / 2;
+    root.style.setProperty('--dr-banner-min', Math.round(ARTE.y0 * s + 150) + 'px');
+    root.style.setProperty('--dr-h', ((ARTE.y1 - ARTE.y0) * s).toFixed(1) + 'px');
+    root.style.setProperty('--dr-pl', (L + 296 * s).toFixed(1) + 'px');
+    root.style.setProperty('--dr-pr', (W - (L + 1290 * s)).toFixed(1) + 'px');
+    root.style.setProperty('--dr-mb', ((ARTE.fimY - ARTE.y1) * s + 14).toFixed(1) + 'px');
+    root.style.setProperty('--dr-need-top', (ARTE.y0 * s + 6).toFixed(1) + 'px');
+    root.classList.add('dragao-arte');
+  }
   function dragaoLimpar() {
     var xs = document.querySelectorAll('.dragao-enrolado');
     for (var i = 0; i < xs.length; i++) if (xs[i].parentNode) xs[i].parentNode.removeChild(xs[i]);
     var root = document.documentElement;
-    root.classList.remove('dragao-arte'); root.classList.remove('dragao-hover'); root.style.removeProperty('--dr-banner-min');
+    root.classList.remove('dragao-arte'); root.classList.remove('dragao-hover');
+    for (var q = 0; q < DR_RAIZ.length; q++) root.style.removeProperty(DR_RAIZ[q]);
     if (dragao.nav) {
       for (var k = 0; k < DR_VARS.length; k++) dragao.nav.style.removeProperty(DR_VARS[k]);
       var lg = dragao.nav.querySelector('.btn-login-site');
@@ -980,7 +1006,7 @@
     dragao.nav = nav;
     var W = Math.round(nav.getBoundingClientRect().width);
     if (W < 1180) return;                              // telas menores: menu normal
-    if (!dragao.imgs) { dragaoImagens(); return; }
+    dragaoImagens();                                   // (as imagens chegam depois e entram com um fade; o menu já fica pronto)
 
     var cs = getComputedStyle(nav);
     dragao.estilo = { pos: false, z: false };
@@ -990,26 +1016,17 @@
     var artW = Math.min(W, 1500), s = artW / ARTE.w, L = (W - artW) / 2;
     var pillH = (ARTE.y1 - ARTE.y0) * s, pillW = (ARTE.x1 - ARTE.x0) * s, T = -ARTE.y0 * s;
     var root = document.documentElement;
-    root.style.setProperty('--dr-banner-min', Math.round(ARTE.y0 * s + 150) + 'px');   // banner alto o bastante p/ o título ficar acima do dragão
-    root.classList.add('dragao-arte');
-    var topoPagina = nav.getBoundingClientRect().top + (window.pageYOffset || 0);       // medido já com o banner no tamanho final
-    var mt = Math.max(0, ARTE.y0 * s + 6 - topoPagina);                                  // espaço em cima p/ a cabeça não cortar
-    var mb = (ARTE.fimY - ARTE.y1) * s + 14;                                             // espaço embaixo p/ as voltas do corpo
+    dragaoReservar();                                                                    // (já foi feito no início; garante após redimensionar)
     var D = Math.min(76, pillH * 0.72), temLogo = !!nav.querySelector('.logo');
     var xLogo = L + ARTE.x0 * s + 12, xBtn = xLogo + (temLogo ? D + 10 : 0);
     var st = nav.style;
-    st.setProperty('--dr-h', pillH.toFixed(1) + 'px');
-    st.setProperty('--dr-pl', (L + 296 * s).toFixed(1) + 'px');                          // links começam depois da garra
-    st.setProperty('--dr-pr', (W - (L + 1290 * s)).toFixed(1) + 'px');                   // e terminam antes da cauda
-    st.setProperty('--dr-mt', mt.toFixed(1) + 'px');
-    st.setProperty('--dr-mb', mb.toFixed(1) + 'px');
     st.setProperty('--dr-logo-l', xLogo.toFixed(1) + 'px');
     st.setProperty('--dr-logo-d', D.toFixed(1) + 'px');
     st.setProperty('--dr-btn-l', xBtn.toFixed(1) + 'px');
 
-    function img(cls, z, fonte) {
+    function img(cls, z, fonte, entra) {
       var i = document.createElement('img');
-      i.className = 'dragao-enrolado dragao-arte-img ' + cls; i.alt = ''; i.draggable = false; i.src = fonte.src;
+      i.className = 'dragao-enrolado dragao-arte-img ' + cls + (entra ? ' dr-novo' : ''); i.alt = ''; i.draggable = false; i.src = fonte.src;
       i.setAttribute('aria-hidden', 'true');
       i.style.cssText = 'position:absolute;left:' + L.toFixed(1) + 'px;top:' + T.toFixed(1) + 'px;width:' + (ARTE.imgW * s).toFixed(1) + 'px;height:' + (ARTE.imgH * s).toFixed(1) + 'px;max-width:none;pointer-events:none;user-select:none;z-index:' + z + ';';
       return i;
@@ -1017,7 +1034,8 @@
     var barra = document.createElement('div');
     barra.className = 'dragao-enrolado dragao-barra'; barra.setAttribute('aria-hidden', 'true');
     barra.style.cssText = 'position:absolute;left:' + (L + ARTE.x0 * s).toFixed(1) + 'px;top:0;width:' + pillW.toFixed(1) + 'px;height:' + pillH.toFixed(1) + 'px;border-radius:' + (pillH / 2).toFixed(1) + 'px;pointer-events:none;z-index:-1;';
-    nav.appendChild(img('tras', -2, dragao.imgs[0]));
+    var comImg = !!dragao.imgs, novo = comImg && !dragao.entrou;
+    if (comImg) nav.appendChild(img('tras', -2, dragao.imgs[0], novo));
     nav.appendChild(barra);
 
     var d = 84 * s, bola = document.createElement('div');                                // esfera de 4 estrelas na ponta direita da barra
@@ -1031,7 +1049,7 @@
       e.style.cssText = 'position:absolute;left:' + (L + o[0] * s - dd / 2).toFixed(1) + 'px;top:' + (T + o[1] * s - dd / 2).toFixed(1) + 'px;width:' + dd.toFixed(1) + 'px;height:' + dd.toFixed(1) + 'px;border-radius:50%;pointer-events:none;z-index:-1;';
       nav.appendChild(e);
     });
-    nav.appendChild(img('frente', 6, dragao.imgs[1]));
+    if (comImg) { nav.appendChild(img('frente', 6, dragao.imgs[1], novo)); dragao.entrou = true; }
 
     dragao.hover = { e: function () { root.classList.add('dragao-hover'); }, l: function () { root.classList.remove('dragao-hover'); } };
     nav.addEventListener('mouseenter', dragao.hover.e); nav.addEventListener('mouseleave', dragao.hover.l);
@@ -1047,12 +1065,13 @@
 
   function iniciarDragao() {
     dragao.querer = true;
+    dragaoReservar(); dragaoImagens();                // espaço reservado e imagens já a caminho desde o início da página
     if (dragao.ligado) { dragaoAgendar(); return; }
     dragao.ligado = true;
     window.addEventListener('resize', dragaoAgendar);
     window.addEventListener('load', dragaoAgendar);
     document.addEventListener('DOMContentLoaded', function () {
-      dragaoAgendar();
+      dragaoMontar();                               // 1ª montagem sem esperar (sem atraso)
       var nav = document.querySelector('.site-nav');
       if (nav && window.ResizeObserver) {
         dragao.ro = new ResizeObserver(function () { dragaoAgendar(); });
@@ -1080,11 +1099,32 @@
   // movimento", nada disso acontece e o link funciona normalmente.
   var jutsu = { ligado: false, ocupado: false, entrou: false };
 
+  var TRANS = {                                     // transição de cada tema novo (o Ninja tem o jutsu completo, mais abaixo)
+    faroeste: { cor: 'linear-gradient(180deg,#ecd9a8,#c9ac6c)', emb: '🌵', part: ['🌾', '💨', '🌵', '🐎'] },
+    matrix:   { cor: 'linear-gradient(180deg,#00200d,#000a04)', emb: '01', part: ['0', '1', 'ｱ', 'ﾊ', '7', 'ﾘ'], txt: '#00ff66' },
+    velozes:  { cor: 'linear-gradient(135deg,#ff4a1c,#19b5ff)', emb: '🏁', part: ['🏁', '💨', '⚡', '🏎️'] },
+    dragao:   { cor: 'radial-gradient(circle at 50% 50%,#fff3b0,#ffb800 40%,#ff7a00 100%)', emb: '🐉', part: ['✨', '🔥', '⭐', '🟠'] },
+    rio:      { cor: 'linear-gradient(135deg,#1f7bf2,#ff3d8b)', emb: '🦜', part: ['🎉', '🪶', '✨', '🌴'] },
+    pirata:   { cor: 'linear-gradient(180deg,#0e2c52,#1e7fc0)', emb: '⚓', part: ['🌊', '⚓', '🏴‍☠️', '💧'] }
+  };
+  function transTemaMontar(mod, x, y, modo) {
+    var t = TRANS[mod] || TRANS.dragao, o = document.createElement('div'), h = '', i;
+    o.id = 'tema-jutsu'; o.className = 'jutsu-' + modo + ' trans-' + modo; o.setAttribute('aria-hidden', 'true');
+    o.style.cssText = '--jx:' + Math.round(x) + 'px;--jy:' + Math.round(y) + 'px;';
+    h += '<div class="tt-fundo" style="background:' + t.cor + '"></div><div class="tt-emb"' + (t.txt ? ' style="color:' + t.txt + ';font-family:monospace;"' : '') + '>' + t.emb + '</div>';
+    for (i = 0; i < 14; i++) {
+      var a = i * (Math.PI * 2 / 14), d = 18 + (i % 3) * 10;
+      h += '<span class="tt-p" style="--tx:' + Math.round(Math.cos(a) * d) + 'vmax;--ty:' + Math.round(Math.sin(a) * d) + 'vmax;--r:' + (i * 37) + 'deg;--de:' + (i * 18) + 'ms;' + (t.txt ? 'color:' + t.txt + ';' : '') + '">' + t.part[i % t.part.length] + '</span>';
+    }
+    o.innerHTML = h; document.body.appendChild(o); return o;
+  }
   function jutsuAtivo() {
-    return escopo === 'site' && document.documentElement.getAttribute('data-modelo') === 'ninja' && !reduzMovimento();
+    return escopo === 'site' && TEMAS_NOVOS.indexOf(document.documentElement.getAttribute('data-modelo')) >= 0 && !reduzMovimento();
   }
 
   function jutsuMontar(x, y, modo) {
+    var mod = document.documentElement.getAttribute('data-modelo');
+    if (mod !== 'ninja') return transTemaMontar(mod, x, y, modo);           // demais temas: transição temática
     var o = document.createElement('div');
     o.id = 'tema-jutsu'; o.className = 'jutsu-' + modo; o.setAttribute('aria-hidden', 'true');
     o.style.cssText = '--jx:' + Math.round(x) + 'px;--jy:' + Math.round(y) + 'px;';
@@ -1117,7 +1157,7 @@
     if (!x && !y) { var rc = a.getBoundingClientRect(); x = rc.left + rc.width / 2; y = rc.top + rc.height / 2; }   // clique por teclado
     jutsuMontar(x, y, 'sair');
     try { sessionStorage.setItem('tema_jutsu', JSON.stringify({ t: Date.now(), x: x, y: y })); } catch (err) {}
-    setTimeout(function () { location.href = url.href; }, 620);
+    setTimeout(function () { location.href = url.href; }, 580);
     setTimeout(function () {                      // rede de segurança: se a navegação não acontecer, destrava a página
       jutsu.ocupado = false;
       var o = document.getElementById('tema-jutsu'); if (o && o.parentNode) o.parentNode.removeChild(o);
@@ -1141,10 +1181,13 @@
     var d = null;
     try { d = JSON.parse(sessionStorage.getItem('tema_jutsu') || 'null'); sessionStorage.removeItem('tema_jutsu'); } catch (err) {}
     if (!d || Date.now() - d.t > 5000) return;
+    var cobre = (TRANS[document.documentElement.getAttribute('data-modelo')] || {}).cobre;
+    if (cobre) document.documentElement.style.setProperty('--tt-cobre', cobre);
     document.documentElement.classList.add('tema-jutsu-cobre');    // cobre a tela desde o 1º quadro (sem "piscar")
     function mostrar() {
       var o = jutsuMontar(d.x, d.y, 'entrar');
       document.documentElement.classList.remove('tema-jutsu-cobre');
+      document.documentElement.style.removeProperty('--tt-cobre');
       setTimeout(function () { if (o.parentNode) o.parentNode.removeChild(o); }, 1000);
     }
     if (document.body) mostrar(); else document.addEventListener('DOMContentLoaded', mostrar);
@@ -1164,7 +1207,7 @@
     var novoTema = escopo === 'site' && TEMAS_NOVOS.indexOf(modelo) >= 0;
     semLateral(novoTema);                                   // sem menu lateral nos temas novos
     if (novoTema) iniciarMenuGrupos(); else pararMenuGrupos();   // menu em cascata (Aves, Mídias)
-    if (escopo === 'site' && modelo === 'ninja') iniciarJutsu(); else pararJutsu();
+    if (escopo === 'site' && TEMAS_NOVOS.indexOf(modelo) >= 0) iniciarJutsu(); else pararJutsu();   // transição em todos os temas novos
   }
 
   function ler(chave) { try { return JSON.parse(localStorage.getItem(chave)); } catch (e) { return null; } }
