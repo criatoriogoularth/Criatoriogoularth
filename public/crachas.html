@@ -683,21 +683,20 @@
         </label>
         <label class="sc-modo-op" id="sc-modo-op-tema">
           <input type="radio" name="sc-modo" value="tema" onchange="trocarModoCracha('tema')">
-          🎨 Crachás Temáticos (frente e verso · alta resolução)
+          🎨 Crachás Temáticos (informações + árvore · alta resolução)
         </label>
       </div>
 
       <!-- CRACHÁS TEMÁTICOS: modelos novos, em alta resolução -->
       <div class="mi-painel" id="mi-painel">
-        <div class="mi-titulo">🎨 Crachás e árvores genealógicas temáticos <small>193 × 65 mm · exportação em alta resolução</small></div>
+        <div class="mi-titulo">🎨 Crachás temáticos <small>193 × 65 mm (mesma medida do crachá atual) · informações da ave de um lado e árvore do outro</small></div>
         <div class="mi-grid">
           <label>Modelo <select id="mi-modelo" onchange="MI_UI.mudou()"></select></label>
-          <label>O que imprimir
-            <select id="mi-imprimir" onchange="MI_UI.mudou()">
-              <option value="frente-verso">Frente e verso (páginas alternadas)</option>
-              <option value="frente">Só a frente (crachá)</option>
-              <option value="verso">Só o verso (árvore genealógica)</option>
-              <option value="folha">Árvore em folha A4 (1 por página)</option>
+          <label>Gerações na árvore
+            <select id="mi-geracoes" onchange="MI_UI.mudou()">
+              <option value="3">3 gerações — letras maiores</option>
+              <option value="4">4 gerações — recomendado</option>
+              <option value="5">5 gerações — completa (letras bem pequenas)</option>
             </select></label>
           <label>Qualidade
             <select id="mi-dpi" onchange="MI_UI.mudou()">
@@ -2900,7 +2899,7 @@ function trocarModoCracha(modo, silencioso) {
   SC.fecharPainel();
   const lede = document.getElementById('lede-cracha');
   if (lede) lede.textContent = modoCracha === 'tema'
-    ? 'Crachás e árvores genealógicas temáticos, com frente e verso e exportação em alta resolução — escolha o modelo e o logo.'
+    ? 'Crachás temáticos na mesma medida do atual: informações da ave de um lado e a árvore genealógica do outro, em alta resolução — escolha o modelo e o logo.'
     : modoCracha === 'site'
     ? 'Gere crachás para gaiolas sem árvore genealógica — uma cor por tipo de ave (macho, fêmea, indefinido e filhote).'
     : 'Gere etiquetas para gaiolas com informações da ave e árvore genealógica.';
@@ -2912,7 +2911,7 @@ function trocarModoCracha(modo, silencioso) {
 const MI_UI = (function () {
   const MI = window.ModelosImpressao;
   const CHAVE = 'cracha_tema_v1', CHAVE_LOGO = 'cracha_tema_logo';
-  const cfg = { modelo: 'ouro', imprimir: 'frente-verso', logo: 'proprio', dpi: 350 };
+  const cfg = { modelo: 'ouro', geracoes: 4, logo: 'proprio', dpi: 350 };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(CHAVE) || '{}')); } catch (e) {}
   if (!MI.MODELOS[cfg.modelo]) cfg.modelo = 'ouro';
   let logoProprio = '', logoSite = { url: '', iniciais: '' }, ancestrais = null, painelOk = false;
@@ -2936,41 +2935,36 @@ const MI_UI = (function () {
     return { url: logoProprio || antigo, iniciais: ini };
   }
   function dadosAve(ave, todas) {
-    const t = Genealogia.montar(ave, todas, { maxGen: 3, ancestraisTabela: ancestrais || [] });
+    const t = Genealogia.montar(ave, todas, { maxGen: 5, ancestraisTabela: ancestrais || [] });
     const nome = c => (t[c] && t[c].nome) ? t[c].nome : '';
     return {
       dados: { nome: ave.nome, especie: ave.especie, raca: ave.raca, anilha: ave.anilha, nasc: ave.dataNasc, sexo: ave.sexo, pai: nome('pai'), mae: nome('mae'), criador: criador() },
       getNo: c => t[c] || null
     };
   }
-  function pecas(ave, todas) {                     // [{ html, modelo, tipo }] conforme "o que imprimir"
-    const { dados, getNo } = dadosAve(ave, todas), logo = logoAtual(), out = [];
-    if (cfg.imprimir === 'folha') { out.push({ tipo: 'verso', modelo: cfg.modelo, html: MI.htmlArvore(dados, getNo, cfg.modelo, { logo, formato: 'folha' }) }); return out; }
-    if (cfg.imprimir !== 'verso') out.push({ tipo: 'frente', modelo: cfg.modelo, html: MI.htmlCracha(dados, cfg.modelo, { logo }) });
-    if (cfg.imprimir !== 'frente') out.push({ tipo: 'verso', modelo: cfg.modelo, html: MI.htmlArvore(dados, getNo, cfg.modelo, { logo }) });
-    return out;
+  function peca(ave, todas) {                      // UMA peça por ave: informações (esq.) + árvore (dir.), 193 x 65 mm
+    const { dados, getNo } = dadosAve(ave, todas);
+    return { modelo: cfg.modelo, html: MI.htmlCracha(dados, getNo, cfg.modelo, { logo: logoAtual(), geracoes: cfg.geracoes }) };
   }
 
   async function previa(container, selecionadas, todas) {
     container.classList.remove('sc-site-prev'); container.classList.add('mi-prev');
     await carregarExtras();
-    const folha = cfg.imprimir === 'folha', W = folha ? MI.FOLHA.w : MI.TILE.w, H = folha ? MI.FOLHA.h : MI.TILE.h;
-    const larg = Math.max(300, (container.clientWidth || 900) - 20), px = W * 3.7795;
-    const k = Math.min(1, (folha ? Math.min(larg, 620) : larg) / px);
+    const W = MI.TILE.w, H = MI.TILE.h, larg = Math.max(300, (container.clientWidth || 900) - 20), px = W * 3.7795;
+    const k = Math.min(1, larg / px), mostrar = selecionadas.slice(0, 4);
     container.innerHTML = '';
-    for (const ave of selecionadas.slice(0, folha ? 2 : 3)) {
-      for (const p of pecas(ave, todas)) {
-        const caixa = document.createElement('div'), dentro = document.createElement('div');
-        caixa.style.cssText = `width:${(px * k).toFixed(1)}px;height:${(H * 3.7795 * k).toFixed(1)}px;margin:6px;flex:none;border-radius:6px;overflow:hidden;box-shadow:0 6px 18px -8px #0008;`;
-        dentro.style.cssText = `transform:scale(${k});transform-origin:0 0;width:${W}mm;`;
-        caixa.appendChild(dentro); container.appendChild(caixa);
-        await MI.montar(dentro, p.html, p.modelo);
-      }
+    for (const ave of mostrar) {
+      const caixa = document.createElement('div'), dentro = document.createElement('div');
+      caixa.style.cssText = `width:${(px * k).toFixed(1)}px;height:${(H * 3.7795 * k).toFixed(1)}px;margin:6px;flex:none;border-radius:6px;overflow:hidden;box-shadow:0 6px 18px -8px #0008;`;
+      dentro.style.cssText = `transform:scale(${k});transform-origin:0 0;width:${W}mm;`;
+      caixa.appendChild(dentro); container.appendChild(caixa);
+      const p = peca(ave, todas);
+      await MI.montar(dentro, p.html, p.modelo);
     }
-    if (selecionadas.length > (folha ? 2 : 3)) {
+    if (selecionadas.length > mostrar.length) {
       const mais = document.createElement('div');
       mais.style.cssText = 'padding:10px;color:var(--text-muted);font-size:12.5px;align-self:center;';
-      mais.textContent = `… e mais ${selecionadas.length - (folha ? 2 : 3)} ave(s) no PDF`;
+      mais.textContent = `… e mais ${selecionadas.length - mostrar.length} ave(s) no PDF`;
       container.appendChild(mais);
     }
   }
@@ -2981,20 +2975,10 @@ const MI_UI = (function () {
     try {
       await carregarExtras();
       await MI.carregarFontes(cfg.modelo);
-      const itens = [];
-      if (cfg.imprimir === 'folha' || cfg.imprimir === 'frente' || cfg.imprimir === 'verso') {
-        selecionadas.forEach(a => pecas(a, todas).forEach(p => itens.push(p)));
-      } else {                                      // frente e verso: a cada 4 aves, uma página de frentes e outra de versos
-        for (let i = 0; i < selecionadas.length; i += 4) {
-          const g = selecionadas.slice(i, i + 4).map(a => pecas(a, todas));
-          g.forEach((ps, j) => itens.push(Object.assign({}, ps[0], j === 0 ? { novaPagina: true } : {})));
-          g.forEach((ps, j) => itens.push(Object.assign({}, ps[1], j === 0 ? { novaPagina: true } : {})));
-        }
-      }
-      const doc = await MI.pdf(itens, { dpi: cfg.dpi, formato: cfg.imprimir === 'folha' ? 'folha' : 'tile',
-        progresso: (n, t) => { btn.textContent = `⏳ Gerando ${n}/${t}...`; } });
-      doc.save(cfg.imprimir === 'folha' ? 'arvores-genealogicas.pdf' : 'crachas-tematicos.pdf');
-      alert(`✅ Pronto! ${selecionadas.length} ave(s) — ${doc.getNumberOfPages()} página(s) em ${cfg.dpi} dpi.`);
+      const itens = selecionadas.map(a => peca(a, todas));
+      const doc = await MI.pdf(itens, { dpi: cfg.dpi, formato: 'tile', progresso: (n, t) => { btn.textContent = `⏳ Gerando ${n}/${t}...`; } });
+      doc.save('crachas-tematicos.pdf');
+      alert(`✅ Pronto! ${selecionadas.length} crachá(s) — ${doc.getNumberOfPages()} página(s) em ${cfg.dpi} dpi.`);
     } catch (e) {
       console.error(e); alert('❌ Erro ao gerar o PDF: ' + e.message);
     } finally { btn.disabled = false; btn.textContent = rotulo; }
@@ -3016,7 +3000,7 @@ const MI_UI = (function () {
   }
   function mudou() {
     cfg.modelo = document.getElementById('mi-modelo').value;
-    cfg.imprimir = document.getElementById('mi-imprimir').value;
+    cfg.geracoes = parseInt(document.getElementById('mi-geracoes').value, 10) || 4;
     cfg.dpi = parseInt(document.getElementById('mi-dpi').value, 10) || 350;
     const r = document.querySelector('input[name="mi-logo"]:checked'); if (r) cfg.logo = r.value;
     salvar(); renderizarPrevia();
@@ -3027,7 +3011,7 @@ const MI_UI = (function () {
     const grupo = (rot, ids) => `<optgroup label="${rot}">` + ids.map(id => `<option value="${id}">${MI.MODELOS[id].emoji} ${MI.MODELOS[id].nome}</option>`).join('') + '</optgroup>';
     sel.innerHTML = grupo('Clássicos e modernos', ['ouro', 'moderno-claro', 'moderno-escuro', 'elegante']) + grupo('Temas do site', ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata']);
     sel.value = cfg.modelo;
-    document.getElementById('mi-imprimir').value = cfg.imprimir;
+    document.getElementById('mi-geracoes').value = String(cfg.geracoes);
     document.getElementById('mi-dpi').value = String(cfg.dpi);
     const r = document.querySelector(`input[name="mi-logo"][value="${cfg.logo}"]`); if (r) r.checked = true;
     atualizarThumb();

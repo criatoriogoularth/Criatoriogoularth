@@ -168,6 +168,32 @@
     '.mi-finfo{position:relative;z-index:1;display:flex;flex-direction:column;gap:3u;margin-top:3u;}',
     '.mi-finfo .mi-cx{height:14u;font-size:5u;}',
     '.mi-finfo .mi-lin{gap:3u;}',
+    /* ---- CRACHÁ DUPLO 193 x 65 mm: metade esquerda = informações da ave · metade direita = árvore genealógica ---- */
+    '.mi-duplo .mi-corpo2{position:relative;z-index:1;display:flex;height:100%;}',
+    '.mi-esq{width:96.5u;flex:none;height:100%;padding:2.6u 2.2u 2.6u 3u;display:flex;gap:2u;}',
+    '.mi-esq .mi-logo-col{width:27u;}',
+    '.mi-esq .mi-logo{width:25u;height:25u;border-width:.7u;}',
+    '.mi-esq .mi-logo .mi-mono{font-size:9u;}',
+    '.mi-esq .mi-dados{gap:1.1u;}',
+    '.mi-esq .mi-nome{height:13.5u;font-size:7.6u;}',
+    '.mi-esq .mi-cx{height:7.8u;font-size:3.2u;padding:0 1.2u;}',
+    '.mi-esq .mi-lin.mi-rod .mi-cx{height:6.8u;font-size:2.6u;}',
+    '.mi-esq .mi-lin.mi-rod .mi-cx:first-child{flex:1.9;}.mi-esq .mi-lin.mi-rod .mi-cx:nth-child(2){flex:.9;}',
+    '.mi-dir{width:96.5u;flex:none;height:100%;padding:2u 2.6u 2.2u 2.4u;display:flex;flex-direction:column;border-left:.5u solid var(--mi-linha);}',
+    '.mi-cab2{flex:none;height:5u;display:flex;align-items:center;justify-content:center;gap:2u;font-family:var(--mi-ft);font-size:3.5u;color:var(--mi-titulo);text-shadow:var(--mi-titulo-sombra);text-transform:var(--mi-caps);letter-spacing:var(--mi-ls);}',
+    '.mi-cab2 .mi-est{color:var(--mi-acento);font-size:3u;}',
+    '.mi-t2{position:relative;flex:none;height:53u;margin-top:.8u;display:flex;}',
+    '.mi-fl2{display:flex;flex-direction:column;height:100%;}',
+    '.mi-no2{position:relative;flex:1 1 0;min-height:0;display:flex;align-items:center;}',
+    '.mi-no2>.mi-fl2{position:relative;margin-left:var(--cg);height:100%;}',
+    '.mi-no2>.mi-fl2:before{content:"";position:absolute;left:calc(var(--cg) / -2);top:25%;bottom:25%;border-left:.4u solid var(--mi-linha);}',
+    '.mi-no2>.mi-fl2>.mi-no2:before{content:"";position:absolute;left:calc(var(--cg) / -2);top:50%;width:calc(var(--cg) / 2);border-top:.4u solid var(--mi-linha);}',
+    '.mi-bx2{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mi-cx-bg);color:var(--mi-cx-txt);border:.3u solid var(--mi-cx-borda);border-radius:var(--mi-cx-raio);font-weight:var(--mi-cx-peso);text-align:center;overflow:hidden;padding:0 .6u;line-height:1.05;box-shadow:var(--mi-cx-sombra);}',
+    '.mi-bx2.m{background:var(--mi-macho);}.mi-bx2.f{background:var(--mi-femea);}',
+    '.mi-bx2.vazio{opacity:.72;font-style:italic;}',
+    '.mi-bx2.tem{overflow:visible;}',
+    '.mi-bx2.tem:after{content:"";position:absolute;right:calc(var(--cg) / -2);top:50%;width:calc(var(--cg) / 2);border-top:.4u solid var(--mi-linha);}',
+    '.mi-bn2,.mi-ba2{display:block;max-width:100%;text-align:center;}.mi-ba2{opacity:.78;margin-top:.15u;}',
     /* ---- enfeites de cada modelo ---- */
     '.mi-t-ouro .mi-deco{background:linear-gradient(115deg,transparent 0,transparent 7%,rgba(255,215,90,.95) 7%,rgba(255,215,90,.95) 8.2%,transparent 8.2%,transparent 10%,rgba(255,196,60,.6) 10%,rgba(255,196,60,.6) 11.2%,transparent 11.2%),linear-gradient(245deg,transparent 0,transparent 90%,rgba(255,215,90,.85) 90%,rgba(255,215,90,.85) 91.2%,transparent 91.2%);}',
     '.mi-t-ouro .mi-frame:before{content:"";position:absolute;left:.9u;top:.9u;right:.9u;bottom:.9u;border:.4u solid rgba(255,215,90,.55);border-radius:1.8u;}',
@@ -223,7 +249,7 @@
   function ajustar(raiz) {
     var ts = raiz.querySelectorAll('.mi-t');
     for (var i = 0; i < ts.length; i++) {
-      var t = ts[i], pai = t.closest('.mi-cx,.mi-nome,.mi-bx,.mi-fnome,.mi-fcri,.mi-cab') || t.parentElement, cs = getComputedStyle(pai);   // a caixa de largura real (não o <span> interno)
+      var t = ts[i], pai = t.closest('.mi-cx,.mi-nome,.mi-bx,.mi-bx2,.mi-fnome,.mi-fcri,.mi-cab,.mi-cab2') || t.parentElement, cs = getComputedStyle(pai);   // a caixa de largura real (não o <span> interno)
       var disp = pai.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       var tam = parseFloat(getComputedStyle(t).fontSize), min = tam * 0.42, g = 0;
       t.style.fontSize = '';
@@ -255,9 +281,25 @@
   }
   var AVE_SVG = '<svg viewBox="0 0 100 80"><path d="M12 56Q10 38 30 30Q36 14 54 14Q70 14 76 28L94 34L76 40Q78 58 60 66L66 78L52 70Q30 76 12 56Z" fill="currentColor"/><circle cx="62" cy="26" r="3" fill="#fff" opacity=".85"/></svg>';
 
-  /* ---------- CRACHÁ (193 x 65 mm) ---------- */
-  function htmlCracha(d, id, op) {
-    op = op || {}; garantirCss();
+  /* ---------- CRACHÁ (193 x 65 mm) — UMA peça: informações da ave (esq.) + árvore genealógica (dir.) ---------- */
+  var CAP = { 1: 10, 2: 8, 3: 6.2, 4: 5, 5: 3.2 };       // altura máxima da caixa em cada geração (mm)
+  function arvoreCracha(getNo, prof) {
+    var H = 53, larg = 91, cg = prof >= 5 ? 1.6 : 2.4, bw = (larg - (prof - 1) * cg) / prof;
+    function no(caminho, nivel) {
+      var n = getNo(caminho) || null, nome = n && !vazio(n.nome) ? n.nome : '';
+      var sx = /pai$/.test(caminho) ? 'm' : 'f';
+      var slot = H / Math.pow(2, nivel), bh = Math.min(slot - 0.5, CAP[nivel] || 3), fs = Math.max(1.15, Math.min(3.1, bh * 0.62));
+      var tem = nivel < prof;
+      var an = (bh >= 7.5 && n && !vazio(n.anilha)) ? '<span class="mi-ba2" style="font-size:' + (fs * 0.72).toFixed(2) + 'mm"><span class="mi-t">' + esc(n.anilha) + '</span></span>' : '';
+      var box = '<div class="mi-bx2 ' + sx + (nome ? '' : ' vazio') + (tem ? ' tem' : '') + '" style="width:' + bw.toFixed(2) + 'mm;height:' + bh.toFixed(2) + 'mm;font-size:' + fs.toFixed(2) + 'mm;"><span class="mi-bn2"><span class="mi-t">' + esc(nome || 'Indefinido') + '</span></span>' + an + '</div>';
+      return '<div class="mi-no2">' + box + (tem ? '<div class="mi-fl2">' + par(caminho, nivel + 1) + '</div>' : '') + '</div>';
+    }
+    function par(base, nivel) { return no(base ? base + '.pai' : 'pai', nivel) + no(base ? base + '.mae' : 'mae', nivel); }
+    return '<div class="mi-t2" style="--cg:' + cg + 'mm;"><div class="mi-fl2">' + par('', 1) + '</div></div>';
+  }
+  function htmlCracha(d, getNo, id, op) {
+    op = op || {}; garantirCss(); getNo = getNo || function () { return null; };
+    var prof = Math.max(3, Math.min(5, parseInt(op.geracoes, 10) || 4));
     var mo = Object.assign({ especie: 1, anilha: 1, nasc: 1, sexo: 1, pai: 1, mae: 1, rodape: 1 }, op.mostrar || {});
     var esp = [d.especie, d.raca].filter(function (x) { return !vazio(x); }).join(' - ');
     var cri = d.criador || {};
@@ -265,11 +307,14 @@
     if (mo.especie) linhas += cx(esp || '—');
     if (mo.anilha) linhas += cx(vazio(d.anilha) ? '—' : d.anilha);
     if (mo.nasc || mo.sexo) linhas += '<div class="mi-lin">' + (mo.nasc ? cx(fmtData(d.nasc)) : '') + (mo.sexo ? cx(sexoTxt(d.sexo)) : '') + '</div>';
-    if (mo.pai || mo.mae) linhas += '<div class="mi-lin">' + (mo.pai ? cx('Pai: ' + (vazio(d.pai) ? '—' : d.pai), 'mi-baixa') : '') + (mo.mae ? cx('Mãe: ' + (vazio(d.mae) ? '—' : d.mae), 'mi-baixa') : '') + '</div>';
+    if (mo.pai || mo.mae) linhas += '<div class="mi-lin">' + (mo.pai ? cx('Pai: ' + (vazio(d.pai) ? '—' : d.pai)) : '') + (mo.mae ? cx('Mãe: ' + (vazio(d.mae) ? '—' : d.mae)) : '') + '</div>';
     var rod = mo.rodape ? '<div class="mi-lin mi-rod" style="margin-top:auto;">' + cx(cri.nome || 'Criador') + cx(cri.registro || 'Registro') + cx(cri.telefone || 'Telefone') + '</div>' : '';
-    return raizAbre(id, 'mi-cracha', TILE.w, TILE.h) +
-      '<div class="mi-corpo"><div class="mi-logo-col">' + htmlLogo(op.logo) + '</div>' +
-      '<div class="mi-dados"><div class="mi-nome"><span class="mi-t">' + esc(vazio(d.nome) ? '—' : d.nome) + '</span></div>' + linhas + rod + '</div></div></div>';
+    return raizAbre(id, 'mi-duplo', TILE.w, TILE.h) +
+      '<div class="mi-corpo2">' +
+        '<div class="mi-esq"><div class="mi-logo-col">' + htmlLogo(op.logo) + '</div>' +
+          '<div class="mi-dados"><div class="mi-nome"><span class="mi-t">' + esc(vazio(d.nome) ? '—' : d.nome) + '</span></div>' + linhas + rod + '</div></div>' +
+        '<div class="mi-dir"><div class="mi-cab2"><span class="mi-est">★</span><span class="mi-t">Árvore Genealógica</span><span class="mi-est">★</span></div>' + arvoreCracha(getNo, prof) + '</div>' +
+      '</div></div>';
   }
 
   /* ---------- ÁRVORE ---------- */
@@ -339,7 +384,7 @@
     if (atual.length) paginas.push(atual);
     for (var pi = 0; pi < paginas.length; pi++) {
       if (pi > 0) doc.addPage();
-      var pg = paginas[pi], esp = (297 - TILE.h * pg.length) / (pg.length + 1);
+      var pg = paginas[pi], nTot = Math.min(total, 4), esp = (297 - TILE.h * nTot) / (nTot + 1);   // mesma conta do PDF atual
       for (var j = 0; j < pg.length; j++) {
         var tmp = document.createElement('div'); area.appendChild(tmp);
         var el = await montar(tmp, pg[j].html, pg[j].modelo);
