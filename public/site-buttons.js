@@ -13,7 +13,7 @@
 // injetar um <style> pequeno no <head> sobrescrevendo essas variáveis.
 //
 // MUDANÇA: "Copas" deixou de ser uma aba/página própria no menu. Os links de
-// Copas e Torneios agora aparecem como um widget na coluna lateral de Home e
+// (Copas e Torneios foram removidos do produto.)
 // Criatório (mesmo estilo do menu lateral de blog: legenda + lista de links,
 // sem caixa), junto dos banners de anúncio. Por isso, em toda página do site,
 // qualquer link apontando pra "site-torneios.html" (o antigo menu/aba Copas)
@@ -25,8 +25,8 @@
 // já vem no <link> fixo de cada página, então não precisa recarregar nada.
 const FONTES_DISPONIVEIS = {
   padrao: {
-    titulo: "var(--font-titulo,'Fraunces',serif)",
-    texto: "var(--font-texto,'Manrope',sans-serif)",
+    titulo: "'Fraunces', serif",
+    texto: "'Manrope', sans-serif",
     googleFontsUrl: null
   },
   elegante: {
@@ -42,9 +42,60 @@ const FONTES_DISPONIVEIS = {
 };
 window.FONTES_DISPONIVEIS = FONTES_DISPONIVEIS;
 
-// O visual (modelo, dia/noite, cores, fonte) agora é aplicado pelo motor de temas (tema.js).
 function aplicarTemaPersonalizado(personalizacao) {
-  if (window.TemaEngine && TemaEngine.escopo === 'site') TemaEngine.sincronizarSite(personalizacao);
+  const cores = personalizacao.temaCores;
+  const fonteChave = personalizacao.temaFonte || 'padrao';
+  const fonte = FONTES_DISPONIVEIS[fonteChave] || FONTES_DISPONIVEIS.padrao;
+
+  if (fonte.googleFontsUrl && !document.querySelector(`link[href="${fonte.googleFontsUrl}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = fonte.googleFontsUrl;
+    document.head.appendChild(link);
+  }
+
+  const linhas = [`--font-titulo: ${fonte.titulo};`, `--font-texto: ${fonte.texto};`];
+
+  if (cores) {
+    if (cores.bg) linhas.push(`--bg: ${cores.bg};`);
+    if (cores.bgElevated) linhas.push(`--bg-elevated: ${cores.bgElevated};`);
+    if (cores.bgElevated2) linhas.push(`--bg-elevated-2: ${cores.bgElevated2};`);
+    if (cores.brass) linhas.push(`--brass: ${cores.brass};`);
+    if (cores.brassSoft) linhas.push(`--brass-soft: ${cores.brassSoft};`);
+    if (cores.brassDim) linhas.push(`--brass-dim: ${cores.brassDim};`);
+    if (cores.line) linhas.push(`--line: ${cores.line};`);
+    if (cores.text) linhas.push(`--text: ${cores.text};`);
+    if (cores.textMuted) linhas.push(`--text-muted: ${cores.textMuted};`);
+    if (cores.sageSoft) linhas.push(`--sage-soft: ${cores.sageSoft};`);
+  }
+
+  let styleTag = document.getElementById('tema-personalizado');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'tema-personalizado';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `:root {\n  ${linhas.join('\n  ')}\n}`;
+}
+
+// Plano sem impressão: o site mostra as imagens mas dificulta copiar e imprimir.
+// Atenção: nenhum site consegue IMPEDIR uma captura de tela. Isto desencoraja o uso casual e deixa o nome
+// do criatório marcado (marca d'água) em qualquer foto tirada da tela.
+function aplicarProtecaoDeImagens(nome) {
+  const xml = (s) => String(s).replace(/[&<>"']/g, '');
+  const texto = xml(nome) || 'Criatório';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><text x="20" y="110" transform="rotate(-25 160 100)" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="rgba(255,255,255,0.28)" stroke="rgba(0,0,0,0.12)" stroke-width="0.6">${texto}</text></svg>`;
+  const st = document.createElement('style');
+  st.textContent = `
+    body::after{content:"";position:fixed;inset:0;z-index:2147483000;pointer-events:none;background-image:url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}");background-repeat:repeat;}
+    img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none;}
+    @media print{body{display:none !important;}}`;
+  document.head.appendChild(st);
+  document.addEventListener('contextmenu', (e) => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+  document.addEventListener('dragstart', (e) => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && ['p', 's'].includes(String(e.key).toLowerCase())) e.preventDefault();
+  });
 }
 
 (async function () {
@@ -60,41 +111,30 @@ function aplicarTemaPersonalizado(personalizacao) {
     // Os links de Copas e Torneios agora vivem só como widget na coluna
     // lateral de Home/Criatório (ver seção mais abaixo). Roda em toda
     // página do site porque este arquivo é incluído em todas elas.
-    document.querySelectorAll('a[href="site-torneios.html"]').forEach(el => el.remove());
+    document.querySelectorAll('a[href="site-torneios.html"], a[href="site-crachas.html"]').forEach(el => el.remove());
 
-    // Se a busca falhar (internet instável), NÃO troca o visual guardado pelo padrão:
-    // devolve null e o tema já aplicado pelo cache permanece.
-    async function getPersonalizacaoSegura() {
-        try { return (window.DB ? await DB.getConfig('site_personalizacao') : null) || {}; }
-        catch (e) { return null; }
-    }
-
-    const [conteudo, personalizacaoBruta, parceirosCfg] = await Promise.all([
+    const [conteudo, personalizacao, dadosCriatorio] = await Promise.all([
         getConfig('site_conteudo'),
-        getPersonalizacaoSegura(),
-        getConfig('site_parceiros')
+        getConfig('site_personalizacao'),
+        getConfig('dados_criatorio')
     ]);
 
-    // A aba "Parceiros" só aparece no menu se existir pelo menos um parceiro visível —
-    // assim o visitante nunca cai numa página vazia.
-    const temParceiros = Array.isArray(parceirosCfg) && parceirosCfg.some(p => p && p.visivel !== false);
-
-    const personalizacao = personalizacaoBruta || {};
-    if (personalizacaoBruta) aplicarTemaPersonalizado(personalizacaoBruta);
-    else if (window.TemaEngine) TemaEngine.liberarSite();
+    aplicarTemaPersonalizado(personalizacao);
+    if (personalizacao.protegerImagens) aplicarProtecaoDeImagens(personalizacao.nome || '');
 
     // ---- Botões de WhatsApp ----
     const whatsappBtns = document.querySelectorAll('.btn-whatsapp, .btn-whatsapp-site, a[href*="wa.me"], a[href*="whatsapp"]');
     whatsappBtns.forEach(btn => {
-        // Links de WhatsApp dos PARCEIROS têm número próprio: nunca trocar pelo do criatório.
-        if (btn.closest('.parceiro-card')) return;
-        if (conteudo.whatsapp) {
-            const numero = conteudo.whatsapp.replace(/\D/g, '');
+        // O número é do próprio criatório (conteúdo do site ou cadastro). Sem número, o botão some —
+        // antes caía num número fixo e mandava o visitante para a pessoa errada.
+        let numero = String(conteudo.whatsapp || dadosCriatorio.whatsapp || dadosCriatorio.celular || '').replace(/\D/g, '');
+        if (numero && numero.length <= 11) numero = '55' + numero;
+        if (numero) {
             btn.href = `https://wa.me/${numero}`;
             btn.target = '_blank';
+            btn.rel = 'noopener';
         } else {
-            btn.href = 'https://wa.me/5511941493657';
-            btn.target = '_blank';
+            btn.style.display = 'none';
         }
     });
 
@@ -113,8 +153,7 @@ function aplicarTemaPersonalizado(personalizacao) {
     // (.site-footer .links) nunca era tocado, por isso sempre mostrava
     // todas as abas, mesmo as escondidas. Como o mapa de nomes e a ordem
     // são os mesmos, a mesma função é aplicada nos dois containers agora.
-    const vis = Object.assign({}, personalizacao.visibilidade || {});
-    if (!temParceiros) vis.parceiros = false;
+    const vis = personalizacao.visibilidade || {};
 
     const mapa = {
         'Home': 'home',
@@ -126,7 +165,6 @@ function aplicarTemaPersonalizado(personalizacao) {
         'Fotos': 'fotos',
         'Vídeos': 'videos',
         'Crachás': 'crachas',
-        'Parceiros': 'parceiros',
         'Contato': 'contato'
     };
 
@@ -159,16 +197,10 @@ function aplicarTemaPersonalizado(personalizacao) {
         });
 
         if (Array.isArray(personalizacao.ordemMenu)) {
-            const ordem = personalizacao.ordemMenu.filter(chave => elementoPorChave[chave]);
-            // CORREÇÃO: abas que existem na página mas ainda não estão na ordem salva (ex.: uma aba
-            // nova) ficavam de fora do reposicionamento e iam parar no INÍCIO do menu. Agora entram
-            // logo antes de "Contato" (ou no fim, se não houver Contato).
-            Object.keys(elementoPorChave).forEach(chave => {
-                if (ordem.includes(chave)) return;
-                const posContato = ordem.indexOf('contato');
-                if (posContato >= 0) ordem.splice(posContato, 0, chave); else ordem.push(chave);
+            personalizacao.ordemMenu.forEach(chave => {
+                const el = elementoPorChave[chave];
+                if (el) container.appendChild(el);
             });
-            ordem.forEach(chave => container.appendChild(elementoPorChave[chave]));
         }
     }
 
@@ -195,53 +227,21 @@ function aplicarTemaPersonalizado(personalizacao) {
     if (footerContainer) footerContainer.style.visibility = 'visible';
 
     // ---- Layout do menu: topo (padrão) ou lateral ----
-    // Os temas novos (Velho Oeste, Código Verde, Corrida de Rua, Ninja, Dragão, Rio, Piratas) usam um
-    // menu no topo em cascata — o menu lateral fica desativado neles (a escolha do dono continua salva).
-    const _temasSemLateral = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
-    const _modeloSite = personalizacao && personalizacao.temas && personalizacao.temas.site && personalizacao.temas.site.modelo;
-    if ((personalizacao.layoutMenu || 'topo') === 'lateral' && !_temasSemLateral.includes(_modeloSite)) {
+    if ((personalizacao.layoutMenu || 'topo') === 'lateral') {
         document.body.classList.add('layout-lateral');
     }
 
-    // ---- Coluna lateral: links de Copas/Torneios + banners de anúncio ----
+    // ---- Coluna lateral: banners de anúncio ----
     // (só Home e Criatório — são as únicas páginas do site sem fotos/tabelas
-    // próprias, por isso servem de espaço pra essa coluna, nos dois modos
-    // de menu).
-    //
-    // MUDANÇA: antes essa coluna só tinha banners de anúncio. Agora também
-    // recebe, no topo, os links de Copas e Torneios — no mesmo estilo de
-    // "menu lateral de blog" (legenda da categoria + lista de links, sem
-    // caixa), que é como o usuário já publicava isso no site antigo.
+    // próprias, por isso servem de espaço pra essa coluna).
     const PAGINAS_COM_BANNER = ['site-home', 'site-criatorio'];
     const paginaAtual = (location.pathname.split('/').pop() || '').replace('.html', '');
     if (PAGINAS_COM_BANNER.includes(paginaAtual)) {
-        const [banners, torneios] = await Promise.all([
-            getConfig('site_banners'),
-            (async () => {
-                try {
-                    return (window.DB && DB.getTorneiosPublico) ? await DB.getTorneiosPublico() : [];
-                } catch (e) {
-                    return [];
-                }
-            })()
-        ]);
-
+        const banners = await getConfig('site_banners');
         const ativos = Array.isArray(banners) ? banners.filter(b => b && b.imagemUrl) : [];
-
-        // Agrupa os links por categoria, mantendo a ordem que já vem da
-        // API pública (categoria, ordem, data) — mesma lógica usada antes
-        // na página site-torneios.html.
-        const gruposTorneios = {};
-        (Array.isArray(torneios) ? torneios : []).forEach(t => {
-            const cat = t.categoria || 'Torneios';
-            if (!gruposTorneios[cat]) gruposTorneios[cat] = [];
-            gruposTorneios[cat].push(t);
-        });
-        const temTorneios = Object.keys(gruposTorneios).length > 0;
-
         const siteMain = document.querySelector('.site-main');
 
-        if ((ativos.length > 0 || temTorneios) && siteMain) {
+        if (ativos.length > 0 && siteMain) {
             // Move todo o conteúdo que já existia pra dentro de um wrapper,
             // sobrando só ele + a coluna lateral como filhos diretos de
             // .site-main — assim o grid de 2 colunas (conteúdo | lateral)
@@ -255,28 +255,17 @@ function aplicarTemaPersonalizado(personalizacao) {
             const coluna = document.createElement('aside');
             coluna.className = 'site-banner-coluna';
 
-            let html = '';
+            const attr = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+            const linkSeguro = (l) => /^https?:\/\//i.test(String(l || '').trim()) ? String(l).trim() : '';
 
-            if (temTorneios) {
-                html += Object.entries(gruposTorneios).map(([categoria, lista]) => `
-                    <div class="site-torneios-widget">
-                        <h4>${categoria}</h4>
-                        <ul>
-                            ${lista.map(t => `<li><a href="site-torneio-detalhe.html?id=${t.id}">${t.etapa}</a></li>`).join('')}
-                        </ul>
-                    </div>
-                `).join('');
-            }
-
-            html += ativos.map(b => {
-                const abre = b.link
-                    ? `<a class="banner-anuncio" href="${b.link}" target="_blank" rel="noopener sponsored">`
+            coluna.innerHTML = ativos.slice(0, 5).map(b => {
+                const link = linkSeguro(b.link);
+                const abre = link
+                    ? `<a class="banner-anuncio" href="${attr(link)}" target="_blank" rel="noopener sponsored">`
                     : `<div class="banner-anuncio">`;
-                const fecha = b.link ? '</a>' : '</div>';
-                return `${abre}<img src="${b.imagemUrl}" alt="Anúncio" loading="lazy">${fecha}`;
+                const fecha = link ? '</a>' : '</div>';
+                return `${abre}<img src="${attr(b.imagemUrl)}" alt="Anúncio" loading="lazy">${fecha}`;
             }).join('');
-
-            coluna.innerHTML = html;
 
             siteMain.appendChild(conteudoWrapper);
             siteMain.appendChild(coluna);

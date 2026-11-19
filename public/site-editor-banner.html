@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Editar Banner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .editor-card {
   background: var(--bg-elevated-2);
@@ -18,7 +17,7 @@
   margin-bottom: 20px;
 }
 .editor-card h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--brass-soft);
   margin-bottom: 14px;
@@ -105,15 +104,15 @@
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid var(--brass-dim);
-  background: rgba(var(--accent-rgb,199,151,63),0.08);
+  background: rgba(199,151,63,0.08);
   color: var(--brass-soft);
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12px;
   transition: .15s ease;
 }
 .banner-upload-area .btn-upload:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.18);
+  background: rgba(199,151,63,0.18);
 }
 .banner-size-info {
   font-size: 10px;
@@ -171,7 +170,7 @@
 
         <div class="field" style="margin-top:12px;">
           <label>Título do Banner</label>
-          <input type="text" id="banner-titulo" placeholder="Bem-vindo ao Criatório Goularth">
+          <input type="text" id="banner-titulo" placeholder="Bem-vindo ao nosso criatório">
           <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
         </div>
         <div class="field">

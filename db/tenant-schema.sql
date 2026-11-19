@@ -1,7 +1,9 @@
 -- ============================================================
--- SCHEMA DO BANCO — Sistema Criatório Goularth
--- Rode este arquivo uma vez no seu Postgres:
---   psql "$DATABASE_URL" -f db/schema.sql
+-- SCHEMA DO BANCO DE CADA CRIATÓRIO (um banco por cliente) — Aviari
+-- É aplicado sozinho quando o banco do cliente é usado pela 1ª vez
+-- (db/tenants.js). Tudo aqui é "IF NOT EXISTS": pode rodar quantas
+-- vezes quiser sem estragar nada.
+-- Dentro de cada banco o dono é SEMPRE o usuário id = 1.
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -102,7 +104,6 @@ CREATE TABLE IF NOT EXISTS ancestrais (
   anilha VARCHAR(100),
   sexo VARCHAR(20) NOT NULL,
   especie VARCHAR(255),
-  raca VARCHAR(255),
   observacao TEXT,
   criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
   atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
@@ -140,23 +141,7 @@ CREATE INDEX IF NOT EXISTS idx_visitas_usuario_data ON site_visitas(usuario_id, 
 -- pontos editável linha a linha; a coluna "resultados" abaixo é
 -- legado (não é mais lida nem escrita pelo sistema) e fica só pra não
 -- quebrar quem já tinha dados antigos nela.
-CREATE TABLE IF NOT EXISTS site_torneios (
-  id SERIAL PRIMARY KEY,
-  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-  categoria VARCHAR(255) NOT NULL,
-  etapa VARCHAR(255) NOT NULL,
-  data DATE,
-  visivel BOOLEAN NOT NULL DEFAULT true,
-  ordem INTEGER NOT NULL DEFAULT 0,
-  arquivo_url TEXT,
-  arquivo_tipo VARCHAR(20), -- 'imagem' ou 'pdf'
-  resultados JSONB NOT NULL DEFAULT '[]', -- legado, não usado mais
-  criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
-  atualizado_em TIMESTAMP NOT NULL DEFAULT NOW()
-);
 
-CREATE INDEX IF NOT EXISTS idx_torneios_usuario ON site_torneios(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_torneios_categoria ON site_torneios(categoria);
 
 CREATE TABLE IF NOT EXISTS site_mensagens (
   id SERIAL PRIMARY KEY,
@@ -172,3 +157,29 @@ CREATE TABLE IF NOT EXISTS site_mensagens (
   ip_hash VARCHAR(40),
   criado_em TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- ============================================================
+-- AJUSTES IDEMPOTENTES (bancos antigos recebem as colunas novas sozinhos)
+-- ============================================================
+ALTER TABLE aves
+  ADD COLUMN IF NOT EXISTS fotos JSONB NOT NULL DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS video_url VARCHAR(500),
+  ADD COLUMN IF NOT EXISTS cig_numero VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS cig_arquivo TEXT,
+  ADD COLUMN IF NOT EXISTS sexagem_arquivo TEXT;
+
+-- Reprodução finalizada não pode ficar "Ativo" (bug antigo): corrige o que já existe.
+UPDATE reproducoes SET status = 'Finalizado' WHERE dados->>'finalizada' = 'Sim' AND status <> 'Finalizado';
+
+-- CIG e laudo de sexagem só aparecem no site se o criador marcar "mostrar" em cada ave.
+-- Bancos antigos: quem já tinha documento publicado continua publicado (feito UMA vez, quando a coluna nasce).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'aves' AND column_name = 'mostrar_cig') THEN
+    ALTER TABLE aves ADD COLUMN mostrar_cig BOOLEAN NOT NULL DEFAULT false,
+                     ADD COLUMN mostrar_sexagem BOOLEAN NOT NULL DEFAULT false;
+    UPDATE aves SET mostrar_cig = true
+      WHERE (cig_numero IS NOT NULL AND cig_numero <> '') OR (cig_arquivo IS NOT NULL AND cig_arquivo <> '');
+    UPDATE aves SET mostrar_sexagem = true WHERE sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '';
+  END IF;
+END $$;

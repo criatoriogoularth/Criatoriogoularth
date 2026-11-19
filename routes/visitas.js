@@ -6,7 +6,6 @@
 // (sessionStorage), então "visita" aqui ~ "sessão de alguém no
 // site", não uma linha por página vista.
 const express = require('express');
-const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 
@@ -18,7 +17,7 @@ router.post('/', asyncHandler(async (req, res) => {
 
   // Sistema é single-user: sempre grava pro usuário id=1, mesmo padrão
   // já usado em routes/config.js pra tudo que é dado público do site.
-  await pool.query(
+  await req.db.query(
     'INSERT INTO site_visitas (usuario_id, pagina) VALUES ($1, $2)',
     [1, pagina]
   );
@@ -28,16 +27,16 @@ router.post('/', asyncHandler(async (req, res) => {
 // ---------- ESTATÍSTICAS (só admin logado) ----------
 router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
   const [hoje, total, ultimos7] = await Promise.all([
-    pool.query(
+    req.db.query(
       `SELECT COUNT(*)::int AS total FROM site_visitas
        WHERE usuario_id = $1 AND data = CURRENT_DATE`,
       [1]
     ),
-    pool.query(
+    req.db.query(
       `SELECT COUNT(*)::int AS total FROM site_visitas WHERE usuario_id = $1`,
       [1]
     ),
-    pool.query(
+    req.db.query(
       `SELECT data, COUNT(*)::int AS total
        FROM site_visitas
        WHERE usuario_id = $1 AND data >= CURRENT_DATE - INTERVAL '6 days'

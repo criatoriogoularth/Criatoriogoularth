@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
-<title>Criatório Goularth — Plantel</title>
+<title>Criatório — Plantel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Criatório de aves com excelência genética: conheça nosso plantel, filhotes e adultos.">
 <meta name="theme-color" content="#0d1a16">
@@ -13,7 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style-site.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .site-header {
   background: var(--bg-elevated);
@@ -169,7 +167,7 @@
 }
 
 .sexo-indefinido {
-  background: rgba(var(--accent-rgb,199,151,63), 0.15);
+  background: rgba(199, 151, 63, 0.15);
   color: var(--brass-soft);
 }
 
@@ -217,13 +215,13 @@
 }
 
 .ave-card .footer .btn-primary {
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
   border-color: var(--brass-dim);
   color: var(--brass-soft);
 }
 
 .ave-card .footer .btn-primary:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.2);
+  background: rgba(199,151,63,0.2);
 }
 
 /* Seções por espécie na visualização em lista */
@@ -281,7 +279,7 @@
 
 .sexo-column-header.sexo-indefinido {
   color: var(--brass-soft);
-  background: rgba(var(--accent-rgb,199,151,63), 0.1);
+  background: rgba(199, 151, 63, 0.1);
 }
 
 .ave-lista-item {
@@ -353,7 +351,7 @@
 }
 
 .table-wrapper tr:hover td {
-  background: rgba(var(--accent-rgb,199,151,63),0.04);
+  background: rgba(199,151,63,0.04);
 }
 
 .sexo-badge {
@@ -375,7 +373,7 @@
   font-size: 11px;
   border-radius: 6px;
   border: 1px solid var(--brass-dim);
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
   color: var(--brass-soft);
   cursor: pointer;
   font-family: var(--font-texto);
@@ -385,7 +383,7 @@
 }
 
 .table-wrapper .btn:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.2);
+  background: rgba(199,151,63,0.2);
 }
 
 .empty-plantel {
@@ -458,8 +456,6 @@
         <a href="site-filhotes.html">Filhotes</a>
         <a href="site-fotos.html">Fotos</a>
         <a href="site-videos.html">Vídeos</a>
-        <a href="site-crachas.html">Crachás</a>
-        <a href="site-parceiros.html">Parceiros</a>
         <a href="site-contato.html">Contato</a>
       </div>
       <div class="nav-buttons">
@@ -507,11 +503,9 @@
       <a href="site-filhotes.html">Filhotes</a>
       <a href="site-fotos.html">Fotos</a>
       <a href="site-videos.html">Vídeos</a>
-        <a href="site-crachas.html">Crachás</a>
-      <a href="site-parceiros.html">Parceiros</a>
       <a href="site-contato.html">Contato</a>
     </div>
-    <p>© 2026 Criatório Goularth · Todos os direitos reservados</p>
+    <p>© 2026 <span class="rodape-nome">Criatório</span> · Todos os direitos reservados</p>
   </footer>
 
   <script src="db-api.js"></script>
@@ -533,9 +527,11 @@
       const personalizacao = await getPersonalizacao();
       const logoSection = document.getElementById('logo-section');
       
-      const nome = personalizacao.nome || 'Criatório Goularth';
+      const nome = personalizacao.nome || 'Meu Criatório';
+      document.title = document.title.replace(/^Criatório/, nome);
+      document.querySelectorAll('.rodape-nome').forEach(e => { e.textContent = nome; });
       const subtitulo = personalizacao.subtitulo || '';
-      const iniciais = personalizacao.logoIniciais || 'CG';
+      const iniciais = personalizacao.logoIniciais || ((nome || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'AV');
       const logoUrl = personalizacao.logoUrl || '';
       const logoTamanho = personalizacao.logoTamanho || 76;
       const nomeTamanho = personalizacao.nomeTamanho || 20;

@@ -1,9 +1,9 @@
 // routes/aves.js
 const express = require('express');
-const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
 const Genealogia = require('../public/genealogia.js');
+const { limparTexto, limparString, limparProfundo } = require('../lib/sanitizar');
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ const CAMPOS = [
   'manejo', 'gaiola', 'mutacao', 'pai', 'anilha_pai', 'mae', 'anilha_mae',
   'avo_paterno', 'avo_paterna', 'avo_materno', 'avo_materna', 'filhote',
   'no_site', 'categoria_site', 'status_site', 'ancestrais', 'historico',
-  'fotos', 'video_url', 'cig_numero', 'cig_arquivo', 'sexagem_arquivo'
+  'fotos', 'video_url', 'cig_numero', 'cig_arquivo', 'sexagem_arquivo', 'mostrar_cig', 'mostrar_sexagem'
 ];
 
 const MAX_FOTOS = 6;
@@ -20,22 +20,12 @@ const MAX_FOTOS = 6;
 // Colunas pesadas (imagens em base64): NÃO vão nas listagens, só na ficha da ave.
 const COLS_LEVES = `id, usuario_id, nome, anilha, sexo, especie, raca, data_nasc, situacao, tipo, manejo, gaiola,
   mutacao, pai, anilha_pai, mae, anilha_mae, avo_paterno, avo_paterna, avo_materno, avo_materna, filhote, no_site,
-  categoria_site, status_site, ancestrais, historico, video_url, cig_numero, criado_em, atualizado_em,
+  categoria_site, status_site, ancestrais, historico, video_url, cig_numero, mostrar_cig, mostrar_sexagem, criado_em, atualizado_em,
   (jsonb_array_length(COALESCE(fotos, '[]'::jsonb)) > 0) AS tem_fotos,
   (cig_arquivo IS NOT NULL AND cig_arquivo <> '') AS tem_cig_arquivo,
   (sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '') AS tem_sexagem_arquivo`;
 
-// Cria as colunas novas sozinho na primeira vez (não precisa rodar nada no banco).
-const colunasProntas = pool.query(`
-  ALTER TABLE aves
-    ADD COLUMN IF NOT EXISTS fotos JSONB NOT NULL DEFAULT '[]',
-    ADD COLUMN IF NOT EXISTS video_url VARCHAR(500),
-    ADD COLUMN IF NOT EXISTS cig_numero VARCHAR(100),
-    ADD COLUMN IF NOT EXISTS cig_arquivo TEXT,
-    ADD COLUMN IF NOT EXISTS sexagem_arquivo TEXT
-`).catch((e) => console.error('Falha ao criar colunas de mídia das aves:', e.message));
-
-router.use((req, res, next) => { colunasProntas.then(() => next()); });
+// (As colunas de mídia agora fazem parte de db/tenant-schema.sql, aplicado por cliente.)
 
 // data:image/jpeg;base64,... -> { mime, bin } (ou null)
 function decodificarDataUrl(du) {
@@ -52,6 +42,21 @@ function arquivoOk(du, max = 6000000) {
 }
 
 // Valida o que veio de mídia no corpo; devolve mensagem de erro ou null.
+// Fotos por ave que o plano permite. Quem já tem mais fotos (ex.: conta antiga) não perde nenhuma:
+// o limite vale para ADICIONAR, nunca para o que já existe.
+async function limiteFotosAve(req, aveId) {
+  const base = (req.plano && req.plano.limite_fotos_ave) || MAX_FOTOS;
+  if (!aveId) return base;
+  const { rows } = await req.db.query(
+    'SELECT jsonb_array_length(fotos) AS n FROM aves WHERE id = $1 AND usuario_id = $2', [aveId, req.user.id]);
+  return Math.max(base, (rows[0] && rows[0].n) || 0);
+}
+function contarFotos(body) {
+  let l = body.fotos;
+  if (typeof l === 'string') { try { l = JSON.parse(l); } catch { l = []; } }
+  return Array.isArray(l) ? l.length : 0;
+}
+
 function validarMidia(body) {
   const v = body.video_url;
   if (typeof v === 'string' && v.trim() !== '' && !/^https?:\/\//i.test(v.trim())) {
@@ -68,7 +73,7 @@ function validarMidia(body) {
 
 // Colunas JSONB que guardam um ARRAY
 const CAMPOS_JSON_ARRAY = new Set(['ancestrais', 'historico', 'fotos']);
-const CAMPOS_BOOLEAN = new Set(['filhote', 'no_site']);
+const CAMPOS_BOOLEAN = new Set(['filhote', 'no_site', 'mostrar_cig', 'mostrar_sexagem']);
 const CAMPOS_DATE = new Set(['data_nasc']);
 const CAMPOS_NUMERIC = new Set([]); // se tiver algum campo numérico no futuro
 
@@ -81,7 +86,7 @@ const CAMPOS_NUMERIC = new Set([]); // se tiver algum campo numérico no futuro
  * - Datas vazias → null
  * - null/undefined com fallback para arrays vazios
  */
-function prepararValor(campo, valor) {
+function prepararValor(campo, valor, maxFotos = MAX_FOTOS) {
   // 1. TRATA UNDEFINED E STRING VAZIA
   if (valor === undefined) {
     return getDefaultForField(campo);
@@ -106,19 +111,19 @@ function prepararValor(campo, valor) {
     let lista = valor;
     if (typeof lista === 'string') { try { lista = JSON.parse(lista); } catch { lista = []; } }
     if (!Array.isArray(lista)) lista = [];
-    const ok = lista.filter((f) => arquivoOk(f, 3000000) && !f.startsWith('data:application/pdf')).slice(0, MAX_FOTOS);
+    const ok = lista.filter((f) => arquivoOk(f, 3000000) && !f.startsWith('data:application/pdf')).slice(0, maxFotos);
     return JSON.stringify(ok);
   }
 
   // 2. TRATA CAMPOS JSON (arrays)
   if (CAMPOS_JSON_ARRAY.has(campo)) {
     if (valor === null) return JSON.stringify([]);
-    if (Array.isArray(valor)) return JSON.stringify(valor);
+    if (Array.isArray(valor)) return JSON.stringify(limparProfundo(valor));
     if (typeof valor === 'string') {
       try {
         // Se veio como string JSON, faz parse e serializa de novo
         const parsed = JSON.parse(valor);
-        return JSON.stringify(Array.isArray(parsed) ? parsed : []);
+        return JSON.stringify(Array.isArray(parsed) ? limparProfundo(parsed) : []);
       } catch {
         return JSON.stringify([]);
       }
@@ -154,7 +159,7 @@ function prepararValor(campo, valor) {
 
   // 6. QUALQUER OUTRO CAMPO - retorna o valor limpo
   if (typeof valor === 'string') {
-    return valor.trim() || null;
+    return limparString(valor.trim()) || null;
   }
   return valor;
 }
@@ -173,25 +178,15 @@ function linhaParaAve(row) {
 // ---------- ROTAS PRIVADAS ----------
 
 router.get('/', authMiddleware, asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `SELECT ${COLS_LEVES} FROM aves WHERE usuario_id = $1 ORDER BY id`,
     [req.user.id]
   );
   res.json(rows.map(linhaParaAve));
 }));
 
-// BACKUP COMPLETO: a listagem normal omite fotos/CIG/laudo (são pesados). Para o backup
-// elas precisam ir junto, senão restaurar apagaria as imagens.
-router.get('/backup/completo', authMiddleware, asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
-    'SELECT * FROM aves WHERE usuario_id = $1 ORDER BY id',
-    [req.user.id]
-  );
-  res.json(rows);
-}));
-
 router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     'SELECT * FROM aves WHERE id = $1 AND usuario_id = $2',
     [req.params.id, req.user.id]
   );
@@ -199,8 +194,59 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
   res.json(linhaParaAve(rows[0]));
 }));
 
+// Limite de aves do plano (vazio = sem limite). Devolve a mensagem de erro ou null.
+async function erroLimiteAves(req, quantas = 1) {
+  const max = req.plano && req.plano.limite_aves;
+  if (max == null) return null;
+  const { rows } = await req.db.query('SELECT COUNT(*)::int AS n FROM aves WHERE usuario_id = $1', [req.user.id]);
+  return rows[0].n + quantas > max ? `Seu plano permite até ${max} aves (você tem ${rows[0].n}).` : null;
+}
+
+// Cadastro de várias aves de uma vez (usado pela importação de planilha). Cada linha é conferida
+// sozinha: as boas entram, as ruins voltam com o motivo — uma linha errada não derruba as outras.
+router.post('/lote', authMiddleware, asyncHandler(async (req, res) => {
+  const lista = req.body && req.body.aves;
+  if (!Array.isArray(lista) || lista.length === 0) return res.status(400).json({ error: 'Envie a lista de aves.' });
+  if (lista.length > 300) return res.status(400).json({ error: 'Envie no máximo 300 aves por vez.' });
+
+  const maxAves = req.plano && req.plano.limite_aves;
+  let restante = Infinity;
+  if (maxAves != null) {
+    const { rows } = await req.db.query('SELECT COUNT(*)::int AS n FROM aves WHERE usuario_id = $1', [req.user.id]);
+    restante = Math.max(0, maxAves - rows[0].n);
+  }
+  const maxFotos = await limiteFotosAve(req, null);
+  const { rows: existentes } = await req.db.query('SELECT anilha FROM aves WHERE usuario_id = $1', [req.user.id]);
+  const anilhasUsadas = new Set(existentes.map((r) => String(r.anilha || '').trim().toLowerCase()));
+
+  const criadas = [], ignoradas = [];
+  for (let i = 0; i < lista.length; i++) {
+    const b = limparProfundo(lista[i] || {});
+    const linha = i + 1;
+    const nome = String(b.nome || '').trim(), anilha = String(b.anilha || '').trim();
+    if (!nome) { ignoradas.push({ linha, motivo: 'sem nome' }); continue; }
+    if (!anilha) { ignoradas.push({ linha, nome, motivo: 'sem anilha' }); continue; }
+    if (anilhasUsadas.has(anilha.toLowerCase())) { ignoradas.push({ linha, nome, motivo: 'anilha já cadastrada' }); continue; }
+    if (criadas.length >= restante) { ignoradas.push({ linha, nome, motivo: `limite de ${maxAves} aves do plano` }); continue; }
+    b.nome = nome; b.anilha = anilha;
+    delete b.fotos; delete b.cig_arquivo; delete b.sexagem_arquivo;      // planilha não traz arquivos
+    try {
+      const cols = ['usuario_id', ...CAMPOS];
+      const valores = [req.user.id, ...CAMPOS.map((c) => prepararValor(c, b[c], maxFotos))];
+      const { rows } = await req.db.query(
+        `INSERT INTO aves (${cols.join(', ')}) VALUES (${valores.map((_, k) => `$${k + 1}`).join(', ')}) RETURNING id`, valores);
+      anilhasUsadas.add(anilha.toLowerCase());
+      criadas.push({ linha, id: rows[0].id });
+    } catch (e) { ignoradas.push({ linha, nome, motivo: 'dados inválidos' }); }
+  }
+  res.status(201).json({ criadas: criadas.length, ignoradas });
+}));
+
 router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const body = req.body || {};
+
+  const limite = await erroLimiteAves(req);
+  if (limite) return res.status(403).json({ error: limite, codigo: 'LIMITE_AVES' });
   
   // Validação básica
   if (!body.nome || (typeof body.nome === 'string' && body.nome.trim() === '')) {
@@ -213,8 +259,13 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const erroMidia = validarMidia(body);
   if (erroMidia) return res.status(400).json({ error: erroMidia });
 
+  const maxFotos = await limiteFotosAve(req, null);
+  if (contarFotos(body) > maxFotos) {
+    return res.status(400).json({ error: `Seu plano permite até ${maxFotos} fotos por ave.` });
+  }
+
   // Impede duplicar anilha
-  const dup = await pool.query(
+  const dup = await req.db.query(
     'SELECT id FROM aves WHERE anilha = $1 AND usuario_id = $2',
     [body.anilha.trim(), req.user.id]
   );
@@ -226,11 +277,11 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
   const cols = ['usuario_id', ...CAMPOS];
   const valores = [
     req.user.id,
-    ...CAMPOS.map(c => prepararValor(c, body[c]))
+    ...CAMPOS.map(c => prepararValor(c, body[c], maxFotos))
   ];
   const placeholders = valores.map((_, i) => `$${i + 1}`).join(', ');
 
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `INSERT INTO aves (${cols.join(', ')}) VALUES (${placeholders}) RETURNING *`,
     valores
   );
@@ -243,9 +294,14 @@ router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
   const erroMidia = validarMidia(body);
   if (erroMidia) return res.status(400).json({ error: erroMidia });
 
+  const maxFotos = await limiteFotosAve(req, req.params.id);
+  if (body.fotos !== undefined && contarFotos(body) > maxFotos) {
+    return res.status(400).json({ error: `Seu plano permite até ${maxFotos} fotos por ave.` });
+  }
+
   // Verifica duplicidade se estiver mudando a anilha
   if (body.anilha && typeof body.anilha === 'string' && body.anilha.trim() !== '') {
-    const dup = await pool.query(
+    const dup = await req.db.query(
       'SELECT id FROM aves WHERE anilha = $1 AND usuario_id = $2 AND id != $3',
       [body.anilha.trim(), req.user.id, req.params.id]
     );
@@ -262,10 +318,10 @@ router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
 
   // Prepara cada campo com a função de limpeza
   const sets = camposEnviados.map((c, i) => `${c} = $${i + 1}`).join(', ');
-  const valores = camposEnviados.map(c => prepararValor(c, body[c]));
+  const valores = camposEnviados.map(c => prepararValor(c, body[c], maxFotos));
   valores.push(req.params.id, req.user.id);
 
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `UPDATE aves SET ${sets}, atualizado_em = NOW()
      WHERE id = $${valores.length - 1} AND usuario_id = $${valores.length}
      RETURNING *`,
@@ -276,7 +332,7 @@ router.put('/:id', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     'DELETE FROM aves WHERE id = $1 AND usuario_id = $2 RETURNING id',
     [req.params.id, req.user.id]
   );
@@ -287,15 +343,15 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
 // ---------- ROTAS PÚBLICAS ----------
 
 router.get('/publico/site', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `SELECT id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, mae,
             categoria_site AS "categoria", status_site AS "status",
-            cig_numero AS "cigNumero",
+            CASE WHEN mostrar_cig THEN cig_numero END AS "cigNumero",
             (jsonb_array_length(COALESCE(fotos, '[]'::jsonb)) > 0) AS "temFoto",
             (video_url IS NOT NULL AND video_url <> '') AS "temVideo",
-            ((cig_numero IS NOT NULL AND cig_numero <> '') OR (cig_arquivo IS NOT NULL AND cig_arquivo <> '')) AS "temCig",
-            (sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '') AS "temSexagem",
+            (mostrar_cig AND ((cig_numero IS NOT NULL AND cig_numero <> '') OR (cig_arquivo IS NOT NULL AND cig_arquivo <> ''))) AS "temCig",
+            (mostrar_sexagem AND sexagem_arquivo IS NOT NULL AND sexagem_arquivo <> '') AS "temSexagem",
             EXTRACT(EPOCH FROM atualizado_em)::bigint AS "v"
      FROM aves WHERE no_site = true ORDER BY especie, nome`
   );
@@ -305,8 +361,8 @@ router.get('/publico/site', asyncHandler(async (req, res) => {
 // Dados de mídia de UMA ave (foto, vídeo, CIG, laudo) — usado pela janelinha do site.
 router.get('/publico/midia/:id', asyncHandler(async (req, res) => {
   if (!/^\d{1,9}$/.test(req.params.id)) return res.status(404).json({ error: 'Ave não encontrada.' });
-  const { rows } = await pool.query(
-    `SELECT id, nome, anilha, sexo, fotos, video_url, cig_numero, cig_arquivo, sexagem_arquivo,
+  const { rows } = await req.db.query(
+    `SELECT id, nome, anilha, sexo, fotos, video_url, cig_numero, cig_arquivo, sexagem_arquivo, mostrar_cig, mostrar_sexagem,
             EXTRACT(EPOCH FROM atualizado_em)::bigint AS v
      FROM aves WHERE id = $1 AND no_site = true`,
     [req.params.id]
@@ -318,9 +374,9 @@ router.get('/publico/midia/:id', asyncHandler(async (req, res) => {
     id: a.id, nome: a.nome, anilha: a.anilha, sexo: a.sexo,
     numFotos: Array.isArray(a.fotos) ? a.fotos.length : 0,
     videoUrl: a.video_url,
-    cigNumero: a.cig_numero,
-    cigTipo: a.cig_arquivo ? tipo(a.cig_arquivo) : null,
-    sexagemTipo: a.sexagem_arquivo ? tipo(a.sexagem_arquivo) : null,
+    cigNumero: a.mostrar_cig ? a.cig_numero : null,
+    cigTipo: a.mostrar_cig && a.cig_arquivo ? tipo(a.cig_arquivo) : null,
+    sexagemTipo: a.mostrar_sexagem && a.sexagem_arquivo ? tipo(a.sexagem_arquivo) : null,
     v: Number(a.v)
   });
 }));
@@ -331,8 +387,10 @@ router.get('/publico/arquivo/:id/:tipo/:i?', asyncHandler(async (req, res) => {
   if (!/^\d{1,9}$/.test(req.params.id)) return naoAchou();
   const col = { foto: 'fotos', cig: 'cig_arquivo', sexagem: 'sexagem_arquivo' }[req.params.tipo];
   if (!col) return naoAchou();
-  const { rows } = await pool.query(`SELECT ${col} AS c FROM aves WHERE id = $1 AND no_site = true`, [req.params.id]);
+  const { rows } = await req.db.query(`SELECT ${col} AS c, mostrar_cig, mostrar_sexagem FROM aves WHERE id = $1 AND no_site = true`, [req.params.id]);
   if (!rows[0] || !rows[0].c) return naoAchou();
+  // Documento só sai se o criador marcou "mostrar no site" nesta ave
+  if ((req.params.tipo === 'cig' && !rows[0].mostrar_cig) || (req.params.tipo === 'sexagem' && !rows[0].mostrar_sexagem)) return naoAchou();
   let du = rows[0].c;
   if (req.params.tipo === 'foto') {
     const i = /^\d+$/.test(req.params.i || '') ? parseInt(req.params.i, 10) : 0;
@@ -345,7 +403,7 @@ router.get('/publico/arquivo/:id/:tipo/:i?', asyncHandler(async (req, res) => {
 }));
 
 router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
-  const aveRes = await pool.query(
+  const aveRes = await req.db.query(
     `SELECT id, usuario_id, nome, anilha, sexo, especie, raca,
             data_nasc AS "dataNasc", pai, anilha_pai AS "anilhaPai",
             mae, anilha_mae AS "anilhaMae",
@@ -363,14 +421,14 @@ router.get('/publico/certificado/:id', asyncHandler(async (req, res) => {
   // usada pelo painel, pelo crachá e pelo simulador. Antes só buscava pai/mãe por nome
   // (em qualquer criador!) e olhava no máximo até os avós.
   const [todasRes, tabelaRes] = await Promise.all([
-    pool.query(
+    req.db.query(
       `SELECT id, nome, anilha, pai, anilha_pai AS "anilhaPai", mae, anilha_mae AS "anilhaMae",
               avo_paterno AS "avoPaterno", avo_paterna AS "avoPaterna",
               avo_materno AS "avoMaterno", avo_materna AS "avoMaterna", ancestrais
        FROM aves WHERE usuario_id = $1`,
       [ave.usuario_id]
     ),
-    pool.query('SELECT nome, anilha FROM ancestrais WHERE usuario_id = $1', [ave.usuario_id])
+    req.db.query('SELECT nome, anilha FROM ancestrais WHERE usuario_id = $1', [ave.usuario_id])
   ]);
   const arvore = Genealogia.montar(ave, todasRes.rows, { maxGen: 5, ancestraisTabela: tabelaRes.rows });
 

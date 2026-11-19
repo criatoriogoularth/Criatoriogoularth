@@ -1,11 +1,14 @@
 {
-  "name": "criatoriogoularth",
+  "name": "aviari",
   "version": "2.0.0",
-  "description": "Sistema de Gestão de Criatório Goularth — API real com Postgres",
+  "description": "Aviari — gestão de criatórios de aves (multicliente)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "create-admin": "node scripts/create-admin.js"
+    "init-master": "node scripts/init-master.js",
+    "criar-dono": "node scripts/criar-dono.js",
+    "registrar-legado": "node scripts/registrar-legado.js",
+    "test": "node tests/isolamento.test.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -13,6 +16,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^10.5.0",
     "pg": "^8.11.5"
   },
   "engines": {

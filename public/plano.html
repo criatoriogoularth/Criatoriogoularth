@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviari — Seu plano</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="auth-client.js"></script>
+<style>
+body{background:radial-gradient(ellipse at top,rgba(199,151,63,0.08),transparent 55%),var(--bg);min-height:100vh;}
+.pl-wrap{max-width:900px;margin:0 auto;padding:28px 16px 60px;}
+.pl-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.pl-top h1{margin:0;font-size:22px;color:var(--brass-soft);font-family:'Fraunces',serif;}
+.pl-sair{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Manrope',sans-serif;}
+.estado{background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:22px;}
+.estado.bloqueado{border-color:#b5483a;background:rgba(181,72,58,.1);}
+.estado.aviso{border-color:var(--brass);background:rgba(199,151,63,.08);}
+.estado h2{margin:0 0 6px;font-size:17px;}
+.estado p{margin:0;font-size:13.5px;color:var(--text-muted);line-height:1.5;}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+.plano{background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;}
+.plano h3{margin:0;font-size:17px;color:var(--brass-soft);}
+.plano .desc{font-size:13px;color:var(--text-muted);line-height:1.45;min-height:38px;}
+.plano ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7;}
+.plano .preco{font-size:20px;font-weight:800;}
+.plano .preco small{font-size:12px;font-weight:500;color:var(--text-muted);}
+.plano button{margin-top:auto;padding:11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:var(--on-brass);font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;font-size:14px;}
+.plano button:disabled{opacity:.6;cursor:default;}
+.msg{margin-top:16px;font-size:13px;text-align:center;min-height:20px;}
+.nota{font-size:12px;color:var(--text-muted);margin-top:18px;text-align:center;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="pl-wrap">
+  <div class="pl-top">
+    <h1>🐦 Seu plano</h1>
+    <div style="display:flex;gap:8px;">
+      <a href="dashboard.html" id="voltar" style="display:none;"><button class="pl-sair">← Voltar ao sistema</button></a>
+      <button class="pl-sair" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div class="estado" id="estado">⏳ Carregando...</div>
+  <h3 style="margin:0 0 12px;">Planos disponíveis</h3>
+  <div class="grade" id="grade"></div>
+  <div class="msg" id="msg"></div>
+  <div class="nota">Escolha o plano e a gente entra em contato para combinar o pagamento.<br>Seus dados ficam guardados e protegidos — nada é apagado por vencimento de plano.</div>
+</div>
+
+<script>
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+const token = localStorage.getItem('token');
+if (!token) location.href = 'login.html';
+const H = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+function sair() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); location.href = 'login.html'; }
+const dinheiro = (c) => c == null ? 'Sob consulta' : (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+(async function () {
+  const r = await fetch('/api/conta', { headers: H });
+  if (r.status === 401) return sair();
+  const c = await r.json();
+  const a = c.acesso, st = document.getElementById('estado');
+
+  if (!a.ativo) {
+    const motivo = { teste_acabou: 'O seu teste grátis terminou.', plano_vencido: 'O seu plano venceu.', suspenso: 'A sua conta está suspensa.', vencido: 'O seu plano venceu.' }[a.motivo] || 'O seu acesso está bloqueado.';
+    st.className = 'estado bloqueado';
+    st.innerHTML = `<h2>🔒 ${esc(motivo)}</h2><p>Os seus dados estão guardados e seguros. Escolha um plano abaixo para voltar a usar o sistema${c.plano.site ? ' e colocar o site no ar de novo' : ''}.</p>`;
+  } else {
+    document.getElementById('voltar').style.display = '';
+    st.className = 'estado' + (a.tipo === 'teste' || a.somenteLeitura ? ' aviso' : '');
+    st.innerHTML = a.somenteLeitura
+      ? `<h2>⚠️ Plano vencido — só consulta</h2><p>Você ainda pode ver seus dados por mais ${a.diasRestantes} dia(s). Renove para voltar a alterar.</p>`
+      : a.tipo === 'teste'
+        ? `<h2>⏳ Teste grátis — ${a.diasRestantes} dia(s) restante(s)</h2><p>Tudo liberado. Quando acabar, o acesso é bloqueado até você escolher um plano.</p>`
+        : `<h2>✅ Plano ${esc(c.plano.nome)} ativo</h2><p>${a.diasRestantes != null ? `Vence em ${a.diasRestantes} dia(s).` : ''}</p>`;
+  }
+
+  document.getElementById('grade').innerHTML = c.planosDisponiveis.map((p) => `
+    <div class="plano">
+      <h3>${esc(p.nome)}</h3>
+      <div class="desc">${esc(p.descricao || '')}</div>
+      <div class="preco">${dinheiro(p.precoAnualCentavos)} ${p.precoAnualCentavos != null ? '<small>/ano</small>' : ''}</div>
+      <ul>
+        <li>${p.gerenciador === 'completo' ? 'Gerenciador completo' : p.gerenciador === 'reduzido' ? 'Cadastro de aves e árvore genealógica' : 'Sem gerenciador'}</li>
+        <li>${p.site ? 'Site público do criatório' : 'Sem site público'}</li>
+        <li>${p.dominioProprio ? 'Domínio próprio opcional' : 'Endereço no subdomínio'}</li>
+        <li>${p.imprimir ? 'Impressão de crachás e árvore' : 'Sem impressão (só visualizar)'}</li>
+      </ul>
+      <button onclick="querer('${esc(p.id)}', this)">${c.plano.id === p.id && a.ativo ? 'Renovar este plano' : 'Quero este plano'}</button>
+    </div>`).join('');
+})();
+
+async function querer(id, btn) {
+  btn.disabled = true;
+  const m = document.getElementById('msg');
+  try {
+    const r = await fetch('/api/conta/interesse', { method: 'POST', headers: H, body: JSON.stringify({ plano_id: id }) });
+    if (!r.ok) throw new Error();
+    m.style.color = '#7fd18b'; m.textContent = '✅ Pedido recebido! Vamos entrar em contato pelo seu e-mail.';
+  } catch (e) { m.style.color = '#ff8a80'; m.textContent = '❌ Não foi possível enviar. Tente de novo.'; btn.disabled = false; }
+}
+</script>
+</body>
+</html>

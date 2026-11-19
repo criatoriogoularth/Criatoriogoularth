@@ -6,7 +6,16 @@
 // A janela só fecha pelo ✕, por "Cancelar"/"Fechar" ou pelo botão voltar do aparelho
 // (clicar fora não fecha, para ninguém perder o que digitou).
 (function () {
-  var TELEFONE_WHATSAPP = '5511941493657';
+  // WhatsApp do criatório vem da configuração dele (nunca um número fixo no código).
+  var TELEFONE_WHATSAPP = '';
+  (function carregarWhatsapp() {
+    if (!window.DB) return;
+    Promise.all([DB.getConfig('site_conteudo'), DB.getConfig('dados_criatorio')]).then(function (r) {
+      var n = ((r[0] && r[0].whatsapp) || (r[1] && (r[1].whatsapp || r[1].celular)) || '').replace(/\D/g, '');
+      if (n && n.length <= 11) n = '55' + n;     // número brasileiro sem DDI
+      TELEFONE_WHATSAPP = n;
+    }).catch(function () {});
+  })();
   var API = '/api/mensagens';
 
   var CSS = '' +
@@ -20,7 +29,7 @@
     '.sm-corpo{padding:14px 16px 18px}' +
     '.sm-tipos{display:flex;gap:8px;margin-bottom:12px}' +
     '.sm-tipos button{flex:1;padding:9px 6px;border-radius:999px;border:1px solid var(--line,#333);background:transparent;color:var(--text-muted,#aaa);font-size:13px;cursor:pointer;font-family:inherit}' +
-    '.sm-tipos button.on{background:rgba(var(--accent-rgb,199,151,63),.15);border-color:var(--brass-dim,#8a6a2b);color:var(--brass-soft,#e0bd7c);font-weight:600}' +
+    '.sm-tipos button.on{background:rgba(199,151,63,.15);border-color:var(--brass-dim,#8a6a2b);color:var(--brass-soft,#e0bd7c);font-weight:600}' +
     '.sm-corpo label{display:block;font-size:12px;color:var(--text-muted,#aaa);margin:10px 0 4px}' +
     '.sm-corpo input[type=text],.sm-corpo textarea{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:8px;border:1px solid var(--line,#333);background:rgba(0,0,0,.25);color:inherit;font-size:15px;font-family:inherit}' +
     '.sm-corpo textarea{min-height:84px;resize:vertical}' +
@@ -125,7 +134,7 @@
         '<div class="sm-corpo sm-ok"><div class="ic">✅</div>' +
         '<p>Recebemos ' + (st.tipo === 'reserva' ? 'seu pedido de reserva' : 'sua dúvida') + ' e vamos entrar em contato o quanto antes.</p>' +
         '<div class="sm-acoes" style="justify-content:center">' +
-        '<a class="sm-btn pri" target="_blank" rel="noopener" href="https://wa.me/' + TELEFONE_WHATSAPP + '?text=' + encodeURIComponent(texto) + '">💬 Falar também pelo WhatsApp</a>' +
+        (TELEFONE_WHATSAPP ? '<a class="sm-btn pri" target="_blank" rel="noopener" href="https://wa.me/' + TELEFONE_WHATSAPP + '?text=' + encodeURIComponent(texto) + '">💬 Falar também pelo WhatsApp</a>' : '') +
         '<button type="button" class="sm-btn" data-sm-fechar>Fechar</button></div></div></div>';
     }).catch(function (e) {
       erro.textContent = e.message || 'Não foi possível enviar agora.';

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Banners de Anúncio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .editor-card {
   background: var(--bg-elevated-2);
@@ -18,7 +17,7 @@
   margin-bottom: 20px;
 }
 .editor-card h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--brass-soft);
   margin-bottom: 6px;
@@ -89,7 +88,7 @@
 }
 .banner-item:active { cursor: grabbing; }
 .banner-item.dragging { opacity: 0.4; }
-.banner-item.drag-over { border-color: var(--brass); background: rgba(var(--accent-rgb,199,151,63),0.1); }
+.banner-item.drag-over { border-color: var(--brass); background: rgba(199,151,63,0.1); }
 .banner-item .handle { color: var(--text-muted); font-size: 15px; flex-shrink: 0; }
 .banner-item .thumb {
   width: 56px;
@@ -113,7 +112,7 @@
   font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
   color: var(--brass-soft);
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
   border: 1px solid var(--brass-dim);
   border-radius: 10px;
   padding: 2px 8px;
@@ -274,7 +273,14 @@ function renderizarBanners() {
 // MODAL DE ADICIONAR/EDITAR
 // ============================================================
 
-function abrirModalBanner(idx) {
+async function abrirModalBanner(idx) {
+  if (idx === undefined || idx === null) {
+    const max = (await DB.getLimites()).banners;
+    if (banners.length >= max) {
+      alert(`Você já tem ${banners.length} de ${max} banners. Remova um para adicionar outro.`);
+      return;
+    }
+  }
   const editando = typeof idx === 'number';
   const banner = editando ? banners[idx] : { tamanho: '300x250', imagemUrl: '', link: '' };
 
@@ -294,7 +300,7 @@ function abrirModalBanner(idx) {
 
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="font-family:var(--font-titulo,'Fraunces',serif);color:var(--brass-soft);">${editando ? '✎ Editar Banner' : '+ Novo Banner'}</h3>
+      <h3 style="font-family:'Fraunces',serif;color:var(--brass-soft);">${editando ? '✎ Editar Banner' : '+ Novo Banner'}</h3>
       <button onclick="document.querySelectorAll('div[style*=&quot;position: fixed&quot;]').forEach(el => el.remove())" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
     </div>
 
@@ -335,30 +341,21 @@ function abrirModalBanner(idx) {
   document.body.appendChild(overlay);
 }
 
-function uploadImagemBanner(event) {
+async function uploadImagemBanner(event) {
   const file = event.target.files[0];
+  event.target.value = '';
   if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    alert('Selecione uma imagem válida.');
-    return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    alert('A imagem excede 10MB.');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
+  try {
+    const url = await DB.reduzirImagem(file, 1000, 0.8);   // banner de celular/PC vira poucas centenas de KB
     const input = document.getElementById('banner-imagem');
     const preview = document.getElementById('banner-imagem-preview');
     if (input) {
-      input.value = e.target.result;
-      preview.innerHTML = `<img src="${e.target.result}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
+      input.value = url;
+      preview.innerHTML = `<img src="${url}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
     }
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
+  } catch (erro) {
+    alert(erro.message);
+  }
 }
 
 async function salvarModalBanner(idx) {

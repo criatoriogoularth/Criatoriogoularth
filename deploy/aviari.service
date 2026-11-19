@@ -1,0 +1,20 @@
+[Unit]
+Description=Aviari — gestão de criatórios
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=aviari
+WorkingDirectory=/opt/aviari
+EnvironmentFile=/opt/aviari/.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Cadastro de Ave</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .field-grid .field-full { grid-column: 1 / -1; }
 
@@ -24,7 +22,7 @@
   background: none;
   border: none;
   color: var(--text-muted);
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12.5px;
   font-weight: 600;
   padding: 9px 14px;
@@ -112,14 +110,14 @@
   border-radius: 6px !important;
   padding: 6px 10px !important;
   color: var(--text) !important;
-  font-family: var(--font-texto,'Manrope',sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 12px !important;
   outline: none !important;
 }
 .nova-anilha-row select:focus,
 .nova-anilha-row input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
 }
 .nova-anilha-row .btn {
   padding: 6px 14px;
@@ -153,16 +151,16 @@
 .btn-atualizar-especies {
   padding: 4px 12px;
   font-size: 11px;
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   border-radius: 6px;
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   transition: .15s ease;
 }
 .btn-atualizar-especies:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.2);
+  background: rgba(199,151,63,0.2);
 }
 
 .historico-container {
@@ -278,7 +276,7 @@
   border-radius: 6px !important;
   padding: 8px 10px !important;
   color: var(--text) !important;
-  font-family: var(--font-texto,'Manrope',sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 13px !important;
   outline: none !important;
   transition: .15s !important;
@@ -288,7 +286,7 @@
 .modal-box .field select:focus,
 .modal-box .field textarea:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
 }
 
 .modal-box .field select option {
@@ -348,8 +346,8 @@
 }
 
 .heranca-aviso {
-  background: rgba(var(--sage-rgb,92,154,124), 0.08);
-  border: 1px solid rgba(var(--sage-rgb,92,154,124), 0.25);
+  background: rgba(92, 154, 124, 0.08);
+  border: 1px solid rgba(92, 154, 124, 0.25);
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 4px;
@@ -404,7 +402,7 @@
   word-break: break-word;
   line-height: 1.1;
 }
-.arvore-no.filled { background: rgba(var(--accent-rgb,199,151,63),0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
+.arvore-no.filled { background: rgba(199,151,63,0.06); border-color: var(--brass-dim); color: var(--brass-soft); }
 .arvore-no.filled.female { background: rgba(185,116,98,0.06); border-color: rgba(185,116,98,0.3); color: var(--rose-text); }
 .arvore-no.empty { color: var(--text-muted); opacity: 0.4; font-style: italic; font-size: 8px; }
 .arvore-no .anilha-tag {
@@ -444,7 +442,9 @@
   .midia-foto .acoes button:hover{background:rgba(255,255,255,.06);color:var(--text)}
   .midia-foto .acoes button.rm{color:#e2988a}
   .midia-upload{display:inline-block;cursor:pointer}
-  .midia-doc{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .midia-mostrar{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-top:10px;cursor:pointer;}
+.midia-mostrar input{margin-top:3px;accent-color:var(--brass);width:16px;height:16px;}
+.midia-doc{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
   .midia-doc img{height:84px;border-radius:8px;border:1px solid var(--line);background:#fff}
   .midia-doc .pdf{font-size:13px;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
   .midia-status{font-size:12px;margin-top:6px}
@@ -691,6 +691,8 @@
             </label>
             <div id="cig-preview"></div>
           </div>
+          <label class="midia-mostrar"><input type="checkbox" id="f-cig-mostrar"> Mostrar o C.I.G. no site (o visitante poderá ver o número e o documento)</label>
+          <div class="midia-ajuda">⚠️ O documento pode conter dados pessoais (nome, CPF, endereço). Só marque se quiser que fique público.</div>
         </fieldset>
 
         <fieldset>
@@ -702,6 +704,7 @@
             </label>
             <div id="sexagem-preview"></div>
           </div>
+          <label class="midia-mostrar"><input type="checkbox" id="f-sexagem-mostrar"> Mostrar o laudo de sexagem no site</label>
         </fieldset>
 
         <div class="form-actions">
@@ -713,7 +716,7 @@
       <!-- ABA HISTÓRICO -->
       <div class="subpage" id="ave-historico">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-          <h3 style="font-family:var(--font-titulo,'Fraunces',serif);font-size:18px;margin:0;">Histórico da Ave</h3>
+          <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:0;">Histórico da Ave</h3>
           <button class="btn btn-primary" onclick="abrirModalHistorico()">+ Adicionar Histórico</button>
         </div>
         <div id="historico-lista" class="historico-container">
@@ -809,7 +812,8 @@ let historicoAtual = [];
 /* ============================================================
    FOTOS, VÍDEO, C.I.G. E LAUDO DE SEXAGEM
    ============================================================ */
-const MAX_FOTOS = 6;
+let MAX_FOTOS = 3;   // o valor real vem do plano (abaixo)
+DB.getLimites().then(l => { MAX_FOTOS = l.fotosAve || 3; if (typeof renderFotos === 'function') renderFotos(); });
 let midia = { fotos: [], cigArquivo: '', sexagemArquivo: '' };
 
 // Reduz a imagem no próprio aparelho antes de enviar (foto de celular tem 5-10 MB).
@@ -864,7 +868,7 @@ function renderFotos() {
         <button type="button" class="rm" onclick="removerFoto(${i})">✕ Remover</button>
       </div>
     </div>`).join('');
-  document.getElementById('fotos-contagem').textContent = midia.fotos.length + ' de ' + MAX_FOTOS + ' fotos';
+  document.getElementById('fotos-contagem').textContent = midia.fotos.length + ' de ' + Math.max(MAX_FOTOS, midia.fotos.length) + ' fotos';
 }
 function fotoComoCapa(i) { const [f] = midia.fotos.splice(i, 1); midia.fotos.unshift(f); renderFotos(); }
 function removerFoto(i) { midia.fotos.splice(i, 1); renderFotos(); }
@@ -895,6 +899,8 @@ function carregarMidia(ave) {
   midia.sexagemArquivo = (ave && ave.sexagemArquivo) || '';
   document.getElementById('f-video').value = (ave && ave.videoUrl) || '';
   document.getElementById('f-cig-numero').value = (ave && ave.cigNumero) || '';
+  document.getElementById('f-cig-mostrar').checked = !!(ave && ave.mostrarCig);
+  document.getElementById('f-sexagem-mostrar').checked = !!(ave && ave.mostrarSexagem);
   renderFotos(); renderDocumento('cigArquivo', 'cig-preview'); renderDocumento('sexagemArquivo', 'sexagem-preview');
   atualizarStatusVideo();
 }
@@ -905,8 +911,8 @@ function iniciarMidia() {
   document.getElementById('f-fotos-input').addEventListener('change', async (e) => {
     const arquivos = Array.from(e.target.files || []);
     e.target.value = ''; // permite escolher a mesma foto de novo
-    const vagas = MAX_FOTOS - midia.fotos.length;
-    if (arquivos.length > vagas) alert('Cada ave pode ter até ' + MAX_FOTOS + ' fotos. Vou usar só as ' + Math.max(vagas, 0) + ' primeiras.');
+    const vagas = Math.max(MAX_FOTOS, midia.fotos.length) - midia.fotos.length;
+    if (arquivos.length > vagas) alert('Seu plano permite até ' + Math.max(MAX_FOTOS, midia.fotos.length) + ' fotos por ave. Vou usar só as ' + Math.max(vagas, 0) + ' primeiras.');
     for (const a of arquivos.slice(0, Math.max(vagas, 0))) {
       try { midia.fotos.push(await imagemRedimensionada(a, 1100, 0.8)); renderFotos(); }
       catch (err) { alert(err.message); }
@@ -1425,7 +1431,7 @@ async function renderModalSelectAve() {
   }
   
   if (busca) {
-    todas = todas.filter(a => String(a.nome || '').toLowerCase().includes(busca) || String(a.anilha || '').toLowerCase().includes(busca));
+    todas = todas.filter(a => a.nome.toLowerCase().includes(busca) || a.anilha.toLowerCase().includes(busca));
   }
   
   const container = document.getElementById('modal-select-list');
@@ -1891,57 +1897,41 @@ async function salvarAve() {
   dados.cigNumero = document.getElementById('f-cig-numero').value.trim();
   dados.cigArquivo = midia.cigArquivo;
   dados.sexagemArquivo = midia.sexagemArquivo;
+  dados.mostrarCig = document.getElementById('f-cig-mostrar').checked;
+  dados.mostrarSexagem = document.getElementById('f-sexagem-mostrar').checked;
 
   const aves = await DB.getAll(DB.TABLES.AVES);
   const anilhaEmUso = aves.some(a => a.anilha === anilha && a.id !== parseInt(id));
   if (anilhaEmUso) { alert('Esta anilha já está sendo usada por outra ave!'); return; }
   
-  if (window._salvandoAve) return; // evita duplo clique
-  window._salvandoAve = true;
-
-  // 1) Salva a ave. Se isto falhar, nada foi gravado e o erro é mostrado.
-  let resultado;
   try {
+    let resultado;
     if (id) {
       resultado = await DB.update(DB.TABLES.AVES, parseInt(id), dados);
+      // Se trocou a anilha da ave, a antiga volta para o estoque
+      if (aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
+        const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
+        if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
+      }
+      alert('✅ Ave atualizada com sucesso!');
     } else {
       resultado = await DB.add(DB.TABLES.AVES, dados);
+      alert('✅ Ave cadastrada com sucesso!');
     }
-  } catch (e) {
-    window._salvandoAve = false;
-    alert('❌ Erro ao salvar: ' + e.message);
-    return;
-  }
-
-  // 2) Passos complementares. CORREÇÃO: antes ficavam no mesmo try do passo 1, então se um deles
-  // falhasse aparecia "Erro ao salvar" mesmo com a ave já gravada — e ao tentar de novo o sistema
-  // reclamava que a anilha já estava em uso (pela própria ave que tinha acabado de salvar).
-  const avisos = [];
-  try {
-    // Se trocou a anilha da ave, a antiga volta para o estoque
-    if (id && aveExistente && aveExistente.anilha && aveExistente.anilha !== anilha) {
-      const antiga = await DB.getAnilhaPorNumero(aveExistente.anilha);
-      if (antiga) await DB.update(DB.TABLES.ANILHAS, antiga.id, { disponivel: 'Sim' });
-    }
-  } catch (e) { avisos.push('não consegui devolver a anilha antiga ao estoque (' + e.message + ')'); }
-
-  try {
+    
     // Anilha usada deixa de estar disponível no estoque
     const anilhaObj = await DB.getAnilhaPorNumero(anilha);
     if (anilhaObj && anilhaObj.disponivel !== 'Não') {
       await DB.update(DB.TABLES.ANILHAS, anilhaObj.id, { disponivel: 'Não' });
     }
-  } catch (e) { avisos.push('não consegui marcar a anilha como indisponível (' + e.message + ')'); }
 
-  try {
-    // Salvar ancestrais criados na árvore na tabela de ancestrais
+    // ===== NOVO: Salvar ancestrais criados na árvore na tabela de ancestrais =====
     await salvarAncestraisDaArvore(dados.ancestrais, nome, dados.especie);
-  } catch (e) { avisos.push('não consegui atualizar a lista de ancestrais (' + e.message + ')'); }
-
-  window._salvandoAve = false;
-  alert((id ? '✅ Ave atualizada com sucesso!' : '✅ Ave cadastrada com sucesso!') +
-        (avisos.length ? '\n\n⚠️ A ave foi salva, mas ' + avisos.join('; ') + '.' : ''));
-  voltarLista();
+    
+    voltarLista();
+  } catch (e) {
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
 }
 
 /* ============================================================

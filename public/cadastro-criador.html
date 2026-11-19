@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Dados do Criatório</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .field-grid .field-full {
   grid-column: 1 / -1;
@@ -81,12 +80,12 @@
   border: 1px solid var(--brass-dim);
   border-radius: var(--radius);
   padding: 20px 24px;
-  background: rgba(var(--accent-rgb,199,151,63),0.04);
+  background: rgba(199,151,63,0.04);
 }
 
 .trocar-senha-section legend {
   color: var(--brass-soft);
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 16px;
   font-weight: 600;
   padding: 0 10px;
@@ -124,7 +123,7 @@
   border-radius: 8px !important;
   padding: 9px 11px !important;
   color: var(--text) !important;
-  font-family: var(--font-texto,'Manrope',sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 13.5px !important;
   outline: none !important;
   transition: .15s !important;
@@ -132,7 +131,7 @@
 
 .trocar-senha-section .field input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.15) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
 }
 
 .trocar-senha-section .btn-alterar-senha {
@@ -141,7 +140,7 @@
   color: var(--on-brass);
   border: none;
   border-radius: 9px;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
@@ -171,8 +170,8 @@
 
 .trocar-senha-section .senha-status.success {
   display: block;
-  background: rgba(var(--sage-rgb,92,154,124),0.15);
-  border: 1px solid rgba(var(--sage-rgb,92,154,124),0.3);
+  background: rgba(92,154,124,0.15);
+  border: 1px solid rgba(92,154,124,0.3);
   color: var(--sage-soft);
 }
 
@@ -185,8 +184,8 @@
 
 .trocar-senha-section .senha-status.info {
   display: block;
-  background: rgba(var(--accent-rgb,199,151,63),0.15);
-  border: 1px solid rgba(var(--accent-rgb,199,151,63),0.3);
+  background: rgba(199,151,63,0.15);
+  border: 1px solid rgba(199,151,63,0.3);
   color: var(--brass-soft);
 }
 
@@ -211,7 +210,7 @@
   border: 1px solid var(--line) !important;
   border-radius: 6px;
   padding: 7px 12px;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12px;
   outline: none;
   flex: 1;
@@ -225,7 +224,7 @@
 .especies-toolbar input:focus,
 .especies-toolbar select:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
 }
 
 .especies-toolbar select option {
@@ -273,7 +272,7 @@
 .especie-row .info .usada {
   font-size: 9px;
   color: var(--sage-soft);
-  background: rgba(var(--sage-rgb,92,154,124),0.15);
+  background: rgba(92,154,124,0.15);
   padding: 1px 8px;
   border-radius: 10px;
 }
@@ -341,7 +340,7 @@
   border-radius: 6px !important;
   padding: 8px 10px !important;
   color: var(--text) !important;
-  font-family: var(--font-texto,'Manrope',sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 13px !important;
   outline: none !important;
   transition: .15s !important;
@@ -349,7 +348,7 @@
 
 .modal-box .field input:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12) !important;
 }
 
 .modal-actions {
@@ -370,7 +369,7 @@
 }
 
 .especies-rapidas .chip {
-  background: rgba(var(--accent-rgb,199,151,63),0.1);
+  background: rgba(199,151,63,0.1);
   border: 1px solid var(--brass-dim);
   border-radius: 16px;
   padding: 4px 14px;
@@ -381,7 +380,7 @@
 }
 
 .especies-rapidas .chip:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.2);
+  background: rgba(199,151,63,0.2);
 }
 
 .especies-rapidas .chip .cientifico-chip {
@@ -398,7 +397,7 @@
   border: 1px solid var(--line) !important;
   border-radius: 8px !important;
   padding: 9px 11px !important;
-  font-family: var(--font-texto,'Manrope',sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
   font-size: 13.5px !important;
   outline: none !important;
   -webkit-appearance: none !important;
@@ -418,7 +417,7 @@
 #f-categoria:focus,
 #f-uf:focus {
   border-color: var(--brass) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.15) !important;
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.15) !important;
 }
 
 @media (max-width: 768px) {
@@ -446,13 +445,14 @@
       <fieldset>
         <legend>Identificação</legend>
         <div class="field-grid">
-          <div class="field"><label>CNPJ/CPF <span class="req">*</span></label><input type="text" value="226.978.758-75" id="f-cpf"></div>
-          <div class="field"><label>Nome do Criatório <span class="req">*</span></label><input type="text" value="Criatório Goularth" id="f-nome-criatorio"></div>
-          <div class="field"><label>Registro</label><input type="text" value="3348370 / FOB II.889" id="f-registro"></div>
-          <div class="field"><label>Data Licença</label><input type="date" value="2001-02-19" id="f-data-licenca"></div>
+          <div class="field"><label>CNPJ/CPF <span class="req">*</span></label><input type="text" placeholder="000.000.000-00" id="f-cpf"></div>
+          <div class="field"><label>Nome do Criatório <span class="req">*</span></label><input type="text" placeholder="Ex.: Canaril Amaral" id="f-nome-criatorio"></div>
+          <div class="field"><label>Responsável <small style="font-weight:400;">(aparece no certificado)</small></label><input type="text" placeholder="Seu nome" id="f-responsavel"></div>
+          <div class="field"><label>Registro</label><input type="text" placeholder="Ex.: 000000 / FOB 000" id="f-registro"></div>
+          <div class="field"><label>Data Licença</label><input type="date" id="f-data-licenca"></div>
           <div class="field"><label>Categoria <span class="req">*</span></label>
             <select id="f-categoria">
-              <option selected>Amador</option>
+              <option>Amador</option>
               <option>Profissional</option>
             </select>
           </div>
@@ -470,7 +470,7 @@
       <fieldset>
         <legend>Redes sociais</legend>
         <div class="field-grid">
-          <div class="field"><label>WhatsApp</label><input type="text" value="(11) 9 4149-3657" id="f-whatsapp"></div>
+          <div class="field"><label>WhatsApp</label><input type="text" placeholder="(00) 0 0000-0000" id="f-whatsapp"></div>
           <div class="field"><label>Facebook</label><input type="text" placeholder="/seuperfil" id="f-facebook"></div>
           <div class="field"><label>Twitter</label><input type="text" placeholder="@seuperfil" id="f-twitter"></div>
           <div class="field"><label>Instagram</label><input type="text" placeholder="@seuperfil" id="f-instagram"></div>
@@ -482,18 +482,18 @@
         <legend>Contato</legend>
         <div class="field-grid">
           <div class="field"><label>Fone</label><input type="text" placeholder="(11)" id="f-fone"></div>
-          <div class="field"><label>Celular</label><input type="text" value="(11) 9 4149-3657" id="f-celular"></div>
-          <div class="field"><label>E-mail</label><input type="email" value="criatorio.goularth@gmail.com" id="f-email"></div>
+          <div class="field"><label>Celular</label><input type="text" placeholder="(00) 0 0000-0000" id="f-celular"></div>
+          <div class="field"><label>E-mail</label><input type="email" placeholder="contato@seucriatorio.com.br" id="f-email"></div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Endereço</legend>
         <div class="field-grid">
-          <div class="field"><label>CEP</label><input type="text" value="09760-371" id="f-cep"></div>
-          <div class="field field-full"><label>Endereço <span class="req">*</span></label><input type="text" value="Rua Giacinto Tognato" id="f-endereco"></div>
-          <div class="field"><label>Número <span class="req">*</span></label><input type="text" value="889" id="f-numero"></div>
-          <div class="field"><label>Bairro <span class="req">*</span></label><input type="text" value="Baeta Neves" id="f-bairro"></div>
+          <div class="field"><label>CEP</label><input type="text" placeholder="00000-000" id="f-cep"></div>
+          <div class="field field-full"><label>Endereço <span class="req">*</span></label><input type="text" placeholder="Rua, avenida..." id="f-endereco"></div>
+          <div class="field"><label>Número <span class="req">*</span></label><input type="text" placeholder="Nº" id="f-numero"></div>
+          <div class="field"><label>Bairro <span class="req">*</span></label><input type="text" placeholder="Bairro" id="f-bairro"></div>
           <div class="field"><label>UF <span class="req">*</span></label>
             <select id="f-uf">
               <option selected>SP</option>
@@ -525,7 +525,7 @@
               <option>SE</option>
             </select>
           </div>
-          <div class="field"><label>Cidade <span class="req">*</span></label><input type="text" value="São Bernardo do Campo" id="f-cidade"></div>
+          <div class="field"><label>Cidade <span class="req">*</span></label><input type="text" placeholder="Cidade" id="f-cidade"></div>
           <div class="field field-full"><label>Complemento</label><input type="text" placeholder="Opcional" id="f-complemento"></div>
         </div>
       </fieldset>
@@ -534,10 +534,10 @@
         <legend>Proprietários</legend>
         <div class="owner-row">
           <div class="who">
-            <div class="owner-avatar">FG</div>
+            <div class="owner-avatar" id="owner-avatar">?</div>
             <div>
-              <div style="font-weight:700;font-size:13.5px;">Fabio Alves Goulart</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">CPF 226.978.758-75 · São Bernardo do Campo - SP</div>
+              <div style="font-weight:700;font-size:13.5px;" id="owner-nome">Proprietário</div>
+              <div style="font-size:11.5px;color:var(--text-muted);" id="owner-info"></div>
             </div>
           </div>
           <div style="display:flex;gap:6px;"><button class="btn btn-ghost" style="padding:6px 12px;">Editar</button></div>
@@ -913,6 +913,7 @@ window.popularSelectEspecie = async function() {
 async function salvarDadosCriatorio() {
   const dados = {
     cpf: document.getElementById('f-cpf').value.trim(),
+    responsavel: document.getElementById('f-responsavel').value.trim(),
     nomeCriatorio: document.getElementById('f-nome-criatorio').value.trim(),
     registro: document.getElementById('f-registro').value.trim(),
     dataLicenca: document.getElementById('f-data-licenca').value,
@@ -954,13 +955,28 @@ async function salvarDadosCriatorio() {
   }
 }
 
+function mostrarProprietario(dados) {
+  let u = {};
+  try { u = JSON.parse(localStorage.getItem('usuario') || '{}'); } catch (e) {}
+  const nome = (dados && dados.responsavel) || u.nome || 'Proprietário';
+  document.getElementById('owner-nome').textContent = nome;
+  document.getElementById('owner-avatar').textContent = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+  document.getElementById('owner-info').textContent = [dados && dados.cpf ? 'CPF ' + dados.cpf : '', dados && dados.cidade ? dados.cidade + (dados.uf ? ' - ' + dados.uf : '') : ''].filter(Boolean).join(' · ');
+}
+
 async function carregarDadosCriatorio() {
   try {
     const dados = await DB.getConfig('dados_criatorio');
-    if (!dados) return;
-    
+    mostrarProprietario(dados);
+    if (!dados) {
+      let u = {};
+      try { u = JSON.parse(localStorage.getItem('usuario') || '{}'); } catch (e) {}
+      document.getElementById('f-responsavel').value = u.nome || '';
+      return;
+    }
+    document.getElementById('f-responsavel').value = dados.responsavel || '';
     document.getElementById('f-cpf').value = dados.cpf || '';
-    document.getElementById('f-nome-criatorio').value = dados.nomeCriatorio || '';
+    document.getElementById('f-nome-criatorio').value = dados.nomeCriatorio || ((JSON.parse(localStorage.getItem('usuario') || '{}').criatorio) || '');
     document.getElementById('f-registro').value = dados.registro || '';
     document.getElementById('f-data-licenca').value = dados.dataLicenca || '';
     document.getElementById('f-categoria').value = dados.categoria || 'Amador';

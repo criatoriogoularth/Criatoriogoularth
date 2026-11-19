@@ -31,6 +31,10 @@ async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
+  // Site aberto por caminho (/c/nome/...): diz ao servidor de qual criatório é.
+  const mt = location.pathname.match(/\/c\/([a-z0-9-]{3,40})\//);
+  if (mt) headers['X-Tenant'] = mt[1];
+
   // GET nunca pode vir do cache do navegador (senão a lista antiga reaparece
   // depois de excluir/editar e só some com F5).
   const metodo = (options.method || 'GET').toUpperCase();
@@ -51,6 +55,11 @@ async function apiFetch(path, options = {}) {
   }
 
   const data = await res.json().catch(() => null);
+
+  // Teste acabou / plano vencido: leva para a tela de planos
+  if (res.status === 402 && data && data.codigo === 'ACESSO_BLOQUEADO' && !location.pathname.endsWith('plano.html')) {
+    window.location.href = 'plano.html';
+  }
   if (!res.ok) {
     throw new Error((data && data.error) || `Erro ${res.status}`);
   }
@@ -103,7 +112,7 @@ const DB = {
   },
   async getReproducoesAtivas() {
     const reproducoes = await this.getAll(this.TABLES.REPRODUCOES);
-    return reproducoes.filter(r => r.status === 'Ativo' && r.finalizada !== 'Sim');
+    return reproducoes.filter(r => r.status === 'Ativo');
   },
   async getAvePorAnilha(anilha) {
     if (!anilha) return null;
@@ -155,11 +164,6 @@ const DB = {
     return ancestrais.find(a => a.nome && a.nome.toLowerCase() === nome.toLowerCase()) || null;
   },
 
-  // Aves COMPLETAS (com fotos, CIG e laudo) — só para backup
-  async getAvesBackupCompleto() {
-    return apiFetch('/aves/backup/completo');
-  },
-
   // ---- PÚBLICO ----
   async getAvesPublicas() {
     const res = await fetch(`${API_BASE}/aves/publico/site`);
@@ -178,8 +182,19 @@ const DB = {
   },
 
   // ---- CONFIG ----
+  // Páginas do SITE público leem a versão pública (só o que o visitante pode ver).
+  // Páginas do GERENCIADOR leem a versão completa, pelo login — assim cada criador só enxerga o que é dele.
   async getConfig(chave) {
-    const res = await fetch(`${API_BASE}/config/publico/${chave}`);
+    const token = localStorage.getItem('token');
+    const paginaPublica = /site-(home|criatorio|noticias|plantel|adultos|filhotes|fotos|videos|contato|certificado)\.html$/.test(location.pathname);
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const mt = location.pathname.match(/\/c\/([a-z0-9-]{3,40})\//);
+    if (mt) headers['X-Tenant'] = mt[1];
+
+    const url = (token && !paginaPublica) ? `${API_BASE}/config/${chave}` : `${API_BASE}/config/publico/${chave}`;
+    const res = await fetch(url, { headers });
+    if (res.status === 402 && !location.pathname.endsWith('plano.html')) { window.location.href = 'plano.html'; return null; }
     if (!res.ok) return null;
     return res.json();
   },
@@ -220,72 +235,43 @@ const DB = {
     return apiFetch(`/mensagens/${id}`, { method: 'DELETE' });
   },
 
-  // ---- TORNEIOS (Copas) ----
-  async getTorneiosPublico() {
-    const res = await fetch(`${API_BASE}/torneios/publico`);
-    if (!res.ok) return [];
-    return res.json();
+  // ---- LIMITES DO PLANO e IMAGENS ----
+  // Limites vêm do servidor (que é quem confere de verdade); aqui só para avisar o usuário.
+  async getLimites() {
+    if (!this._limites) {
+      try { this._limites = (await apiFetch('/conta')).limites; }
+      catch (e) { this._limites = null; }
+      if (!this._limites) this._limites = { fotosAve: 3, galeria: 50, banners: 5 };
+    }
+    return this._limites;
   },
-  async getTorneioPublico(id) {
-    const res = await fetch(`${API_BASE}/torneios/publico/${id}`);
-    if (!res.ok) return null;
-    return res.json();
-  },
-  async getTorneios() {
-    return apiFetch('/torneios');
-  },
-  async getTorneio(id) {
-    return apiFetch(`/torneios/${id}`);
-  },
-  async addTorneio(dados) {
-    return apiFetch('/torneios', { method: 'POST', body: JSON.stringify(dados) });
-  },
-  async updateTorneio(id, dados) {
-    return apiFetch(`/torneios/${id}`, { method: 'PUT', body: JSON.stringify(dados) });
-  },
-  async deleteTorneio(id) {
-    return apiFetch(`/torneios/${id}`, { method: 'DELETE' });
-  },
-  async reordenarTorneios(itens) {
-    return apiFetch('/torneios/reordenar/lote', { method: 'PUT', body: JSON.stringify({ itens }) });
+
+  // Reduz a imagem no próprio aparelho antes de enviar (foto de celular de 5 MB vira ~200 KB).
+  reduzirImagem(file, maxLado = 1200, qualidade = 0.8) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type || !file.type.startsWith('image/')) return reject(new Error('O arquivo não é uma imagem.'));
+      const leitor = new FileReader();
+      leitor.onerror = () => reject(new Error('Não foi possível ler a imagem.'));
+      leitor.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Imagem inválida ou formato não suportado.'));
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > maxLado || h > maxLado) {
+            if (w >= h) { h = Math.round(h * maxLado / w); w = maxLado; } else { w = Math.round(w * maxLado / h); h = maxLado; }
+          }
+          const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          const cx = cv.getContext('2d');
+          cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h);   // PNG transparente não vira fundo preto
+          cx.drawImage(img, 0, 0, w, h);
+          resolve(cv.toDataURL('image/jpeg', qualidade));
+        };
+        img.src = leitor.result;
+      };
+      leitor.readAsDataURL(file);
+    });
   }
 };
-
-// ============================================================
-// AVISO GLOBAL DE ERRO
-// ============================================================
-// Várias telas chamam a API sem try/catch: quando algo falhava (salvar, excluir,
-// carregar), nada aparecia e parecia que "o programa não fez nada". Agora qualquer erro
-// não tratado vira um aviso discreto no canto da tela (só para quem está logado,
-// nunca para visitantes do site público).
-function mostrarAvisoErro(msg) {
-  try {
-    let box = document.getElementById('aviso-erro-global');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'aviso-erro-global';
-      box.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:99999;max-width:340px;' +
-        'background:#5a1f1f;color:#fff;border:1px solid #c75a5a;border-radius:10px;padding:12px 14px;' +
-        'font:13px/1.4 Manrope,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4);cursor:pointer;';
-      box.title = 'Clique para fechar';
-      box.onclick = () => box.remove();
-      document.body.appendChild(box);
-    }
-    box.textContent = '⚠️ ' + msg;
-    clearTimeout(box._t);
-    box._t = setTimeout(() => box.remove(), 9000);
-  } catch (e) { /* nunca deixa o aviso quebrar a página */ }
-}
-window.mostrarAvisoErro = mostrarAvisoErro;
-
-window.addEventListener('unhandledrejection', (ev) => {
-  const err = ev.reason;
-  const msg = err && err.message ? err.message : String(err || 'Erro desconhecido');
-  console.error('Erro não tratado:', err);
-  if (msg === 'Não autenticado') return;
-  if (!localStorage.getItem('token')) return;
-  mostrarAvisoErro('Não foi possível concluir: ' + msg);
-});
 
 window.DB = DB;
 console.log('✅ db-api.js carregado');

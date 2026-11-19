@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Personalizar Site</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +11,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .editor-card {
   background: var(--bg-elevated-2);
@@ -23,7 +22,7 @@
   margin-bottom: 20px;
 }
 .editor-card h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--brass-soft);
   margin-bottom: 14px;
@@ -78,13 +77,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-weight: 700;
   color: var(--brass-soft);
-  background: rgba(var(--accent-rgb,199,151,63),0.1);
+  background: rgba(199,151,63,0.1);
 }
 .preview-container .info-preview .nome {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-weight: 700;
   color: var(--brass-soft);
 }
@@ -125,16 +124,16 @@
   margin-top: 8px;
   padding: 6px 18px;
   border-radius: 6px;
-  background: rgba(var(--accent-rgb,199,151,63),0.15);
+  background: rgba(199,151,63,0.15);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
 }
 .upload-area .btn-upload:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.25);
+  background: rgba(199,151,63,0.25);
 }
 .toggle-container {
   display: flex;
@@ -233,7 +232,7 @@
   transform: rotate(45deg);
 }
 .ave-selector-item:has(input[type="checkbox"]:checked) {
-  background: rgba(var(--accent-rgb,199,151,63),0.1);
+  background: rgba(199,151,63,0.1);
   border-color: var(--brass-dim);
 }
 .ave-selector-item label {
@@ -260,7 +259,7 @@
 }
 .aba-item.drag-over {
   border-color: var(--brass);
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
 }
 .aba-item .handle {
   color: var(--text-muted);
@@ -282,7 +281,6 @@
   line-height: 1.4;
 }
 </style>
-<script src="modelos-impressao.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -328,12 +326,12 @@
         </div>
         <div class="field">
           <label>Iniciais (fallback se não houver imagem)</label>
-          <input type="text" id="logo-iniciais" placeholder="CG" maxlength="4">
+          <input type="text" id="logo-iniciais" placeholder="AV" maxlength="4">
           <div style="font-size:10px;color:var(--text-muted);">Máximo 4 caracteres. Usado quando não há imagem.</div>
         </div>
         <div class="field">
           <label>Nome do Criatório</label>
-          <input type="text" id="criatorio-nome" placeholder="Criatório Goularth">
+          <input type="text" id="criatorio-nome" placeholder="Ex.: Canaril Amaral">
         </div>
         <div class="field">
           <label>Tamanho do Nome (px)</label>
@@ -349,10 +347,10 @@
         <h4 style="color:var(--text-muted);font-size:13px;margin:12px 0 8px;">📋 Prévia</h4>
         <div class="preview-container" id="preview-container">
           <div id="preview-logo">
-            <div class="logo-placeholder" style="width:76px;height:76px;font-size:28px;">CG</div>
+            <div class="logo-placeholder" style="width:76px;height:76px;font-size:28px;">AV</div>
           </div>
           <div class="info-preview">
-            <div class="nome" id="preview-nome" style="font-size:20px;">Criatório Goularth</div>
+            <div class="nome" id="preview-nome" style="font-size:20px;">Meu Criatório</div>
             <div class="sub" id="preview-sub">Canários · Coleiros · Trinca-Ferro</div>
           </div>
         </div>
@@ -368,7 +366,7 @@
           </div>
           <span class="toggle-label" id="tema-label-claro">☀️ Claro</span>
         </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Modo dia/noite do gerenciador (painel). O modelo e as cores do painel e do site ficam em <a href="site-editor-tema.html" style="color:var(--brass-soft);">🎨 Modelos e Cores</a>.</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Selecione o tema que será aplicado em todo o site.</div>
       </div>
 
       <!-- VISUALIZAÇÃO DO PLANTEL -->
@@ -395,9 +393,6 @@
           <span class="toggle-label" id="layout-label-lateral">▮ Lateral</span>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">"Topo" é o menu horizontal atual. "Lateral" fixa o menu numa coluna à esquerda, estilo blog — em telas de celular ele volta a aparecer no topo automaticamente.</div>
-        <div id="layout-aviso-tema" style="display:none;margin-top:10px;font-size:12px;line-height:1.5;padding:10px 12px;border-radius:8px;border:1px solid var(--brass);color:var(--brass-soft);">
-          🔒 O tema escolhido para o site usa o <b>menu em cascata no topo</b> (Aves ▾ e Mídias ▾), por isso o menu lateral fica desativado. Para usar o lateral, escolha um tema clássico em <b>Modelos e Cores</b>.
-        </div>
       </div>
 
       <!-- ===== VISIBILIDADE E ORDEM DAS ABAS ===== -->
@@ -494,9 +489,31 @@ function savePersonalizacaoDebounced(data) {
 // ============================================================
 
 function aplicarTema(tema) {
-  // O visual agora é controlado pelo motor de temas (tema.js), que respeita o modelo escolhido
-  // em "Modelos e Cores". Aqui só se troca o modo dia/noite do gerenciador.
-  if (window.TemaEngine) TemaEngine.definirModoAdmin(tema);
+  const root = document.documentElement;
+  
+  if (tema === 'claro') {
+    root.style.setProperty('--bg', '#f5f0e8');
+    root.style.setProperty('--bg-elevated', '#ede8df');
+    root.style.setProperty('--bg-elevated-2', '#e5dfd4');
+    root.style.setProperty('--text', '#23291f');
+    root.style.setProperty('--text-muted', '#5a6355');
+    root.style.setProperty('--line', 'rgba(199,151,63,0.3)');
+    root.style.setProperty('--parchment', '#f5f0e8');
+    root.style.setProperty('--parchment-dim', '#e5dfd4');
+    root.style.setProperty('--ink', '#23291f');
+    root.style.setProperty('--ink-soft', '#5a6355');
+  } else {
+    root.style.setProperty('--bg', '#0d1a16');
+    root.style.setProperty('--bg-elevated', '#132621');
+    root.style.setProperty('--bg-elevated-2', '#17302a');
+    root.style.setProperty('--text', '#ece6d6');
+    root.style.setProperty('--text-muted', '#9aa89e');
+    root.style.setProperty('--line', 'rgba(199,151,63,0.22)');
+    root.style.setProperty('--parchment', '#f3ecda');
+    root.style.setProperty('--parchment-dim', '#e7dec5');
+    root.style.setProperty('--ink', '#23291f');
+    root.style.setProperty('--ink-soft', '#4a5347');
+  }
 }
 
 // ============================================================
@@ -509,8 +526,8 @@ async function carregarPersonalizacao() {
   
   // LOGO
   document.getElementById('logo-tamanho').value = personalizacao.logoTamanho || 76;
-  document.getElementById('logo-iniciais').value = personalizacao.logoIniciais || 'CG';
-  document.getElementById('criatorio-nome').value = personalizacao.nome || 'Criatório Goularth';
+  document.getElementById('logo-iniciais').value = personalizacao.logoIniciais || 'AV';
+  document.getElementById('criatorio-nome').value = personalizacao.nome || 'Meu Criatório';
   document.getElementById('nome-tamanho').value = personalizacao.nomeTamanho || 20;
   document.getElementById('criatorio-subtitulo').value = personalizacao.subtitulo || 'Canários · Coleiros · Trinca-Ferro';
   
@@ -520,12 +537,12 @@ async function carregarPersonalizacao() {
   // Preview logo
   const previewLogo = document.getElementById('preview-logo');
   if (personalizacao.logoUrl) {
-    previewLogo.innerHTML = `<img src="${personalizacao.logoUrl}" class="logo-preview" style="width:${tamanhoLogo}px;height:${tamanhoLogo}px;" onerror="this.parentElement.innerHTML='<div class=\\'logo-placeholder\\' style=\\'width:${tamanhoLogo}px;height:${tamanhoLogo}px;font-size:${tamanhoLogo * 0.4}px;\\'>${personalizacao.logoIniciais || 'CG'}</div>'">`;
+    previewLogo.innerHTML = `<img src="${personalizacao.logoUrl}" class="logo-preview" style="width:${tamanhoLogo}px;height:${tamanhoLogo}px;" onerror="this.parentElement.innerHTML='<div class=\\'logo-placeholder\\' style=\\'width:${tamanhoLogo}px;height:${tamanhoLogo}px;font-size:${tamanhoLogo * 0.4}px;\\'>${personalizacao.logoIniciais || 'AV'}</div>'">`;
   } else {
-    previewLogo.innerHTML = `<div class="logo-placeholder" style="width:${tamanhoLogo}px;height:${tamanhoLogo}px;font-size:${tamanhoLogo * 0.4}px;">${personalizacao.logoIniciais || 'CG'}</div>`;
+    previewLogo.innerHTML = `<div class="logo-placeholder" style="width:${tamanhoLogo}px;height:${tamanhoLogo}px;font-size:${tamanhoLogo * 0.4}px;">${personalizacao.logoIniciais || 'AV'}</div>`;
   }
   
-  document.getElementById('preview-nome').textContent = personalizacao.nome || 'Criatório Goularth';
+  document.getElementById('preview-nome').textContent = personalizacao.nome || 'Meu Criatório';
   document.getElementById('preview-nome').style.fontSize = tamanhoNome + 'px';
   document.getElementById('preview-sub').textContent = personalizacao.subtitulo || 'Canários · Coleiros · Trinca-Ferro';
   
@@ -564,17 +581,10 @@ async function carregarPersonalizacao() {
   }
 
   // LAYOUT DO MENU
-  const TEMAS_SEM_LATERAL = ['faroeste', 'matrix', 'velozes', 'ninja', 'dragao', 'rio', 'pirata'];
-  const layoutBloqueado = TEMAS_SEM_LATERAL.includes(personalizacao.temas && personalizacao.temas.site && personalizacao.temas.site.modelo);
-  const layoutMenu = layoutBloqueado ? 'topo' : (personalizacao.layoutMenu || 'topo');   // a escolha salva não é apagada
+  const layoutMenu = personalizacao.layoutMenu || 'topo';
   const layoutToggle = document.getElementById('layout-menu-toggle');
   const layoutLabelTopo = document.getElementById('layout-label-topo');
   const layoutLabelLateral = document.getElementById('layout-label-lateral');
-  if (layoutBloqueado) {
-    document.getElementById('layout-aviso-tema').style.display = 'block';
-    layoutToggle.style.opacity = '.4'; layoutToggle.style.pointerEvents = 'none';
-    layoutLabelLateral.style.opacity = '.4';
-  }
 
   if (layoutMenu === 'lateral') {
     layoutToggle.classList.add('active');
@@ -673,15 +683,9 @@ async function uploadLogo(event) {
     }
     
     await savePersonalizacao(personalizacao);
-    // Cópia em ALTA resolução (900 px, PNG) para impressão de crachás e árvores. O site continua usando a versão leve.
-    // Se não der para guardar, nada se perde: o logo normal já foi salvo acima.
-    try {
-      personalizacao.logoUrlHD = await ModelosImpressao.logoHD(file, 900);
-      await savePersonalizacao(personalizacao);
-    } catch (e) { delete personalizacao.logoUrlHD; console.warn('Cópia em alta resolução do logo não foi salva:', e); }
     
     const tamanhoLogo = parseInt(document.getElementById('logo-tamanho').value) || 76;
-    const iniciais = document.getElementById('logo-iniciais').value || 'CG';
+    const iniciais = document.getElementById('logo-iniciais').value || 'AV';
     
     document.getElementById('preview-logo').innerHTML = `<img src="${personalizacao.logoUrl}" class="logo-preview" style="width:${tamanhoLogo}px;height:${tamanhoLogo}px;" onerror="this.parentElement.innerHTML='<div class=\\'logo-placeholder\\' style=\\'width:${tamanhoLogo}px;height:${tamanhoLogo}px;font-size:${tamanhoLogo * 0.4}px;\\'>${iniciais}</div>'">`;
     
@@ -699,11 +703,10 @@ async function excluirLogo() {
   
   const personalizacao = await getPersonalizacao();
   personalizacao.logoUrl = '';
-  personalizacao.logoUrlHD = '';
   await savePersonalizacao(personalizacao);
   
   const tamanho = parseInt(document.getElementById('logo-tamanho').value) || 76;
-  const iniciais = document.getElementById('logo-iniciais').value || 'CG';
+  const iniciais = document.getElementById('logo-iniciais').value || 'AV';
   
   document.getElementById('preview-logo').innerHTML = `<div class="logo-placeholder" style="width:${tamanho}px;height:${tamanho}px;font-size:${tamanho * 0.4}px;">${iniciais}</div>`;
   
@@ -713,8 +716,8 @@ async function excluirLogo() {
 
 async function atualizarPreviewLogo() {
   const tamanhoLogo = parseInt(document.getElementById('logo-tamanho').value) || 76;
-  const iniciais = document.getElementById('logo-iniciais').value || 'CG';
-  const nome = document.getElementById('criatorio-nome').value || 'Criatório Goularth';
+  const iniciais = document.getElementById('logo-iniciais').value || 'AV';
+  const nome = document.getElementById('criatorio-nome').value || 'Meu Criatório';
   const tamanhoNome = parseInt(document.getElementById('nome-tamanho').value) || 20;
   const subtitulo = document.getElementById('criatorio-subtitulo').value || 'Canários · Coleiros · Trinca-Ferro';
   
@@ -850,7 +853,6 @@ const ABAS_PADRAO = [
   { chave: 'fotos', icone: '📸', label: 'Fotos' },
   { chave: 'videos', icone: '🎬', label: 'Vídeos' },
   { chave: 'crachas', icone: '🏷️', label: 'Crachás' },
-  { chave: 'parceiros', icone: '🤝', label: 'Parceiros' },
   { chave: 'contato', icone: '📧', label: 'Contato' }
 ];
 
@@ -1029,8 +1031,8 @@ function atualizarSidebar() {
 
 async function salvarPersonalizacao() {
   const tamanhoLogo = parseInt(document.getElementById('logo-tamanho').value) || 76;
-  const iniciais = document.getElementById('logo-iniciais').value || 'CG';
-  const nome = document.getElementById('criatorio-nome').value || 'Criatório Goularth';
+  const iniciais = document.getElementById('logo-iniciais').value || 'AV';
+  const nome = document.getElementById('criatorio-nome').value || 'Meu Criatório';
   const tamanhoNome = parseInt(document.getElementById('nome-tamanho').value) || 20;
   const subtitulo = document.getElementById('criatorio-subtitulo').value || 'Canários · Coleiros · Trinca-Ferro';
   

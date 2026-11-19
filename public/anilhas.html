@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Anilhas</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .anilhas-toolbar {
   display: flex;
@@ -32,7 +31,7 @@
   border-radius: 8px;
   padding: 8px 12px;
   color: var(--text);
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12.5px;
   outline: none;
   min-width: 140px;
@@ -81,7 +80,7 @@
 }
 
 .table-wrap tr:hover td {
-  background: rgba(var(--accent-rgb,199,151,63),0.04);
+  background: rgba(199,151,63,0.04);
 }
 
 .badge {
@@ -92,14 +91,14 @@
   font-weight: 600;
 }
 
-.badge-ativo { background: rgba(var(--sage-rgb,92,154,124), 0.2); color: var(--sage-soft); }
+.badge-ativo { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
 .badge-inativo { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
-.badge-disponivel { background: rgba(var(--sage-rgb,92,154,124), 0.2); color: var(--sage-soft); }
+.badge-disponivel { background: rgba(92, 154, 124, 0.2); color: var(--sage-soft); }
 .badge-indisponivel { background: rgba(192, 89, 74, 0.2); color: var(--danger-text); }
-.badge-aberta { background: rgba(var(--accent-rgb,199,151,63), 0.15); color: var(--brass-soft); }
+.badge-aberta { background: rgba(199, 151, 63, 0.15); color: var(--brass-soft); }
 .badge-comercial { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
-.badge-fob { background: rgba(var(--accent-rgb,199,151,63), 0.20); color: var(--brass-soft); }
-.badge-ibama { background: rgba(var(--sage-rgb,92,154,124), 0.20); color: var(--sage-soft); }
+.badge-fob { background: rgba(199, 151, 63, 0.20); color: var(--brass-soft); }
+.badge-ibama { background: rgba(92, 154, 124, 0.20); color: var(--sage-soft); }
 .badge-marcacao { background: rgba(200, 100, 130, 0.20); color: var(--rose-text); }
 .badge-sispass { background: rgba(70, 130, 200, 0.15); color: var(--info-text); }
 
@@ -152,7 +151,7 @@
   border-radius: 6px;
   padding: 8px 10px;
   color: var(--text);
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 13px;
   outline: none;
   transition: .15s;
@@ -162,7 +161,7 @@
 .modal-box .field select:focus,
 .modal-box .field textarea:focus {
   border-color: var(--brass);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb,199,151,63),0.12);
+  box-shadow: 0 0 0 3px rgba(199,151,63,0.12);
 }
 
 .modal-box .field textarea {
@@ -214,7 +213,7 @@
 }
 
 .empty-state-table h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--text);
   margin-bottom: 6px;
@@ -228,7 +227,7 @@
   padding: 10px 20px;
   border-radius: 9px;
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-weight: 700;
   font-size: 13px;
   transition: .15s ease;
@@ -676,7 +675,7 @@ async function renderizarTabela() {
   let anilhas = await DB.getAll(DB.TABLES.ANILHAS);
 
   let lista = anilhas.filter(item => {
-    const matchBusca = String(item.numero || '').toLowerCase().includes(busca) || String(item.cor || '').toLowerCase().includes(busca);
+    const matchBusca = item.numero.toLowerCase().includes(busca) || item.cor.toLowerCase().includes(busca);
     const matchCor = filtroCor ? item.cor === filtroCor : true;
     const matchStatus = filtroStatus ? item.ativo === filtroStatus : true;
     const matchDisponivel = filtroDisponivel ? item.disponivel === filtroDisponivel : true;
@@ -749,9 +748,7 @@ async function editarAnilha(id) {
   document.getElementById('f-observacao').value = item.observacao || '';
   document.querySelector(`input[name="ativo"][value="${item.ativo}"]`).checked = true;
   document.querySelector(`input[name="disponivel"][value="${item.disponivel}"]`).checked = true;
-  // CORREÇÃO: a data chegava como "2026-04-18T00:00:00.000Z", que o campo de data rejeita
-  // (ficava em branco). Só os 10 primeiros caracteres (AAAA-MM-DD) servem.
-  document.getElementById('f-data-cadastro').value = item.dataCadastro ? String(item.dataCadastro).slice(0, 10) : '';
+  document.getElementById('f-data-cadastro').value = item.dataCadastro || '';
   document.getElementById('modal-anilha').classList.add('open');
 }
 
@@ -794,12 +791,6 @@ async function salvarAnilha(event) {
 }
 
 async function excluirAnilha(id) {
-  // CORREÇÃO: dava para excluir uma anilha que está em uso por uma ave, deixando a ave "órfã".
-  try {
-    const [item, aves] = await Promise.all([DB.getById(DB.TABLES.ANILHAS, id), DB.getAll(DB.TABLES.AVES)]);
-    const emUso = item && aves.find(a => a.anilha === item.numero);
-    if (emUso && !confirm(`⚠️ A anilha ${item.numero} está em uso pela ave "${emUso.nome}".\n\nExcluir a anilha do estoque NÃO apaga a ave, mas ela deixará de constar no controle de anilhas. Excluir mesmo assim?`)) return;
-  } catch (e) { /* se não deu para checar, segue para a confirmação normal */ }
   if (!confirm('Tem certeza que deseja excluir esta anilha?')) return;
   try {
     await DB.delete(DB.TABLES.ANILHAS, id);

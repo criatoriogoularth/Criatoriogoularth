@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%90%A6%3C/text%3E%3C/svg%3E">
 
-<title>Criatório Goularth — Certificado</title>
+<title>Criatório — Certificado</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -592,10 +592,10 @@ body {
       <div class="cert-header" id="cert-header">
         <div class="cert-header-left">
           <div class="cert-title" id="cert-title">CERTIFICADO</div>
-          <div class="cert-criador" id="cert-criador">Criatório Goularth</div>
-          <div class="cert-responsavel" id="cert-responsavel">Responsável: Fabio Alves Goulart</div>
-          <div class="cert-registros" id="cert-registros">CTF 3348370 / FOB II.889</div>
-          <div class="cert-contato" id="cert-contato">criatorio.goularth@gmail.com · (11) 9 4149-3657</div>
+          <div class="cert-criador" id="cert-criador"></div>
+          <div class="cert-responsavel" id="cert-responsavel"></div>
+          <div class="cert-registros" id="cert-registros"></div>
+          <div class="cert-contato" id="cert-contato"></div>
         </div>
       </div>
       
@@ -605,7 +605,7 @@ body {
       </div>
       
       <div class="cert-footer" id="cert-footer">
-        <span id="cert-footer-text">Gestão de Criatório Goularth</span>
+        <span id="cert-footer-text">Gestão de Criatório</span>
       </div>
     </div>
     
@@ -615,6 +615,7 @@ body {
   </div>
 
   <script src="db-api.js"></script>
+<script src="cert-cabecalho.js"></script>
 <script src="voltar.js"></script>
   <script>
     // ===== ZOOM =====
@@ -663,9 +664,11 @@ body {
       const personalizacao = await getPersonalizacao();
       const logoSection = document.getElementById('logo-section');
       
-      const nome = personalizacao.nome || 'Criatório Goularth';
+      const nome = personalizacao.nome || 'Meu Criatório';
+      document.title = document.title.replace(/^Criatório/, nome);
+      document.querySelectorAll('.rodape-nome').forEach(e => { e.textContent = nome; });
       const subtitulo = personalizacao.subtitulo || '';
-      const iniciais = personalizacao.logoIniciais || 'CG';
+      const iniciais = personalizacao.logoIniciais || ((nome || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'AV');
       const logoUrl = personalizacao.logoUrl || '';
       const logoTamanho = personalizacao.logoTamanho || 38;
       const nomeTamanho = personalizacao.nomeTamanho || 18;

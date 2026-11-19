@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Editar Site</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <style>
 .editor-card {
   background: var(--bg-elevated-2);
@@ -18,7 +17,7 @@
   margin-bottom: 20px;
 }
 .editor-card h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--brass-soft);
   margin-bottom: 14px;
@@ -82,16 +81,16 @@
   margin-top: 10px;
   padding: 8px 24px;
   border-radius: 6px;
-  background: rgba(var(--accent-rgb,199,151,63),0.15);
+  background: rgba(199,151,63,0.15);
   border: 1px solid var(--brass-dim);
   color: var(--brass-soft);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
 }
 .upload-area .btn-upload:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.25);
+  background: rgba(199,151,63,0.25);
 }
 .items-list {
   display: flex;
@@ -138,7 +137,7 @@
   font-size: 10px;
   padding: 2px 10px;
   border-radius: 12px;
-  background: rgba(var(--accent-rgb,199,151,63),0.12);
+  background: rgba(199,151,63,0.12);
   color: var(--brass-soft);
 }
 .item-row .actions {
@@ -165,7 +164,7 @@
   background: none;
   border: none;
   color: var(--text-muted);
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12.5px;
   font-weight: 600;
   padding: 8px 16px;
@@ -196,14 +195,14 @@
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid var(--brass-dim);
-  background: rgba(var(--accent-rgb,199,151,63),0.08);
+  background: rgba(199,151,63,0.08);
   color: var(--brass-soft);
   cursor: pointer;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
   font-size: 12px;
 }
 .banner-upload-area .btn-upload:hover {
-  background: rgba(var(--accent-rgb,199,151,63),0.18);
+  background: rgba(199,151,63,0.18);
 }
 .banner-preview-container {
   width: 100%;
@@ -269,7 +268,7 @@
   color: var(--text);
   padding: 2px 6px;
   font-size: 11px;
-  font-family: var(--font-texto,'Manrope',sans-serif);
+  font-family: 'Manrope', sans-serif;
 }
 </style>
 </head>
@@ -338,6 +337,8 @@ function ehAdulta(ave) {
   }
   return !(ave.filhote || ave.situacao === 'Filhote');
 }
+
+DB.getLimites().then(l => { window.__limiteGaleria = l.galeria; });
 
 async function getFotos() {
   return (await DB.getConfig('site_fotos')) || [];
@@ -496,7 +497,7 @@ async function renderHome() {
       </div>
       <div class="field" style="margin-top:12px;">
         <label>Título do Banner</label>
-        <input type="text" id="banner-titulo" placeholder="Bem-vindo ao Criatório Goularth">
+        <input type="text" id="banner-titulo" placeholder="Bem-vindo ao nosso criatório">
         <div style="font-size:10px;color:var(--text-muted);">Deixe em branco para não exibir</div>
       </div>
       <div class="field">
@@ -939,7 +940,7 @@ function renderFotos() {
       </div>
     </div>
     <div class="editor-card">
-      <h3>🖼️ Fotos Cadastradas (${fotos.length})</h3>
+      <h3>🖼️ Fotos Cadastradas (${fotos.length}${window.__limiteGaleria ? ' de ' + window.__limiteGaleria : ''})</h3>
       <div class="tabs">
         <button class="active" onclick="switchTabFotos('lista-criacao', this)">📸 Criação (${fotosCriacao.length})</button>
         <button onclick="switchTabFotos('lista-torneios', this)">🏆 Torneios (${fotosTorneios.length})</button>
@@ -1244,7 +1245,7 @@ function uploadBannerNoticia(event) {
 // FUNÇÕES DE FOTOS
 // ============================================================
 
-function uploadFotos(event) {
+async function uploadFotos(event) {
   const files = event.target.files;
   if (!files || files.length === 0) {
     alert('Nenhum arquivo selecionado.');
@@ -1255,40 +1256,49 @@ function uploadFotos(event) {
   const categoria = document.getElementById('nova-foto-categoria').value || 'Criação';
   const descricao = document.getElementById('nova-foto-descricao').value.trim() || '';
 
-  let carregadas = 0;
-  const total = files.length;
+  // Limite de fotos da galeria no plano (50 no subdomínio, 80 com domínio próprio, + pacotes extras)
+  const limite = (await DB.getLimites()).galeria;
+  const vagas = limite - fotos.length;
+  let arquivos = Array.from(files);
+  event.target.value = '';
+  if (vagas <= 0) {
+    alert(`Sua galeria já tem ${fotos.length} de ${limite} fotos. Remova alguma para enviar outra, ou peça mais espaço.`);
+    return;
+  }
+  if (arquivos.length > vagas) {
+    alert(`Só cabem mais ${vagas} foto(s) (limite do plano: ${limite}). Vou enviar as ${vagas} primeiras.`);
+    arquivos = arquivos.slice(0, vagas);
+  }
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    if (!file.type.startsWith('image/')) {
-      alert(`O arquivo "${file.name}" não é uma imagem.`);
-      continue;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert(`A imagem "${file.name}" excede 10MB.`);
-      continue;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
+  let enviadas = 0;
+  for (const file of arquivos) {
+    try {
+      // A foto é reduzida aqui mesmo: uma foto de celular de 5 MB vira ~200 KB.
+      const url = await DB.reduzirImagem(file, 1200, 0.8);
       fotos.push({
-        url: e.target.result,
-        titulo: titulo + (total > 1 ? ` ${carregadas + 1}` : ''),
+        url,
+        titulo: titulo + (arquivos.length > 1 ? ` ${enviadas + 1}` : ''),
         categoria: categoria,
         descricao: descricao
       });
-      carregadas++;
-      if (carregadas === total) {
-        await saveFotos(fotos);
-        await renderizarEditor();
-        alert(`✅ ${carregadas} foto(s) enviada(s)!`);
-        document.getElementById('nova-foto-titulo').value = '';
-        document.getElementById('nova-foto-descricao').value = '';
-      }
-    };
-    reader.readAsDataURL(file);
+      enviadas++;
+    } catch (erro) {
+      alert(`"${file.name}": ${erro.message}`);
+    }
   }
-  event.target.value = '';
+  if (enviadas === 0) return;
+
+  try {
+    await saveFotos(fotos);
+  } catch (erro) {
+    fotos.splice(fotos.length - enviadas, enviadas);   // desfaz em memória, o servidor recusou
+    alert('❌ Não foi possível salvar: ' + erro.message);
+    return;
+  }
+  await renderizarEditor();
+  alert(`✅ ${enviadas} foto(s) enviada(s)! Galeria: ${fotos.length} de ${limite}.`);
+  document.getElementById('nova-foto-titulo').value = '';
+  document.getElementById('nova-foto-descricao').value = '';
 }
 
 async function editarFoto(index) {

@@ -1,4 +1,3 @@
-.env
-_envt
 node_modules/
+.env
 *.log

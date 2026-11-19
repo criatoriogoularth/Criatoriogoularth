@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aviari — Criar conta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+.cad-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at top,rgba(199,151,63,0.08),transparent 55%),var(--bg);}
+.cad-card{width:100%;max-width:460px;background:var(--bg-elevated-2);border:1px solid var(--line);border-radius:18px;padding:32px 28px;box-shadow:0 8px 40px rgba(var(--shade),0.3);}
+.cad-card .mark{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px;text-align:center;}
+.cad-card .ring{width:58px;height:58px;border-radius:50%;border:2px solid var(--brass);display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(199,151,63,0.06);}
+.cad-card h2{margin:0;font-size:20px;color:var(--brass-soft);}
+.cad-card .sub{font-size:12.5px;color:var(--text-muted);}
+.faixa{background:rgba(199,151,63,0.1);border:1px solid var(--brass-dim);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--brass-soft);margin-bottom:18px;text-align:center;}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;}
+.field label{font-size:11.5px;color:var(--text-muted);font-weight:600;}
+.field input[type=text],.field input[type=email],.field input[type=password]{background:var(--input-bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-size:16px;outline:none;font-family:'Manrope',sans-serif;}
+.field input:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(199,151,63,0.15);}
+.field .dica{font-size:11px;color:var(--text-muted);}
+.slug-linha{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--input-bg);overflow:hidden;}
+.slug-linha input{border:none !important;background:transparent !important;flex:1;min-width:0;box-shadow:none !important;padding:10px 12px !important;border-radius:0 !important;}
+.slug-linha .sufixo{padding:0 12px 0 0;font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.slug-status{font-size:12px;min-height:16px;}
+.ok{color:#7fd18b;}.ruim{color:var(--danger-text,#ff8a80);}
+.aceite{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-muted);margin:6px 0 14px;line-height:1.45;}
+.aceite input{margin-top:3px;accent-color:var(--brass);width:17px;height:17px;flex-shrink:0;}
+.aceite a{color:var(--brass-soft);}
+.btn-cad{width:100%;padding:13px;border-radius:8px;background:linear-gradient(135deg,var(--brass-soft),var(--brass));color:var(--on-brass);border:none;font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
+.btn-cad:disabled{opacity:.6;cursor:not-allowed;}
+.erro{color:var(--danger-text,#ff8a80);font-size:13px;text-align:center;margin-top:10px;min-height:18px;}
+.invalido{text-align:center;padding:10px 0;}
+.invalido h2{color:var(--danger-text,#ff8a80);}
+.ja{font-size:12px;text-align:center;margin-top:16px;color:var(--text-muted);}
+.ja a{color:var(--brass-soft);}
+</style>
+</head>
+<body>
+<div class="cad-wrap">
+  <div class="cad-card">
+    <div id="carregando" style="text-align:center;color:var(--text-muted);">⏳ Conferindo o seu convite...</div>
+
+    <div id="invalido" class="invalido" style="display:none;">
+      <div class="ring" style="margin:0 auto 14px;">🔒</div>
+      <h2>Convite inválido</h2>
+      <p class="sub">Este convite não existe, já foi usado ou venceu.<br>Peça um novo a quem te convidou.</p>
+      <div class="ja"><a href="login.html">Já tenho conta — entrar</a></div>
+    </div>
+
+    <div id="formulario" style="display:none;">
+      <div class="mark">
+        <div class="ring">🐦</div>
+        <h2>Criar o seu criatório</h2>
+        <div class="sub">Aviari — gestão de criatórios de aves</div>
+      </div>
+      <div class="faixa" id="faixa"></div>
+
+      <div class="field"><label>Seu nome</label><input type="text" id="nome" autocomplete="name"></div>
+      <div class="field"><label>Nome do criatório</label><input type="text" id="criatorio" placeholder="Ex.: Canaril Amaral"></div>
+      <div class="field">
+        <label>Endereço do seu site</label>
+        <div class="slug-linha"><input type="text" id="slug" placeholder="canarilamaral" autocapitalize="none" autocomplete="off" spellcheck="false"><span class="sufixo" id="sufixo"></span></div>
+        <div class="slug-status" id="slug-status"></div>
+        <div class="dica" id="slug-dica">3 a 40 letras minúsculas, números ou hífen. Depois de criado não dá para trocar sozinho.</div>
+      </div>
+      <div class="field"><label>E-mail (será o seu login)</label><input type="email" id="email" autocomplete="email"></div>
+      <div class="field"><label>CPF <span style="font-weight:400;">(opcional — também serve para entrar)</span></label><input type="text" id="cpf" inputmode="numeric" placeholder="000.000.000-00" autocomplete="off"></div>
+      <div class="field"><label>Senha (mínimo 8 caracteres)</label><input type="password" id="senha" autocomplete="new-password"></div>
+      <div class="field"><label>Repita a senha</label><input type="password" id="senha2" autocomplete="new-password"></div>
+
+      <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="termos.html" target="_blank">Termos de Uso e a Política de Privacidade</a>.</span></label>
+
+      <button class="btn-cad" id="btn" onclick="criar()">Criar minha conta</button>
+      <div class="erro" id="erro"></div>
+      <div class="ja"><a href="login.html">Já tenho conta — entrar</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const convite = new URLSearchParams(location.search).get('convite') || '';
+const $ = (id) => document.getElementById(id);
+let slugOk = false, timer = null;
+
+(async function () {
+  try {
+    const r = await fetch('/api/cadastro/convite/' + encodeURIComponent(convite));
+    if (!r.ok) throw new Error();
+    const c = await r.json();
+    $('faixa').textContent = c.diasTeste ? `🎁 Você ganhou ${c.diasTeste} dias de teste grátis — com tudo liberado.` : `Plano: ${c.plano}`;
+    if (c.emailDestino) { $('email').value = c.emailDestino; $('email').readOnly = true; }
+    $('sufixo').textContent = c.baseDominio ? '.' + c.baseDominio : '';
+    if (!c.baseDominio) $('slug-dica').textContent = 'Neste período de testes o seu site abre em  /c/seu-endereço  (os endereços próprios chegam depois).';
+    $('carregando').style.display = 'none';
+    $('formulario').style.display = '';
+  } catch (e) {
+    $('carregando').style.display = 'none';
+    $('invalido').style.display = '';
+  }
+})();
+
+// endereço: limpa o que foi digitado e confere se está livre
+$('slug').addEventListener('input', () => {
+  const v = $('slug').value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9-]/g, '');
+  $('slug').value = v; slugOk = false;
+  const st = $('slug-status'); st.className = 'slug-status'; st.textContent = '';
+  clearTimeout(timer);
+  if (v.length < 3) return;
+  timer = setTimeout(async () => {
+    try {
+      const r = await (await fetch('/api/cadastro/slug/' + encodeURIComponent(v))).json();
+      if ($('slug').value !== v) return;
+      slugOk = !!r.disponivel;
+      st.className = 'slug-status ' + (slugOk ? 'ok' : 'ruim');
+      st.textContent = slugOk ? '✅ Disponível' : (r.motivo === 'em_uso' ? '❌ Já está em uso' : '❌ Endereço não permitido');
+    } catch (e) { /* sem rede: o servidor confere de novo ao criar */ }
+  }, 350);
+});
+
+$('cpf').addEventListener('input', () => {
+  const d = $('cpf').value.replace(/\D/g, '').slice(0, 11);
+  $('cpf').value = d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+});
+
+async function criar() {
+  const erro = $('erro'); erro.textContent = '';
+  if ($('senha').value !== $('senha2').value) { erro.textContent = '⚠️ As senhas não são iguais.'; return; }
+  if (!$('aceite').checked) { erro.textContent = '⚠️ Aceite os Termos de Uso para continuar.'; return; }
+  const btn = $('btn'); btn.disabled = true; btn.textContent = '⏳ Criando o seu criatório... (pode levar alguns segundos)';
+  try {
+    const r = await fetch('/api/cadastro/convite/' + encodeURIComponent(convite), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome: $('nome').value, criatorio: $('criatorio').value, slug: $('slug').value, email: $('email').value,
+        cpf: $('cpf').value, senha: $('senha').value, aceite: $('aceite').checked })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Não foi possível criar a conta.');
+    localStorage.setItem('token', d.token);
+    localStorage.setItem('usuario', JSON.stringify(d.usuario));
+    location.href = d.redirect || 'dashboard.html';
+  } catch (e) {
+    erro.textContent = '❌ ' + e.message;
+    btn.disabled = false; btn.textContent = 'Criar minha conta';
+  }
+}
+</script>
+</body>
+</html>

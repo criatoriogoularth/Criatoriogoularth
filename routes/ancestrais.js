@@ -1,22 +1,14 @@
 // routes/ancestrais.js
 const express = require('express');
-const pool = require('../db/pool');
 const authMiddleware = require('../middleware/auth');
 const asyncHandler = require('../middleware/asyncHandler');
+const { limparProfundo, limparTexto } = require('../lib/sanitizar');
 
 const router = express.Router();
-
-// CORREÇÃO: esta rota grava a coluna "raca", mas o schema.sql original não a criava —
-// em um banco novo todo cadastro de ancestral falhava. Cria sozinha se faltar.
-const colunasProntas = pool.query(
-  'ALTER TABLE ancestrais ADD COLUMN IF NOT EXISTS raca VARCHAR(255)'
-).catch((e) => console.error('Falha ao criar coluna raca em ancestrais:', e.message));
-router.use((req, res, next) => { colunasProntas.then(() => next()); });
-
 router.use(authMiddleware);
 
 router.get('/', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     'SELECT * FROM ancestrais WHERE usuario_id = $1 ORDER BY nome',
     [req.user.id]
   );
@@ -24,7 +16,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.get('/:id', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     'SELECT * FROM ancestrais WHERE id = $1 AND usuario_id = $2',
     [req.params.id, req.user.id]
   );
@@ -34,7 +26,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 router.post('/', asyncHandler(async (req, res) => {
   // ===== CORREÇÃO: ADICIONADO CAMPO 'raca' =====
-  const { nome, anilha, sexo, especie, raca, observacao } = req.body || {};
+  const { nome, anilha, sexo, especie, raca, observacao } = limparProfundo(req.body || {});
   
   if (!nome || !nome.trim()) {
     return res.status(400).json({ error: 'Nome é obrigatório.' });
@@ -43,7 +35,7 @@ router.post('/', asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Sexo é obrigatório.' });
   }
 
-  const dup = await pool.query(
+  const dup = await req.db.query(
     'SELECT id FROM ancestrais WHERE nome = $1 AND usuario_id = $2',
     [nome.trim(), req.user.id]
   );
@@ -52,7 +44,7 @@ router.post('/', asyncHandler(async (req, res) => {
   }
 
   // ===== CORREÇÃO: ADICIONADO 'raca' NA LISTA DE COLUNAS E VALORES =====
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `INSERT INTO ancestrais (usuario_id, nome, anilha, sexo, especie, raca, observacao)
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [req.user.id, nome.trim(), anilha || '', sexo, especie || '', raca || '', observacao || '']
@@ -62,10 +54,10 @@ router.post('/', asyncHandler(async (req, res) => {
 
 router.put('/:id', asyncHandler(async (req, res) => {
   // ===== CORREÇÃO: ADICIONADO CAMPO 'raca' =====
-  const { nome, anilha, sexo, especie, raca, observacao } = req.body || {};
+  const { nome, anilha, sexo, especie, raca, observacao } = limparProfundo(req.body || {});
   
   if (nome && nome.trim()) {
-    const dup = await pool.query(
+    const dup = await req.db.query(
       'SELECT id FROM ancestrais WHERE nome = $1 AND usuario_id = $2 AND id != $3',
       [nome.trim(), req.user.id, req.params.id]
     );
@@ -75,7 +67,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
   }
 
   // ===== CORREÇÃO: ADICIONADO 'raca' NA ATUALIZAÇÃO =====
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     `UPDATE ancestrais SET
        nome = COALESCE($1, nome),
        anilha = COALESCE($2, anilha),
@@ -92,7 +84,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/:id', asyncHandler(async (req, res) => {
-  const { rows } = await pool.query(
+  const { rows } = await req.db.query(
     'DELETE FROM ancestrais WHERE id = $1 AND usuario_id = $2 RETURNING id',
     [req.params.id, req.user.id]
   );

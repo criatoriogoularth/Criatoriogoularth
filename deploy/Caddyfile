@@ -1,0 +1,35 @@
+# Caddyfile do Aviari — HTTPS automático para o app, para os subdomínios dos criatórios e para
+# domínios próprios de clientes. Fica em /etc/caddy/Caddyfile.
+#
+# SEGURANÇA: o Caddy só pede certificado para um nome depois de perguntar ao Aviari
+# ("ask"). O Aviari só responde "sim" para endereços que existem de verdade (app, criatórios
+# cadastrados e domínios próprios ATIVADOS pelo dono). Sem isso, qualquer pessoa poderia apontar
+# domínios aleatórios para o seu servidor e esgotar o limite de certificados.
+{
+	email {$ACME_EMAIL}
+	on_demand_tls {
+		ask http://127.0.0.1:3000/api/interno/dominio-permitido
+	}
+}
+
+# Todos os endereços permitidos (app.seudominio, fulano.seudominio, dominio-do-cliente.com.br ...)
+https:// {
+	tls {
+		on_demand
+	}
+
+	# rotas internas nunca ficam públicas
+	@interno path /api/interno/*
+	respond @interno 404
+
+	encode zstd gzip
+	request_body {
+		max_size 40MB
+	}
+	reverse_proxy 127.0.0.1:3000
+}
+
+# quem digitar http:// vai para https://
+http:// {
+	redir https://{host}{uri} permanent
+}

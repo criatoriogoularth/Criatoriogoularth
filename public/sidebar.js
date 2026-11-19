@@ -5,9 +5,11 @@ async function renderSidebar(activePage) {
         personalizacao = (await DB.getConfig('site_personalizacao')) || {};
     } catch (e) {}
 
-    const nome = personalizacao.nome || 'Criatório Goularth';
-    const subtitulo = personalizacao.subtitulo || 'Plano Anual · Ativo';
-    const iniciais = personalizacao.logoIniciais || 'CG';
+    let _u = null;
+    try { _u = JSON.parse(localStorage.getItem('usuario') || 'null'); } catch (e) {}
+    const nome = personalizacao.nome || (_u && _u.criatorio) || 'Meu Criatório';
+    const subtitulo = personalizacao.subtitulo || 'Aviari';
+    const iniciais = personalizacao.logoIniciais || ((nome || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'AV');
     const logoUrl = personalizacao.logoUrl || '';
     const logoTamanho = personalizacao.logoTamanho || 38;
 
@@ -30,12 +32,11 @@ async function renderSidebar(activePage) {
             { id: 'reproducao', href: 'reproducao.html', icon: '🥚', label: 'Reprodução' },
             { id: 'crachas', href: 'crachas.html', icon: '🏷️', label: 'Crachás' },
             { id: 'importar-arvore', href: 'importar-arvore.html', icon: '📤', label: 'Importar Árvore' },
+            { id: 'importar-planilha', href: 'importar-planilha.html', icon: '📊', label: 'Importar Planilha' },
         ] },
         { group: 'Criatório', items: [
             { id: 'cadastro-criador', href: 'cadastro-criador.html', icon: '🏷️', label: 'Dados do Criatório' },
             { id: 'admin-site', href: 'admin-site.html', icon: '🌐', label: 'Site do Criatório' },
-            { id: 'site-editor-torneios', href: 'site-editor-torneios.html', icon: '🏆', label: 'Copas e Torneios' },
-            { id: 'site-editor-parceiros', href: 'site-editor-parceiros.html', icon: '🤝', label: 'Parceiros' },
             { id: 'admin-db', href: 'admin-db.html', icon: '🗄️', label: 'Backup & Dados' },
         ] },
     ];
@@ -50,7 +51,6 @@ async function renderSidebar(activePage) {
             { id: 'site-filhotes', href: 'site-filhotes.html', icon: '🐣', label: 'Filhotes' },
             { id: 'site-fotos', href: 'site-fotos.html', icon: '📸', label: 'Fotos' },
             { id: 'site-videos', href: 'site-videos.html', icon: '🎬', label: 'Vídeos' },
-            { id: 'site-parceiros', href: 'site-parceiros.html', icon: '🤝', label: 'Parceiros' },
             { id: 'site-contato', href: 'site-contato.html', icon: '📧', label: 'Contato' },
         ] },
     ];
@@ -68,8 +68,7 @@ async function renderSidebar(activePage) {
 
     // o servidor é a fonte da verdade (vale em qualquer aparelho); sem ele, usa o salvo no navegador
     const temaAtual = personalizacao.tema || localStorage.getItem('tema') || 'escuro';
-    // aplica o MODELO do gerenciador (ex.: Vibrante) no modo dia/noite escolhido
-    if (window.TemaEngine) TemaEngine.sincronizarAdmin(personalizacao);
+    aplicarTema(temaAtual);
 
     const usuarioStr = localStorage.getItem('usuario');
     const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
@@ -78,19 +77,19 @@ async function renderSidebar(activePage) {
         <div class="plan-chip" style="flex-direction:column;align-items:stretch;gap:4px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <span>👑 ${usuario ? usuario.nome : 'Administrador'}</span>
-                <span style="font-size:10px;color:var(--text-muted);">${usuario ? (usuario.criatorio || '') : 'Criatório Goularth'}</span>
+                <span style="font-size:10px;color:var(--text-muted);">${usuario ? (usuario.criatorio || '') : ''}</span>
             </div>
             <div style="font-size:10px;color:var(--text-muted);text-align:center;">🔑 Acesso total ao sistema</div>
         </div>
         <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
             <button onclick="setTheme('escuro')"
-                style="background:${temaAtual === 'escuro' ? 'rgba(var(--accent-rgb,199,151,63),0.2)' : 'transparent'};
+                style="background:${temaAtual === 'escuro' ? 'rgba(199,151,63,0.2)' : 'transparent'};
                        border:1px solid ${temaAtual === 'escuro' ? 'var(--brass)' : 'var(--line)'};
                        border-radius:6px;padding:4px 10px;
                        color:${temaAtual === 'escuro' ? 'var(--brass-soft)' : 'var(--text-muted)'};
                        cursor:pointer;font-size:10px;transition:.15s ease;">🌙</button>
             <button onclick="setTheme('claro')"
-                style="background:${temaAtual === 'claro' ? 'rgba(var(--accent-rgb,199,151,63),0.2)' : 'transparent'};
+                style="background:${temaAtual === 'claro' ? 'rgba(199,151,63,0.2)' : 'transparent'};
                        border:1px solid ${temaAtual === 'claro' ? 'var(--brass)' : 'var(--line)'};
                        border-radius:6px;padding:4px 10px;
                        color:${temaAtual === 'claro' ? 'var(--brass-soft)' : 'var(--text-muted)'};
@@ -120,11 +119,20 @@ async function renderSidebar(activePage) {
 }
 
 function aplicarTema(tema) {
-    if (window.TemaEngine) TemaEngine.definirModoAdmin(tema);
+    const root = document.documentElement;
+    // limpa valores inline antigos, para o CSS (data-theme) mandar
+    ['--bg', '--bg-elevated', '--bg-elevated-2', '--text', '--text-muted', '--line']
+        .forEach(v => root.style.removeProperty(v));
+    if (tema === 'claro') root.setAttribute('data-theme', 'claro');
+    else root.removeAttribute('data-theme');
+    try { localStorage.setItem('tema', tema === 'claro' ? 'claro' : 'escuro'); } catch (e) {}
 }
 
 async function setTheme(tema) {
     aplicarTema(tema); // troca na hora, sem esperar o servidor
+
+    const path = window.location.pathname.split('/').pop();
+    renderSidebar(path.replace('.html', ''));
 
     try {
         const personalizacao = (await DB.getConfig('site_personalizacao')) || {};
@@ -133,11 +141,6 @@ async function setTheme(tema) {
     } catch (e) {
         console.warn('Não foi possível salvar o tema no servidor:', e);
     }
-
-    // só redesenha a barra lateral DEPOIS de salvar: antes ela relia o valor antigo do
-    // servidor e o tema "voltava" sozinho até recarregar a página.
-    const path = window.location.pathname.split('/').pop();
-    renderSidebar(path.replace('.html', ''));
 }
 
 function fazerLogout() {

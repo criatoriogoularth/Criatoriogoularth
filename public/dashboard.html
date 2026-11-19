@@ -2,14 +2,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script src="tema.js"></script>
 <meta charset="UTF-8">
 <title>Aviário — Painel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="tema.js"></script>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="temas-modelos.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 .stats-grid {
@@ -26,7 +25,7 @@
   text-align: center;
 }
 .stat-card .stat-number {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 32px;
   font-weight: 700;
   color: var(--brass-soft);
@@ -82,8 +81,8 @@
   font-size: 11px;
   font-weight: 600;
 }
-.badge-disponivel { background: rgba(var(--sage-rgb,92,154,124),0.2); color: var(--sage-soft); }
-.badge-usada { background: rgba(var(--accent-rgb,199,151,63),0.15); color: var(--brass-soft); }
+.badge-disponivel { background: rgba(92,154,124,0.2); color: var(--sage-soft); }
+.badge-usada { background: rgba(199,151,63,0.15); color: var(--brass-soft); }
 .badge-esgotada { background: rgba(192,89,74,0.2); color: var(--danger-text); }
 .species-list {
   display: flex;
@@ -107,7 +106,7 @@
   font-size: 16px;
 }
 .section-title {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--text);
@@ -124,7 +123,7 @@
 }
 .empty-state-painel .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
 .empty-state-painel h3 {
-  font-family: var(--font-titulo,'Fraunces',serif);
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   color: var(--text);
   margin-bottom: 6px;
@@ -138,7 +137,7 @@
   background: var(--bg-elevated-2); border: 1px solid var(--line); border-left: 4px solid var(--brass);
   border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; font-size: 14px; line-height: 1.45;
 }
-.aviso-item.nasce-hoje { border-left-color: #5c9a7c; background: rgba(var(--sage-rgb,92,154,124),.10); }
+.aviso-item.nasce-hoje { border-left-color: #5c9a7c; background: rgba(92,154,124,.10); }
 .aviso-item.atrasado { border-left-color: #e0763a; }
 .aviso-item.lida { opacity: .6; border-left-color: var(--line); }
 .aviso-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline; }
@@ -149,8 +148,8 @@
 .aviso-acoes { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
 .aviso-acoes .btn { padding: 6px 12px; font-size: 12px; text-decoration: none; }
 .tipo-badge { display:inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 6px; }
-.tipo-reserva { background: rgba(var(--sage-rgb,92,154,124),.2); color: #8fc4a6; }
-.tipo-duvida { background: rgba(var(--accent-rgb,199,151,63),.2); color: var(--brass-soft); }
+.tipo-reserva { background: rgba(92,154,124,.2); color: #8fc4a6; }
+.tipo-duvida { background: rgba(199,151,63,.2); color: var(--brass-soft); }
 .tipo-contato { background: rgba(90,140,200,.2); color: #8fb4e0; }
 .contador-aviso { background: #e0763a; color: #fff; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
 </style>
@@ -272,40 +271,8 @@ function textoPrazo(dias) {
   return `Previsão passou há ${-dias} dias`;
 }
 
-const DIAS_OVOSCOPIA = 5; // ovoscopia = 5 dias depois que a fêmea começa a chocar
-
-function somarDiasIso(iso, n) {
-  const [a, m, d] = String(iso).slice(0, 10).split('-').map(Number);
-  const dt = new Date(a, m - 1, d + n);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-}
-
-// Ovoscopias que já estão no dia (ou atrasadas) e ainda não foram marcadas como feitas.
-function ovoscopiasPendentes(ativas) {
-  return ativas
-    .filter(r => r.inicioChoco && !r.ovoscopiaFeita)
-    .map(r => {
-      const data = somarDiasIso(r.inicioChoco, DIAS_OVOSCOPIA);
-      return { r, data, dias: diasAte(data) };
-    })
-    // só avisa a partir do dia; e para de insistir depois que o nascimento previsto já passou
-    .filter(x => x.dias <= 0 && (!x.r.previsaoNascimento || diasAte(x.r.previsaoNascimento) >= 0))
-    .sort((a, b) => a.dias - b.dias);
-}
-
-async function marcarOvoscopia(id) {
-  try {
-    const hoje = new Date();
-    const iso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-    await DB.update(DB.TABLES.REPRODUCOES, id, { ovoscopiaFeita: true, ovoscopiaData: iso });
-    REPRODUCOES = await DB.getAll(DB.TABLES.REPRODUCOES);
-    renderizarAvisos();
-  } catch (e) { alert('Não foi possível registrar a ovoscopia: ' + e.message); }
-}
-
 function montarFilhotesPorNascer(reproducoes) {
   const ativas = reproducoes.filter(r => r.status === 'Ativo' && r.finalizada !== 'Sim');
-  const ovoscopias = ovoscopiasPendentes(ativas);
 
   const chocando = ativas
     .filter(r => r.previsaoNascimento)
@@ -316,18 +283,6 @@ function montarFilhotesPorNascer(reproducoes) {
   const botando = ativas.filter(r => !r.inicioChoco && !r.previsaoNascimento);
 
   let html = '';
-  if (ovoscopias.length) {
-    html += `<div class="avisos-sub">🔍 Ovoscopia</div>`;
-    html += ovoscopias.map(({ r, dias, data }) => `
-      <div class="aviso-item ${dias === 0 ? 'nasce-hoje' : 'atrasado'}">
-        <div class="aviso-top">
-          <span class="aviso-titulo">${dias === 0 ? 'Hoje é dia de ovoscopia' : 'Ovoscopia atrasada há ' + (-dias) + ' dia' + (dias < -1 ? 's' : '')} — ${esc(r.femeaNome)}${r.machoNome ? ' × ' + esc(r.machoNome) : ''}</span>
-          <span class="aviso-quando">choco desde ${fmtDataBR(r.inicioChoco)}</span>
-        </div>
-        <div class="aviso-detalhe">${DIAS_OVOSCOPIA} dias de choco completos em ${fmtDataBR(data)}. Confira os ovos contra a luz e separe férteis de inférteis.</div>
-        <div class="aviso-acoes"><button class="btn btn-primary" onclick="marcarOvoscopia(${r.id})">✔ Ovoscopia feita</button></div>
-      </div>`).join('');
-  }
   if (chocando.length) {
     html += `<div class="avisos-sub">🥚 Filhotes para nascer</div>`;
     html += chocando.map(({ r, dias }) => `
@@ -350,7 +305,7 @@ function montarFilhotesPorNascer(reproducoes) {
         <div class="aviso-detalhe">${r.totalOvos ? r.totalOvos + ' ovo(s) até agora' : 'Sem ovos contados'} · choco ainda não começou</div>
       </div>`).join('');
   }
-  return { html, total: ovoscopias.length + chocando.length + botando.length };
+  return { html, total: chocando.length + botando.length };
 }
 
 function linkResposta(m) {
@@ -361,7 +316,7 @@ function linkResposta(m) {
   let d = c.replace(/\D/g, '');
   if (d.length >= 10 && d.length <= 11) d = '55' + d; // DDD + número -> adiciona o Brasil
   if (d.length >= 12) {
-    const texto = `Olá, ${m.nome}! Aqui é do Criatório Goularth, recebi sua mensagem${m.aveNome ? ' sobre ' + m.aveNome : ''}.`;
+    const texto = `Olá, ${m.nome}! Aqui é do ${(JSON.parse(localStorage.getItem('usuario') || '{}').criatorio) || 'criatório'}, recebi sua mensagem${m.aveNome ? ' sobre ' + m.aveNome : ''}.`;
     return `<a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/${d}?text=${encodeURIComponent(texto)}">💬 Responder no WhatsApp</a>`;
   }
   return '';
